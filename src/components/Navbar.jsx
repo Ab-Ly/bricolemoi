@@ -41,14 +41,6 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
     setTimeout(() => setRefreshing(false), 800);
   };
 
-  const isCinVerified = Boolean(
-    user?.cin_verified ||
-    user?.is_verified ||
-    user?.profiles?.cin_verified ||
-    user?.maalem_details?.cin_verified ||
-    user?.maalem_details?.is_verified
-  );
-
   return (
     <header className="sticky top-0 z-50 bg-[#0B0F17]/95 backdrop-blur-xl border-b border-cyan-500/20 shadow-[0_4px_25px_rgba(6,182,212,0.15)] font-sans">
       {/* Top Ticker Bar */}
@@ -94,7 +86,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
         {/* Brand / Logo */}
         <motion.div 
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-0" 
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-0 flex-shrink-0" 
           onClick={onGoHome}
         >
           <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-900/90 backdrop-blur-md border ${
@@ -122,7 +114,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                 {appMode === 'MAALEM' ? 'PRO' : appMode === 'ADMIN' ? 'ADMIN' : appMode === 'CLIENT' ? 'CLIENT' : 'MAROC 🇲🇦'}
               </span>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5 truncate hidden xs:block">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5 truncate hidden sm:block">
               {appMode === 'MAALEM' ? 'Portail Artisans & Dépannage' : appMode === 'ADMIN' ? 'Dashboard Administration' : appMode === 'CLIENT' ? 'Espace Client Dépannage' : 'Dépannage d\'Urgence Express 24h/7j'}
             </p>
           </div>
@@ -141,17 +133,17 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                 title="Retour à l'accueil"
               >
                 <span>←</span>
-                <span className="hidden sm:inline">Accueil</span>
+                <span className="hidden xs:inline">Accueil</span>
               </motion.button>
 
               {deferredPrompt && !isInstalled && (
                 <motion.button
                   whileTap={{ scale: 0.90 }}
                   onClick={installPWA}
-                  className="h-10 sm:h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-90"
+                  className="hidden sm:inline-flex h-10 sm:h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-90"
                 >
                   <Download className="w-4 h-4 text-white" />
-                  <span className="hidden sm:inline">{t('pwa_install')}</span>
+                  <span>{t('pwa_install')}</span>
                 </motion.button>
               )}
 
@@ -183,7 +175,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                   <motion.button
                     whileTap={{ scale: 0.90 }}
                     onClick={() => setAuthModalOpen(true)}
-                    className="h-10 sm:h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-[11px] sm:text-xs font-bold px-3 sm:px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-90 cursor-pointer"
+                    className="hidden sm:inline-flex h-10 sm:h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-[11px] sm:text-xs font-bold px-3 sm:px-4 rounded-2xl items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-90 cursor-pointer"
                   >
                     <span>Inscription</span>
                   </motion.button>
@@ -203,24 +195,24 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                 title="Retour à l'accueil"
               >
                 <span>←</span>
-                <span className="hidden sm:inline">Accueil</span>
+                <span className="hidden xs:inline">Accueil</span>
               </motion.button>
 
               {user ? (
                 <>
                   {/* Credit Balance Badge (Seulement si connecté) */}
-                  <div className="h-11 flex items-center gap-2 bg-gradient-to-r from-slate-900/95 to-cyan-950/40 border border-cyan-500/40 px-3.5 rounded-2xl shadow-[0_0_15px_rgba(6,182,212,0.2)] text-xs font-bold text-cyan-300">
+                  <div className="h-11 flex items-center gap-2 bg-gradient-to-r from-slate-900/95 to-cyan-950/40 border border-cyan-500/40 px-2.5 sm:px-3.5 rounded-2xl shadow-[0_0_15px_rgba(6,182,212,0.2)] text-xs font-bold text-cyan-300">
                     <Coins weight="duotone" className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)] flex-shrink-0" />
                     <span className="text-[11px] text-slate-400 hidden xs:inline">Solde :</span>
                     <span className="text-white font-mono font-black">{liveCreditBalance.toFixed(2)} <span className="text-amber-400 text-[10px]">DH</span></span>
                   </div>
 
-                  {/* User Profile & CIN Badge Card */}
-                  <div className="flex items-center gap-2.5">
+                  {/* User Profile & Pro Badge Card */}
+                  <div className="flex items-center gap-1.5 sm:gap-2.5">
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setProfileModalOpen(true)}
-                      className="h-11 flex items-center gap-2.5 bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 hover:border-cyan-400/60 px-3 rounded-2xl shadow-sm transition-all cursor-pointer"
+                      className="h-11 flex items-center gap-2 bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 hover:border-cyan-400/60 px-2.5 sm:px-3 rounded-2xl shadow-sm transition-all cursor-pointer"
                     >
                       <div className="relative flex-shrink-0">
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-black text-xs shadow-[0_0_10px_rgba(6,182,212,0.7)]">
@@ -228,28 +220,17 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                         </div>
                         {/* Mobile verified indicator badge */}
                         <span className="sm:hidden absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-950 border border-slate-800">
-                          {isCinVerified ? (
-                            <CheckCircle weight="fill" className="w-3 h-3 text-emerald-400" />
-                          ) : (
-                            <WarningCircle weight="fill" className="w-3 h-3 text-amber-400" />
-                          )}
+                          <CheckCircle weight="fill" className="w-3 h-3 text-emerald-400" />
                         </span>
                       </div>
 
                       <div className="hidden sm:flex flex-col justify-center text-left leading-none">
                         <p className="text-xs font-bold text-slate-100 leading-none">{user.full_name}</p>
                         <div className="flex items-center gap-1 mt-1 leading-none">
-                          {isCinVerified ? (
-                            <span className="text-emerald-400 flex items-center gap-1 font-extrabold text-[10px]">
-                              <CheckCircle weight="fill" className="w-3 h-3 text-emerald-400 drop-shadow-[0_0_4px_rgba(52,211,153,0.8)]" />
-                              CIN Vérifiée
-                            </span>
-                          ) : (
-                            <span className="text-amber-400 flex items-center gap-1 font-extrabold text-[10px]">
-                              <WarningCircle weight="fill" className="w-3 h-3 text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]" />
-                              En attente CIN
-                            </span>
-                          )}
+                          <span className="text-emerald-400 flex items-center gap-1 font-extrabold text-[10px]">
+                            <CheckCircle weight="fill" className="w-3 h-3 text-emerald-400 drop-shadow-[0_0_4px_rgba(52,211,153,0.8)]" />
+                            Artisan Vérifié
+                          </span>
                         </div>
                       </div>
                     </motion.button>
@@ -258,7 +239,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                     <motion.button
                       whileTap={{ scale: 0.90 }}
                       onClick={() => logout()}
-                      className="h-11 flex items-center gap-2 bg-slate-900/90 hover:bg-red-950/80 text-slate-300 hover:text-red-300 border border-slate-700/80 hover:border-red-500/50 px-3.5 rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+                      className="h-11 flex items-center gap-2 bg-slate-900/90 hover:bg-red-950/80 text-slate-300 hover:text-red-300 border border-slate-700/80 hover:border-red-500/50 px-2.5 sm:px-3.5 rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
                       title="Se Déconnecter"
                     >
                       <SignOut weight="bold" className="w-4 h-4 text-red-400 drop-shadow-[0_0_6px_rgba(248,113,113,0.7)]" />
@@ -271,10 +252,10 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                   <motion.button
                     whileTap={{ scale: 0.90 }}
                     onClick={() => setAuthModalOpen(true)}
-                    className="h-11 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(245,158,11,0.4)] active:scale-90 cursor-pointer"
+                    className="h-11 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs px-3.5 sm:px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(245,158,11,0.4)] active:scale-90 cursor-pointer"
                   >
                     <PhosphorUser weight="bold" className="w-4 h-4 text-slate-950" />
-                    <span>Espace Pro • Connexion</span>
+                    <span>Espace Pro <span className="hidden xs:inline">• Connexion</span></span>
                   </motion.button>
                 </div>
               )}
@@ -317,27 +298,27 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
             </div>
           )}
 
-          {/* 4. LANDING ROOT HEADER ACTIONS (Direct Quick Journey Links & Connect) */}
+          {/* 4. LANDING ROOT HEADER ACTIONS (Direct Quick Journey Links on md+ & Connect) */}
           {appMode === 'LANDING' && (
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Direct Quick Link to Client SOS */}
+              {/* Direct Quick Link to Client SOS - Visible on md+ */}
               <motion.button
                 whileTap={{ scale: 0.92 }}
                 onClick={() => switchSubdomainInDev('CLIENT')}
-                className="h-10 sm:h-11 bg-slate-900/90 hover:bg-cyan-950/70 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 text-xs font-bold px-3 sm:px-4 rounded-2xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.35)] cursor-pointer"
+                className="hidden md:inline-flex h-10 sm:h-11 bg-slate-900/90 hover:bg-cyan-950/70 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 text-xs font-bold px-3 sm:px-4 rounded-2xl items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.35)] cursor-pointer"
               >
                 <Zap className="w-4 h-4 text-cyan-400 fill-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
                 <span className="font-black">SOS Urgence</span>
               </motion.button>
 
-              {/* Direct Quick Link to Maalem Pro */}
+              {/* Direct Quick Link to Maalem Pro - Visible on md+ */}
               <motion.button
                 whileTap={{ scale: 0.92 }}
                 onClick={() => switchSubdomainInDev('MAALEM')}
-                className="h-10 sm:h-11 bg-slate-900/90 hover:bg-amber-950/60 text-amber-300 hover:text-amber-200 border border-amber-500/40 hover:border-amber-400 text-xs font-bold px-3 sm:px-4 rounded-2xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_20px_rgba(245,158,11,0.35)] cursor-pointer"
+                className="hidden md:inline-flex h-10 sm:h-11 bg-slate-900/90 hover:bg-amber-950/60 text-amber-300 hover:text-amber-200 border border-amber-500/40 hover:border-amber-400 text-xs font-bold px-3 sm:px-4 rounded-2xl items-center gap-2 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_20px_rgba(245,158,11,0.35)] cursor-pointer"
               >
                 <Wrench className="w-4 h-4 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
-                <span className="font-black hidden sm:inline">Espace Maâlem</span>
+                <span className="font-black hidden lg:inline">Espace Maâlem</span>
                 <span className="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono text-[10px] font-black">+15 DH</span>
               </motion.button>
 

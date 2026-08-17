@@ -196,7 +196,7 @@ export const LandingPage = ({ onSelectJourney }) => {
           className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed"
         >
           {activeTab === 'CLIENT' ? (
-            <>Plomberie, électricité, serrurerie ou panne auto ? Lancez votre alerte SOS et suivez votre <strong className="text-cyan-300">Maâlem certifié CIN</strong> en direct sur la carte radar.</>
+            <>Plomberie, électricité, serrurerie ou panne auto ? Lancez votre alerte SOS et suivez votre <strong className="text-cyan-300">Maâlem vérifié</strong> en direct sur la carte radar.</>
           ) : (
             <>Rejoignez le réseau des artisans vérifiés au Maroc. Recevez des alertes WhatsApp instantanées dans votre quartier. <strong className="text-amber-300">+15 DH offerts à l'inscription</strong> pour votre 1er lead offert.</>
           )}
@@ -563,9 +563,9 @@ export const LandingPage = ({ onSelectJourney }) => {
                     <span>S'inscrire →</span>
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-white mb-2 group-hover:text-amber-300 transition-colors">Inscription &amp; Vérification CIN</h4>
+                <h4 className="text-lg font-black text-white mb-2 group-hover:text-amber-300 transition-colors">Inscription Pro Rapide</h4>
                 <p className="text-slate-300 text-xs leading-relaxed">
-                  Créez votre compte pro avec votre numéro de téléphone. Votre pièce d'identité est vérifiée instantanément en quelques secondes pour obtenir votre badge certifié.
+                  Créez votre compte pro avec votre numéro de téléphone et votre métier. Votre compte est activé instantanément pour recevoir vos premiers chantiers.
                 </p>
               </motion.div>
 
@@ -600,12 +600,12 @@ export const LandingPage = ({ onSelectJourney }) => {
                     3
                   </span>
                   <span className="text-[10px] text-amber-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <span>0% Commission →</span>
+                    <span>Encaisser →</span>
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-white mb-2 group-hover:text-amber-300 transition-colors">Encaissement 100% Direct</h4>
+                <h4 className="text-lg font-black text-white mb-2 group-hover:text-amber-300 transition-colors">Intervention &amp; Encaissement Direct</h4>
                 <p className="text-slate-300 text-xs leading-relaxed">
-                  Intervenez et encaissez la totalité de votre prestation directement auprès du client. Aucune commission en pourcentage n'est prélevée sur votre travail.
+                  Appelez le client, réalisez le dépannage au tarif convenu et encaissez 100% de la prestation en direct (0% de commission sur vos travaux).
                 </p>
               </motion.div>
             </>
@@ -667,8 +667,8 @@ export const LandingPage = ({ onSelectJourney }) => {
             <ShieldCheck className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
           </div>
           <div>
-            <p className="font-bold text-white text-sm">Garantie Anti-Arnaque &amp; Certification CIN</p>
-            <p className="text-slate-400">Tous les Maâlems sont vérifiés avec pièce d'identité officielle et évalués après chaque intervention.</p>
+            <p className="font-bold text-white text-sm">Garantie Anti-Arnaque &amp; Artisans Vérifiés</p>
+            <p className="text-slate-400">Tous les Maâlems sont vérifiés par notre équipe et évalués après chaque intervention.</p>
           </div>
         </div>
 

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
-import { CINVerificationView } from './CINVerificationView';
 import { Wrench, Lock } from 'lucide-react';
 
 export const ProtectedRoute = ({ allowedRole, children, onRedirect }) => {
@@ -46,13 +45,6 @@ export const ProtectedRoute = ({ allowedRole, children, onRedirect }) => {
   // MAALEM ACCESS: Allowed strictly if authenticated as MAALEM
   if (allowedRole === 'MAALEM') {
     if (user && user.role?.toUpperCase() === 'MAALEM') {
-      // Check CIN Verification Status
-      const isCinVerified = user.maalem_details?.cin_verified || user.maalem_details?.is_verified;
-
-      if (!isCinVerified) {
-        return <CINVerificationView onVerificationComplete={() => {}} />;
-      }
-
       return children;
     }
 

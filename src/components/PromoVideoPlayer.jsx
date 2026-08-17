@@ -78,8 +78,8 @@ const CLIENT_SCENES = [
     badgeAr: 'المعلم فطريقو عندك',
     title: '12 Minutes : Maâlem Hassan Arrive chez Vous',
     titleAr: 'المعلم حسن واصل فـ 12 دقيقة مع تتبع GPS مباشر',
-    desc: 'Vous recevez la fiche de Hassan : Plombier certifié CIN, noté 4.9★ (128 avis). Vous pouvez l\'appeler ou lui parler sur WhatsApp et voir sa moto avancer sur la carte en temps réel.',
-    descAr: 'كتشوف تصويرتو، النمرة ديالو، لاكارط مفعلية، والبوزيسيون ديال الموطور ديالو جاية ديريكت لدارك.',
+    desc: 'Vous recevez la fiche de Hassan : Plombier professionnel vérifié, noté 4.9★ (128 avis). Vous pouvez l\'appeler ou lui parler sur WhatsApp et voir sa moto avancer sur la carte en temps réel.',
+    descAr: 'كتشوف تصويرتو، النمرة ديالو، والكونط ديالو مفعل، والبوزيسيون ديال الموطور ديالو جاية ديريكت لدارك.',
     icon: Clock,
     themeColor: 'from-emerald-500 to-teal-600',
     accentColor: 'text-emerald-400',
@@ -87,7 +87,7 @@ const CLIENT_SCENES = [
     mockupVisual: {
       type: 'REAL_TRACKING',
       maalemName: 'Hassan Plombier (Maârif)',
-      verifiedBadge: '✔ CIN Officielle Vérifiée',
+      verifiedBadge: '✔ Artisan Professionnel Vérifié',
       rating: '4.9 ★ (128 interventions)',
       eta: 'En route en Moto • Arrivée dans 8 min (1.2 km)'
     }
@@ -117,22 +117,22 @@ const CLIENT_SCENES = [
 const MAALEM_SCENES = [
   {
     id: 1,
-    shortLabel: '🪪 1. Inscription CIN',
-    badge: 'Cas Réel 1/4 • Vérification Express',
-    badgeAr: 'تفعيل لاكارط ناسيونال',
-    title: 'Inscription en 30s avec votre Carte d\'Identité (CIN)',
-    titleAr: 'سجل برقم تيليفونك وصور لاكارط ناسيونال باش تاخد البادج',
-    desc: 'Saisissez votre numéro marocain (+212 6... / 7...) et prenez votre CIN en photo. La vérification d\'identité automatique valide votre dossier en 10 secondes pour vous attribuer le badge "Artisan Certifié".',
-    descAr: 'بلا ما تعمر وراق وبلا ما تمشي للبيرو، صور لاكارط ناسيونال ديالك والسيستيم كيفعل الكونط فالحين.',
+    shortLabel: '📱 1. Inscription 30s',
+    badge: 'Cas Réel 1/4 • Inscription Express',
+    badgeAr: 'تسجيل سريع في 30 ثانية',
+    title: 'Inscription Pro en 30s avec votre Téléphone',
+    titleAr: 'سجل برقم تليفونك واختار الحرفة ديالك باش تبدا',
+    desc: 'Saisissez votre numéro marocain (+212 6... / 7...) et sélectionnez votre métier. Votre profil artisan est activé immédiatement pour recevoir des chantiers dans votre ville.',
+    descAr: 'بلا تعقيدات وبلا ما تمشي للبيرو، دخل نمرتك وحرفتك والسيستيم كيفعل الكونط فالحين.',
     icon: Wrench,
     themeColor: 'from-amber-500 to-orange-600',
     accentColor: 'text-amber-400',
-    mockupType: 'cin_scan',
+    mockupType: 'profile_activation',
     mockupVisual: {
-      type: 'REAL_CIN_SCAN',
-      title: 'Vérification Officielle de la Pièce d\'Identité',
-      extractedName: 'Hassan El Alami (Plombier)',
-      cinStatus: '✔ CIN Conforme & Validée Immédiatement'
+      type: 'REAL_PROFILE_ACTIVATION',
+      title: 'Activation Immédiate du Profil Pro',
+      extractedName: 'Hassan El Alami (Plombier Casablanca)',
+      status: '✔ Profil Validé & Prêt à Recevoir des Chantiers'
     }
   },
   {
@@ -496,15 +496,15 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                     </div>
                   )}
 
-                  {/* 5. Maalem Real CIN Scan Mockup */}
-                  {currentScene.mockupVisual.type === 'REAL_CIN_SCAN' && (
+                  {/* 5. Maalem Real Profile Activation Mockup */}
+                  {currentScene.mockupVisual.type === 'REAL_PROFILE_ACTIVATION' && (
                     <div className="p-3 sm:p-4 bg-slate-950 rounded-2xl border border-amber-500/40 space-y-2 text-left">
                       <span className="px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40 text-[9px] sm:text-[10px] font-black">
                         {currentScene.mockupVisual.title}
                       </span>
                       <div className="p-2.5 bg-slate-900 rounded-xl border border-amber-500/30 space-y-1">
                         <p className="text-xs font-bold text-slate-100">{currentScene.mockupVisual.extractedName}</p>
-                        <p className="text-[10px] text-emerald-400 font-bold">{currentScene.mockupVisual.cinStatus}</p>
+                        <p className="text-[10px] text-emerald-400 font-bold">{currentScene.mockupVisual.status}</p>
                       </div>
                       <div className="p-1.5 bg-emerald-950/80 rounded-xl text-[9px] text-emerald-300 font-bold text-center border border-emerald-500/30">
                         Badge Artisan Officiel Activé 🚀
