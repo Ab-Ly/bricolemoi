@@ -1,0 +1,279 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ShieldAlert, 
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  AlertTriangle, 
+  Gift, 
+  Phone, 
+  MapPin, 
+  User, 
+  Wrench, 
+  Coins, 
+  Check, 
+  X,
+  FileText,
+  ShieldCheck
+} from 'lucide-react';
+import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
+
+export const AdminDisputesView = ({ adminAlerts = [], interventions = [], onResolveDispute }) => {
+  const [filter, setFilter] = useState('ALL'); // 'ALL' | 'PENDING' | 'RESOLVED'
+  const [rejectReasonModalAlert, setRejectReasonModalAlert] = useState(null);
+  const [rejectReasonText, setRejectReasonText] = useState('Délai anti-abus dépassé (> 30 min)');
+
+  const filteredAlerts = adminAlerts.filter((a) => {
+    if (filter === 'PENDING') return a.status !== 'REFUNDED_RESOLVED' && a.status !== 'REJECTED';
+    if (filter === 'RESOLVED') return a.status === 'REFUNDED_RESOLVED' || a.status === 'REJECTED';
+    return true;
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Header & Explications des Règles Métier */}
+      <div className="bg-slate-900/80 backdrop-blur-xl border border-cyan-500/20 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-black text-white flex items-center gap-2.5 font-sans">
+              <ShieldAlert className="w-6 h-6 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+              <span>Gestion des Litiges &amp; Remplacement de Leads</span>
+              <span className="text-xs font-mono font-bold bg-amber-950/80 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30">
+                {filteredAlerts.length} dossiers
+              </span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">
+              Arbitrage des réclamations artisans (Client injoignable dans les 30 min, faux numéro, désaccord devis).
+            </p>
+          </div>
+
+          {/* Filtre Statut */}
+          <div className="flex items-center gap-2">
+            {['ALL', 'PENDING', 'RESOLVED'].map((st) => (
+              <button
+                key={st}
+                type="button"
+                onClick={() => setFilter(st)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  filter === st
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-[0_0_12px_rgba(251,191,36,0.4)]'
+                    : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                {st === 'ALL' ? 'Tous les Dossiers' : st === 'PENDING' ? '⏳ À Traiter' : '✅ Clôturés'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Charte Anti-Abus BricoleMoi */}
+        <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300 flex items-start gap-3">
+          <ShieldCheck className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold text-white">Règles d'Arbitrage BricoleMoi Maroc :</p>
+            <p className="text-slate-400 mt-0.5 leading-relaxed">
+              1. <strong>Crédit de remplacement</strong> : L'artisan reçoit 1 crédit lead (+15.00 DH) sur son solde sans sortie de cash.
+              <br />
+              2. <strong>Délai anti-abus</strong> : Tout signalement doit être effectué dans les <strong>30 minutes</strong> suivant l'acceptation du lead.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Liste des Dossiers de Litiges */}
+      <div className="space-y-4">
+        {filteredAlerts.length === 0 ? (
+          <div className="text-center py-12 bg-slate-900/60 border border-slate-800 rounded-3xl text-slate-500 text-sm">
+            <CheckCircle2 className="w-10 h-10 mx-auto text-emerald-500 mb-2 opacity-60" />
+            <p className="font-bold text-slate-300">Aucun litige en attente de traitement.</p>
+            <p className="text-xs text-slate-500 mt-1">Toutes les réclamations ont été résolues avec succès.</p>
+          </div>
+        ) : (
+          filteredAlerts.map((alert) => {
+            const isResolved = alert.status === 'REFUNDED_RESOLVED' || alert.status === 'REJECTED';
+            const isRefunded = alert.status === 'REFUNDED_RESOLVED';
+
+            return (
+              <motion.div
+                layout
+                key={alert.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`bg-slate-900/80 backdrop-blur-xl border rounded-3xl p-5 shadow-xl transition-all space-y-4 ${
+                  isResolved
+                    ? 'border-slate-800 opacity-80'
+                    : 'border-amber-500/30 hover:border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.1)]'
+                }`}
+              >
+                {/* Header Litige */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-xl bg-amber-950 border border-amber-500/40 text-amber-300 font-mono font-bold text-xs">
+                      #{String(alert.id).slice(-6)}
+                    </span>
+                    <span className="font-black text-white text-sm">
+                      {alert.reason_label || alert.reason_code || 'Client Injoignable'}
+                    </span>
+                  </div>
+
+                  <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold border self-start sm:self-auto ${
+                    isRefunded
+                      ? 'bg-emerald-950 border-emerald-500 text-emerald-300'
+                      : isResolved
+                        ? 'bg-rose-950 border-rose-500 text-rose-300'
+                        : 'bg-amber-950 border-amber-500 text-amber-300 animate-pulse'
+                  }`}>
+                    {isRefunded ? '✅ Crédit Accordé (+15 DH)' : isResolved ? '❌ Réclamation Rejetée' : '⏳ En Attente d\'Arbitrage'}
+                  </span>
+                </div>
+
+                {/* Détail Parties Prenantes */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  {/* Maâlem Réclamant */}
+                  <div className="bg-slate-950/80 p-3.5 rounded-2xl border border-slate-800 space-y-1">
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase block">🛠️ Artisan Maâlem :</span>
+                    <p className="font-bold text-white text-sm">{alert.maalem_name || 'Artisan Maâlem'}</p>
+                    <p className="text-slate-300 font-mono flex items-center gap-1">
+                      <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{alert.maalem_phone || 'N/A'}</span>
+                    </p>
+                  </div>
+
+                  {/* Client Concerné */}
+                  <div className="bg-slate-950/80 p-3.5 rounded-2xl border border-slate-800 space-y-1">
+                    <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase block">👤 Client Signalé :</span>
+                    <p className="font-bold text-white text-sm">{alert.client_name || 'Client BricoleMoi'}</p>
+                    <p className="text-slate-300 font-mono flex items-center gap-1">
+                      <Phone className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>{alert.client_phone || 'N/A'}</span>
+                    </p>
+                    <p className="text-slate-400 text-[11px] flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-cyan-400" />
+                      <span>{alert.district || 'Casablanca'}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Commentaire de signalement */}
+                {alert.comment && (
+                  <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 text-xs text-slate-300 italic">
+                    "{alert.comment}"
+                  </div>
+                )}
+
+                {/* Actions d'Arbitrage (Si non clôturé) */}
+                {!isResolved && (
+                  <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                    {/* Bouton Rejeter */}
+                    <button
+                      type="button"
+                      onClick={() => setRejectReasonModalAlert(alert)}
+                      className="w-full sm:w-auto px-4 py-2 bg-slate-950 hover:bg-rose-950 border border-slate-800 hover:border-rose-500 text-slate-300 hover:text-rose-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <XCircle className="w-4 h-4 text-rose-400" />
+                      <span>Rejeter la Réclamation</span>
+                    </button>
+
+                    {/* Bouton Accorder 1 Crédit de remplacement */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (onResolveDispute) {
+                          onResolveDispute({
+                            alertId: alert.id,
+                            maalemId: alert.maalem_id,
+                            amount: 15,
+                            shouldRefund: true
+                          });
+                        }
+                      }}
+                      className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black shadow-[0_0_15px_rgba(52,211,153,0.4)] flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                    >
+                      <Gift className="w-4 h-4" />
+                      <span>Accorder 1 Crédit de Remplacement (+15 DH)</span>
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Modal Motif de Rejet */}
+      <AnimatePresence>
+        {rejectReasonModalAlert && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setRejectReasonModalAlert(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
+            />
+
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-md bg-slate-950 border border-rose-500/40 rounded-3xl p-6 shadow-2xl text-slate-100 space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 className="text-sm font-black text-rose-300 flex items-center gap-2">
+                  <XCircle className="w-5 h-5 text-rose-400" />
+                  <span>Rejeter la réclamation #{String(rejectReasonModalAlert.id).slice(-6)}</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setRejectReasonModalAlert(null)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-xs font-bold text-slate-300">
+                  Motif du rejet (transmis à l'artisan) :
+                </label>
+                <textarea
+                  rows="3"
+                  value={rejectReasonText}
+                  onChange={(e) => setRejectReasonText(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-rose-400 shadow-inner"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setRejectReasonModalAlert(null)}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 text-slate-300 text-xs font-bold"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onResolveDispute) {
+                      onResolveDispute({
+                        alertId: rejectReasonModalAlert.id,
+                        maalemId: rejectReasonModalAlert.maalem_id,
+                        shouldRefund: false
+                      });
+                    }
+                    setRejectReasonModalAlert(null);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-lg"
+                >
+                  Confirmer le Rejet
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};

@@ -1,0 +1,465 @@
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
+import { useAuth } from './AuthContext';
+import { useApp } from './AppContext';
+import { ABLY_CHANNELS } from '../lib/ablyClient';
+import { subscribeToRealtimeChannel, publishRealtimeEvent } from '../lib/ablyRealtimeService';
+import { startEmergencySiren, stopEmergencySiren, playNotificationSound, triggerVibration } from '../lib/audioNotifier';
+import { notify } from '../lib/notify';
+import { showLocalPushNotification } from '../lib/pushNotificationService';
+
+// ==========================================
+// 1. ÉTATS STRICTS DE LA MACHINE D'ÉTATS SOS
+// ==========================================
+export const EMERGENCY_STATES = {
+  IDLE: 'IDLE',           // Veille / Repos (Carte épurée côté client / Toggle présence côté Maâlem)
+  SEARCHING: 'SEARCHING', // SOS déclenché (Radar pulsant bloquant côté client / Modale alerte bloquante côté Maâlem)
+  MATCHED: 'MATCHED',     // Mission acceptée à 15 DH (Suivi GPS live, contact débloqué, intervention en cours)
+  COMPLETED: 'COMPLETED'  // Clôture des travaux (Modale d'évaluation 5★ côté client)
+};
+
+// Types d'actions du Reducer
+const ACTIONS = {
+  TRIGGER_SOS: 'TRIGGER_SOS',
+  RECEIVE_ALERT: 'RECEIVE_ALERT',
+  DISMISS_ALERT: 'DISMISS_ALERT',
+  MATCH_SOS: 'MATCH_SOS',
+  UPDATE_PROGRESS: 'UPDATE_PROGRESS',
+  COMPLETE_MISSION: 'COMPLETE_MISSION',
+  RESET_TO_IDLE: 'RESET_TO_IDLE'
+};
+
+const initialState = {
+  state: EMERGENCY_STATES.IDLE,
+  activeEmergency: null,   // Données de l'intervention active
+  matchedMaalem: null,     // Coordonnées et profil du Maâlem assigné
+  incomingAlert: null,     // Alerte SOS entrante pour le Maâlem (modale plein écran)
+  progressStep: 'ASSIGNED',// 'ASSIGNED' | 'ON_THE_WAY' | 'ARRIVED' | 'IN_PROGRESS' | 'DONE'
+  finalPrice: null,
+  reviewSubmitted: false
+};
+
+function emergencyFlowReducer(state, action) {
+  switch (action.type) {
+    case ACTIONS.TRIGGER_SOS:
+      return {
+        ...state,
+        state: EMERGENCY_STATES.SEARCHING,
+        activeEmergency: action.payload.emergency,
+        matchedMaalem: null,
+        incomingAlert: null,
+        progressStep: 'ASSIGNED',
+        finalPrice: null,
+        reviewSubmitted: false
+      };
+
+    case ACTIONS.RECEIVE_ALERT:
+      // Réception d'une alerte SOS par un Maâlem en ligne
+      if (state.state === EMERGENCY_STATES.MATCHED) return state; // Déjà en mission
+      return {
+        ...state,
+        state: EMERGENCY_STATES.SEARCHING,
+        incomingAlert: action.payload.alert
+      };
+
+    case ACTIONS.DISMISS_ALERT:
+      return {
+        ...state,
+        state: state.state === EMERGENCY_STATES.SEARCHING && !state.activeEmergency 
+          ? EMERGENCY_STATES.IDLE 
+          : state.state,
+        incomingAlert: null
+      };
+
+    case ACTIONS.MATCH_SOS:
+      return {
+        ...state,
+        state: EMERGENCY_STATES.MATCHED,
+        activeEmergency: action.payload.emergency || state.activeEmergency,
+        matchedMaalem: action.payload.maalem || state.matchedMaalem,
+        incomingAlert: null,
+        progressStep: action.payload.progressStep || state.progressStep || 'ON_THE_WAY'
+      };
+
+    case ACTIONS.UPDATE_PROGRESS:
+      return {
+        ...state,
+        progressStep: action.payload.step,
+        activeEmergency: state.activeEmergency 
+          ? { ...state.activeEmergency, progress_step: action.payload.step }
+          : null
+      };
+
+    case ACTIONS.COMPLETE_MISSION:
+      return {
+        ...state,
+        state: EMERGENCY_STATES.COMPLETED,
+        finalPrice: action.payload.finalPrice || state.activeEmergency?.final_agreed_price,
+        progressStep: 'DONE'
+      };
+
+    case ACTIONS.RESET_TO_IDLE:
+      return {
+        ...initialState,
+        state: EMERGENCY_STATES.IDLE
+      };
+
+    default:
+      return state;
+  }
+}
+
+const EmergencyFlowContext = createContext(null);
+
+export const EmergencyFlowProvider = ({ children }) => {
+  const { user } = useAuth();
+  const { 
+    interventions, 
+    maalems, 
+    acceptLead, 
+    requestWorkCompletion, 
+    updateInterventionProgress, 
+    submitReview 
+  } = useApp();
+
+  const [flowState, dispatch] = useReducer(emergencyFlowReducer, initialState);
+  const userRef = useRef(user);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
+  // Synchronisation avec les interventions existantes au montage ou changement d'utilisateur
+  useEffect(() => {
+    if (!user) return;
+    const isMaalem = user.role?.toUpperCase() === 'MAALEM';
+
+    if (isMaalem) {
+      // Trouver si le Maâlem a une intervention en cours
+      const activeJob = interventions?.find(
+        (i) => String(i.maalem_id || '').trim() === String(user.id).trim() && 
+               ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
+      );
+      if (activeJob && flowState.state === EMERGENCY_STATES.IDLE) {
+        dispatch({
+          type: ACTIONS.MATCH_SOS,
+          payload: {
+            emergency: activeJob,
+            progressStep: activeJob.progress_step || 'ON_THE_WAY'
+          }
+        });
+      }
+    } else {
+      // Côté Client : vérifier si une demande est active
+      const myPending = interventions?.find(
+        (i) => String(i.client_id || '').trim() === String(user.id).trim() && i.status === 'PENDING'
+      );
+      const myMatched = interventions?.find(
+        (i) => String(i.client_id || '').trim() === String(user.id).trim() && 
+               ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
+      );
+
+      if (myMatched && flowState.state !== EMERGENCY_STATES.MATCHED && flowState.state !== EMERGENCY_STATES.COMPLETED) {
+        const maalemInfo = maalems?.find((m) => String(m.id).trim() === String(myMatched.maalem_id).trim()) || {
+          id: myMatched.maalem_id,
+          full_name: myMatched.maalem_name || 'Artisan Maâlem',
+          phone: myMatched.maalem_phone || '',
+          specialty: myMatched.service_type || 'PLUMBING',
+          rating_avg: 4.9
+        };
+        dispatch({
+          type: ACTIONS.MATCH_SOS,
+          payload: {
+            emergency: myMatched,
+            maalem: maalemInfo,
+            progressStep: myMatched.progress_step || 'ON_THE_WAY'
+          }
+        });
+      } else if (myPending && flowState.state === EMERGENCY_STATES.IDLE) {
+        dispatch({
+          type: ACTIONS.TRIGGER_SOS,
+          payload: { emergency: myPending }
+        });
+      }
+    }
+  }, [user?.id, user?.role, interventions, maalems]);
+
+  // =========================================================================
+  // 2. SOUSCRIPTIONS TEMPS RÉEL ABLY SELON LE RÔLE (CLIENT / MAÂLEM)
+  // =========================================================================
+
+  // Écoute du canal personnel utilisateur : notifications:user:[userId]
+  useEffect(() => {
+    if (!user?.id) return;
+    const userChannel = ABLY_CHANNELS.getUserChannel(user.id);
+
+    const unsubscribe = subscribeToRealtimeChannel(
+      userChannel,
+      ({ event, payload }) => {
+        if (!payload) return;
+
+        if (event === 'job:accepted' || event === 'sos:claimed') {
+          // Un Maâlem a accepté le SOS du client
+          const maalemDetails = {
+            id: payload.maalem_id,
+            full_name: payload.maalem_name || 'Artisan Maâlem',
+            phone: payload.maalem_phone || '',
+            rating_avg: payload.maalem_rating || 4.9,
+            specialty: payload.specialty || 'PLUMBING',
+            lat: payload.maalem_lat,
+            lng: payload.maalem_lng,
+            eta_minutes: payload.eta_minutes || 15
+          };
+
+          dispatch({
+            type: ACTIONS.MATCH_SOS,
+            payload: {
+              emergency: payload.intervention || { id: payload.intervention_id },
+              maalem: maalemDetails,
+              progressStep: 'ON_THE_WAY'
+            }
+          });
+
+          notify.success(
+            'Artisan en Route 🛠️',
+            `${maalemDetails.full_name} a pris en charge votre urgence ! Arrivée estimée : ~15 min.`,
+            { id: `job-accepted-${payload.intervention_id || 'active'}`, badge: 'Match Confirmé' }
+          );
+        } else if (event === 'job:progress') {
+          dispatch({
+            type: ACTIONS.UPDATE_PROGRESS,
+            payload: { step: payload.progress_step }
+          });
+        } else if (event === 'work:completion_requested') {
+          dispatch({
+            type: ACTIONS.COMPLETE_MISSION,
+            payload: { finalPrice: payload.final_agreed_price }
+          });
+        }
+      },
+      user.id
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user?.id]);
+
+  // Écoute des alertes SOS géographiques pour les Maâlems en ligne
+  useEffect(() => {
+    const isMaalem = user?.role?.toUpperCase() === 'MAALEM';
+    if (!isMaalem || !user?.id) return;
+
+    const userCity = user?.city_zone || user?.city || 'casablanca';
+    const userSpecialty = user?.maalem_details?.specialty || user?.specialty || 'all';
+
+    const specialtySosChannel = ABLY_CHANNELS.getSosChannel(userCity, userSpecialty);
+    const citySosChannel = ABLY_CHANNELS.getSosCityChannel(userCity);
+
+    const handleSosBroadcast = ({ event, payload }) => {
+      if (!payload) return;
+
+      if (event === 'sos:alert' || event === 'new_job') {
+        const alertData = payload.intervention || payload;
+        // Si l'alerte n'est pas la sienne et qu'il n'est pas déjà en mission
+        if (flowState.state !== EMERGENCY_STATES.MATCHED) {
+          startEmergencySiren();
+          triggerVibration([200, 100, 200, 100]);
+          dispatch({
+            type: ACTIONS.RECEIVE_ALERT,
+            payload: { alert: alertData }
+          });
+
+          if (document.hidden) {
+            showLocalPushNotification(`🚨 URGENCE SOS : ${alertData.subcategory || alertData.service_type || 'Dépannage'}`, {
+              body: `Nouvelle demande à ${alertData.district || userCity}. Touchez pour intervenir.`,
+              tag: `sos-${alertData.id}`
+            });
+          }
+        }
+      } else if (event === 'sos:claimed') {
+        // Un autre Maâlem a pris le lead avant nous -> fermer l'alerte
+        if (flowState.incomingAlert?.id === payload.intervention_id) {
+          stopEmergencySiren();
+          dispatch({ type: ACTIONS.DISMISS_ALERT });
+          notify.info('Lead Attribué', 'Une autre équipe a déjà pris en charge cette intervention.', { id: `claimed-${payload.intervention_id}` });
+        }
+      }
+    };
+
+    const unsubSpecialty = subscribeToRealtimeChannel(specialtySosChannel, handleSosBroadcast, user.id);
+    const unsubCity = subscribeToRealtimeChannel(citySosChannel, handleSosBroadcast, user.id);
+
+    return () => {
+      unsubSpecialty();
+      unsubCity();
+      stopEmergencySiren();
+    };
+  }, [user?.id, user?.role, user?.city_zone, user?.specialty, flowState.state, flowState.incomingAlert?.id]);
+
+  // =========================================================================
+  // 3. ACTIONS DE L'ORCHESTRATEUR DE FLUX
+  // =========================================================================
+
+  /**
+   * VUE 2 -> Déclenchement d'un SOS par le client
+   */
+  const triggerSOS = useCallback((emergencyData) => {
+    dispatch({
+      type: ACTIONS.TRIGGER_SOS,
+      payload: { emergency: emergencyData }
+    });
+    notify.sos('🚨 Radar SOS Activé', 'Diffusion en direct aux artisans disponibles...', { id: `sos-active-${emergencyData.id || Date.now()}` });
+  }, []);
+
+  /**
+   * VUE 3 -> Acceptation de la mission par le Maâlem (15 DH)
+   */
+  const acceptSOS = useCallback(async (alertId) => {
+    stopEmergencySiren();
+    try {
+      const result = await acceptLead(alertId);
+      if (result === false) {
+        return false;
+      }
+      
+      // Diffusion immédiate de l'événement sos:claimed pour fermer l'alerte chez tous les autres
+      const userCity = userRef.current?.city_zone || 'casablanca';
+      const userSpecialty = userRef.current?.maalem_details?.specialty || 'all';
+      
+      const claimPayload = {
+        intervention_id: alertId,
+        maalem_id: userRef.current?.id,
+        maalem_name: userRef.current?.full_name || 'Artisan Maâlem',
+        maalem_phone: userRef.current?.phone || '',
+        maalem_rating: userRef.current?.maalem_details?.rating_avg || 4.9,
+        timestamp: Date.now()
+      };
+
+      publishRealtimeEvent(ABLY_CHANNELS.getSosChannel(userCity, userSpecialty), 'sos:claimed', claimPayload);
+      publishRealtimeEvent(ABLY_CHANNELS.getSosCityChannel(userCity), 'sos:claimed', claimPayload);
+
+      dispatch({
+        type: ACTIONS.MATCH_SOS,
+        payload: {
+          emergency: result || flowState.incomingAlert || { id: alertId },
+          progressStep: 'ON_THE_WAY'
+        }
+      });
+
+      notify.success('Mission Acceptée ! 🛠️', 'Coordonnées client débloquées. Déplacement en cours.', { id: `accept-ok-${alertId}` });
+      return result;
+    } catch (err) {
+      console.warn('acceptSOS error:', err);
+      return false;
+    }
+  }, [acceptLead, flowState.incomingAlert]);
+
+  /**
+   * Progression de l'intervention (Maâlem)
+   */
+  const setProgressStep = useCallback(async (step) => {
+    const intvId = flowState.activeEmergency?.id;
+    if (!intvId) return;
+
+    await updateInterventionProgress(intvId, step);
+    dispatch({
+      type: ACTIONS.UPDATE_PROGRESS,
+      payload: { step }
+    });
+
+    if (step === 'ON_THE_WAY') {
+      notify.progress('ON_THE_WAY', 'En Route', 'Votre statut est désormais : En déplacement vers le client.', { id: `prog-${intvId}` });
+    } else if (step === 'ARRIVED') {
+      notify.progress('ARRIVED', 'Arrivé sur Place', 'Statut : Diagnostic en cours chez le client.', { id: `prog-${intvId}` });
+    }
+  }, [flowState.activeEmergency?.id, updateInterventionProgress]);
+
+  /**
+   * VUE 4 -> Terminer la mission (Maâlem)
+   */
+  const finishMission = useCallback(async (finalAgreedPrice) => {
+    const intvId = flowState.activeEmergency?.id;
+    if (!intvId) return;
+
+    await requestWorkCompletion(intvId, finalAgreedPrice);
+    dispatch({
+      type: ACTIONS.COMPLETE_MISSION,
+      payload: { finalPrice: finalAgreedPrice }
+    });
+    notify.success('Mission Terminée ✨', 'Demande de validation transmise au client avec succès.', { id: `finish-${intvId}` });
+  }, [flowState.activeEmergency?.id, requestWorkCompletion]);
+
+  /**
+   * VUE 4 -> Soumission du feedback / avis 5★ (Client) & Retour automatique à IDLE
+   */
+  const submitClientFeedback = useCallback(async ({ rating, comment, badges, tipDh }) => {
+    const intvId = flowState.activeEmergency?.id;
+    if (intvId) {
+      await submitReview({
+        intervention_id: intvId,
+        rating,
+        comment,
+        badges,
+        tip_dh: tipDh
+      });
+    }
+
+    dispatch({ type: ACTIONS.RESET_TO_IDLE });
+    notify.success('Merci pour votre avis ! ⭐', 'Votre retour aide notre communauté d\'artisans.', { id: `review-${intvId || 'done'}` });
+  }, [flowState.activeEmergency?.id, submitReview]);
+
+  /**
+   * Annuler l'alerte SOS et revenir à IDLE
+   */
+  const cancelSOS = useCallback(() => {
+    stopEmergencySiren();
+    dispatch({ type: ACTIONS.RESET_TO_IDLE });
+  }, []);
+
+  /**
+   * Fermer la modale d'alerte SOS reçue sans accepter
+   */
+  const dismissAlert = useCallback(() => {
+    stopEmergencySiren();
+    dispatch({ type: ACTIONS.DISMISS_ALERT });
+  }, []);
+
+  return (
+    <EmergencyFlowContext.Provider
+      value={{
+        // États de la Machine d'États
+        state: flowState.state,
+        isIdle: flowState.state === EMERGENCY_STATES.IDLE,
+        isSearching: flowState.state === EMERGENCY_STATES.SEARCHING,
+        isMatched: flowState.state === EMERGENCY_STATES.MATCHED,
+        isCompleted: flowState.state === EMERGENCY_STATES.COMPLETED,
+        
+        // Données du contexte
+        activeEmergency: flowState.activeEmergency,
+        matchedMaalem: flowState.matchedMaalem,
+        incomingAlert: flowState.incomingAlert,
+        progressStep: flowState.progressStep,
+        finalPrice: flowState.finalPrice,
+
+        // Actions du cycle de vie
+        triggerSOS,
+        acceptSOS,
+        setProgressStep,
+        finishMission,
+        submitClientFeedback,
+        cancelSOS,
+        dismissAlert
+      }}
+    >
+      {children}
+    </EmergencyFlowContext.Provider>
+  );
+};
+
+export const useEmergencyFlow = () => {
+  const context = useContext(EmergencyFlowContext);
+  if (!context) {
+    throw new Error('useEmergencyFlow must be used within an EmergencyFlowProvider');
+  }
+  return context;
+};
