@@ -1,7 +1,7 @@
 /**
- * Utility for Subdomain-based Multi-App Routing in BricoleMoi
- * Detects domain hostname (e.g., client.bricolemoi.ma, maalem.bricolemoi.ma, admin.bricolemoi.ma)
- * or fallback search params / path routes in dev mode.
+ * Utility for Subdomain-based & SPA-based Multi-App Routing in BricoleMoi
+ * Supports real subdomains (e.g., client.bricolemoi.ma, maalem.bricolemoi.ma, admin.bricolemoi.ma)
+ * and seamless zero-reload SPA transitions via History API and custom events.
  */
 
 export const APP_SUBDOMAINS = {
@@ -43,9 +43,46 @@ export const getAppSubdomain = () => {
   return APP_SUBDOMAINS.LANDING;
 };
 
-export const switchSubdomainInDev = (targetApp) => {
+/**
+ * Seamless SPA in-app router & navigation helper.
+ * Pushes new URL to history without hard reload, stores context, and dispatches navigation event.
+ */
+export const switchSubdomainInDev = (targetApp, params = {}) => {
   if (typeof window === 'undefined') return;
+
+  const validApp = APP_SUBDOMAINS[String(targetApp).toUpperCase()] || APP_SUBDOMAINS.LANDING;
   const url = new URL(window.location.href);
-  url.searchParams.set('app', targetApp.toLowerCase());
-  window.location.href = url.toString();
+  url.searchParams.set('app', validApp.toLowerCase());
+
+  // Store contextual navigation params (e.g. initial service category, city)
+  if (params && typeof params === 'object') {
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) {
+        url.searchParams.set(k, String(v));
+      }
+    });
+    try {
+      sessionStorage.setItem('bricolemoi_nav_context', JSON.stringify(params));
+    } catch (e) {}
+  }
+
+  // Push state to browser history without white flash
+  window.history.pushState({ app: validApp, params }, '', url.toString());
+
+  // Dispatch custom navigation event for reactive listeners
+  window.dispatchEvent(
+    new CustomEvent('bricolemoi_navigate', {
+      detail: { app: validApp, params }
+    })
+  );
 };
+
+export const getNavContext = () => {
+  try {
+    const raw = sessionStorage.getItem('bricolemoi_nav_context');
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+};
+

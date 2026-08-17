@@ -31,33 +31,25 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
     >
       <div className="max-w-md mx-auto flex items-center justify-around gap-1">
         
-        {/* ROLE CLIENT / LANDING NAVIGATION TABS */}
-        {(currentRole === 'CLIENT' || activeView === 'LANDING') && (
+        {/* 1. LANDING NAVIGATION TABS */}
+        {activeView === 'LANDING' && (
           <>
             <motion.button
               whileTap={{ scale: 0.90 }}
-              onClick={() => onChangeView('LANDING')}
-              className={`min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center transition-all active:scale-95 cursor-pointer ${
-                activeView === 'LANDING'
-                  ? 'text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.25)] font-bold'
-                  : 'text-slate-400 hover:text-slate-200 border border-transparent'
-              }`}
+              onClick={() => onChangeView('CLIENT')}
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-300 hover:text-cyan-300 transition-all active:scale-95 cursor-pointer bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-400/50"
             >
-              <Zap className={`w-5 h-5 ${activeView === 'LANDING' ? 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]' : 'text-slate-400'}`} />
+              <Zap className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">SOS Urgence</span>
             </motion.button>
 
             <motion.button
               whileTap={{ scale: 0.90 }}
-              onClick={() => onChangeView('CLIENT')}
-              className={`min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center transition-all active:scale-95 cursor-pointer ${
-                activeView === 'CLIENT'
-                  ? 'text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.25)] font-bold'
-                  : 'text-slate-400 hover:text-slate-200 border border-transparent'
-              }`}
+              onClick={() => onChangeView('MAALEM')}
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-300 hover:text-amber-300 transition-all active:scale-95 cursor-pointer bg-slate-900/60 border border-amber-500/20 hover:border-amber-400/50"
             >
-              <ClipboardList className={`w-5 h-5 ${activeView === 'CLIENT' ? 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]' : 'text-slate-400'}`} />
-              <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Mes Demandes</span>
+              <Wrench className="w-5 h-5 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
+              <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Espace Maâlem</span>
             </motion.button>
 
             <motion.button
@@ -71,51 +63,79 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
           </>
         )}
 
-        {/* ROLE MAALEM NAVIGATION TABS */}
-        {currentRole === 'MAALEM' && activeView !== 'LANDING' && (
+        {/* 2. CLIENT VIEW NAVIGATION TABS */}
+        {activeView === 'CLIENT' && (
           <>
-            {/* 1. Missions (Active View) */}
+            <motion.button
+              whileTap={{ scale: 0.90 }}
+              onClick={() => onChangeView('LANDING')}
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 border border-transparent transition-all active:scale-95 cursor-pointer"
+            >
+              <Home className="w-5 h-5 text-slate-400" />
+              <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Accueil</span>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.90 }}
+              onClick={() => onChangeView('CLIENT')}
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.25)] font-bold transition-all active:scale-95 cursor-pointer"
+            >
+              <Zap className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+              <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">SOS Dépannage</span>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.90 }}
+              onClick={handleProfileClick}
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 border border-transparent transition-all active:scale-95 cursor-pointer"
+            >
+              <User className="w-5 h-5 drop-shadow-[0_0_4px_rgba(34,211,238,0.5)]" />
+              <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">{user ? 'Profil' : 'Connexion'}</span>
+            </motion.button>
+          </>
+        )}
+
+        {/* 3. MAALEM VIEW NAVIGATION TABS */}
+        {activeView === 'MAALEM' && (
+          <>
+            {/* 1. Accueil */}
+            <motion.button
+              whileTap={{ scale: 0.90 }}
+              onClick={() => onChangeView('LANDING')}
+              className="min-h-[46px] flex-1 max-w-[80px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 border border-transparent transition-all active:scale-95 cursor-pointer"
+            >
+              <Home className="w-5 h-5 text-slate-400" />
+              <span className="text-[10px] mt-0.5 font-medium tracking-tight truncate max-w-full">Accueil</span>
+            </motion.button>
+
+            {/* 2. Missions (Active View) */}
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('MAALEM')}
-              className={`min-h-[46px] flex-1 max-w-[88px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center transition-all active:scale-95 cursor-pointer ${
-                activeView === 'MAALEM'
-                  ? 'text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.25)] font-bold'
-                  : 'text-slate-400 hover:text-slate-200 border border-transparent'
-              }`}
+              className="min-h-[46px] flex-1 max-w-[88px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-amber-300 bg-amber-950/70 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.25)] font-bold transition-all active:scale-95 cursor-pointer"
             >
-              <Wrench className={`w-5 h-5 ${activeView === 'MAALEM' ? 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]' : 'text-slate-400'}`} />
+              <Wrench className="w-5 h-5 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
               <span className="text-[10px] mt-0.5 font-bold tracking-tight truncate max-w-full">Missions</span>
             </motion.button>
 
-            {/* 2. Recharge Action (Modal Trigger) */}
+            {/* 3. Recharge Action (Modal Trigger) */}
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => {
                 if (typeof onOpenRecharge === 'function') onOpenRecharge();
                 else window.dispatchEvent(new CustomEvent('bricolemoi_open_recharge_modal'));
               }}
-              className="min-h-[46px] flex-1 max-w-[88px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 hover:bg-slate-900/50 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[80px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 hover:bg-slate-900/50 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
               <Wallet className="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" />
               <span className="text-[10px] mt-0.5 font-medium tracking-tight truncate max-w-full">Recharge</span>
-            </motion.button>
-
-            {/* 3. Portefeuille & Historique (Modal Trigger) */}
-            <motion.button
-              whileTap={{ scale: 0.90 }}
-              onClick={() => window.dispatchEvent(new CustomEvent('bricolemoi_open_history_modal'))}
-              className="min-h-[46px] flex-1 max-w-[88px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 hover:bg-slate-900/50 border border-transparent transition-all active:scale-95 cursor-pointer"
-            >
-              <Receipt weight="duotone" className="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" />
-              <span className="text-[10px] mt-0.5 font-medium tracking-tight truncate max-w-full">Portefeuille</span>
             </motion.button>
 
             {/* 4. Profil */}
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={handleProfileClick}
-              className="min-h-[46px] flex-1 max-w-[88px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 hover:bg-slate-900/50 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[80px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 hover:bg-slate-900/50 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
               <User className="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" />
               <span className="text-[10px] mt-0.5 font-medium tracking-tight truncate max-w-full">Profil</span>
@@ -123,17 +143,22 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
           </>
         )}
 
-        {/* ROLE ADMIN NAVIGATION TABS */}
-        {currentRole === 'ADMIN' && activeView !== 'LANDING' && (
+        {/* 4. ADMIN VIEW NAVIGATION TABS */}
+        {activeView === 'ADMIN' && (
           <>
             <motion.button
               whileTap={{ scale: 0.90 }}
+              onClick={() => onChangeView('LANDING')}
+              className="min-h-[46px] flex-1 max-w-[110px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 border border-transparent transition-all active:scale-95 cursor-pointer"
+            >
+              <Home className="w-5 h-5" />
+              <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Accueil</span>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('ADMIN')}
-              className={`min-h-[46px] flex-1 max-w-[140px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center transition-all active:scale-95 cursor-pointer ${
-                activeView === 'ADMIN'
-                  ? 'text-purple-300 bg-purple-950/70 border border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.3)] font-bold'
-                  : 'text-slate-400 hover:text-slate-200 border border-transparent'
-              }`}
+              className="min-h-[46px] flex-1 max-w-[130px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-purple-300 bg-purple-950/70 border border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.3)] font-bold transition-all active:scale-95 cursor-pointer"
             >
               <ShieldCheck className="w-5 h-5 text-purple-400" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Dashboard Admin</span>
@@ -142,7 +167,7 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={handleProfileClick}
-              className="min-h-[46px] flex-1 max-w-[140px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-purple-300 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[110px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-purple-300 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
               <User className="w-5 h-5" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Profil</span>

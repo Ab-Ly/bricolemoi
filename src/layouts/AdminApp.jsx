@@ -30,7 +30,7 @@ export const AdminApp = () => {
   return (
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans selection:bg-purple-500 selection:text-white overflow-x-hidden">
       {/* 100% Dedicated Admin Header */}
-      <Navbar appMode="ADMIN" onGoHome={() => switchSubdomainInDev('ADMIN')} />
+      <Navbar appMode="ADMIN" onGoHome={() => switchSubdomainInDev('LANDING')} />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-8">
         {!isPinAuthenticated ? (

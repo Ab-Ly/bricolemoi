@@ -116,13 +116,14 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               <span className={`text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full border shadow-sm ${
                 appMode === 'MAALEM' ? 'bg-amber-950/80 text-amber-300 border-amber-500/40' :
                 appMode === 'ADMIN' ? 'bg-purple-950/80 text-purple-300 border-purple-500/40' :
-                'bg-cyan-950/80 text-cyan-300 border-cyan-500/40'
+                appMode === 'CLIENT' ? 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40' :
+                'bg-cyan-950/80 text-cyan-300 border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.25)]'
               }`}>
-                {appMode === 'MAALEM' ? 'PRO' : appMode === 'ADMIN' ? 'ADMIN' : 'CLIENT'}
+                {appMode === 'MAALEM' ? 'PRO' : appMode === 'ADMIN' ? 'ADMIN' : appMode === 'CLIENT' ? 'CLIENT' : 'MAROC 🇲🇦'}
               </span>
             </div>
             <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5 truncate hidden xs:block">
-              {appMode === 'MAALEM' ? 'Portail Artisans & Dépannage' : appMode === 'ADMIN' ? 'Dashboard Administration' : 'Dépannage d\'Urgence Express'}
+              {appMode === 'MAALEM' ? 'Portail Artisans & Dépannage' : appMode === 'ADMIN' ? 'Dashboard Administration' : appMode === 'CLIENT' ? 'Espace Client Dépannage' : 'Dépannage d\'Urgence Express 24h/7j'}
             </p>
           </div>
         </motion.div>
@@ -132,6 +133,17 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
           {/* 1. CLIENT HEADER ACTIONS */}
           {appMode === 'CLIENT' && (
             <>
+              {/* Back to Home / Landing Button */}
+              <motion.button
+                whileTap={{ scale: 0.90 }}
+                onClick={() => switchSubdomainInDev('LANDING')}
+                className="h-10 sm:h-11 bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-cyan-500/20 hover:border-cyan-400/50 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Retour à l'accueil"
+              >
+                <span>←</span>
+                <span className="hidden sm:inline">Accueil</span>
+              </motion.button>
+
               {deferredPrompt && !isInstalled && (
                 <motion.button
                   whileTap={{ scale: 0.90 }}
@@ -162,7 +174,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                   <motion.button
                     whileTap={{ scale: 0.90 }}
                     onClick={() => setAuthModalOpen(true)}
-                    className="h-10 sm:h-11 bg-slate-900 hover:bg-slate-800 text-cyan-300 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-cyan-500/30 flex items-center gap-1.5 transition-all shadow-sm active:scale-90"
+                    className="h-10 sm:h-11 bg-slate-900 hover:bg-slate-800 text-cyan-300 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-cyan-500/30 flex items-center gap-1.5 transition-all shadow-sm active:scale-90 cursor-pointer"
                   >
                     <PhosphorUser weight="bold" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
                     <span>Connexion</span>
@@ -171,7 +183,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                   <motion.button
                     whileTap={{ scale: 0.90 }}
                     onClick={() => setAuthModalOpen(true)}
-                    className="h-10 sm:h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-[11px] sm:text-xs font-bold px-3 sm:px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-90"
+                    className="h-10 sm:h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-[11px] sm:text-xs font-bold px-3 sm:px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-90 cursor-pointer"
                   >
                     <span>Inscription</span>
                   </motion.button>
@@ -183,6 +195,17 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
           {/* 2. MAALEM HEADER ACTIONS (Unified Height h-11 / 44px) */}
           {appMode === 'MAALEM' && (
             <>
+              {/* Back to Home / Landing Button */}
+              <motion.button
+                whileTap={{ scale: 0.90 }}
+                onClick={() => switchSubdomainInDev('LANDING')}
+                className="h-11 bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-amber-500/20 hover:border-amber-400/50 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Retour à l'accueil"
+              >
+                <span>←</span>
+                <span className="hidden sm:inline">Accueil</span>
+              </motion.button>
+
               {user ? (
                 <>
                   {/* Credit Balance Badge (Seulement si connecté) */}
@@ -248,7 +271,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                   <motion.button
                     whileTap={{ scale: 0.90 }}
                     onClick={() => setAuthModalOpen(true)}
-                    className="h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-90 cursor-pointer"
+                    className="h-11 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(245,158,11,0.4)] active:scale-90 cursor-pointer"
                   >
                     <PhosphorUser weight="bold" className="w-4 h-4 text-slate-950" />
                     <span>Espace Pro • Connexion</span>
@@ -282,10 +305,10 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                 onClick={() => {
                   sessionStorage.removeItem('bricolemoi_admin_pin_ok');
                   logout(() => {
-                    window.location.href = '/?app=landing';
+                    switchSubdomainInDev('LANDING');
                   });
                 }}
-                className="h-11 bg-slate-900/90 hover:bg-red-950/80 text-slate-300 hover:text-red-300 border border-purple-500/30 hover:border-red-500/40 px-3.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                className="h-11 bg-slate-900/90 hover:bg-red-950/80 text-slate-300 hover:text-red-300 border border-purple-500/30 hover:border-red-500/40 px-3.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
                 title="Quitter le Dashboard Admin"
               >
                 <SignOut weight="bold" className="w-4 h-4 text-red-400" />
@@ -294,27 +317,49 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
             </div>
           )}
 
-          {/* 4. LANDING ROOT HEADER ACTIONS (Unified Height h-11) */}
+          {/* 4. LANDING ROOT HEADER ACTIONS (Direct Quick Journey Links & Connect) */}
           {appMode === 'LANDING' && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Direct Quick Link to Client SOS */}
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={() => switchSubdomainInDev('CLIENT')}
+                className="h-10 sm:h-11 bg-slate-900/90 hover:bg-cyan-950/70 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 text-xs font-bold px-3 sm:px-4 rounded-2xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.35)] cursor-pointer"
+              >
+                <Zap className="w-4 h-4 text-cyan-400 fill-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+                <span className="font-black">SOS Urgence</span>
+              </motion.button>
+
+              {/* Direct Quick Link to Maalem Pro */}
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={() => switchSubdomainInDev('MAALEM')}
+                className="h-10 sm:h-11 bg-slate-900/90 hover:bg-amber-950/60 text-amber-300 hover:text-amber-200 border border-amber-500/40 hover:border-amber-400 text-xs font-bold px-3 sm:px-4 rounded-2xl flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_20px_rgba(245,158,11,0.35)] cursor-pointer"
+              >
+                <Wrench className="w-4 h-4 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
+                <span className="font-black hidden sm:inline">Espace Maâlem</span>
+                <span className="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono text-[10px] font-black">+15 DH</span>
+              </motion.button>
+
               {user ? (
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setProfileModalOpen(true)}
-                  className="h-11 flex items-center gap-2 bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 px-3.5 rounded-2xl shadow-sm transition-all cursor-pointer"
+                  className="h-10 sm:h-11 flex items-center gap-2 bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 px-3 sm:px-3.5 rounded-2xl shadow-sm transition-all cursor-pointer"
                 >
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center font-extrabold text-xs">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center font-extrabold text-xs">
                     {user.full_name?.charAt(0) || 'U'}
                   </div>
-                  <span className="text-xs font-bold text-slate-100 hidden sm:inline">{user.full_name}</span>
+                  <span className="text-xs font-bold text-slate-100 hidden md:inline">{user.full_name}</span>
                 </motion.button>
               ) : (
                 <motion.button
-                  whileTap={{ scale: 0.90 }}
+                  whileTap={{ scale: 0.92 }}
                   onClick={() => setAuthModalOpen(true)}
-                  className="h-11 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold px-4 rounded-2xl shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center"
+                  className="h-10 sm:h-11 bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs px-3.5 sm:px-4 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.45)] hover:shadow-[0_0_25px_rgba(6,182,212,0.65)] flex items-center gap-1.5 cursor-pointer"
                 >
-                  Connexion / Inscription
+                  <PhosphorUser weight="bold" className="w-4 h-4 text-slate-950" />
+                  <span>Connexion</span>
                 </motion.button>
               )}
             </div>

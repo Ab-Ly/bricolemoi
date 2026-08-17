@@ -6,7 +6,7 @@ import { BottomNav } from '../components/BottomNav';
 import { ShieldAlert, ArrowLeft, Wrench } from 'lucide-react';
 import { switchSubdomainInDev } from '../lib/subdomain';
 
-export const ClientApp = () => {
+export const ClientApp = ({ initialCategory, initialCity, initialDistrict }) => {
   const { user, setUser, setAuthModalOpen, currentRole, switchRole, logout } = useAuth();
 
   // Role Etanchéité Guard: If logged in as MAALEM on client.*, block access & redirect
@@ -85,7 +85,7 @@ export const ClientApp = () => {
                 switchRole('MAALEM');
                 switchSubdomainInDev('MAALEM');
               }}
-              className="w-full bg-slate-900/50 text-slate-400 hover:text-white rounded-xl px-6 py-2 text-xs transition-all flex items-center justify-center gap-1.5 mt-1"
+              className="w-full bg-slate-900/50 text-slate-400 hover:text-white rounded-xl px-6 py-2 text-xs transition-all flex items-center justify-center gap-1.5 mt-1 cursor-pointer"
             >
               <Wrench className="w-3.5 h-3.5 text-amber-400" />
               <span>Aller à l'Espace Maalem Pro</span>
@@ -99,13 +99,14 @@ export const ClientApp = () => {
   return (
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden">
       {/* 100% Dedicated Client Header */}
-      <Navbar appMode="CLIENT" onGoHome={() => switchSubdomainInDev('CLIENT')} />
+      <Navbar appMode="CLIENT" onGoHome={() => switchSubdomainInDev('LANDING')} />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-8">
-        <ClientView />
+        <ClientView initialCategory={initialCategory} initialCity={initialCity} initialDistrict={initialDistrict} />
       </main>
 
       <BottomNav activeView="CLIENT" onChangeView={(v) => switchSubdomainInDev(v)} />
     </div>
   );
 };
+

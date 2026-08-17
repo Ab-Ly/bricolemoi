@@ -581,7 +581,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
               {track === 'CLIENT' ? (
                 <motion.button
                   whileTap={{ scale: 0.94 }}
-                  onClick={() => onSelectJourney('CLIENT')}
+                  onClick={() => onSelectJourney('CLIENT', { category: 'PLUMBING', city: 'Casablanca' })}
                   className="w-full sm:w-auto py-3 px-5 rounded-xl bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(6,182,212,0.5)] flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Zap className="w-4 h-4 text-slate-950 fill-slate-950 flex-shrink-0" />
@@ -591,7 +591,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
               ) : (
                 <motion.button
                   whileTap={{ scale: 0.94 }}
-                  onClick={() => onSelectJourney('MAALEM')}
+                  onClick={() => onSelectJourney('MAALEM', { promo: 'BONUS15' })}
                   className="w-full sm:w-auto py-3 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(245,158,11,0.5)] flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Wrench className="w-4 h-4 text-slate-950 flex-shrink-0" />

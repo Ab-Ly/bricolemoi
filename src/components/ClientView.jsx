@@ -211,7 +211,23 @@ const getServiceDisplay = (type) => {
   return SERVICE_TYPE_MAP[key] || { label: type || 'Dépannage Général', icon: '🛠️' };
 };
 
-export const ClientView = () => {
+const mapCategoryToSlug = (cat) => {
+  if (!cat) return 'plomberie';
+  const c = String(cat).toLowerCase();
+  if (c.includes('plomb')) return 'plomberie';
+  if (c.includes('elec')) return 'electricite';
+  if (c.includes('serrur')) return 'serrurerie';
+  if (c.includes('auto') || c.includes('mecan')) return 'mecanique';
+  if (c.includes('clim') || c.includes('froid')) return 'climatisation';
+  if (c.includes('appliance') || c.includes('electro')) return 'electromenager';
+  if (c.includes('peint')) return 'peinture';
+  if (c.includes('menuis')) return 'menuiserie';
+  if (c.includes('macon') || c.includes('etanch')) return 'etancheite-carrelage';
+  if (c.includes('nett')) return 'nettoyage-menage';
+  return c;
+};
+
+export const ClientView = ({ initialCategory, initialCity, initialDistrict }) => {
   const { t, user, setAuthModalOpen } = useAuth();
   const { interventions, maalems, createIntervention, confirmFinalDevis, completeIntervention, submitReview, cancelIntervention } = useApp();
   const {
@@ -228,13 +244,13 @@ export const ClientView = () => {
     submitClientFeedback
   } = useEmergencyFlow();
 
-  const [serviceType, setServiceType] = useState('plomberie');
+  const [serviceType, setServiceType] = useState(() => mapCategoryToSlug(initialCategory || 'plomberie'));
   const [selectedSubcategory, setSelectedSubcategory] = useState('Réparations & Fuite');
   
   // Niveau d'urgence (Immédiat < 30min vs Planifié)
   const [urgencyLevel, setUrgencyLevel] = useState('IMMEDIATE'); // 'IMMEDIATE' | 'SCHEDULED'
   
-  // Localisation Ville & Quartier (Lecture immédiate du cache GPS local)
+  // Localisation Ville & Quartier (Lecture immédiate du cache GPS local ou prop initiale)
   const savedGPS = (() => {
     try {
       return JSON.parse(localStorage.getItem('bricolemoi_client_gps') || 'null');
@@ -243,10 +259,37 @@ export const ClientView = () => {
     }
   })();
 
-  const [selectedCity, setSelectedCity] = useState(savedGPS?.city || 'Casablanca');
-  const [selectedDistrict, setSelectedDistrict] = useState(savedGPS?.district || 'Maârif');
-  const [selectedLat, setSelectedLat] = useState(savedGPS?.lat || 33.5883);
-  const [selectedLng, setSelectedLng] = useState(savedGPS?.lng || -7.6328);
+  const startCity = initialCity || savedGPS?.city || 'Casablanca';
+  const startCityObj = MOROCCAN_CITIES.find((c) => c.name.toLowerCase() === startCity.toLowerCase()) || MOROCCAN_CITIES[0];
+  const startDistrict = initialDistrict || (initialCity ? (startCityObj.districts?.[0]?.name || 'Centre') : (savedGPS?.district || 'Maârif'));
+  const startDistrictObj = (startCityObj.districts || []).find((d) => d.name.toLowerCase() === startDistrict.toLowerCase()) || startCityObj.districts?.[0];
+
+  const [selectedCity, setSelectedCity] = useState(startCityObj.name);
+  const [selectedDistrict, setSelectedDistrict] = useState(startDistrictObj?.name || 'Maârif');
+  const [selectedLat, setSelectedLat] = useState(startDistrictObj?.lat || savedGPS?.lat || 33.5883);
+  const [selectedLng, setSelectedLng] = useState(startDistrictObj?.lng || savedGPS?.lng || -7.6328);
+
+  // Synchroniser dynamiquement si les props changent
+  useEffect(() => {
+    if (initialCategory) {
+      setServiceType(mapCategoryToSlug(initialCategory));
+    }
+  }, [initialCategory]);
+
+  useEffect(() => {
+    if (initialCity) {
+      const cityObj = MOROCCAN_CITIES.find((c) => c.name.toLowerCase() === initialCity.toLowerCase());
+      if (cityObj) {
+        setSelectedCity(cityObj.name);
+        const dist = initialDistrict ? (cityObj.districts || []).find((d) => d.name.toLowerCase() === initialDistrict.toLowerCase()) : cityObj.districts?.[0];
+        if (dist) {
+          setSelectedDistrict(dist.name);
+          setSelectedLat(dist.lat);
+          setSelectedLng(dist.lng);
+        }
+      }
+    }
+  }, [initialCity, initialDistrict]);
   
   const [audioUrl, setAudioUrl] = useState(null);
   const [photos, setPhotos] = useState([]);

@@ -24,13 +24,54 @@ const MainApp = () => {
   const { activeSosAlert, dismissSosAlert } = useAblyNotifications({ user });
   const { incomingAlert, acceptSOS, dismissAlert } = useEmergencyFlow();
   
-  // Detect Subdomain dynamically from window.location.hostname
-  const activeSubdomain = getAppSubdomain();
+  // Reactive Subdomain & Navigation State
+  const [activeSubdomain, setActiveSubdomain] = useState(() => getAppSubdomain());
+  const [navParams, setNavParams] = useState(() => {
+    if (typeof window === 'undefined') return {};
+    const searchParams = new URLSearchParams(window.location.search);
+    return {
+      category: searchParams.get('category') || searchParams.get('service') || '',
+      city: searchParams.get('city') || '',
+      district: searchParams.get('district') || ''
+    };
+  });
 
   // PWA Install State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showPromptBanner, setShowPromptBanner] = useState(true);
+
+  // Listen to popstate and custom bricolemoi_navigate events for instant 0ms SPA switching
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveSubdomain(getAppSubdomain());
+      const sp = new URLSearchParams(window.location.search);
+      setNavParams({
+        category: sp.get('category') || sp.get('service') || '',
+        city: sp.get('city') || '',
+        district: sp.get('district') || ''
+      });
+    };
+
+    const handleCustomNavigate = (e) => {
+      if (e.detail?.app) {
+        setActiveSubdomain(e.detail.app);
+      } else {
+        setActiveSubdomain(getAppSubdomain());
+      }
+      if (e.detail?.params) {
+        setNavParams(e.detail.params);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('bricolemoi_navigate', handleCustomNavigate);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('bricolemoi_navigate', handleCustomNavigate);
+    };
+  }, []);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -66,16 +107,16 @@ const MainApp = () => {
     }
   };
 
-  const handleSelectJourney = (journey) => {
+  const handleSelectJourney = (journey, params = {}) => {
     if (journey === 'CLIENT') {
       switchRole('CLIENT');
-      switchSubdomainInDev('CLIENT');
+      switchSubdomainInDev('CLIENT', params);
     } else if (journey === 'MAALEM') {
       switchRole('MAALEM');
       if (!user || user.role !== 'MAALEM') {
         setAuthModalOpen(true);
       }
-      switchSubdomainInDev('MAALEM');
+      switchSubdomainInDev('MAALEM', params);
     }
   };
 
@@ -84,7 +125,7 @@ const MainApp = () => {
     return (
       <>
         <Toaster position="top-center" theme="dark" offset="16px" gap={10} visibleToasts={4} expand={false} />
-        <ClientApp />
+        <ClientApp initialCategory={navParams.category} initialCity={navParams.city} initialDistrict={navParams.district} />
         <AuthModal />
         <AdminAuthModal />
         <UserProfileModal 

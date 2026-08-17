@@ -69,7 +69,7 @@ export const MaalemApp = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans">
-        <Navbar appMode="MAALEM" onGoHome={() => switchSubdomainInDev('MAALEM')} />
+        <Navbar appMode="MAALEM" onGoHome={() => switchSubdomainInDev('LANDING')} />
 
         <main className="flex-grow max-w-md w-full mx-auto px-4 py-12 flex items-center justify-center">
           <div className="w-full bg-slate-900/90 backdrop-blur-xl border border-cyan-500/30 rounded-3xl p-6 sm:p-8 text-center shadow-[0_0_35px_rgba(6,182,212,0.2)] space-y-6 relative overflow-hidden">
@@ -172,7 +172,7 @@ export const MaalemApp = () => {
   return (
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-black overflow-x-hidden">
       {/* 100% Dedicated Maalem Header */}
-      <Navbar appMode="MAALEM" onGoHome={() => switchSubdomainInDev('MAALEM')} />
+      <Navbar appMode="MAALEM" onGoHome={() => switchSubdomainInDev('LANDING')} />
 
       {/* Main Content (Mobile-First Layout) */}
       <main className="flex-grow max-w-4xl w-full mx-auto px-3 sm:px-6 py-4 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] md:pb-12">
