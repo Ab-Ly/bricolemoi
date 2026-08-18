@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
+import { switchSubdomainInDev } from '../lib/subdomain';
 import { 
   Wrench, 
   Globe, 
   Download,
   Zap,
-  RefreshCw
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
 import { 
   LockKey, 
@@ -16,7 +18,8 @@ import {
   WarningCircle, 
   SignOut, 
   ShieldCheck as PhosphorShieldCheck, 
-  User as PhosphorUser
+  User as PhosphorUser,
+  WhatsappLogo
 } from '@phosphor-icons/react';
 
 export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appMode = 'CLIENT' }) => {
@@ -66,10 +69,11 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
             href="https://wa.me/212619184098"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden lg:inline-flex items-center gap-1.5 text-slate-400 hover:text-cyan-300 transition-colors"
+            className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900/80 hover:bg-emerald-950/40 border border-emerald-500/20 hover:border-emerald-400/50 text-slate-300 hover:text-emerald-300 transition-all text-[11px] shadow-sm group"
           >
-            <span>Support WhatsApp :</span>
-            <strong className="text-cyan-400 font-mono font-bold hover:underline">+212 619 18 40 98</strong>
+            <WhatsappLogo weight="fill" className="w-3.5 h-3.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.8)] group-hover:scale-110 transition-transform" />
+            <span className="text-slate-400 group-hover:text-slate-200">Support WhatsApp :</span>
+            <strong className="text-emerald-400 font-mono font-bold tracking-wider">+212 619 18 40 98</strong>
           </a>
           <motion.button 
             whileTap={{ scale: 0.90 }}
@@ -304,22 +308,33 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               {/* Direct Quick Link to Client SOS - Visible on md+ */}
               <motion.button
                 whileTap={{ scale: 0.92 }}
+                whileHover={{ scale: 1.02 }}
                 onClick={() => switchSubdomainInDev('CLIENT')}
-                className="hidden md:inline-flex h-10 sm:h-11 bg-slate-900/90 hover:bg-cyan-950/70 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 text-xs font-bold px-3 sm:px-4 rounded-2xl items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.35)] cursor-pointer"
+                className="hidden md:inline-flex h-10 sm:h-11 bg-slate-900/90 hover:bg-cyan-950/50 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 text-xs font-extrabold px-3.5 sm:px-4 rounded-2xl items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] cursor-pointer group"
+                title="Demander une intervention d'urgence"
               >
-                <Zap className="w-4 h-4 text-cyan-400 fill-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
-                <span className="font-black">SOS Urgence</span>
+                <div className="w-6 h-6 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
+                  <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)] group-hover:scale-110 transition-transform" />
+                </div>
+                <span className="tracking-tight">SOS Urgence</span>
               </motion.button>
 
               {/* Direct Quick Link to Maalem Pro - Visible on md+ */}
               <motion.button
                 whileTap={{ scale: 0.92 }}
+                whileHover={{ scale: 1.02 }}
                 onClick={() => switchSubdomainInDev('MAALEM')}
-                className="hidden md:inline-flex h-10 sm:h-11 bg-slate-900/90 hover:bg-amber-950/60 text-amber-300 hover:text-amber-200 border border-amber-500/40 hover:border-amber-400 text-xs font-bold px-3 sm:px-4 rounded-2xl items-center gap-2 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_20px_rgba(245,158,11,0.35)] cursor-pointer"
+                className="hidden md:inline-flex h-10 sm:h-11 bg-slate-900/90 hover:bg-amber-950/40 text-amber-300 hover:text-amber-200 border border-amber-500/40 hover:border-amber-400 text-xs font-extrabold px-3.5 sm:px-4 rounded-2xl items-center gap-2.5 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] cursor-pointer group"
+                title="Espace Artisans & Professionnels"
               >
-                <Wrench className="w-4 h-4 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
-                <span className="font-black hidden lg:inline">Espace Maâlem</span>
-                <span className="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono text-[10px] font-black">+15 DH</span>
+                <div className="w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
+                  <Wrench className="w-3.5 h-3.5 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.9)] group-hover:scale-110 transition-transform" />
+                </div>
+                <span className="tracking-tight hidden lg:inline">Espace Maâlem</span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/50 font-mono text-[10px] font-black shadow-[0_0_8px_rgba(245,158,11,0.3)]">
+                  <Sparkles className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                  +15 DH Offerts
+                </span>
               </motion.button>
 
               {user ? (
@@ -336,8 +351,9 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               ) : (
                 <motion.button
                   whileTap={{ scale: 0.92 }}
+                  whileHover={{ scale: 1.02 }}
                   onClick={() => setAuthModalOpen(true)}
-                  className="h-10 sm:h-11 bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs px-3.5 sm:px-4 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.45)] hover:shadow-[0_0_25px_rgba(6,182,212,0.65)] flex items-center gap-1.5 cursor-pointer"
+                  className="h-10 sm:h-11 bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs px-4 sm:px-5 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.45)] hover:shadow-[0_0_25px_rgba(6,182,212,0.65)] flex items-center gap-2 cursor-pointer transition-all active:scale-95"
                 >
                   <PhosphorUser weight="bold" className="w-4 h-4 text-slate-950" />
                   <span>Connexion</span>
