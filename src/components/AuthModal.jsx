@@ -18,13 +18,15 @@ import {
   RotateCcw,
   Navigation,
   Camera,
-  Image as ImageIcon,
   Trash2,
   Plus,
   Lock,
   ArrowLeft,
   ChevronDown,
-  Globe
+  Globe,
+  Briefcase,
+  Zap,
+  Check
 } from 'lucide-react';
 import { 
   WhatsappLogo, 
@@ -37,7 +39,9 @@ import {
   Buildings,
   MapPinLine,
   Password,
-  DeviceMobile
+  DeviceMobile,
+  Handshake,
+  ShieldStar
 } from '@phosphor-icons/react';
 import { SpecialtySelect } from './SpecialtySelect';
 import { CustomDropdown } from './CustomDropdown';
@@ -287,9 +291,11 @@ export const AuthModal = () => {
     t 
   } = useAuth();
   
-  // Ordre UX prioritaire : 1. Inscription (SIGN_UP) | 2. Connexion (SIGN_IN) | 3. PIN oublié (FORGOT_PIN)
-  const [authMode, setAuthMode] = useState('SIGN_UP'); 
-  const [role, setRole] = useState('CLIENT'); // 'CLIENT' | 'MAALEM'
+  // Séparation Fondamentale : Rôle Actif
+  const [role, setRole] = useState('CLIENT'); // 'CLIENT' (Cyan) | 'MAALEM' (Ambre/Or)
+  // Mode : Inscription vs Connexion
+  const [authMode, setAuthMode] = useState('SIGN_UP'); // 'SIGN_UP' | 'SIGN_IN' | 'FORGOT_PIN'
+
   const [phone, setPhone] = useState('');
   const [fullName, setFullName] = useState('');
 
@@ -309,17 +315,16 @@ export const AuthModal = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Si l'utilisateur choisit le rôle MAALEM, forcer l'indicatif Maroc (+212)
+  // Si l'utilisateur est sur l'Espace MAALEM, verrouiller sur le Maroc (+212)
   useEffect(() => {
     if (role === 'MAALEM') {
       setSelectedCountry(COUNTRY_DIAL_CODES[0]);
     }
   }, [role]);
 
-  // 1: Phone & Details / Sign In, 2: OTP Verification, 3: Set PIN Code, 4: Google Phone Linking
+  // 1: Formulaire / Sign In, 2: OTP SMS, 3: Choix du PIN
   const [step, setStep] = useState(1);
-  const [channel, setChannel] = useState('sms'); // 'sms' (par défaut, 100% opérationnel) | 'whatsapp'
-  const [googleUserTemp, setGoogleUserTemp] = useState(null);
+  const [channel, setChannel] = useState('sms'); // 'sms' (par défaut) | 'whatsapp'
 
   // PIN & OTP Inputs
   const [loginPin, setLoginPin] = useState(['', '', '', '']);
@@ -415,10 +420,9 @@ export const AuthModal = () => {
     setOtpDigits(['', '', '', '', '', '']);
     setPortfolioPhotos([]);
     setIsCountryOpen(false);
-    setGoogleUserTemp(null);
   };
 
-  // Normalisation du numéro selon l'indicatif choisi
+  // Normalisation du numéro selon l'indicatif
   const cleanPhoneInput = (input, dial) => {
     let digits = String(input || '').replace(/\D/g, '');
     const dialDigits = String(dial || '+212').replace(/\D/g, '');
@@ -447,7 +451,7 @@ export const AuthModal = () => {
     setPhone(sanitized);
   };
 
-  // Calculateur Haversine
+  // Calculateur Haversine GPS
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -501,7 +505,7 @@ export const AuthModal = () => {
     );
   };
 
-  // --- GESTION DES CASES DU PIN DE CONNEXION (4 CHIFFRES) ---
+  // --- GESTION DU PIN (4 CHIFFRES) ---
   const handleLoginPinChange = (index, value) => {
     const clean = value.replace(/\D/g, '');
     if (!clean) {
@@ -545,7 +549,6 @@ export const AuthModal = () => {
     }
   };
 
-  // --- GESTION DES CASES DU NOUVEAU PIN (4 CHIFFRES) ---
   const handleNewPinChange = (index, value) => {
     const clean = value.replace(/\D/g, '');
     if (!clean) {
@@ -562,7 +565,7 @@ export const AuthModal = () => {
     }
   };
 
-  // --- GESTION DES CASES OTP (6 CHIFFRES) ---
+  // --- GESTION OTP (6 CHIFFRES) ---
   const handleOtpDigitChange = (index, value) => {
     const clean = value.replace(/\D/g, '');
     if (!clean) {
@@ -606,46 +609,22 @@ export const AuthModal = () => {
     }
   };
 
-  // 1. ACTION CONNEXION / INSCRIPTION 1-CLIC GOOGLE AVEC OUVERTURE DIRECTE DE LA VUE PROFIL
+  // 1. ACTION CONNEXION / INSCRIPTION 1-CLIC GOOGLE AVEC OUVERTURE FLUIDE DU PROFIL
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setErrorBanner('');
     setConflictMsg('');
     try {
-      const authUser = await loginWithGoogle(role);
+      const authUser = await loginWithGoogle('CLIENT');
       handleClose();
-      // Si le compte Google n'a pas encore de numéro de téléphone enregistré :
-      // On ouvre immédiatement sa fiche Profil pour qu'il le renseigne en toute fluidité
-      if (!authUser?.phone) {
+      // Si le compte Google n'a pas encore de numéro, ouvrir sa vue Profil
+      if (!authUser?.phone || authUser.phone.length < 8) {
         setProfileModalOpen(true);
       }
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
         setErrorBanner(err.message || 'Impossible de se connecter avec Google.');
       }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Finalisation de la liaison du numéro de téléphone pour le compte Google
-  const handleFinalizeGooglePhone = async (e) => {
-    if (e) e.preventDefault();
-    const fullNumber = getFullInternationalNumber();
-    if (!phone || phone.length < 6) {
-      setErrorBanner('Veuillez saisir un numéro de téléphone valide.');
-      return;
-    }
-
-    setLoading(true);
-    setErrorBanner('');
-    try {
-      const res = await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
-      setStep(2); // Valider le numéro par OTP
-      setResendCountdown(60);
-      setInfoMsg(`Code de confirmation envoyé par SMS au ${fullNumber}`);
-    } catch (err) {
-      setErrorBanner(err.message || 'Erreur lors de l\'envoi du code.');
     } finally {
       setLoading(false);
     }
@@ -678,7 +657,7 @@ export const AuthModal = () => {
     }
   };
 
-  // 3. ACTION DÉPART INSCRIPTION AVEC DÉTECTION PROACTIVE
+  // 3. ACTION DÉPART INSCRIPTION
   const handleStartSignUp = async (e) => {
     if (e) e.preventDefault();
     const fullNumber = getFullInternationalNumber();
@@ -692,11 +671,10 @@ export const AuthModal = () => {
     setConflictMsg('');
 
     try {
-      // Détection Proactive : le numéro existe-t-il déjà ?
       const profileCheck = await checkPhoneProfile(fullNumber);
       if (profileCheck?.exists) {
         const roleName = profileCheck.role === 'MAALEM' ? 'Artisan Maâlem Pro' : 'Client Particulier';
-        setConflictMsg(`👋 Bon retour parmi nous ! Ce numéro est déjà enregistré en tant que ${roleName}. Veuillez vous connecter avec votre Code PIN.`);
+        setConflictMsg(`👋 Bon retour ! Ce numéro est déjà inscrit en tant que ${roleName}. Connectez-vous avec votre Code PIN.`);
         setRole(profileCheck.role);
         setAuthMode('SIGN_IN');
         setStep(1);
@@ -704,7 +682,6 @@ export const AuthModal = () => {
         return;
       }
 
-      // Nouveau compte : envoi OTP SMS Direct (ou WhatsApp si explicitement choisi)
       const res = await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
       setStep(2);
       setResendCountdown(60);
@@ -733,7 +710,7 @@ export const AuthModal = () => {
     try {
       const profileCheck = await checkPhoneProfile(fullNumber);
       if (!profileCheck?.exists) {
-        setErrorBanner('Ce numéro n\'est associé à aucun compte. Veuillez d\'abord vous inscrire.');
+        setErrorBanner('Ce numéro n\'est associé à aucun compte.');
         setLoading(false);
         return;
       }
@@ -741,7 +718,7 @@ export const AuthModal = () => {
       const res = await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
       setStep(2);
       setResendCountdown(60);
-      setInfoMsg(`Code de sécurité envoyé par ${channel === 'sms' ? 'SMS' : 'WhatsApp'} au ${fullNumber}`);
+      setInfoMsg(`Code de sécurité envoyé par SMS au ${fullNumber}`);
     } catch (err) {
       setErrorBanner(err.message || 'Impossible d\'envoyer le code OTP.');
     } finally {
@@ -749,7 +726,7 @@ export const AuthModal = () => {
     }
   };
 
-  // 5. ACTION PASSAGE À L'ÉTAPE 3 (CHOIX DU PIN) APRÈS OTP
+  // 5. ACTION VALIDATION OTP
   const handleOtpProceed = (code) => {
     const token = code || otpDigits.join('');
     if (token.length < 6) {
@@ -760,7 +737,7 @@ export const AuthModal = () => {
     setStep(3);
   };
 
-  // 6. ACTION CRÉATION OU RÉINITIALISATION FINALE DU PIN
+  // 6. ACTION CRÉATION OU RÉINITIALISATION DU PIN
   const handleFinalizePin = async (e) => {
     if (e) e.preventDefault();
     const pinStr = newPin.join('');
@@ -776,14 +753,14 @@ export const AuthModal = () => {
     const otpToken = otpDigits.join('');
 
     try {
-      if (authMode === 'SIGN_UP' || googleUserTemp) {
+      if (authMode === 'SIGN_UP') {
         const combinedCityZone = `${selectedCity} - ${selectedDistrict}`;
         await verifyPhoneOTP({
           phone: fullNumber,
           token: otpToken,
           pin: pinStr,
           role,
-          fullName: fullName || googleUserTemp?.full_name || (role === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
+          fullName: fullName.trim() || (role === 'MAALEM' ? 'Artisan Maâlem' : 'Client Particulier'),
           cityZone: combinedCityZone,
           specialty,
           portfolioUrls: portfolioPhotos.map(p => p.preview),
@@ -808,7 +785,7 @@ export const AuthModal = () => {
   const renderCountryCodeSelector = () => {
     if (role === 'MAALEM') {
       return (
-        <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-950/90 border border-cyan-500/30 rounded-xl text-cyan-300 text-xs font-mono font-bold shadow-inner z-10">
+        <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-950/90 border border-amber-500/30 rounded-xl text-amber-300 text-xs font-mono font-bold shadow-inner z-10">
           <span className="text-sm">🇲🇦</span>
           <span>+212</span>
         </div>
@@ -860,6 +837,8 @@ export const AuthModal = () => {
     );
   };
 
+  const isClient = role === 'CLIENT';
+
   return (
     <AnimatePresence>
       {authModalOpen && (
@@ -875,46 +854,111 @@ export const AuthModal = () => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.94, opacity: 0, y: 10 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="bg-slate-950 border border-cyan-500/40 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-[0_0_35px_rgba(6,182,212,0.3)] relative overflow-hidden text-slate-100 max-h-modal overflow-y-auto modal-scroll"
+            className={`bg-slate-950 border rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden text-slate-100 max-h-modal overflow-y-auto modal-scroll transition-colors duration-300 ${
+              isClient 
+                ? 'border-cyan-500/40 shadow-[0_0_35px_rgba(6,182,212,0.25)]' 
+                : 'border-amber-500/40 shadow-[0_0_35px_rgba(245,158,11,0.25)]'
+            }`}
           >
             {/* Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-900 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-900 transition-colors cursor-pointer z-10"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* Header */}
-            <div className="text-center mb-4 pt-1">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-950 border border-cyan-500/40 flex items-center justify-center mx-auto mb-2.5 shadow-[0_0_15px_rgba(6,182,212,0.35)]">
-                {authMode === 'SIGN_UP' ? (
-                  <UserPlus className="w-6 h-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                ) : authMode === 'SIGN_IN' ? (
-                  <Lock className="w-6 h-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+            {/* ======================================================== */}
+            {/* SÉLECTEUR MAJEUR D'UNIVERS : CLIENT VS MAÂLEM PRO       */}
+            {/* ======================================================== */}
+            {step === 1 && (
+              <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900/90 rounded-2xl border border-slate-800 mb-4 shadow-inner">
+                {/* Onglet Client */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRole('CLIENT');
+                    setErrorBanner('');
+                    setConflictMsg('');
+                  }}
+                  className={`py-2.5 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    isClient
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)] scale-[1.02]'
+                      : 'text-slate-400 hover:text-cyan-300 hover:bg-slate-850'
+                  }`}
+                >
+                  <UserCircle weight="duotone" className={`w-4 h-4 ${isClient ? 'text-white' : 'text-cyan-400'}`} />
+                  <span>Espace Client</span>
+                </button>
+
+                {/* Onglet Maâlem */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRole('MAALEM');
+                    setErrorBanner('');
+                    setConflictMsg('');
+                  }}
+                  className={`py-2.5 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer relative ${
+                    !isClient
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)] scale-[1.02]'
+                      : 'text-slate-400 hover:text-amber-300 hover:bg-slate-850'
+                  }`}
+                >
+                  <PhosphorWrench weight="duotone" className={`w-4 h-4 ${!isClient ? 'text-slate-950' : 'text-amber-400'}`} />
+                  <span>Artisan Maâlem</span>
+                  <span className="absolute -top-1.5 -right-1 px-1.5 py-0.2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[9px] font-black rounded-full shadow-sm tracking-wider uppercase">
+                    +15 DH
+                  </span>
+                </button>
+              </div>
+            )}
+
+            {/* Header Description Dynamique */}
+            <div className="text-center mb-4">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-lg border transition-all ${
+                isClient 
+                  ? 'bg-cyan-950 border-cyan-500/40 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]' 
+                  : 'bg-amber-950 border-amber-500/40 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+              }`}>
+                {step === 2 ? (
+                  <ShieldCheck className="w-6 h-6 animate-pulse" />
+                ) : step === 3 ? (
+                  <KeyRound className="w-6 h-6" />
+                ) : isClient ? (
+                  <UserPlus className="w-6 h-6" />
                 ) : (
-                  <KeyRound className="w-6 h-6 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+                  <Briefcase className="w-6 h-6" />
                 )}
               </div>
 
-              <h3 className="text-xl font-black text-white font-sans tracking-tight">
-                {authMode === 'SIGN_UP'
-                  ? (step === 1 ? 'Créer un Compte BricoleMoi' : step === 2 ? 'Vérification du Numéro' : step === 3 ? 'Définir mon Code PIN' : 'Ajouter mon Numéro')
+              <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                {step === 2 
+                  ? 'Code de Sécurité SMS'
+                  : step === 3 
+                  ? 'Créer mon Code PIN Secret'
                   : authMode === 'SIGN_IN'
-                  ? 'Connexion Sécurisée'
-                  : (step === 1 ? 'Réinitialisation Code PIN' : step === 2 ? 'Code de Sécurité' : 'Nouveau Code PIN')}
+                  ? (isClient ? 'Connexion Espace Client' : 'Connexion Artisan Pro')
+                  : authMode === 'FORGOT_PIN'
+                  ? 'Récupération Code PIN'
+                  : (isClient ? 'Créer mon Compte Client' : 'Rejoindre le Réseau Artisans Pro')}
               </h3>
-              <p className="text-xs text-slate-400 mt-1">
-                {authMode === 'SIGN_UP'
-                  ? (step === 1 ? 'Plateforme marocaine de dépannage express & artisans' : step === 2 ? `Entrez le code reçu au ${getFullInternationalNumber()}` : 'Accédez instantanément à votre espace')
+
+              <p className="text-xs text-slate-400 mt-0.5">
+                {step === 2 
+                  ? `Saisissez les 6 chiffres envoyés au ${getFullInternationalNumber()}`
+                  : step === 3 
+                  ? 'Votre code secret pour vos connexions instantanées'
                   : authMode === 'SIGN_IN'
-                  ? 'Accédez à votre espace avec votre Code PIN secret'
-                  : 'Récupération sécurisée par SMS direct'}
+                  ? 'Accédez à votre espace sécurisé'
+                  : isClient
+                  ? 'Dépannages express, artisans qualifiés & devis gratuits'
+                  : 'Recevez des chantiers qualifiés dans votre zone d\'intervention'}
               </p>
 
-              {/* Mode Toggle Bar - ORDRE UX CLAIR : 1. NOUVEAU COMPTE | 2. SE CONNECTER */}
+              {/* Sous-Onglets : Nouveau Compte vs Se Connecter */}
               {step === 1 && authMode !== 'FORGOT_PIN' && (
-                <div className="flex bg-slate-900 border border-cyan-500/20 p-1 rounded-xl mt-3.5">
+                <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-xl mt-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -924,7 +968,7 @@ export const AuthModal = () => {
                     }}
                     className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       authMode === 'SIGN_UP'
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
+                        ? (isClient ? 'bg-cyan-500 text-slate-950 font-black shadow-md' : 'bg-amber-500 text-slate-950 font-black shadow-md')
                         : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
@@ -941,7 +985,7 @@ export const AuthModal = () => {
                     }}
                     className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       authMode === 'SIGN_IN'
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
+                        ? (isClient ? 'bg-cyan-500 text-slate-950 font-black shadow-md' : 'bg-amber-500 text-slate-950 font-black shadow-md')
                         : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
@@ -952,12 +996,12 @@ export const AuthModal = () => {
               )}
             </div>
 
-            {/* Error & Warning Messages */}
+            {/* Bannières d'Erreurs / Succès */}
             {conflictMsg && (
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-3.5 p-3 bg-amber-950/80 border border-amber-500/50 rounded-xl text-amber-200 text-xs font-medium space-y-1 shadow-[0_0_12px_rgba(251,191,36,0.2)]"
+                className="mb-3 p-3 bg-amber-950/80 border border-amber-500/50 rounded-xl text-amber-200 text-xs font-medium space-y-1 shadow-[0_0_12px_rgba(251,191,36,0.2)]"
               >
                 <p>{conflictMsg}</p>
               </motion.div>
@@ -967,7 +1011,7 @@ export const AuthModal = () => {
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-3.5 p-3 bg-red-950/80 border border-red-500/50 rounded-xl text-red-200 text-xs font-medium space-y-1 shadow-[0_0_12px_rgba(239,68,68,0.2)]"
+                className="mb-3 p-3 bg-red-950/80 border border-red-500/50 rounded-xl text-red-200 text-xs font-medium space-y-1 shadow-[0_0_12px_rgba(239,68,68,0.2)]"
               >
                 <p>{errorBanner}</p>
               </motion.div>
@@ -977,7 +1021,7 @@ export const AuthModal = () => {
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-3.5 p-3 bg-cyan-950/80 border border-cyan-500/40 rounded-xl text-cyan-200 text-xs font-medium text-center shadow-[0_0_10px_rgba(6,182,212,0.2)]"
+                className="mb-3 p-2.5 bg-cyan-950/80 border border-cyan-500/40 rounded-xl text-cyan-200 text-xs font-medium text-center shadow-[0_0_10px_rgba(6,182,212,0.2)]"
               >
                 {infoMsg}
               </motion.div>
@@ -987,453 +1031,261 @@ export const AuthModal = () => {
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-3.5 p-2.5 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs font-bold text-center shadow-[0_0_10px_rgba(52,211,153,0.2)]"
+                className="mb-3 p-2.5 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs font-bold text-center shadow-[0_0_10px_rgba(52,211,153,0.2)]"
               >
                 {gpsSuccessMsg}
               </motion.div>
             )}
 
             {/* ======================================================== */}
-            {/* VUE 1 : INSCRIPTION (SIGN_UP) & PIN OUBLIÉ (FORGOT_PIN)   */}
+            {/* ETAPE 1 : FORMULAIRES DE DÉPART SELON PROFIL ET MODE    */}
             {/* ======================================================== */}
-            {(authMode === 'SIGN_UP' || authMode === 'FORGOT_PIN') && (
+            {step === 1 && (
               <>
-                {/* ETAPE 1 : Renseignements & Téléphone */}
-                {step === 1 && (
-                  <form onSubmit={authMode === 'SIGN_UP' ? handleStartSignUp : handleStartForgotPin} className="space-y-3.5">
-                    
-                    {authMode === 'SIGN_UP' && (
-                      <>
-                        {/* Role Selector */}
+                {/* ---------------------------------------------------- */}
+                {/* A. ESPACE CLIENT : NOUVEAU COMPTE                   */}
+                {/* ---------------------------------------------------- */}
+                {isClient && authMode === 'SIGN_UP' && (
+                  <div className="space-y-3.5">
+                    {/* Option 1 en Vedette : Inscription 1-Clic Google */}
+                    <div className="p-3.5 bg-gradient-to-r from-slate-900 via-slate-900 to-cyan-950/40 border border-cyan-500/30 rounded-2xl space-y-2 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-extrabold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>Option Recommandée</span>
+                        </span>
+                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                          1-Clic Instantané
+                        </span>
+                      </div>
+
+                      <motion.button
+                        whileTap={{ scale: 0.97 }}
+                        type="button"
+                        onClick={handleGoogleSignIn}
+                        disabled={loading}
+                        className="w-full py-3 px-4 bg-slate-950 hover:bg-slate-900 border border-cyan-500/40 hover:border-cyan-400 rounded-xl text-white text-xs font-bold flex items-center justify-center gap-3 transition-all cursor-pointer shadow-md active:scale-95 group"
+                      >
+                        <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Continuer avec Google</span>
+                      </motion.button>
+                    </div>
+
+                    {/* Séparateur */}
+                    <div className="relative flex items-center justify-center my-2">
+                      <div className="border-t border-cyan-500/20 w-full" />
+                      <span className="bg-slate-950 px-3 text-[10px] text-slate-400 font-mono uppercase tracking-wider">ou par Téléphone & SMS</span>
+                      <div className="border-t border-cyan-500/20 w-full" />
+                    </div>
+
+                    {/* Formulaire Client Téléphone */}
+                    <form onSubmit={handleStartSignUp} className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Nom complet :</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="ex: Hassan El Bahi"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs font-bold focus:border-cyan-400 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1.5">Choisissez votre profil :</label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setRole('CLIENT')}
-                              className={`p-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                                role === 'CLIENT'
-                                  ? 'bg-slate-900 border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.25)]'
-                                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-900'
-                              }`}
-                            >
-                              <UserCircle className="w-4 h-4 text-cyan-400" weight="duotone" />
-                              <span>Client Particulier</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => setRole('MAALEM')}
-                              className={`p-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                                role === 'MAALEM'
-                                  ? 'bg-slate-900 border-amber-400 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.25)]'
-                                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-900'
-                              }`}
-                            >
-                              <PhosphorWrench className="w-4 h-4 text-amber-400" weight="duotone" />
-                              <span>Artisan Maâlem</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Bonus Maalem */}
-                        {role === 'MAALEM' && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="p-3 bg-gradient-to-r from-amber-950/70 to-slate-900 border border-amber-500/40 rounded-2xl flex items-center gap-3 shadow-[0_0_15px_rgba(245,158,11,0.15)]"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-amber-950 border border-amber-500/40 text-amber-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(251,191,36,0.5)]">
-                              <Coins weight="duotone" className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <p className="text-xs font-black text-amber-300 flex items-center gap-1">
-                                <span>🎁 Bonus Inscription : +15.00 DH Offert</span>
-                              </p>
-                              <p className="text-[10px] text-slate-300">Crédité automatiquement pour tester vos premières réceptions de chantiers !</p>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {/* Nom Complet */}
-                        <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1.5">Nom complet :</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="ex: Hassan El Bahi"
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            className="w-full px-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm"
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Ville :</label>
+                          <CustomDropdown
+                            options={cityOptions}
+                            value={selectedCity}
+                            onChange={handleCityChange}
+                            placeholder="Ville..."
+                            icon={Buildings}
                           />
                         </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Quartier :</label>
+                          <CustomDropdown
+                            options={districtOptions}
+                            value={selectedDistrict}
+                            onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
+                            placeholder="Quartier..."
+                            icon={MapPinLine}
+                          />
+                        </div>
+                      </div>
 
-                        {/* Ville & Quartier */}
-                        <div className="space-y-2">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <label className="block text-xs font-bold text-slate-300 mb-1.5">Ville au Maroc :</label>
-                              <CustomDropdown
-                                options={cityOptions}
-                                value={selectedCity}
-                                onChange={handleCityChange}
-                                placeholder="Choisir une ville..."
-                                icon={Buildings}
-                              />
-                            </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Numéro de Téléphone :</label>
+                        <div className="relative">
+                          {renderCountryCodeSelector()}
+                          <input
+                            type="tel"
+                            required
+                            placeholder={selectedCountry.placeholder || '612345678'}
+                            value={phone}
+                            onChange={handlePhoneChange}
+                            className="w-full pl-28 sm:pl-32 pr-4 py-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none dir-ltr tracking-wider"
+                          />
+                        </div>
+                      </div>
 
-                            <div>
-                              <label className="block text-xs font-bold text-slate-300 mb-1.5">Quartier / Zone :</label>
-                              <CustomDropdown
-                                options={districtOptions}
-                                value={selectedDistrict}
-                                onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
-                                placeholder="Choisir un quartier..."
-                                icon={MapPinLine}
-                              />
-                            </div>
-                          </div>
+                      <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
+                      >
+                        <span>{loading ? 'Vérification...' : 'Recevoir mon Code SMS →'}</span>
+                      </motion.button>
+                    </form>
+                  </div>
+                )}
 
+                {/* ---------------------------------------------------- */}
+                {/* B. ESPACE CLIENT : SE CONNECTER (PIN OU GOOGLE)     */}
+                {/* ---------------------------------------------------- */}
+                {isClient && authMode === 'SIGN_IN' && (
+                  <div className="space-y-3.5">
+                    {/* Bouton Connexion Google 1-Clic */}
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      type="button"
+                      onClick={handleGoogleSignIn}
+                      disabled={loading}
+                      className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-850 border border-slate-700/80 hover:border-cyan-500/50 rounded-2xl text-slate-100 text-xs font-bold flex items-center justify-center gap-3 transition-all cursor-pointer shadow-md active:scale-95 group"
+                    >
+                      <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                      </svg>
+                      <span>Connexion Rapide avec Google</span>
+                    </motion.button>
+
+                    <div className="relative flex items-center justify-center my-2">
+                      <div className="border-t border-cyan-500/20 w-full" />
+                      <span className="bg-slate-950 px-3 text-[10px] text-slate-400 font-mono uppercase tracking-wider">ou avec Téléphone & Code PIN</span>
+                      <div className="border-t border-cyan-500/20 w-full" />
+                    </div>
+
+                    <form onSubmit={(e) => { e.preventDefault(); handleDirectLogin(); }} className="space-y-3.5">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Numéro de Téléphone :</label>
+                        <div className="relative">
+                          {renderCountryCodeSelector()}
+                          <input
+                            type="tel"
+                            required
+                            placeholder={selectedCountry.placeholder || '612345678'}
+                            value={phone}
+                            onChange={handlePhoneChange}
+                            className="w-full pl-28 sm:pl-32 pr-4 py-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none dir-ltr tracking-wider"
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-300">Code PIN Secret (4 chiffres) :</label>
                           <button
                             type="button"
-                            onClick={handleDetectGPS}
-                            disabled={detectingGps}
-                            className="w-full py-2 px-3 bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+                            onClick={() => {
+                              setAuthMode('FORGOT_PIN');
+                              setStep(1);
+                              setErrorBanner('');
+                            }}
+                            className="text-[11px] text-amber-400/90 hover:text-amber-300 underline font-medium cursor-pointer"
                           >
-                            <Navigation className={`w-3.5 h-3.5 text-cyan-400 ${detectingGps ? 'animate-spin' : ''}`} />
-                            <span>{detectingGps ? 'Localisation en cours...' : '📍 Détecter ma Ville & Quartier par GPS'}</span>
+                            PIN oublié ?
                           </button>
                         </div>
 
-                        {/* Spécialité si Maâlem */}
-                        {role === 'MAALEM' && (
-                          <div className="space-y-3">
-                            <div>
-                              <label className="block text-xs font-bold text-amber-300 mb-1.5 flex items-center gap-1.5">
-                                <PhosphorWrench weight="duotone" className="w-3.5 h-3.5 text-amber-400" />
-                                <span>Spécialité Principale :</span>
-                              </label>
-                              <SpecialtySelect
-                                value={specialty}
-                                onChange={(newVal) => setSpecialty(newVal)}
-                              />
-                            </div>
-
-                            {/* Portfolio */}
-                            <div className="bg-slate-900/80 border border-amber-500/30 p-3 rounded-2xl space-y-2 shadow-inner">
-                              <div className="flex items-center justify-between">
-                                <label className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                                  <Camera className="w-3.5 h-3.5 text-amber-400" />
-                                  <span>Portfolio Chantiers (Optionnel) :</span>
-                                </label>
-                                <span className="text-[10px] font-mono text-amber-400/80 font-bold bg-amber-950/80 px-2 py-0.5 rounded-md border border-amber-500/30">
-                                  {portfolioPhotos.length}/3 photos
-                                </span>
-                              </div>
-
-                              <div className="grid grid-cols-3 gap-2 pt-1">
-                                {portfolioPhotos.map((photo, idx) => (
-                                  <div key={idx} className="relative group rounded-xl overflow-hidden border border-amber-500/40 bg-slate-950 aspect-square flex items-center justify-center shadow-md">
-                                    <img src={photo.preview} alt={`Chantier ${idx + 1}`} className="w-full h-full object-cover" />
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemovePortfolioPhoto(idx)}
-                                      className="absolute top-1 right-1 p-1 bg-red-950/90 text-red-300 border border-red-500/50 rounded-lg hover:bg-red-900 hover:text-white transition-all cursor-pointer"
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                ))}
-
-                                {portfolioPhotos.length < 3 && (
-                                  <label className="border border-dashed border-cyan-500/40 hover:border-cyan-400 bg-slate-950/60 hover:bg-slate-900/90 rounded-xl aspect-square flex flex-col items-center justify-center gap-1 cursor-pointer transition-all p-1 text-center group">
-                                    <input type="file" accept="image/*" multiple onChange={handlePortfolioSelect} className="hidden" />
-                                    <div className="w-6 h-6 rounded-lg bg-cyan-950 border border-cyan-500/40 text-cyan-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                      <Plus className="w-3.5 h-3.5" />
-                                    </div>
-                                    <span className="text-[9px] font-bold text-cyan-300 leading-none">+ Photo</span>
-                                  </label>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* Numéro de Téléphone (Élément Central & Obligatoire) */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-bold text-slate-300">Numéro de Téléphone :</label>
-                        {role === 'CLIENT' && (
-                          <span className="text-[10px] text-cyan-400 font-mono flex items-center gap-1">
-                            <Globe className="w-3 h-3" />
-                            Maroc & MRE
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative">
-                        {renderCountryCodeSelector()}
-                        <input
-                          type="tel"
-                          required
-                          placeholder={selectedCountry.placeholder || '612345678'}
-                          value={phone}
-                          onChange={handlePhoneChange}
-                          className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Canal de Réception : SMS Direct par Défaut */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-[11px] font-bold text-slate-300">Réception du code de confirmation :</label>
-                        <span className="text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                          Instantané
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <button
-                          type="button"
-                          onClick={() => setChannel('sms')}
-                          className={`relative py-3 px-3 rounded-2xl text-xs font-bold border transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
-                            channel === 'sms'
-                              ? 'bg-cyan-950/90 text-cyan-200 border-cyan-400/70 shadow-[0_0_16px_rgba(6,182,212,0.35)] scale-[1.02]'
-                              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:border-cyan-500/40 hover:text-cyan-300'
-                          }`}
-                        >
-                          <span className="absolute -top-2 right-2 px-1.5 py-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-[9px] font-black text-slate-950 rounded-full shadow-sm tracking-wider uppercase">
-                            Recommandé
-                          </span>
-                          <div className="flex items-center gap-1.5">
-                            <ChatCenteredText weight="duotone" className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
-                            <span className="font-extrabold text-white">SMS Direct</span>
-                          </div>
-                          <span className="text-[9px] text-cyan-300/80 font-mono">Réseau GSM classique</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setChannel('whatsapp')}
-                          className={`py-3 px-3 rounded-2xl text-xs font-bold border transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
-                            channel === 'whatsapp'
-                              ? 'bg-emerald-950/90 text-emerald-200 border-emerald-400/70 shadow-[0_0_16px_rgba(16,185,129,0.35)] scale-[1.02]'
-                              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:border-emerald-500/40 hover:text-emerald-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-1.5">
-                            <WhatsappLogo weight="duotone" className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-                            <span className="font-extrabold text-white">WhatsApp</span>
-                          </div>
-                          <span className="text-[9px] text-slate-400 font-mono">Gratuit & Sans délai</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      type="submit"
-                      disabled={loading}
-                      className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all mt-2 cursor-pointer"
-                    >
-                      <span>{loading ? 'Vérification...' : authMode === 'SIGN_UP' ? 'Recevoir Mon Code de Confirmation' : 'Recevoir le Code de Réinitialisation'}</span>
-                      <ArrowRight className="w-4 h-4 text-white" />
-                    </motion.button>
-
-                    {/* Google Auth placé harmonieusement en bas de l'inscription pour pré-remplir */}
-                    {authMode === 'SIGN_UP' && role === 'CLIENT' && (
-                      <div className="pt-2">
-                        <div className="relative flex items-center justify-center my-2">
-                          <div className="border-t border-cyan-500/20 w-full" />
-                          <span className="bg-slate-950 px-2.5 text-[10px] text-slate-400 font-mono uppercase tracking-wider">ou inscription rapide</span>
-                          <div className="border-t border-cyan-500/20 w-full" />
+                        <div className="grid grid-cols-4 gap-2.5 py-1">
+                          {loginPin.map((digit, idx) => (
+                            <input
+                              key={idx}
+                              ref={(el) => (loginPinRefs.current[idx] = el)}
+                              type="password"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              maxLength={4}
+                              value={digit}
+                              onChange={(e) => handleLoginPinChange(idx, e.target.value)}
+                              onKeyDown={(e) => handleLoginPinKeyDown(idx, e)}
+                              className={`h-13 text-center font-mono text-2xl font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
+                                digit
+                                  ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]'
+                                  : 'bg-slate-900/90 border-cyan-500/25 text-cyan-300 hover:border-cyan-500/50'
+                              } focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40 focus:shadow-[0_0_20px_rgba(6,182,212,0.5)]`}
+                            />
+                          ))}
                         </div>
-
-                        <motion.button
-                          whileTap={{ scale: 0.97 }}
-                          type="button"
-                          onClick={handleGoogleSignIn}
-                          disabled={loading}
-                          className="w-full py-2.5 px-3 bg-slate-900/80 hover:bg-slate-850 border border-slate-700/80 hover:border-cyan-500/50 rounded-xl text-slate-200 text-xs font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-sm active:scale-95 group"
-                        >
-                          <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                          </svg>
-                          <span>Pré-remplir avec Google</span>
-                        </motion.button>
                       </div>
-                    )}
 
-                    {authMode === 'FORGOT_PIN' && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAuthMode('SIGN_IN');
-                          setStep(1);
-                          setErrorBanner('');
-                        }}
-                        className="w-full text-center text-xs text-slate-400 hover:text-cyan-300 pt-1 font-bold cursor-pointer"
+                      <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
                       >
-                        ← Retour à la connexion
-                      </button>
-                    )}
-                  </form>
+                        {loading ? 'Connexion...' : 'Se Connecter'}
+                      </motion.button>
+                    </form>
+                  </div>
                 )}
 
-                {/* ETAPE 2 : Saisie du Code OTP (6 Chiffres) */}
-                {step === 2 && (
-                  <form onSubmit={(e) => { e.preventDefault(); handleOtpProceed(); }} className="space-y-4">
-                    {/* Badge Canal */}
-                    <div className="p-3.5 rounded-2xl border bg-slate-900/90 border-cyan-500/30 text-slate-200 flex items-center justify-between shadow-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-cyan-950 border border-cyan-500/40 text-cyan-300 flex items-center justify-center">
-                          {channel === 'sms' ? <ChatCenteredText weight="duotone" className="w-5 h-5 text-cyan-400" /> : <WhatsappLogo weight="duotone" className="w-5 h-5 text-emerald-400" />}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-white">Code envoyé par {channel === 'sms' ? 'SMS Direct' : 'WhatsApp'}</p>
-                          <p className="text-[11px] text-slate-400 font-mono">{getFullInternationalNumber()}</p>
-                        </div>
+                {/* ---------------------------------------------------- */}
+                {/* C. ESPACE ARTISAN MAÂLEM PRO : NOUVEAU COMPTE       */}
+                {/* ---------------------------------------------------- */}
+                {!isClient && authMode === 'SIGN_UP' && (
+                  <form onSubmit={handleStartSignUp} className="space-y-3.5">
+                    {/* Badge Bonus Bienvenue Or */}
+                    <div className="p-3 bg-gradient-to-r from-amber-950/80 to-slate-900 border border-amber-500/40 rounded-2xl flex items-center gap-3 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                      <div className="w-9 h-9 rounded-xl bg-amber-950 border border-amber-500/50 text-amber-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(251,191,36,0.5)]">
+                        <Coins weight="duotone" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-amber-300 flex items-center gap-1">
+                          <span>🎁 Offre Pro : +15.00 DH de Crédits Offerts</span>
+                        </p>
+                        <p className="text-[10px] text-slate-300">Crédités immédiatement à l'inscription pour tester vos premières réceptions de chantiers !</p>
                       </div>
                     </div>
 
-                    {/* Grille 6 Chiffres */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Code à 6 chiffres :</label>
-                      <div className="grid grid-cols-6 gap-2 sm:gap-2.5">
-                        {otpDigits.map((digit, idx) => (
-                          <input
-                            key={idx}
-                            ref={(el) => (otpInputRefs.current[idx] = el)}
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            maxLength={6}
-                            value={digit}
-                            onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
-                            onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                            autoFocus={idx === 0}
-                            className={`h-13 sm:h-14 w-full text-center font-mono text-2xl font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
-                              digit
-                                ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]'
-                                : 'bg-slate-900/90 border-cyan-500/25 text-cyan-300 hover:border-cyan-500/50'
-                            } focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40 focus:shadow-[0_0_20px_rgba(6,182,212,0.5)] focus:scale-105`}
-                          />
-                        ))}
-                      </div>
+                    {/* Métier / Spécialité */}
+                    <div>
+                      <label className="block text-xs font-bold text-amber-300 mb-1 flex items-center gap-1.5">
+                        <PhosphorWrench weight="duotone" className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Votre Métier / Spécialité :</span>
+                      </label>
+                      <SpecialtySelect value={specialty} onChange={setSpecialty} />
                     </div>
 
-                    {/* Minuteur et Renvoi officiel */}
-                    <div className="flex items-center justify-end pt-1">
-                      {resendCountdown > 0 ? (
-                        <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl">
-                          <ClockCounterClockwise className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
-                          <span>Renvoyer le code ({resendCountdown}s)</span>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={authMode === 'SIGN_UP' ? handleStartSignUp : handleStartForgotPin}
-                          className="text-[11px] text-amber-400 hover:text-amber-300 underline font-bold flex items-center gap-1.5 bg-amber-950/80 border border-amber-500/40 px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-[0_0_12px_rgba(245,158,11,0.25)]"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Renvoyer un nouveau code</span>
-                        </button>
-                      )}
+                    {/* Nom Artisan / Atelier */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Nom de l'Artisan ou Entreprise :</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="ex: Maâlem Abdelkader"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-900 border border-amber-500/30 rounded-xl text-slate-100 text-xs font-bold focus:border-amber-400 focus:outline-none"
+                      />
                     </div>
 
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      type="submit"
-                      className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-extrabold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Valider le code & Continuer</span>
-                    </motion.button>
-                  </form>
-                )}
-
-                {/* ETAPE 3 : Choix du Code PIN Secret à 4 Chiffres */}
-                {step === 3 && (
-                  <form onSubmit={handleFinalizePin} className="space-y-4">
-                    <div className="p-3.5 rounded-2xl bg-cyan-950/60 border border-cyan-500/40 text-center space-y-1">
-                      <p className="text-xs font-black text-cyan-300 flex items-center justify-center gap-1.5">
-                        <Password className="w-4 h-4 text-cyan-400" />
-                        <span>{authMode === 'SIGN_UP' || googleUserTemp ? 'Créez votre Code PIN Secret' : 'Définissez votre Nouveau Code PIN'}</span>
-                      </p>
-                      <p className="text-[11px] text-slate-300">
-                        Ce code à 4 chiffres vous servira pour vos futures connexions instantanées et sécurisées !
-                      </p>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-300 text-center">Votre Code PIN à 4 chiffres :</label>
-                      <div className="grid grid-cols-4 gap-2.5 sm:gap-3 py-1">
-                        {newPin.map((digit, idx) => (
-                          <input
-                            key={idx}
-                            ref={(el) => (newPinRefs.current[idx] = el)}
-                            type="password"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            maxLength={4}
-                            value={digit}
-                            onChange={(e) => handleNewPinChange(idx, e.target.value)}
-                            autoFocus={idx === 0}
-                            className={`h-14 text-center font-mono text-2xl font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
-                              digit
-                                ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]'
-                                : 'bg-slate-900/90 border-cyan-500/25 text-cyan-300 hover:border-cyan-500/50'
-                            } focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40 focus:shadow-[0_0_20px_rgba(6,182,212,0.5)] focus:scale-105`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      type="submit"
-                      disabled={loading}
-                      className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-sm rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
-                    >
-                      {loading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>Enregistrement en cours...</span>
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Finaliser & Accéder à BricoleMoi</span>
-                        </>
-                      )}
-                    </motion.button>
-                  </form>
-                )}
-
-                {/* ETAPE 4 : Liaison obligatoire du numéro pour compte Google */}
-                {step === 4 && googleUserTemp && (
-                  <form onSubmit={handleFinalizeGooglePhone} className="space-y-4">
-                    <div className="p-3.5 rounded-2xl bg-cyan-950/60 border border-cyan-500/40 text-center space-y-1.5">
-                      <div className="w-10 h-10 rounded-full bg-slate-900 border border-cyan-400/40 flex items-center justify-center mx-auto shadow-sm">
-                        <DeviceMobile className="w-5 h-5 text-cyan-400" weight="duotone" />
-                      </div>
-                      <p className="text-xs font-black text-cyan-300">
-                        Associez votre Numéro de Téléphone
-                      </p>
-                      <p className="text-[11px] text-slate-300">
-                        Obligatoire pour que les artisans puissent vous joindre en cas de dépannage ou devis !
-                      </p>
-                    </div>
-
-                    {/* Ville & Quartier */}
+                    {/* Ville & Zone d'intervention */}
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1">Ville :</label>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Ville d'intervention :</label>
                         <CustomDropdown
                           options={cityOptions}
                           value={selectedCity}
@@ -1443,20 +1295,129 @@ export const AuthModal = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1">Quartier :</label>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Zone principale :</label>
                         <CustomDropdown
                           options={districtOptions}
                           value={selectedDistrict}
                           onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
-                          placeholder="Quartier..."
+                          placeholder="Zone..."
                           icon={MapPinLine}
                         />
                       </div>
                     </div>
 
-                    {/* Numéro de Téléphone */}
+                    {/* Numéro GSM Marocain Pro (+212) */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1.5">Votre numéro :</label>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Numéro Mobile Professionnel (GSM Maroc) :</label>
+                      <div className="relative">
+                        <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 bg-slate-950 border border-amber-500/40 rounded-xl text-amber-300 text-xs font-mono font-bold">
+                          <span>🇲🇦</span>
+                          <span>+212</span>
+                        </div>
+                        <input
+                          type="tel"
+                          required
+                          placeholder="661001122"
+                          value={phone}
+                          onChange={handlePhoneChange}
+                          className="w-full pl-28 pr-4 py-2.5 bg-slate-900 border border-amber-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-amber-400 focus:outline-none dir-ltr tracking-wider"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bouton d'inscription Pro Or */}
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
+                    >
+                      <Handshake weight="duotone" className="w-4 h-4 text-slate-950" />
+                      <span>{loading ? 'Validation en cours...' : 'Rejoindre le Réseau d\'Artisans Pro →'}</span>
+                    </motion.button>
+                  </form>
+                )}
+
+                {/* ---------------------------------------------------- */}
+                {/* D. ESPACE ARTISAN MAÂLEM PRO : SE CONNECTER (PIN)   */}
+                {/* ---------------------------------------------------- */}
+                {!isClient && authMode === 'SIGN_IN' && (
+                  <form onSubmit={(e) => { e.preventDefault(); handleDirectLogin(); }} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Numéro Mobile Pro (GSM Maroc) :</label>
+                      <div className="relative">
+                        <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 bg-slate-950 border border-amber-500/40 rounded-xl text-amber-300 text-xs font-mono font-bold">
+                          <span>🇲🇦</span>
+                          <span>+212</span>
+                        </div>
+                        <input
+                          type="tel"
+                          required
+                          placeholder="661001122"
+                          value={phone}
+                          onChange={handlePhoneChange}
+                          className="w-full pl-28 pr-4 py-3 bg-slate-900 border border-amber-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-amber-400 focus:outline-none dir-ltr tracking-wider"
+                          autoFocus
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-300">Code PIN Secret Pro (4 chiffres) :</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAuthMode('FORGOT_PIN');
+                            setStep(1);
+                            setErrorBanner('');
+                          }}
+                          className="text-[11px] text-amber-400 hover:text-amber-300 underline font-medium cursor-pointer"
+                        >
+                          PIN oublié ?
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-2.5 py-1">
+                        {loginPin.map((digit, idx) => (
+                          <input
+                            key={idx}
+                            ref={(el) => (loginPinRefs.current[idx] = el)}
+                            type="password"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            maxLength={4}
+                            value={digit}
+                            onChange={(e) => handleLoginPinChange(idx, e.target.value)}
+                            onKeyDown={(e) => handleLoginPinKeyDown(idx, e)}
+                            className={`h-14 text-center font-mono text-2xl font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
+                              digit
+                                ? 'bg-amber-950/40 border-amber-400 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)] scale-[1.02]'
+                                : 'bg-slate-900/90 border-amber-500/25 text-amber-300 hover:border-amber-500/50'
+                            } focus:border-amber-300 focus:ring-2 focus:ring-amber-400/40 focus:shadow-[0_0_20px_rgba(245,158,11,0.5)]`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
+                    >
+                      {loading ? 'Connexion en cours...' : 'Accéder à mon Espace Pro'}
+                    </motion.button>
+                  </form>
+                )}
+
+                {/* ---------------------------------------------------- */}
+                {/* E. PIN OUBLIÉ                                        */}
+                {/* ---------------------------------------------------- */}
+                {authMode === 'FORGOT_PIN' && (
+                  <form onSubmit={handleStartForgotPin} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Votre Numéro de Téléphone :</label>
                       <div className="relative">
                         {renderCountryCodeSelector()}
                         <input
@@ -1465,7 +1426,7 @@ export const AuthModal = () => {
                           placeholder={selectedCountry.placeholder || '612345678'}
                           value={phone}
                           onChange={handlePhoneChange}
-                          className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
+                          className="w-full pl-28 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none dir-ltr tracking-wider"
                           autoFocus
                         />
                       </div>
@@ -1475,121 +1436,146 @@ export const AuthModal = () => {
                       whileTap={{ scale: 0.96 }}
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-sm rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
+                      className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
                     >
-                      {loading ? 'Vérification...' : 'Confirmer mon Numéro par SMS →'}
+                      <span>{loading ? 'Envoi...' : 'Recevoir le Code de Réinitialisation SMS →'}</span>
                     </motion.button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('SIGN_IN');
+                        setStep(1);
+                        setErrorBanner('');
+                      }}
+                      className="w-full text-center text-xs text-slate-400 hover:text-cyan-300 font-bold cursor-pointer pt-1"
+                    >
+                      ← Revenir à la connexion
+                    </button>
                   </form>
                 )}
               </>
             )}
 
             {/* ======================================================== */}
-            {/* VUE 2 : CONNEXION INSTANTANÉE (SIGN_IN)                  */}
+            {/* ETAPE 2 : CODE OTP SMS (6 CHIFFRES)                      */}
             {/* ======================================================== */}
-            {authMode === 'SIGN_IN' && (
-              <div className="space-y-3.5">
-                {/* Bouton Connexion Google 1-Clic bien positionné */}
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={loading}
-                  className="w-full py-3 px-4 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-500/50 rounded-2xl text-slate-100 text-xs font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-md active:scale-95 group"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
-                  <span>Connexion Rapide avec Google</span>
-                </motion.button>
-
-                <div className="relative flex items-center justify-center my-2">
-                  <div className="border-t border-cyan-500/20 w-full" />
-                  <span className="bg-slate-950 px-3 text-[10px] text-slate-400 font-mono uppercase tracking-wider">ou avec Téléphone & Code PIN</span>
-                  <div className="border-t border-cyan-500/20 w-full" />
+            {step === 2 && (
+              <form onSubmit={(e) => { e.preventDefault(); handleOtpProceed(); }} className="space-y-4">
+                <div className="p-3 rounded-2xl border bg-slate-900/90 border-cyan-500/30 text-slate-200 flex items-center justify-between shadow-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-cyan-950 border border-cyan-500/40 text-cyan-300 flex items-center justify-center">
+                      <ChatCenteredText weight="duotone" className="w-5 h-5 text-cyan-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Code envoyé par SMS Direct</p>
+                      <p className="text-[11px] text-slate-400 font-mono">{getFullInternationalNumber()}</p>
+                    </div>
+                  </div>
                 </div>
 
-                <form onSubmit={(e) => { e.preventDefault(); handleDirectLogin(); }} className="space-y-3.5">
-                  {/* Numéro de téléphone avec sélecteur d'indicatif */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1.5">Numéro de Téléphone :</label>
-                    <div className="relative">
-                      {renderCountryCodeSelector()}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-300">Code à 6 chiffres :</label>
+                  <div className="grid grid-cols-6 gap-2 sm:gap-2.5">
+                    {otpDigits.map((digit, idx) => (
                       <input
-                        type="tel"
-                        required
-                        placeholder={selectedCountry.placeholder || '612345678'}
-                        value={phone}
-                        onChange={handlePhoneChange}
-                        className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
-                        autoFocus
+                        key={idx}
+                        ref={(el) => (otpInputRefs.current[idx] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={6}
+                        value={digit}
+                        onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                        autoFocus={idx === 0}
+                        className={`h-13 sm:h-14 w-full text-center font-mono text-2xl font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
+                          digit
+                            ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]'
+                            : 'bg-slate-900/90 border-cyan-500/25 text-cyan-300 hover:border-cyan-500/50'
+                        } focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40 focus:shadow-[0_0_20px_rgba(6,182,212,0.5)]`}
                       />
-                    </div>
+                    ))}
                   </div>
+                </div>
 
-                  {/* Saisie du PIN à 4 chiffres */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-slate-300">Code PIN Secret (4 chiffres) :</label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAuthMode('FORGOT_PIN');
-                          setStep(1);
-                          setErrorBanner('');
-                        }}
-                        className="text-[11px] text-amber-400/90 hover:text-amber-300 underline font-medium cursor-pointer"
-                      >
-                        PIN oublié ?
-                      </button>
+                <div className="flex items-center justify-end pt-1">
+                  {resendCountdown > 0 ? (
+                    <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl">
+                      <ClockCounterClockwise className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+                      <span>Renvoyer le code ({resendCountdown}s)</span>
                     </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={authMode === 'SIGN_UP' ? handleStartSignUp : handleStartForgotPin}
+                      className="text-[11px] text-amber-400 hover:text-amber-300 underline font-bold flex items-center gap-1.5 bg-amber-950/80 border border-amber-500/40 px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-[0_0_12px_rgba(245,158,11,0.25)]"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Renvoyer un nouveau code</span>
+                    </button>
+                  )}
+                </div>
 
-                    <div className="grid grid-cols-4 gap-2.5 sm:gap-3 py-1">
-                      {loginPin.map((digit, idx) => (
-                        <input
-                          key={idx}
-                          ref={(el) => (loginPinRefs.current[idx] = el)}
-                          type="password"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          maxLength={4}
-                          value={digit}
-                          onChange={(e) => handleLoginPinChange(idx, e.target.value)}
-                          onKeyDown={(e) => handleLoginPinKeyDown(idx, e)}
-                          className={`h-14 text-center font-mono text-2xl font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
-                            digit
-                              ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]'
-                              : 'bg-slate-900/90 border-cyan-500/25 text-cyan-300 hover:border-cyan-500/50'
-                          } focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40 focus:shadow-[0_0_20px_rgba(6,182,212,0.5)] focus:scale-105`}
-                        />
-                      ))}
-                    </div>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="submit"
+                  className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-extrabold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Valider le code & Continuer</span>
+                </motion.button>
+              </form>
+            )}
+
+            {/* ======================================================== */}
+            {/* ETAPE 3 : DÉFINITION DU CODE PIN SECRET (4 CHIFFRES)    */}
+            {/* ======================================================== */}
+            {step === 3 && (
+              <form onSubmit={handleFinalizePin} className="space-y-4">
+                <div className="p-3.5 rounded-2xl bg-cyan-950/60 border border-cyan-500/40 text-center space-y-1">
+                  <p className="text-xs font-black text-cyan-300 flex items-center justify-center gap-1.5">
+                    <Password className="w-4 h-4 text-cyan-400" />
+                    <span>{authMode === 'SIGN_UP' ? 'Définissez votre Code PIN Secret' : 'Votre Nouveau Code PIN'}</span>
+                  </p>
+                  <p className="text-[11px] text-slate-300">
+                    Ce code à 4 chiffres vous servira pour toutes vos connexions futures sans attendre de SMS !
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-300 text-center">Votre Code PIN (4 chiffres) :</label>
+                  <div className="grid grid-cols-4 gap-2.5 sm:gap-3 py-1">
+                    {newPin.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={(el) => (newPinRefs.current[idx] = el)}
+                        type="password"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={4}
+                        value={digit}
+                        onChange={(e) => handleNewPinChange(idx, e.target.value)}
+                        autoFocus={idx === 0}
+                        className={`h-14 text-center font-mono text-2xl font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
+                          digit
+                            ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]'
+                            : 'bg-slate-900/90 border-cyan-500/25 text-cyan-300 hover:border-cyan-500/50'
+                        } focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40 focus:shadow-[0_0_20px_rgba(6,182,212,0.5)]`}
+                      />
+                    ))}
                   </div>
+                </div>
 
-                  {/* Bouton de Connexion */}
-                  <motion.button
-                    whileTap={{ scale: 0.96 }}
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-sm rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Connexion en cours...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-4 h-4" />
-                        <span>Se Connecter</span>
-                      </>
-                    )}
-                  </motion.button>
-                </form>
-              </div>
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-sm rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
+                >
+                  {loading ? 'Finalisation...' : 'Finaliser & Accéder à BricoleMoi'}
+                </motion.button>
+              </form>
             )}
           </motion.div>
         </motion.div>
