@@ -349,7 +349,7 @@
       "file_type": "code",
       "norm_label": "authmodal()",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L278"
+      "source_location": "L233"
     },
     {
       "id": "src_components_bottomnav_bottomnav",
@@ -1913,7 +1913,7 @@
       "file_type": "code",
       "norm_label": "country_dial_codes",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L49"
+      "source_location": "L45"
     },
     {
       "id": "src_components_authmodal_moroccan_cities",
@@ -1924,7 +1924,7 @@
       "file_type": "code",
       "norm_label": "moroccan_cities",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L67"
+      "source_location": "L63"
     },
     {
       "id": "src_components_categoryselector",
@@ -3585,7 +3585,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L292",
+      "source_location": "L247",
       "weight": 1.0
     },
     {
@@ -5481,7 +5481,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L46",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -5493,7 +5493,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L47",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -7521,7 +7521,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L46",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -7533,7 +7533,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L47",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -9240,7 +9240,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L278",
+      "source_location": "L233",
       "weight": 1.0
     },
     {
@@ -9251,7 +9251,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L49",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -9262,7 +9262,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L67",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -10745,5 +10745,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "901092d35838560a59922285377b7886de01f498"
+  "built_at_commit": "979af10614cb34951eeab30aa7a9a1cfafaf072d"
 }

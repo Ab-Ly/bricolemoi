@@ -17,9 +17,6 @@ import {
   Gift,
   RotateCcw,
   Navigation,
-  Camera,
-  Trash2,
-  Plus,
   Lock,
   ArrowLeft,
   ChevronDown,
@@ -29,7 +26,6 @@ import {
   Check
 } from 'lucide-react';
 import { 
-  WhatsappLogo, 
   ChatCenteredText, 
   UserCircle, 
   Wrench as PhosphorWrench, 
@@ -70,32 +66,22 @@ export const MOROCCAN_CITIES = [
     lat: 33.5731,
     lng: -7.5898,
     districts: [
-      'Maârif',
-      'Bourgogne',
-      'Gauthier',
-      'Anfa / Aïn Diab',
-      'Hay Hassani',
-      'Sidi Maarouf',
-      'Aïn Sebaâ',
-      'Bernoussi',
-      'Oasis / Polo',
-      'Belvédère',
-      'Centre-Ville',
-      'Toute la ville'
+      'Maârif', 'Gauthier', 'Anfa', 'Bourgogne', 'Sidi Belyout', 'Ain Diab',
+      'Oasis', 'Polo', 'Californie', 'CIL', 'Belvédère', 'Roches Noires',
+      'Ain Sebaâ', 'Sidi Bernoussi', 'Sidi Moumen', 'Moulay Rachid', 'Ben M\'sik',
+      'Hay Hassani', 'Oulfa', 'Lissasfa', 'Errahma', 'Derb Sultan', 'Sbata',
+      'Mers Sultan', '2 Mars', 'Val Fleuri', 'Racine', 'Palmier', 'Bouskoura',
+      'Dar Bouazza', 'Mediouna', 'Tit Mellil', 'Zenata', 'Mohammedia', 'Nouaceur'
     ]
   },
   {
     name: 'Rabat',
-    lat: 34.0209,
-    lng: -6.8416,
+    lat: 34.020882,
+    lng: -6.84165,
     districts: [
-      'Agdal',
-      'Hay Riad',
-      'Souissi',
-      'Hassan',
-      'Océan',
-      'Yacoub El Mansour',
-      'Toute la ville'
+      'Agdal', 'Hassan', 'Souissi', 'Hay Riad', 'Les Orangers', 'Océan',
+      'Diour Jamaa', 'Yacoub El Mansour', 'Aviation', 'Mabella', 'Takaddoum',
+      'Hay El Fath', 'Youssoufia', 'Akkari', 'Guich Loudaya'
     ]
   },
   {
@@ -103,41 +89,19 @@ export const MOROCCAN_CITIES = [
     lat: 31.6295,
     lng: -7.9811,
     districts: [
-      'Guéliz',
-      'Hivernage',
-      'Médina',
-      'Targa',
-      'Palmeraie',
-      'Daoudiate',
-      'Mhamid',
-      'Toute la ville'
+      'Guéliz', 'Hivernage', 'Médina', 'Palmeraie', 'Targa', 'Semlalia',
+      'Massira', 'Daoudiate', 'Sidi Youssef Ben Ali', 'Mhamid', 'Amerchich',
+      'Ain Itti', 'Bab Doukkala', 'Annakhil', 'Iziki', 'Sidi Ghanem', 'Socoma'
     ]
   },
   {
     name: 'Tanger',
     lat: 35.7595,
-    lng: -5.8340,
+    lng: -5.834,
     districts: [
-      'Malabata',
-      'Centre-Ville',
-      'Marshan',
-      'Boukhalef',
-      'Val Fleuri',
-      'Mesnana',
-      'Toute la ville'
-    ]
-  },
-  {
-    name: 'Fès',
-    lat: 34.0331,
-    lng: -5.0003,
-    districts: [
-      'Ville Nouvelle',
-      'Narjiss',
-      'Route d\'Imouzzer',
-      'Champs de Course',
-      'Médina',
-      'Toute la ville'
+      'Centre-Ville / Boulevard', 'Malabata', 'Médina', 'Marchan', 'Iberia',
+      'California', 'Boubana', 'Val Fleuri', 'Mesnana', 'Beni Makada',
+      'Moghogha', 'Tanja Balia', 'Achakar', 'Gzenaya', 'Boukhalef'
     ]
   },
   {
@@ -145,13 +109,18 @@ export const MOROCCAN_CITIES = [
     lat: 30.4278,
     lng: -9.5981,
     districts: [
-      'Secteur Touristique',
-      'Talborjt',
-      'Dakhla',
-      'Salam',
-      'Haut Founty',
-      'Tikiouine',
-      'Toute la ville'
+      'Centre-Ville', 'Founty / Baie des Palmiers', 'Talborjt', 'Dakhla',
+      'Salam', 'Al Houda', 'Sonaba', 'Charaf', 'Tikiouine', 'Bensergao',
+      'Anza', 'Aourir', 'Taghazout', 'Drarga'
+    ]
+  },
+  {
+    name: 'Fès',
+    lat: 34.0181,
+    lng: -5.0078,
+    districts: [
+      'Ville Nouvelle', 'Médina / Fès El Bali', 'Atlas', 'Narjiss', 'Route d\'Imouzzer',
+      'Champ de Course', 'Mont Fleuri', 'Saada', 'Zouagha', 'Bensouda', 'Ain Chkef'
     ]
   },
   {
@@ -159,38 +128,35 @@ export const MOROCCAN_CITIES = [
     lat: 34.0531,
     lng: -6.7985,
     districts: [
-      'Tabriquet',
-      'Bettana',
-      'Hay Karima',
-      'Sala Al Jadida',
-      'Sidi Moussa',
-      'Toute la ville'
+      'Tabriquet', 'Bettana', 'Bab Lamrissa', 'Sidi Moussa', 'Sala Al Jadida',
+      'Hay Salam', 'Hay Rahma', 'Karia', 'Laayayda', 'Bouknadel'
+    ]
+  },
+  {
+    name: 'Témara',
+    lat: 33.9267,
+    lng: -6.9122,
+    districts: [
+      'Centre Témara', 'Massira 1 & 2', 'Wifaq', 'Fouarat', 'Harhoura',
+      'Val d\'Or', 'Sables d\'Or', 'Sid El Abed', 'Ain Attig'
     ]
   },
   {
     name: 'Meknès',
-    lat: 33.8938,
-    lng: -5.5516,
+    lat: 33.8731,
+    lng: -5.5407,
     districts: [
-      'Hamria',
-      'Marjane',
-      'Bassatine',
-      'Mansour',
-      'Médina',
-      'Toute la ville'
+      'Hamria', 'Médina', 'Plaisance', 'Bassatine', 'Marjane', 'Mansour',
+      'Toulal', 'Sidi Saïd', 'Zitoune', 'Riad'
     ]
   },
   {
     name: 'Kénitra',
-    lat: 34.2610,
+    lat: 34.261,
     lng: -6.5802,
     districts: [
-      'Centre-Ville',
-      'Bir Rami',
-      'Mehdia',
-      'Mimosa',
-      'Val Fleuri',
-      'Toute la ville'
+      'Centre-Ville', 'Mimosas', 'Bir Rami', 'Mehdia', 'Val Fleuri',
+      'Ouled Oujih', 'Saknia', 'Alliance Darna', 'Tayba'
     ]
   },
   {
@@ -198,11 +164,8 @@ export const MOROCCAN_CITIES = [
     lat: 34.6814,
     lng: -1.9086,
     districts: [
-      'Centre-Ville',
-      'Al Qods',
-      'Lazaret',
-      'Mir Ali',
-      'Toute la ville'
+      'Centre-Ville', 'Al Qods', 'Lazaret', 'Mir Ali', 'Golf', 'Hay Andalous',
+      'Sidi Yahya', 'Universités'
     ]
   },
   {
@@ -210,23 +173,16 @@ export const MOROCCAN_CITIES = [
     lat: 35.5889,
     lng: -5.3626,
     districts: [
-      'Centre-Ville',
-      'Wilaya',
-      'Martil',
-      'Cabo Negro',
-      'Toute la ville'
+      'Centre-Ville / Ensanche', 'Médina', 'Wilaya', 'Saniat Rmel', 'Touilaa',
+      'Martil', 'Cabo Negro', 'M\'diq'
     ]
   },
   {
-    name: 'Mohammédia',
-    lat: 33.6866,
-    lng: -7.3829,
+    name: 'Safi',
+    lat: 32.2994,
+    lng: -9.2372,
     districts: [
-      'Parc',
-      'Rachidia',
-      'El Alia',
-      'Monica',
-      'Toute la ville'
+      'Plateau', 'Biada', 'Médina', 'Kouass', 'Saada', 'Jrifat', 'Sidi Bouzid'
     ]
   },
   {
@@ -234,22 +190,17 @@ export const MOROCCAN_CITIES = [
     lat: 33.2316,
     lng: -8.5007,
     districts: [
-      'Centre-Ville',
-      'Sidi Bouzid',
-      'Plateau',
-      'Al Qods',
-      'Toute la ville'
+      'Plateau', 'Cité Portugaise', 'Plage / Corniche', 'Nassim', 'Salam',
+      'Najd', 'Sidi Bouzid', 'Haouzia'
     ]
   },
   {
     name: 'Nador',
-    lat: 35.1688,
+    lat: 35.1681,
     lng: -2.9335,
     districts: [
-      'Centre-Ville',
-      'Al Matar',
-      'Ouled Mimoun',
-      'Toute la ville'
+      'Centre-Ville', 'Corniche', 'Al Matar', 'Ouled Mimoun', 'Beni Ensar',
+      'Selouane', 'Zeghanghane'
     ]
   },
   {
@@ -257,20 +208,24 @@ export const MOROCCAN_CITIES = [
     lat: 32.3373,
     lng: -6.3498,
     districts: [
-      'Centre-Ville',
-      'Al Amal',
-      'Riad Salam',
-      'Toute la ville'
+      'Centre-Ville', 'Ain Asserdoun', 'Atlas', 'Riad Salam', 'Massira', 'Oulad Hamdane'
     ]
   },
   {
-    name: 'Autre Ville',
-    lat: 31.7917,
-    lng: -7.0926,
+    name: 'Mohammedia',
+    lat: 33.6866,
+    lng: -7.3828,
     districts: [
-      'Centre-Ville',
-      'Zone Périurbaine',
-      'Toute la zone'
+      'Parc', 'Kasbah', 'Plage des Sablettes', 'Plage Monica', 'Riad Salam',
+      'El Alia', 'Rachidia', 'Nasr'
+    ]
+  },
+  {
+    name: 'Essaouira',
+    lat: 31.5085,
+    lng: -9.7595,
+    districts: [
+      'Médina', 'Borj', 'Ghazoua', 'Diabat', 'Tafektalt', 'Lagouira'
     ]
   }
 ];
@@ -291,10 +246,18 @@ export const AuthModal = () => {
     t 
   } = useAuth();
   
-  // Séparation Fondamentale : Rôle Actif
+  // Rôle Actif : CLIENT ou MAALEM
   const [role, setRole] = useState('CLIENT'); // 'CLIENT' (Cyan) | 'MAALEM' (Ambre/Or)
-  // Mode : Inscription vs Connexion
-  const [authMode, setAuthMode] = useState('SIGN_UP'); // 'SIGN_UP' | 'SIGN_IN' | 'FORGOT_PIN'
+  
+  // Étape du flux Smart Login :
+  // 1: Entrée Rapide (Téléphone / Google)
+  // 'ENTER_PIN': Connexion Rapide PIN (Utilisateur existant reconnu)
+  // 'SIGNUP_DETAILS': Complément d'infos (Nom, Ville, Spécialité)
+  // 2: Code SMS OTP (6 chiffres)
+  // 3: Définition du Code PIN Secret (4 chiffres)
+  const [step, setStep] = useState(1);
+  const [authMode, setAuthMode] = useState('SIGN_IN'); // 'SIGN_IN' | 'SIGN_UP' | 'FORGOT_PIN'
+  const [existingUserName, setExistingUserName] = useState('');
 
   const [phone, setPhone] = useState('');
   const [fullName, setFullName] = useState('');
@@ -321,10 +284,6 @@ export const AuthModal = () => {
       setSelectedCountry(COUNTRY_DIAL_CODES[0]);
     }
   }, [role]);
-
-  // 1: Formulaire / Sign In, 2: OTP (SMS / WhatsApp), 3: Choix du PIN
-  const [step, setStep] = useState(1);
-  const [channel, setChannel] = useState('sms'); // 'sms' (100% Garanti & Direct) | 'whatsapp'
 
   // PIN & OTP Inputs
   const [loginPin, setLoginPin] = useState(['', '', '', '']);
@@ -358,85 +317,147 @@ export const AuthModal = () => {
   const currentCityObj = MOROCCAN_CITIES.find((c) => c.name === selectedCity) || MOROCCAN_CITIES[0];
   const districtOptions = (currentCityObj.districts || []).map((d) => ({ value: d, label: d }));
 
+  // Handler de changement de ville
   const handleCityChange = (newCity) => {
     setSelectedCity(newCity);
-    const targetCity = MOROCCAN_CITIES.find((c) => c.name === newCity);
-    if (targetCity && targetCity.districts && targetCity.districts.length > 0) {
-      setSelectedDistrict(targetCity.districts[0]);
+    const matched = MOROCCAN_CITIES.find((c) => c.name === newCity);
+    if (matched && matched.districts && matched.districts.length > 0) {
+      setSelectedDistrict(matched.districts[0]);
     }
   };
 
-  // Timer de renvoi
+  // Timer de renvoi OTP
   useEffect(() => {
     let timer;
     if (resendCountdown > 0) {
-      timer = setInterval(() => {
-        setResendCountdown((prev) => prev - 1);
-      }, 1000);
+      timer = setTimeout(() => setResendCountdown(resendCountdown - 1), 1000);
     }
-    return () => clearInterval(timer);
+    return () => clearTimeout(timer);
   }, [resendCountdown]);
 
-  const handleClose = () => {
-    setAuthModalOpen(false);
-    setStep(1);
-    setErrorBanner('');
-    setConflictMsg('');
-    setInfoMsg('');
-    setGpsSuccessMsg('');
-    setLoginPin(['', '', '', '']);
-    setNewPin(['', '', '', '']);
-    setOtpDigits(['', '', '', '', '', '']);
-    setIsCountryOpen(false);
-  };
-
-  // Normalisation du numéro selon l'indicatif
-  const cleanPhoneInput = (input, dial) => {
-    let digits = String(input || '').replace(/\D/g, '');
-    const dialDigits = String(dial || '+212').replace(/\D/g, '');
-    if (digits.startsWith(dialDigits)) {
-      digits = digits.substring(dialDigits.length);
-    }
-    if (digits.startsWith('0')) {
-      digits = digits.substring(1);
-    }
-    return digits;
-  };
-
+  // Construction du numéro international complet
   const getFullInternationalNumber = () => {
-    const rawDigits = phone.replace(/\D/g, '');
-    const dialDigits = selectedCountry.dial.replace(/\D/g, '');
-    if (rawDigits.startsWith(dialDigits)) {
-      return `+${rawDigits}`;
+    let clean = phone.replace(/[\s\-\.\(\)]/g, '');
+    if (clean.startsWith('0')) clean = clean.substring(1);
+    const dial = selectedCountry.dial.replace('+', '');
+    if (clean.startsWith(dial)) {
+      return '+' + clean;
     }
-    const clean = rawDigits.startsWith('0') ? rawDigits.substring(1) : rawDigits;
     return `${selectedCountry.dial}${clean}`;
   };
 
   const handlePhoneChange = (e) => {
-    const raw = e.target.value;
-    const sanitized = cleanPhoneInput(raw, selectedCountry.dial);
-    setPhone(sanitized);
+    let val = e.target.value;
+    val = val.replace(/[^\d\s\-\.]/g, '');
+    setPhone(val);
+    setErrorBanner('');
+    setConflictMsg('');
   };
 
-  // Calculateur Haversine GPS
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+  // Fermer la modal et réinitialiser
+  const handleClose = () => {
+    setAuthModalOpen(false);
+    setStep(1);
+    setAuthMode('SIGN_IN');
+    setPhone('');
+    setFullName('');
+    setLoginPin(['', '', '', '']);
+    setNewPin(['', '', '', '']);
+    setOtpDigits(['', '', '', '', '', '']);
+    setErrorBanner('');
+    setConflictMsg('');
+    setInfoMsg('');
+    setGpsSuccessMsg('');
+    setExistingUserName('');
   };
 
+  // Saisie PIN Connexion
+  const handleLoginPinChange = (idx, val) => {
+    if (!/^\d*$/.test(val)) return;
+    const digit = val.slice(-1);
+    const nextPin = [...loginPin];
+    nextPin[idx] = digit;
+    setLoginPin(nextPin);
+    setErrorBanner('');
+
+    if (digit && idx < 3) {
+      loginPinRefs.current[idx + 1]?.focus();
+    }
+    if (idx === 3 && digit && nextPin.every((d) => d !== '')) {
+      handleDirectLogin(nextPin.join(''));
+    }
+  };
+
+  const handleLoginPinKeyDown = (idx, e) => {
+    if (e.key === 'Backspace' && !loginPin[idx] && idx > 0) {
+      loginPinRefs.current[idx - 1]?.focus();
+    }
+  };
+
+  // Saisie PIN Nouveau Compte
+  const handleNewPinChange = (idx, val) => {
+    if (!/^\d*$/.test(val)) return;
+    const digit = val.slice(-1);
+    const nextPin = [...newPin];
+    nextPin[idx] = digit;
+    setNewPin(nextPin);
+    setErrorBanner('');
+
+    if (digit && idx < 3) {
+      newPinRefs.current[idx + 1]?.focus();
+    }
+  };
+
+  const handleNewPinKeyDown = (idx, e) => {
+    if (e.key === 'Backspace' && !newPin[idx] && idx > 0) {
+      newPinRefs.current[idx - 1]?.focus();
+    }
+  };
+
+  // Saisie Code OTP (6 chiffres)
+  const handleOtpDigitChange = (idx, val) => {
+    if (!/^\d*$/.test(val)) return;
+    
+    // Support du copier/coller d'un code entier
+    if (val.length > 1) {
+      const pasted = val.replace(/\D/g, '').slice(0, 6).split('');
+      const updated = [...otpDigits];
+      pasted.forEach((char, pIdx) => {
+        if (pIdx < 6) updated[pIdx] = char;
+      });
+      setOtpDigits(updated);
+      const nextIdx = Math.min(pasted.length, 5);
+      otpInputRefs.current[nextIdx]?.focus();
+      if (updated.every((d) => d !== '')) {
+        handleOtpProceed(updated.join(''));
+      }
+      return;
+    }
+
+    const digit = val.slice(-1);
+    const nextDigits = [...otpDigits];
+    nextDigits[idx] = digit;
+    setOtpDigits(nextDigits);
+    setErrorBanner('');
+
+    if (digit && idx < 5) {
+      otpInputRefs.current[idx + 1]?.focus();
+    }
+    if (idx === 5 && digit && nextDigits.every((d) => d !== '')) {
+      handleOtpProceed(nextDigits.join(''));
+    }
+  };
+
+  const handleOtpKeyDown = (idx, e) => {
+    if (e.key === 'Backspace' && !otpDigits[idx] && idx > 0) {
+      otpInputRefs.current[idx - 1]?.focus();
+    }
+  };
+
+  // Détection GPS automatique
   const handleDetectGPS = () => {
     if (!navigator.geolocation) {
-      setErrorBanner('La géolocalisation n\'est pas disponible.');
+      setErrorBanner('La géolocalisation n\'est pas supportée par votre navigateur.');
       return;
     }
     setDetectingGps(true);
@@ -450,7 +471,9 @@ export const AuthModal = () => {
         let minDistance = Infinity;
 
         MOROCCAN_CITIES.forEach((city) => {
-          const dist = calculateDistance(latitude, longitude, city.lat, city.lng);
+          const dLat = city.lat - latitude;
+          const dLng = city.lng - longitude;
+          const dist = Math.sqrt(dLat * dLat + dLng * dLng);
           if (dist < minDistance) {
             minDistance = dist;
             closestCity = city;
@@ -462,120 +485,20 @@ export const AuthModal = () => {
           setSelectedDistrict(closestCity.districts[0]);
         }
         setDetectingGps(false);
-        setGpsSuccessMsg(`📍 ${closestCity.name} détectée !`);
-        setTimeout(() => setGpsSuccessMsg(''), 3000);
+        setGpsSuccessMsg(`📍 Position détectée : ${closestCity.name}`);
+        setTimeout(() => setGpsSuccessMsg(''), 4000);
       },
       () => {
         setDetectingGps(false);
-        setErrorBanner('Impossible de détecter la position.');
+        setErrorBanner('Impossible d\'obtenir votre position GPS. Veuillez choisir manuellement.');
       },
-      { timeout: 8000, enableHighAccuracy: true }
+      { timeout: 10000, enableHighAccuracy: true }
     );
   };
 
-  // --- GESTION DU PIN (4 CHIFFRES) ---
-  const handleLoginPinChange = (index, value) => {
-    const clean = value.replace(/\D/g, '');
-    if (!clean) {
-      const next = [...loginPin];
-      next[index] = '';
-      setLoginPin(next);
-      return;
-    }
-
-    if (clean.length > 1) {
-      const pasted = clean.slice(0, 4).split('');
-      const next = ['', '', '', ''];
-      pasted.forEach((d, i) => { if (i < 4) next[i] = d; });
-      setLoginPin(next);
-      const target = Math.min(pasted.length, 3);
-      loginPinRefs.current[target]?.focus();
-      if (next.every(Boolean)) {
-        handleDirectLogin(next.join(''));
-      }
-      return;
-    }
-
-    const next = [...loginPin];
-    next[index] = clean[0];
-    setLoginPin(next);
-
-    if (index < 3) {
-      loginPinRefs.current[index + 1]?.focus();
-    } else if (next.every(Boolean)) {
-      handleDirectLogin(next.join(''));
-    }
-  };
-
-  const handleLoginPinKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !loginPin[index] && index > 0) {
-      loginPinRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowLeft' && index > 0) {
-      loginPinRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && index < 3) {
-      loginPinRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleNewPinChange = (index, value) => {
-    const clean = value.replace(/\D/g, '');
-    if (!clean) {
-      const next = [...newPin];
-      next[index] = '';
-      setNewPin(next);
-      return;
-    }
-    const next = [...newPin];
-    next[index] = clean[0];
-    setNewPin(next);
-    if (index < 3) {
-      newPinRefs.current[index + 1]?.focus();
-    }
-  };
-
-  // --- GESTION OTP (6 CHIFFRES) ---
-  const handleOtpDigitChange = (index, value) => {
-    const clean = value.replace(/\D/g, '');
-    if (!clean) {
-      const next = [...otpDigits];
-      next[index] = '';
-      setOtpDigits(next);
-      return;
-    }
-
-    if (clean.length > 1) {
-      const pasted = clean.slice(0, 6).split('');
-      const next = ['', '', '', '', '', ''];
-      pasted.forEach((d, i) => { if (i < 6) next[i] = d; });
-      setOtpDigits(next);
-      const target = Math.min(pasted.length, 5);
-      otpInputRefs.current[target]?.focus();
-      if (next.every(Boolean)) {
-        handleOtpProceed(next.join(''));
-      }
-      return;
-    }
-
-    const next = [...otpDigits];
-    next[index] = clean[0];
-    setOtpDigits(next);
-
-    if (index < 5) {
-      otpInputRefs.current[index + 1]?.focus();
-    } else if (next.every(Boolean)) {
-      handleOtpProceed(next.join(''));
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowLeft' && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && index < 5) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
-  };
+  // ====================================================================
+  // ACTIONS SMART LOGIN
+  // ====================================================================
 
   // ACTION GOOGLE 1-CLIC
   const handleGoogleSignIn = async () => {
@@ -597,13 +520,50 @@ export const AuthModal = () => {
     }
   };
 
-  // ACTION CONNEXION INSTANTANÉE DIRECTE
-  const handleDirectLogin = async (pinCode) => {
-    const fullNumber = getFullInternationalNumber();
-    if (!phone || phone.length < 6) {
-      setErrorBanner('Veuillez saisir votre numéro de téléphone.');
+  // ÉTAPE 1 : VÉRIFICATION INTELLIGENTE DU NUMÉRO (SMART UNIFIED FLOW)
+  const handleSmartPhoneSubmit = async (e) => {
+    if (e) e.preventDefault();
+    const clean = phone.replace(/[\s\-\.\(\)]/g, '');
+    if (!clean || clean.length < 6) {
+      setErrorBanner('Veuillez saisir un numéro de téléphone valide.');
       return;
     }
+
+    const fullNumber = getFullInternationalNumber();
+    setLoading(true);
+    setErrorBanner('');
+    setConflictMsg('');
+
+    try {
+      const profileCheck = await checkPhoneProfile(fullNumber);
+
+      if (profileCheck?.exists) {
+        // SCÉNARIO A : UTILISATEUR EXISTANT -> Connexion directe par PIN
+        setExistingUserName(profileCheck.fullName || '');
+        if (profileCheck.role) {
+          setRole(profileCheck.role);
+        }
+        setAuthMode('SIGN_IN');
+        setStep('ENTER_PIN');
+        setLoginPin(['', '', '', '']);
+        setTimeout(() => loginPinRefs.current[0]?.focus(), 150);
+      } else {
+        // SCÉNARIO B : NOUVEL UTILISATEUR -> Complément d'inscription
+        setAuthMode('SIGN_UP');
+        setStep('SIGNUP_DETAILS');
+      }
+    } catch (err) {
+      // En cas d'erreur de vérification, basculer en mode inscription classique
+      setAuthMode('SIGN_UP');
+      setStep('SIGNUP_DETAILS');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ACTION CONNEXION PIN (UTILISATEUR EXISTANT)
+  const handleDirectLogin = async (pinCode) => {
+    const fullNumber = getFullInternationalNumber();
     const finalPin = pinCode || loginPin.join('');
     if (finalPin.length !== 4) {
       setErrorBanner('Veuillez saisir les 4 chiffres de votre Code PIN.');
@@ -612,81 +572,55 @@ export const AuthModal = () => {
 
     setLoading(true);
     setErrorBanner('');
-    setConflictMsg('');
 
     try {
       await loginWithPin({ phone: fullNumber, pin: finalPin });
       handleClose();
     } catch (err) {
-      setErrorBanner(err.message || 'Code PIN incorrect ou compte introuvable.');
+      setErrorBanner(err.message || 'Code PIN incorrect.');
     } finally {
       setLoading(false);
     }
   };
 
-  // ACTION DÉPART INSCRIPTION
-  const handleStartSignUp = async (e) => {
+  // ACTION ENVOI SMS INSCRIPTION (DEPUIS SIGNUP_DETAILS)
+  const handleProceedSignUpDetails = async (e) => {
     if (e) e.preventDefault();
-    const fullNumber = getFullInternationalNumber();
-    if (!phone || phone.length < 6) {
-      setErrorBanner('Veuillez saisir un numéro valide.');
+    if (!fullName.trim()) {
+      setErrorBanner('Veuillez renseigner votre nom.');
       return;
     }
 
+    const fullNumber = getFullInternationalNumber();
     setLoading(true);
     setErrorBanner('');
-    setConflictMsg('');
 
     try {
-      const profileCheck = await checkPhoneProfile(fullNumber);
-      if (profileCheck?.exists) {
-        const roleName = profileCheck.role === 'MAALEM' ? 'Artisan Maâlem' : 'Client Particulier';
-        setConflictMsg(`👋 Ce numéro est déjà inscrit (${roleName}). Connectez-vous avec votre PIN.`);
-        setRole(profileCheck.role);
-        setAuthMode('SIGN_IN');
-        setStep(1);
-        setLoading(false);
-        return;
-      }
-
-      await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
+      await sendPhoneOTP(fullNumber, 'sms', selectedCountry.dial);
       setStep(2);
       setResendCountdown(60);
-      setInfoMsg(channel === 'whatsapp' ? `Code envoyé sur WhatsApp au ${fullNumber}` : `Code envoyé par SMS au ${fullNumber}`);
+      setInfoMsg(`Code SMS envoyé au ${fullNumber}`);
     } catch (err) {
-      setErrorBanner(err.message || 'Impossible d\'envoyer le code OTP.');
+      setErrorBanner(err.message || 'Impossible d\'envoyer le code SMS.');
     } finally {
       setLoading(false);
     }
   };
 
   // ACTION DÉPART PIN OUBLIÉ
-  const handleStartForgotPin = async (e) => {
-    if (e) e.preventDefault();
+  const handleStartForgotPin = async () => {
     const fullNumber = getFullInternationalNumber();
-    if (!phone || phone.length < 6) {
-      setErrorBanner('Veuillez saisir votre numéro.');
-      return;
-    }
-
     setLoading(true);
     setErrorBanner('');
-    setConflictMsg('');
+    setAuthMode('FORGOT_PIN');
 
     try {
-      const profileCheck = await checkPhoneProfile(fullNumber);
-      if (!profileCheck?.exists) {
-        setErrorBanner('Ce numéro n\'est associé à aucun compte.');
-        setLoading(false);
-        return;
-      }
-
-      await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
+      await sendPhoneOTP(fullNumber, 'sms', selectedCountry.dial);
       setStep(2);
       setResendCountdown(60);
-      setInfoMsg(channel === 'whatsapp' ? `Code envoyé sur WhatsApp au ${fullNumber}` : `Code envoyé par SMS au ${fullNumber}`);
+      setInfoMsg(`Code de réinitialisation envoyé par SMS au ${fullNumber}`);
     } catch (err) {
-      setErrorBanner(err.message || 'Impossible d\'envoyer le code OTP.');
+      setErrorBanner(err.message || 'Impossible d\'envoyer le code SMS.');
     } finally {
       setLoading(false);
     }
@@ -696,11 +630,12 @@ export const AuthModal = () => {
   const handleOtpProceed = (code) => {
     const token = code || otpDigits.join('');
     if (token.length < 6) {
-      setErrorBanner('Veuillez saisir les 6 chiffres du code.');
+      setErrorBanner('Veuillez saisir les 6 chiffres du code SMS.');
       return;
     }
     setErrorBanner('');
     setStep(3);
+    setTimeout(() => newPinRefs.current[0]?.focus(), 150);
   };
 
   // ACTION FINALISATION DU PIN
@@ -708,7 +643,7 @@ export const AuthModal = () => {
     if (e) e.preventDefault();
     const pinStr = newPin.join('');
     if (pinStr.length !== 4) {
-      setErrorBanner('Le Code PIN doit comporter 4 chiffres.');
+      setErrorBanner('Le Code PIN doit comporter exactement 4 chiffres.');
       return;
     }
 
@@ -798,8 +733,6 @@ export const AuthModal = () => {
     );
   };
 
-
-
   const isClient = role === 'CLIENT';
 
   return (
@@ -817,26 +750,22 @@ export const AuthModal = () => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`bg-slate-950 border rounded-2xl max-w-[420px] w-full p-4 sm:p-5 shadow-2xl relative text-slate-100 transition-colors duration-300 overflow-hidden ${
+            className={`bg-slate-950/95 backdrop-blur-xl border rounded-2xl max-w-[420px] w-full p-4 sm:p-5 shadow-2xl relative text-slate-100 transition-colors duration-300 overflow-hidden ${
               isClient 
                 ? 'border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.2)]' 
                 : 'border-amber-500/40 shadow-[0_0_30px_rgba(245,158,11,0.2)]'
             }`}
           >
-            {/* TOP BAR COMPACTE : Titre + Fermer */}
+            {/* TOP BAR : Titre contextuel + Fermer */}
             <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-900">
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${isClient ? 'bg-cyan-400' : 'bg-amber-400'} animate-pulse`} />
+                <span className={`w-2 h-2 rounded-full ${isClient ? 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]' : 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]'} animate-pulse`} />
                 <h3 className="text-sm font-black text-white tracking-tight">
-                  {step === 2 
-                    ? 'Code de Sécurité SMS'
-                    : step === 3 
-                    ? 'Définir mon Code PIN'
-                    : authMode === 'SIGN_IN'
-                    ? (isClient ? 'Connexion Espace Client' : 'Connexion Maâlem Pro')
-                    : authMode === 'FORGOT_PIN'
-                    ? 'Réinitialiser mon PIN'
-                    : (isClient ? 'Créer mon Compte Client' : 'Inscription Maâlem Pro')}
+                  {step === 1 && (isClient ? 'Espace Client BricoleMoi' : 'Espace Artisan Maâlem Pro')}
+                  {step === 'ENTER_PIN' && 'Connexion Rapide par PIN'}
+                  {step === 'SIGNUP_DETAILS' && (isClient ? 'Nouveau Compte Client' : 'Inscription Maâlem Pro')}
+                  {step === 2 && 'Vérification SMS'}
+                  {step === 3 && 'Sécuriser avec un Code PIN'}
                 </h3>
               </div>
               <button
@@ -847,19 +776,18 @@ export const AuthModal = () => {
               </button>
             </div>
 
-            {/* SWITCHER UNIVERSEL CLIENT / MAALEM (Compact) */}
+            {/* SWITCHER DISCRET DE RÔLE (Écran 1) */}
             {step === 1 && (
-              <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800/80 mb-2.5">
+              <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800/80 mb-3">
                 <button
                   type="button"
                   onClick={() => {
                     setRole('CLIENT');
                     setErrorBanner('');
-                    setConflictMsg('');
                   }}
                   className={`py-1.5 px-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     isClient
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-sm'
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(6,182,212,0.4)]'
                       : 'text-slate-400 hover:text-cyan-300'
                   }`}
                 >
@@ -872,11 +800,10 @@ export const AuthModal = () => {
                   onClick={() => {
                     setRole('MAALEM');
                     setErrorBanner('');
-                    setConflictMsg('');
                   }}
                   className={`py-1.5 px-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer relative ${
                     !isClient
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-sm'
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-[0_0_12px_rgba(245,158,11,0.4)]'
                       : 'text-slate-400 hover:text-amber-300'
                   }`}
                 >
@@ -889,79 +816,46 @@ export const AuthModal = () => {
               </div>
             )}
 
-            {/* SOUS-ONGLETS INSCRIPTION VS CONNEXION (Compact) */}
-            {step === 1 && authMode !== 'FORGOT_PIN' && (
-              <div className="flex bg-slate-900/60 border border-slate-800 p-0.5 rounded-lg mb-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode('SIGN_UP');
-                    setErrorBanner('');
-                    setConflictMsg('');
-                  }}
-                  className={`flex-1 py-1 rounded-md text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                    authMode === 'SIGN_UP'
-                      ? (isClient ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-black' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-black')
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <UserPlus className="w-3 h-3" />
-                  <span>Nouveau Compte</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMode('SIGN_IN');
-                    setErrorBanner('');
-                    setConflictMsg('');
-                  }}
-                  className={`flex-1 py-1 rounded-md text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                    authMode === 'SIGN_IN'
-                      ? (isClient ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-black' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-black')
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <LogIn className="w-3 h-3" />
-                  <span>Se Connecter</span>
-                </button>
-              </div>
-            )}
-
-            {/* Messages compacts */}
-            {conflictMsg && (
-              <div className="mb-2 p-2 bg-amber-950/80 border border-amber-500/50 rounded-xl text-amber-200 text-[11px]">
-                {conflictMsg}
-              </div>
-            )}
-
+            {/* Bannières d'alertes */}
             {errorBanner && (
-              <div className="mb-2 p-2 bg-red-950/80 border border-red-500/50 rounded-xl text-red-200 text-[11px]">
-                {errorBanner}
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="mb-2.5 p-2 bg-red-950/80 border border-red-500/50 rounded-xl text-red-200 text-[11px] flex items-center gap-1.5"
+              >
+                <span className="text-red-400 font-bold">⚠️</span>
+                <span>{errorBanner}</span>
+              </motion.div>
             )}
 
             {infoMsg && (
-              <div className="mb-2 p-2 bg-cyan-950/80 border border-cyan-500/40 rounded-xl text-cyan-200 text-[11px] text-center">
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="mb-2.5 p-2 bg-cyan-950/80 border border-cyan-500/40 rounded-xl text-cyan-200 text-[11px] text-center"
+              >
                 {infoMsg}
-              </div>
+              </motion.div>
             )}
 
             {gpsSuccessMsg && (
-              <div className="mb-2 p-1.5 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-emerald-300 text-[11px] font-bold text-center">
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="mb-2.5 p-1.5 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-emerald-300 text-[11px] font-bold text-center"
+              >
                 {gpsSuccessMsg}
-              </div>
+              </motion.div>
             )}
 
             {/* ======================================================== */}
-            {/* VUE 1 : FORMULAIRES SANS SCROLL                         */}
+            {/* ÉCRAN 1 : SMART ENTRÉE UNIQUE (GOOGLE OU TÉLÉPHONE)      */}
             {/* ======================================================== */}
             {step === 1 && (
-              <>
-                {/* A. CLIENT : INSCRIPTION */}
-                {isClient && authMode === 'SIGN_UP' && (
-                  <div className="space-y-2.5">
-                    {/* Bouton Google 1-Clic Compact */}
+              <div className="space-y-3">
+                {/* 1-Clic Google (Client) */}
+                {isClient && (
+                  <>
                     <motion.button
                       whileTap={{ scale: 0.97 }}
                       type="button"
@@ -983,326 +877,30 @@ export const AuthModal = () => {
 
                     <div className="relative flex items-center justify-center my-1.5">
                       <div className="border-t border-slate-800 w-full" />
-                      <span className="bg-slate-950 px-2 text-[9px] text-slate-500 font-mono uppercase tracking-wider">ou par téléphone</span>
+                      <span className="bg-slate-950 px-2 text-[9px] text-slate-500 font-mono uppercase tracking-wider">
+                        ou avec votre numéro
+                      </span>
                       <div className="border-t border-slate-800 w-full" />
                     </div>
+                  </>
+                )}
 
-                    <form onSubmit={handleStartSignUp} className="space-y-2">
-                      <div>
-                        <input
-                          type="text"
-                          required
-                          placeholder="Votre nom complet"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-slate-100 text-xs font-bold focus:border-cyan-400 focus:outline-none"
-                        />
-                      </div>
-
-                      {/* Ville & Quartier avec bouton GPS compact intégré */}
-                      <div className="grid grid-cols-2 gap-1.5">
-                        <div className="relative">
-                          <CustomDropdown
-                            options={cityOptions}
-                            value={selectedCity}
-                            onChange={handleCityChange}
-                            placeholder="Ville..."
-                            icon={Buildings}
-                          />
-                        </div>
-                        <div>
-                          <CustomDropdown
-                            options={districtOptions}
-                            value={selectedDistrict}
-                            onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
-                            placeholder="Quartier..."
-                            icon={MapPinLine}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Téléphone & Bouton GPS */}
-                      <div className="flex gap-1.5">
-                        <div className="relative flex-1">
-                          {renderCountryCodeSelector()}
-                          <input
-                            type="tel"
-                            required
-                            placeholder={selectedCountry.placeholder || '612345678'}
-                            value={phone}
-                            onChange={handlePhoneChange}
-                            className="w-full pl-24 sm:pl-26 pr-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-slate-100 font-mono text-xs font-bold focus:border-cyan-400 focus:outline-none dir-ltr tracking-wider"
-                          />
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={handleDetectGPS}
-                          disabled={detectingGps}
-                          title="Détecter ma position par GPS"
-                          className="px-2.5 py-2 bg-slate-900 hover:bg-slate-800 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-all active:scale-95 flex-shrink-0"
-                        >
-                          <Navigation className={`w-3.5 h-3.5 text-cyan-400 ${detectingGps ? 'animate-spin' : ''}`} />
-                          <span className="hidden sm:inline">GPS</span>
-                        </button>
-                      </div>
-
-                      <motion.button
-                        whileTap={{ scale: 0.96 }}
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1"
-                      >
-                        <ChatCenteredText weight="duotone" className="w-4 h-4 text-white" />
-                        <span>{loading ? 'Vérification...' : 'Recevoir mon Code SMS Sécurisé →'}</span>
-                      </motion.button>
-                    </form>
+                {/* Bandeau Bonus Pro pour Maâlem */}
+                {!isClient && (
+                  <div className="p-2.5 bg-gradient-to-r from-amber-950/80 to-slate-900 border border-amber-500/40 rounded-xl flex items-center gap-2.5 shadow-sm">
+                    <Coins weight="duotone" className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                    <p className="text-[11px] font-bold text-amber-300">
+                      🎁 <strong>+15.00 DH</strong> offerts immédiatement pour vos premiers chantiers !
+                    </p>
                   </div>
                 )}
 
-                {/* B. CLIENT : SE CONNECTER */}
-                {isClient && authMode === 'SIGN_IN' && (
-                  <div className="space-y-2.5">
-                    <motion.button
-                      whileTap={{ scale: 0.97 }}
-                      type="button"
-                      onClick={handleGoogleSignIn}
-                      disabled={loading}
-                      className="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-850 border border-slate-700/80 hover:border-cyan-500/50 rounded-xl text-slate-100 text-xs font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-sm active:scale-95 group"
-                    >
-                      <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                      </svg>
-                      <span>Connexion Rapide avec Google</span>
-                    </motion.button>
-
-                    <div className="relative flex items-center justify-center my-1.5">
-                      <div className="border-t border-slate-800 w-full" />
-                      <span className="bg-slate-950 px-2 text-[9px] text-slate-500 font-mono uppercase tracking-wider">ou par Code PIN</span>
-                      <div className="border-t border-slate-800 w-full" />
-                    </div>
-
-                    <form onSubmit={(e) => { e.preventDefault(); handleDirectLogin(); }} className="space-y-2.5">
-                      <div className="relative">
-                        {renderCountryCodeSelector()}
-                        <input
-                          type="tel"
-                          required
-                          placeholder={selectedCountry.placeholder || '612345678'}
-                          value={phone}
-                          onChange={handlePhoneChange}
-                          className="w-full pl-24 sm:pl-26 pr-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-slate-100 font-mono text-xs font-bold focus:border-cyan-400 focus:outline-none dir-ltr tracking-wider"
-                          autoFocus
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-bold text-slate-300">Code PIN Secret (4 chiffres) :</label>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAuthMode('FORGOT_PIN');
-                              setStep(1);
-                              setErrorBanner('');
-                            }}
-                            className="text-[10px] text-amber-400/90 hover:text-amber-300 underline font-medium cursor-pointer"
-                          >
-                            PIN oublié ?
-                          </button>
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-2 py-0.5">
-                          {loginPin.map((digit, idx) => (
-                            <input
-                              key={idx}
-                              ref={(el) => (loginPinRefs.current[idx] = el)}
-                              type="password"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              maxLength={4}
-                              value={digit}
-                              onChange={(e) => handleLoginPinChange(idx, e.target.value)}
-                              onKeyDown={(e) => handleLoginPinKeyDown(idx, e)}
-                              className={`h-11 text-center font-mono text-xl font-black rounded-xl border transition-all duration-200 focus:outline-none ${
-                                digit
-                                  ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_10px_rgba(6,182,212,0.3)] scale-[1.02]'
-                                  : 'bg-slate-900/90 border-slate-700 text-cyan-300 hover:border-cyan-500/50'
-                              } focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/30`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      <motion.button
-                        whileTap={{ scale: 0.96 }}
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1"
-                      >
-                        {loading ? 'Connexion...' : 'Se Connecter'}
-                      </motion.button>
-                    </form>
-                  </div>
-                )}
-
-                {/* C. MAALEM : NOUVEAU COMPTE */}
-                {!isClient && authMode === 'SIGN_UP' && (
-                  <form onSubmit={handleStartSignUp} className="space-y-2.5">
-                    {/* Bandeau Bonus Pro */}
-                    <div className="p-2 bg-gradient-to-r from-amber-950/70 to-slate-900 border border-amber-500/40 rounded-xl flex items-center gap-2 shadow-sm">
-                      <Coins weight="duotone" className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                      <p className="text-[10px] font-bold text-amber-300">
-                        🎁 Bonus de Bienvenue : <strong>+15.00 DH</strong> crédités immédiatement pour vos premiers chantiers !
-                      </p>
-                    </div>
-
-                    <div>
-                      <SpecialtySelect value={specialty} onChange={setSpecialty} />
-                    </div>
-
-                    <div>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Nom de l'artisan ou atelier"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-slate-100 text-xs font-bold focus:border-amber-400 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <CustomDropdown
-                        options={cityOptions}
-                        value={selectedCity}
-                        onChange={handleCityChange}
-                        placeholder="Ville..."
-                        icon={Buildings}
-                      />
-                      <CustomDropdown
-                        options={districtOptions}
-                        value={selectedDistrict}
-                        onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
-                        placeholder="Zone..."
-                        icon={MapPinLine}
-                      />
-                    </div>
-
-                    <div className="flex gap-1.5">
-                      <div className="relative flex-1">
-                        <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-0.5 bg-slate-950 border border-amber-500/40 rounded-lg text-amber-300 text-xs font-mono font-bold">
-                          <span>🇲🇦</span>
-                          <span>+212</span>
-                        </div>
-                        <input
-                          type="tel"
-                          required
-                          placeholder="661001122"
-                          value={phone}
-                          onChange={handlePhoneChange}
-                          className="w-full pl-24 pr-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-slate-100 font-mono text-xs font-bold focus:border-amber-400 focus:outline-none dir-ltr tracking-wider"
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleDetectGPS}
-                        disabled={detectingGps}
-                        title="Détecter ma zone par GPS"
-                        className="px-2.5 py-2 bg-slate-900 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-400 text-amber-300 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-all active:scale-95 flex-shrink-0"
-                      >
-                        <Navigation className={`w-3.5 h-3.5 text-amber-400 ${detectingGps ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">GPS</span>
-                      </button>
-                    </div>
-
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      type="submit"
-                      disabled={loading}
-                      className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1"
-                    >
-                      <Handshake weight="duotone" className="w-4 h-4 text-slate-950" />
-                      <span>{loading ? 'Validation...' : 'Rejoindre le Réseau Pro →'}</span>
-                    </motion.button>
-                  </form>
-                )}
-
-                {/* D. MAALEM : SE CONNECTER */}
-                {!isClient && authMode === 'SIGN_IN' && (
-                  <form onSubmit={(e) => { e.preventDefault(); handleDirectLogin(); }} className="space-y-3">
-                    <div className="relative">
-                      <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-0.5 bg-slate-950 border border-amber-500/40 rounded-lg text-amber-300 text-xs font-mono font-bold">
-                        <span>🇲🇦</span>
-                        <span>+212</span>
-                      </div>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="661001122"
-                        value={phone}
-                        onChange={handlePhoneChange}
-                        className="w-full pl-24 pr-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-slate-100 font-mono text-xs font-bold focus:border-amber-400 focus:outline-none dir-ltr tracking-wider"
-                        autoFocus
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <label className="text-[11px] font-bold text-slate-300">Code PIN Secret Pro (4 chiffres) :</label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAuthMode('FORGOT_PIN');
-                            setStep(1);
-                            setErrorBanner('');
-                          }}
-                          className="text-[10px] text-amber-400 hover:text-amber-300 underline font-medium cursor-pointer"
-                        >
-                          PIN oublié ?
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-4 gap-2 py-0.5">
-                        {loginPin.map((digit, idx) => (
-                          <input
-                            key={idx}
-                            ref={(el) => (loginPinRefs.current[idx] = el)}
-                            type="password"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            maxLength={4}
-                            value={digit}
-                            onChange={(e) => handleLoginPinChange(idx, e.target.value)}
-                            onKeyDown={(e) => handleLoginPinKeyDown(idx, e)}
-                            className={`h-11 text-center font-mono text-xl font-black rounded-xl border transition-all duration-200 focus:outline-none ${
-                              digit
-                                ? 'bg-amber-950/40 border-amber-400 text-white shadow-[0_0_10px_rgba(245,158,11,0.3)] scale-[1.02]'
-                                : 'bg-slate-900/90 border-slate-700 text-amber-300 hover:border-amber-500/50'
-                            } focus:border-amber-300 focus:ring-2 focus:ring-amber-400/30`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      type="submit"
-                      disabled={loading}
-                      className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1"
-                    >
-                      {loading ? 'Connexion...' : 'Accéder à mon Espace Pro'}
-                    </motion.button>
-                  </form>
-                )}
-
-                {/* E. PIN OUBLIÉ */}
-                {authMode === 'FORGOT_PIN' && (
-                  <form onSubmit={handleStartForgotPin} className="space-y-3">
+                {/* Formulaire Numéro Unique */}
+                <form onSubmit={handleSmartPhoneSubmit} className="space-y-3">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-300 mb-1 block">
+                      Entrez votre numéro de téléphone :
+                    </label>
                     <div className="relative">
                       {renderCountryCodeSelector()}
                       <input
@@ -1311,39 +909,217 @@ export const AuthModal = () => {
                         placeholder={selectedCountry.placeholder || '612345678'}
                         value={phone}
                         onChange={handlePhoneChange}
-                        className="w-full pl-24 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 font-mono text-xs font-bold focus:border-cyan-400 focus:outline-none dir-ltr tracking-wider"
+                        className={`w-full pl-24 sm:pl-26 pr-3 py-2.5 bg-slate-900 border rounded-xl text-slate-100 font-mono text-sm font-bold focus:outline-none dir-ltr tracking-wider transition-all ${
+                          isClient
+                            ? 'border-slate-700/80 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30'
+                            : 'border-slate-700/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30'
+                        }`}
                         autoFocus
                       />
                     </div>
+                  </div>
 
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      type="submit"
-                      disabled={loading}
-                      className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
-                    >
-                      <ChatCenteredText weight="duotone" className="w-4 h-4 text-white" />
-                      <span>{loading ? 'Envoi...' : 'Recevoir le Code SMS →'}</span>
-                    </motion.button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthMode('SIGN_IN');
-                        setStep(1);
-                        setErrorBanner('');
-                      }}
-                      className="w-full text-center text-[11px] text-slate-400 hover:text-cyan-300 font-bold cursor-pointer pt-1"
-                    >
-                      ← Revenir à la connexion
-                    </button>
-                  </form>
-                )}
-              </>
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    type="submit"
+                    disabled={loading}
+                    className={`w-full py-2.5 font-black text-xs rounded-xl shadow-lg flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer ${
+                      isClient
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                        : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                    }`}
+                  >
+                    <span>{loading ? 'Vérification...' : 'Continuer →'}</span>
+                  </motion.button>
+                </form>
+              </div>
             )}
 
             {/* ======================================================== */}
-            {/* ETAPE 2 : CODE OTP (SMS DIRECT)                          */}
+            {/* ÉCRAN : CONNEXION RAPIDE PIN (UTILISATEUR RECONNU)       */}
+            {/* ======================================================== */}
+            {step === 'ENTER_PIN' && (
+              <form onSubmit={(e) => { e.preventDefault(); handleDirectLogin(); }} className="space-y-3">
+                <div className="p-2.5 bg-slate-900/90 border border-slate-800 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${
+                      isClient ? 'bg-cyan-950 text-cyan-400 border border-cyan-500/30' : 'bg-amber-950 text-amber-400 border border-amber-500/30'
+                    }`}>
+                      {existingUserName ? existingUserName.charAt(0).toUpperCase() : '👤'}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">
+                        {existingUserName ? `Ravi de vous revoir, ${existingUserName} !` : 'Ravi de vous revoir !'}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-mono">{getFullInternationalNumber()}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep(1);
+                      setErrorBanner('');
+                    }}
+                    className="text-[10px] text-slate-400 hover:text-cyan-300 underline font-medium cursor-pointer"
+                  >
+                    Modifier
+                  </button>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-300">Code PIN Secret (4 chiffres) :</label>
+                    <button
+                      type="button"
+                      onClick={handleStartForgotPin}
+                      disabled={loading}
+                      className="text-[10px] text-amber-400/90 hover:text-amber-300 underline font-medium cursor-pointer"
+                    >
+                      PIN oublié ?
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-2 py-0.5">
+                    {loginPin.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={(el) => (loginPinRefs.current[idx] = el)}
+                        type="password"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={4}
+                        value={digit}
+                        onChange={(e) => handleLoginPinChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleLoginPinKeyDown(idx, e)}
+                        autoFocus={idx === 0}
+                        className={`h-11 text-center font-mono text-xl font-black rounded-xl border transition-all duration-200 focus:outline-none ${
+                          digit
+                            ? isClient
+                              ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_10px_rgba(6,182,212,0.3)] scale-[1.02]'
+                              : 'bg-amber-950/40 border-amber-400 text-white shadow-[0_0_10px_rgba(245,158,11,0.3)] scale-[1.02]'
+                            : 'bg-slate-900/90 border-slate-700 text-cyan-300 hover:border-cyan-500/50'
+                        } focus:ring-2 ${isClient ? 'focus:border-cyan-300 focus:ring-cyan-400/30' : 'focus:border-amber-300 focus:ring-amber-400/30'}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full py-2.5 font-extrabold text-xs rounded-xl shadow-lg flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1 ${
+                    isClient
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                      : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                  }`}
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>{loading ? 'Connexion...' : 'Se Connecter'}</span>
+                </motion.button>
+              </form>
+            )}
+
+            {/* ======================================================== */}
+            {/* ÉCRAN : COMPLÉMENT D'INSCRIPTION (NOUVEAU COMPTE)        */}
+            {/* ======================================================== */}
+            {step === 'SIGNUP_DETAILS' && (
+              <form onSubmit={handleProceedSignUpDetails} className="space-y-2.5">
+                {/* Rappel du Numéro */}
+                <div className="p-2 bg-slate-900/80 border border-slate-800 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-300">
+                    <DeviceMobile weight="duotone" className="w-4 h-4 text-cyan-400" />
+                    <span className="font-mono font-bold text-white">{getFullInternationalNumber()}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep(1);
+                      setErrorBanner('');
+                    }}
+                    className="text-[10px] text-cyan-400 hover:underline font-bold"
+                  >
+                    Modifier
+                  </button>
+                </div>
+
+                {/* Spécialité pour Maâlem */}
+                {!isClient && (
+                  <div>
+                    <label className="text-[10px] font-bold text-amber-300 mb-1 block">Votre Spécialité :</label>
+                    <SpecialtySelect value={specialty} onChange={setSpecialty} />
+                  </div>
+                )}
+
+                {/* Nom */}
+                <div>
+                  <label className="text-[10px] font-bold text-slate-300 mb-1 block">
+                    {isClient ? 'Votre Nom Complet :' : 'Nom de l\'artisan ou atelier :'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={isClient ? 'Ex: Karim Benjelloun' : 'Ex: Atelier Pro Plomberie'}
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className={`w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-slate-100 text-xs font-bold focus:outline-none ${
+                      isClient ? 'focus:border-cyan-400' : 'focus:border-amber-400'
+                    }`}
+                    autoFocus
+                  />
+                </div>
+
+                {/* Ville & Zone avec GPS */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-300 block">Ville & Quartier :</label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <CustomDropdown
+                      options={cityOptions}
+                      value={selectedCity}
+                      onChange={handleCityChange}
+                      placeholder="Ville..."
+                      icon={Buildings}
+                    />
+                    <CustomDropdown
+                      options={districtOptions}
+                      value={selectedDistrict}
+                      onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
+                      placeholder="Zone..."
+                      icon={MapPinLine}
+                    />
+                  </div>
+                </div>
+
+                {/* Bouton GPS */}
+                <button
+                  type="button"
+                  onClick={handleDetectGPS}
+                  disabled={detectingGps}
+                  className="w-full py-1.5 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-cyan-300 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                >
+                  <Navigation className={`w-3 h-3 text-cyan-400 ${detectingGps ? 'animate-spin' : ''}`} />
+                  <span>{detectingGps ? 'Localisation en cours...' : '📍 Détecter ma position automatiquement'}</span>
+                </button>
+
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full py-2.5 font-black text-xs rounded-xl shadow-lg flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1 ${
+                    isClient
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                      : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                  }`}
+                >
+                  <ChatCenteredText weight="duotone" className="w-4 h-4" />
+                  <span>{loading ? 'Envoi du code...' : 'Recevoir mon Code SMS d\'activation →'}</span>
+                </motion.button>
+              </form>
+            )}
+
+            {/* ======================================================== */}
+            {/* ÉCRAN 2 : VALIDATION DU CODE SMS OTP (6 CHIFFRES)        */}
             {/* ======================================================== */}
             {step === 2 && (
               <form onSubmit={(e) => { e.preventDefault(); handleOtpProceed(); }} className="space-y-3">
@@ -1391,7 +1167,7 @@ export const AuthModal = () => {
                   ) : (
                     <button
                       type="button"
-                      onClick={authMode === 'SIGN_UP' ? handleStartSignUp : handleStartForgotPin}
+                      onClick={authMode === 'SIGN_UP' ? handleProceedSignUpDetails : handleStartForgotPin}
                       className="text-[10px] text-amber-400 hover:text-amber-300 underline font-bold flex items-center gap-1 transition-all cursor-pointer"
                     >
                       <RotateCcw className="w-3 h-3 text-amber-400" />
@@ -1412,21 +1188,21 @@ export const AuthModal = () => {
             )}
 
             {/* ======================================================== */}
-            {/* ETAPE 3 : DÉFINITION DU CODE PIN                         */}
+            {/* ÉCRAN 3 : DÉFINITION DU CODE PIN SECRET (4 CHIFFRES)     */}
             {/* ======================================================== */}
             {step === 3 && (
               <form onSubmit={handleFinalizePin} className="space-y-3">
-                <div className="p-2.5 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-center space-y-0.5">
-                  <p className="text-[11px] font-black text-cyan-300 flex items-center justify-center gap-1">
-                    <Password className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>{authMode === 'SIGN_UP' ? 'Créez votre Code PIN Secret' : 'Nouveau Code PIN'}</span>
+                <div className="p-2.5 bg-slate-900/90 border border-slate-800 rounded-xl">
+                  <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                    <span>Sécurisez votre compte avec un Code PIN</span>
                   </p>
-                  <p className="text-[10px] text-slate-300">
-                    Ce code à 4 chiffres vous servira pour toutes vos connexions futures.
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Ce code secret à 4 chiffres vous permettra de vous reconnecter en 1 seconde sur tous vos appareils.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-4 gap-2 py-0.5">
+                <div className="grid grid-cols-4 gap-2 py-1">
                   {newPin.map((digit, idx) => (
                     <input
                       key={idx}
@@ -1437,8 +1213,9 @@ export const AuthModal = () => {
                       maxLength={4}
                       value={digit}
                       onChange={(e) => handleNewPinChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleNewPinKeyDown(idx, e)}
                       autoFocus={idx === 0}
-                      className={`h-11 text-center font-mono text-xl font-black rounded-xl border transition-all duration-200 focus:outline-none ${
+                      className={`h-12 text-center font-mono text-2xl font-black rounded-xl border transition-all duration-200 focus:outline-none ${
                         digit
                           ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_10px_rgba(6,182,212,0.3)] scale-[1.02]'
                           : 'bg-slate-900/90 border-slate-700 text-cyan-300 hover:border-cyan-500/50'
@@ -1448,12 +1225,17 @@ export const AuthModal = () => {
                 </div>
 
                 <motion.button
-                  whileTap={{ scale: 0.96 }}
+                  whileTap={{ scale: 0.95 }}
                   type="submit"
-                  disabled={loading}
-                  className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1"
+                  disabled={loading || newPin.some((d) => d === '')}
+                  className={`w-full py-2.5 font-black text-xs rounded-xl shadow-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    isClient
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                      : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.4)]'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  {loading ? 'Finalisation...' : 'Finaliser & Accéder à BricoleMoi'}
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{loading ? 'Finalisation...' : 'Finaliser & Accéder à BricoleMoi 🚀'}</span>
                 </motion.button>
               </form>
             )}
