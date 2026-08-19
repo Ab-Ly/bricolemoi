@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { translations } from '../lib/i18n';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
-import { auth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from '../lib/firebaseClient';
+import { auth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut, googleProvider, signInWithPopup } from '../lib/firebaseClient';
 import { switchSubdomainInDev } from '../lib/subdomain';
 import { 
   sendInfobipOTP, 
@@ -489,6 +489,65 @@ export const AuthProvider = ({ children }) => {
     return await checkPhoneProfileService(phone);
   };
 
+  // Connexion / Inscription 1-Clic avec Google
+  const loginWithGoogle = async (preferredRole = 'CLIENT') => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+      const firebaseUid = toValidUUID(firebaseUser.uid);
+      const email = firebaseUser.email || '';
+      const fullName = firebaseUser.displayName || email.split('@')[0] || 'Client Google';
+      const photoURL = firebaseUser.photoURL || '';
+
+      let authenticatedUser = {
+        id: firebaseUid,
+        email,
+        full_name: fullName,
+        role: preferredRole,
+        avatar_url: photoURL,
+        city_zone: 'Casablanca - Centre-Ville'
+      };
+
+      if (isSupabaseConfigured) {
+        try {
+          const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', firebaseUid)
+            .maybeSingle();
+
+          if (existingProfile) {
+            authenticatedUser = {
+              ...authenticatedUser,
+              ...existingProfile,
+              role: existingProfile.role || preferredRole
+            };
+          } else {
+            const newProfile = {
+              id: firebaseUid,
+              full_name: fullName,
+              role: preferredRole,
+              city_zone: 'Casablanca - Centre-Ville'
+            };
+            await supabase.from('profiles').upsert([newProfile]).select().catch(() => {});
+          }
+        } catch (dbErr) {
+          console.warn('[Google Auth DB Warning]:', dbErr);
+        }
+      }
+
+      setUser(authenticatedUser);
+      setCurrentRole(authenticatedUser.role);
+      sessionStorage.setItem('bricolemoi_session', JSON.stringify(authenticatedUser));
+      setAuthModalOpen(false);
+      switchSubdomainInDev(authenticatedUser.role);
+      return authenticatedUser;
+    } catch (err) {
+      console.error('[Google Sign-In Error]:', err);
+      throw err;
+    }
+  };
+
   const logout = async (onLoggedOut) => {
     try {
       await signOut(auth);
@@ -528,6 +587,7 @@ export const AuthProvider = ({ children }) => {
         loginWithPin,
         resetPinWithOtp,
         checkPhoneProfile,
+        loginWithGoogle,
         logout
       }}
     >
