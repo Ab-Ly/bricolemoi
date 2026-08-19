@@ -73,8 +73,10 @@ export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defau
   let channelUsed = requestedChannel;
   let sentSuccessfully = false;
 
+  console.log(`🔑 [BricoleMoi Security] Code OTP généré pour ${formatted} : [ ${otpCode} ]`);
+
   if (!isTestPhone) {
-    // 1. Si WhatsApp demandé (ou par défaut avec les 100 messages gratuits) :
+    // 1. Si WhatsApp demandé :
     if (requestedChannel === 'whatsapp') {
       try {
         const waRes = await fetch(`https://${INFOBIP_BASE_URL}/whatsapp/1/message/text`, {
@@ -105,10 +107,10 @@ export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defau
       }
     }
 
-    // 2. Si SMS demandé ou si WhatsApp n'a pas pu aboutir :
-    if (!sentSuccessfully) {
+    // 2. Envoi SMS garanti (si SMS demandé ou en fallback/complément WhatsApp tant que le template Meta n'est pas validé) :
+    if (!sentSuccessfully || requestedChannel === 'whatsapp') {
       try {
-        const smsRes = await fetch(`https://${INFOBIP_BASE_URL}/sms/3/messages`, {
+        const smsRes = await fetch(`https://${INFOBIP_BASE_URL}/sms/2/text/advanced`, {
           method: 'POST',
           headers: {
             'Authorization': authHeader,
@@ -119,10 +121,8 @@ export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defau
             messages: [
               {
                 destinations: [{ to: international }],
-                sender: INFOBIP_SMS_SENDER,
-                content: {
-                  text: `[BricoleMoi] Votre code de confirmation est : ${otpCode}. Valable 5 minutes.`
-                }
+                from: 'BricoleMoi',
+                text: `[BricoleMoi] Votre code de confirmation est : ${otpCode}. Valable 5 minutes.`
               }
             ]
           })
@@ -131,12 +131,14 @@ export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defau
         const smsData = await smsRes.json().catch(() => ({}));
         if (smsRes.ok && smsData?.messages?.[0]?.status?.groupName !== 'REJECTED') {
           sentSuccessfully = true;
-          channelUsed = 'sms';
+          if (requestedChannel === 'sms') {
+            channelUsed = 'sms';
+          }
         } else {
           console.warn('[Infobip SMS notice]:', smsData);
         }
       } catch (smsErr) {
-        console.warn('[Infobip SMS notice]:', smsErr);
+        console.warn('[Infobip SMS error]:', smsErr);
       }
     }
   } else {
