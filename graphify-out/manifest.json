@@ -18,10 +18,10 @@
     "semantic_hash": "b0de2d13b03f8e4f1c70686b79e0fa52"
   },
   "public/sw.js": {
-    "mtime": 1786992987.8909516,
-    "seen": 1787172381.875681,
-    "ast_hash": "6bf90c474bdfc9ad4e8ba59dba80262b",
-    "semantic_hash": "6bf90c474bdfc9ad4e8ba59dba80262b"
+    "mtime": 1787172763.1820934,
+    "seen": 1787172917.92407,
+    "ast_hash": "ec8710e98d20be44158050784f54b186",
+    "semantic_hash": ""
   },
   "src/App.jsx": {
     "mtime": 1786994378.610528,
@@ -72,10 +72,10 @@
     "semantic_hash": "6efbde09160a3bdf3bf4fbaf7231c6e9"
   },
   "src/components/ClientView.jsx": {
-    "mtime": 1787172253.882622,
-    "seen": 1787172381.875694,
-    "ast_hash": "2a7cd1c5cf81253a40df83985c20c90c",
-    "semantic_hash": "2a7cd1c5cf81253a40df83985c20c90c"
+    "mtime": 1787172755.0533347,
+    "seen": 1787172917.92469,
+    "ast_hash": "3f0f7d0fda282404458c792a00012120",
+    "semantic_hash": ""
   },
   "src/components/CustomDropdown.jsx": {
     "mtime": 1786992996.2521539,
@@ -454,5 +454,53 @@
     "seen": 1787172409.559268,
     "ast_hash": "908b633ee0f348ebc01e940424272c61",
     "semantic_hash": "908b633ee0f348ebc01e940424272c61"
+  },
+  ".agents/AGENTS.md": {
+    "mtime": 1786992979.2672126,
+    "seen": 1787172917.9328132,
+    "ast_hash": "4a141d7961af0e555ed5c305117778fb",
+    "semantic_hash": ""
+  },
+  ".agents/rules/graphify.md": {
+    "mtime": 1787172253.8360858,
+    "seen": 1787172917.9328158,
+    "ast_hash": "f1e53ecc9194573d3c28fc116c743a2e",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/graphify.md": {
+    "mtime": 1787172253.836567,
+    "seen": 1787172917.932819,
+    "ast_hash": "6d73634a678cf1e1c71930adf80bd1f0",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1786992988.5732696,
+    "seen": 1787172917.932821,
+    "ast_hash": "ba6cf74a2f3906633ec93ef345df10dd",
+    "semantic_hash": ""
+  },
+  "public/favicon.svg": {
+    "mtime": 1786992985.7063723,
+    "seen": 1787172917.932823,
+    "ast_hash": "f306df7b49e442a05ce3703f51c9d779",
+    "semantic_hash": ""
+  },
+  "public/icons/icon-192.png": {
+    "mtime": 1786992986.1213696,
+    "seen": 1787172917.932825,
+    "ast_hash": "8e347af781b7dba2ed9a0a327489339b",
+    "semantic_hash": ""
+  },
+  "public/icons/icon-512.png": {
+    "mtime": 1786992986.4869478,
+    "seen": 1787172917.932827,
+    "ast_hash": "44a2f0d7d454b83062f4e187c6211f9e",
+    "semantic_hash": ""
+  },
+  "public/landing_demo.webp": {
+    "mtime": 1786992987.184837,
+    "seen": 1787172917.932829,
+    "ast_hash": "19e41fb42857ea76cfe973bd085da12f",
+    "semantic_hash": ""
   }
 }

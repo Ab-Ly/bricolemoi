@@ -31,9 +31,17 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  if (!event.request.url.startsWith('http')) return;
+
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
+    fetch(event.request).catch(async () => {
+      const cached = await caches.match(event.request);
+      if (cached) return cached;
+      if (event.request.mode === 'navigate') {
+        const fallback = await caches.match('/index.html') || await caches.match('/');
+        if (fallback) return fallback;
+      }
+      return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
     })
   );
 });

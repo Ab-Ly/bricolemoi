@@ -1,26 +1,27 @@
 # Graph Report - bricolemoi  (2026-08-19)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 80 files · ~205,803 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 291 nodes · 621 edges · 49 communities (25 shown, 24 thin omitted)
+- 300 nodes · 627 edges · 52 communities (26 shown, 26 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3272d47e`
+- Built from commit: `f379136e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
+- EmergencyFlowContext.jsx
+- useAuth
+- EnhancedCategoryIcon.jsx
 - AppContext.jsx
-- AuthContext.jsx
-- MaalemView.jsx
-- ClientView.jsx
 - dependencies
 - devDependencies
-- infobipAuthService.js
+- AuthContext.jsx
 - manifest.json
 - LandingPage.jsx
 - schema.sql
@@ -49,15 +50,18 @@
 - public.transactions
 - public.interventions
 - public.maalem_details
+- Dark Sci-Fi Glassmorphism Engineering Guidelines
+- rules/graphify.md
+- workflows/graphify.md
 
 ## God Nodes (most connected - your core abstractions)
 1. `useAuth()` - 42 edges
 2. `useApp()` - 18 edges
 3. `getSpecialtyLabel()` - 17 edges
 4. `getSpecialtyMeta()` - 16 edges
-5. `EmergencyFlowProvider()` - 13 edges
-6. `switchSubdomainInDev()` - 13 edges
-7. `EnhancedCategoryIcon()` - 13 edges
+5. `EnhancedCategoryIcon()` - 13 edges
+6. `EmergencyFlowProvider()` - 13 edges
+7. `switchSubdomainInDev()` - 13 edges
 8. `InteractiveMap()` - 10 edges
 9. `AuthProvider()` - 10 edges
 10. `useEmergencyFlow()` - 9 edges
@@ -65,35 +69,35 @@
 ## Surprising Connections (you probably didn't know these)
 - `UserProfilePage()` --calls--> `useAuth()`  [EXTRACTED]
   src/components/UserProfilePage.jsx → src/context/AuthContext.jsx
-- `AppProvider()` --calls--> `useAuth()`  [EXTRACTED]
-  src/context/AppContext.jsx → src/context/AuthContext.jsx
-- `EmergencyFlowProvider()` --calls--> `useApp()`  [EXTRACTED]
-  src/context/EmergencyFlowContext.jsx → src/context/AppContext.jsx
-- `EmergencyFlowProvider()` --calls--> `useAuth()`  [EXTRACTED]
-  src/context/EmergencyFlowContext.jsx → src/context/AuthContext.jsx
+- `MainApp()` --calls--> `useApp()`  [EXTRACTED]
+  src/App.jsx → src/context/AppContext.jsx
 - `MainApp()` --calls--> `useEmergencyFlow()`  [EXTRACTED]
   src/App.jsx → src/context/EmergencyFlowContext.jsx
+- `MainApp()` --calls--> `useAblyNotifications()`  [EXTRACTED]
+  src/App.jsx → src/hooks/useAblyNotifications.js
+- `ClientView()` --calls--> `useAuth()`  [EXTRACTED]
+  src/components/ClientView.jsx → src/context/AuthContext.jsx
 
 ## Import Cycles
 - None detected.
 
-## Communities (49 total, 24 thin omitted)
+## Communities (52 total, 26 thin omitted)
 
-### Community 0 - "AppContext.jsx"
+### Community 0 - "EmergencyFlowContext.jsx"
 Cohesion: 0.12
-Nodes (33): EmergencySOSModal(), AppContext, AppProvider(), ACTIONS, EMERGENCY_STATES, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer() (+25 more)
+Nodes (31): EmergencySOSModal(), AppProvider(), ACTIONS, EMERGENCY_STATES, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer(), initialState (+23 more)
 
-### Community 1 - "AuthContext.jsx"
-Cohesion: 0.13
-Nodes (24): App(), MainApp(), AdminAuthModal(), AuthModal(), BottomNav(), LandingPage(), Navbar(), ProtectedRoute() (+16 more)
+### Community 1 - "useAuth"
+Cohesion: 0.19
+Nodes (18): App(), MainApp(), AdminDashboard(), AdminAuthModal(), AdminView(), AuthModal(), BottomNav(), LandingPage() (+10 more)
 
-### Community 2 - "MaalemView.jsx"
-Cohesion: 0.17
-Nodes (21): AdminClientsView(), AdminDashboard(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), AdminView(), EnhancedCategoryIcon() (+13 more)
+### Community 2 - "EnhancedCategoryIcon.jsx"
+Cohesion: 0.28
+Nodes (12): AdminClientsView(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), EnhancedCategoryIcon(), getSpecialtyLabel(), getSpecialtyMeta() (+4 more)
 
-### Community 3 - "ClientView.jsx"
-Cohesion: 0.14
-Nodes (17): COUNTRY_DIAL_CODES, MOROCCAN_CITIES, CATEGORIES_TAXONOMY, CategorySelector(), CGUModal(), ClientView(), getServiceDisplay(), mapCategoryToSlug() (+9 more)
+### Community 3 - "AppContext.jsx"
+Cohesion: 0.11
+Nodes (28): COUNTRY_DIAL_CODES, MOROCCAN_CITIES, CATEGORIES_TAXONOMY, CategorySelector(), CGUModal(), ClientView(), getServiceDisplay(), mapCategoryToSlug() (+20 more)
 
 ### Community 4 - "dependencies"
 Cohesion: 0.08
@@ -103,9 +107,9 @@ Nodes (25): ably, firebase, framer-motion, leaflet, lucide-react, maplibre-gl, d
 Cohesion: 0.08
 Nodes (24): autoprefixer, devDependencies, autoprefixer, postcss, tailwindcss, @types/react, @types/react-dom, vite (+16 more)
 
-### Community 6 - "infobipAuthService.js"
-Cohesion: 0.37
-Nodes (12): AuthProvider(), checkPhoneProfile(), formatInternationalPhone(), formatMoroccanPhone(), getLocalPin(), hashPin(), INFOBIP_BASE_URL, loginWithPin() (+4 more)
+### Community 6 - "AuthContext.jsx"
+Cohesion: 0.19
+Nodes (18): AuthContext, AuthProvider(), app, auth, firebaseConfig, googleProvider, translations, checkPhoneProfile() (+10 more)
 
 ### Community 7 - "manifest.json"
 Cohesion: 0.20
@@ -123,25 +127,29 @@ Nodes (3): public.interventions, public.maalem_details, public.profiles
 Cohesion: 0.67
 Nodes (3): public.reconcile_transaction(), public.transactions, public.profiles
 
+### Community 49 - "Dark Sci-Fi Glassmorphism Engineering Guidelines"
+Cohesion: 0.40
+Nodes (4): 1. Visual Identity & Palette, 2. Action Buttons & Accents, 3. Map & Overlay Panels, Dark Sci-Fi Glassmorphism Engineering Guidelines
+
 ## Knowledge Gaps
-- **66 isolated node(s):** `AppContext`, `ACTIONS`, `EmergencyFlowContext`, `initialState`, `activeChannels` (+61 more)
+- **71 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+66 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **24 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **26 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `useAuth()` connect `AuthContext.jsx` to `LandingPage.jsx`, `AppContext.jsx`, `MaalemView.jsx`, `ClientView.jsx`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **Why does `useAuth()` connect `useAuth` to `EmergencyFlowContext.jsx`, `EnhancedCategoryIcon.jsx`, `AppContext.jsx`, `AuthContext.jsx`, `LandingPage.jsx`?**
+  _High betweenness centrality (0.050) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `devDependencies`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
-- **What connects `AppContext`, `ACTIONS`, `EmergencyFlowContext` to the rest of the system?**
-  _66 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+- **What connects `name`, `private`, `version` to the rest of the system?**
+  _71 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `EmergencyFlowContext.jsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.11522198731501057 - nodes in this community are weakly interconnected._
 - **Should `AppContext.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.11840888066604996 - nodes in this community are weakly interconnected._
-- **Should `AuthContext.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.13124274099883856 - nodes in this community are weakly interconnected._
-- **Should `ClientView.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.1396011396011396 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10853658536585366 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
+  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+- **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
