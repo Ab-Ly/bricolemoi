@@ -322,9 +322,9 @@ export const AuthModal = () => {
     }
   }, [role]);
 
-  // 1: Formulaire / Sign In, 2: OTP (WhatsApp/SMS), 3: Choix du PIN
+  // 1: Formulaire / Sign In, 2: OTP (SMS / WhatsApp), 3: Choix du PIN
   const [step, setStep] = useState(1);
-  const [channel, setChannel] = useState('whatsapp'); // 'whatsapp' (Défaut rapide) | 'sms'
+  const [channel, setChannel] = useState('sms'); // 'sms' (100% Garanti & Direct) | 'whatsapp'
 
   // PIN & OTP Inputs
   const [loginPin, setLoginPin] = useState(['', '', '', '']);
@@ -798,23 +798,10 @@ export const AuthModal = () => {
     );
   };
 
-  // Render Sélecteur de Canal OTP (WhatsApp / SMS)
+  // Render Sélecteur de Canal OTP (SMS / WhatsApp)
   const renderChannelSelector = (accent = 'cyan') => (
     <div className="space-y-1 my-1">
       <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-950/90 border border-slate-800 rounded-xl shadow-inner">
-        <button
-          type="button"
-          onClick={() => setChannel('whatsapp')}
-          className={`py-1.5 px-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-            channel === 'whatsapp'
-              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(16,185,129,0.4)] border border-emerald-400/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <WhatsappLogo weight="fill" className={`w-3.5 h-3.5 ${channel === 'whatsapp' ? 'text-white' : 'text-emerald-400'}`} />
-          <span>WhatsApp ⚡</span>
-        </button>
-
         <button
           type="button"
           onClick={() => setChannel('sms')}
@@ -827,7 +814,20 @@ export const AuthModal = () => {
           }`}
         >
           <ChatCenteredText weight="duotone" className={`w-3.5 h-3.5 ${channel === 'sms' ? (accent === 'amber' ? 'text-slate-950' : 'text-white') : (accent === 'amber' ? 'text-amber-400' : 'text-cyan-400')}`} />
-          <span>SMS Direct</span>
+          <span>SMS Direct 💬</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setChannel('whatsapp')}
+          className={`py-1.5 px-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            channel === 'whatsapp'
+              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(16,185,129,0.4)] border border-emerald-400/50'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+          }`}
+        >
+          <WhatsappLogo weight="fill" className={`w-3.5 h-3.5 ${channel === 'whatsapp' ? 'text-white' : 'text-emerald-400'}`} />
+          <span>WhatsApp 📲</span>
         </button>
       </div>
     </div>
