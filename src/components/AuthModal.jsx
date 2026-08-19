@@ -1097,27 +1097,39 @@ export const AuthModal = () => {
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1">Ville :</label>
-                          <CustomDropdown
-                            options={cityOptions}
-                            value={selectedCity}
-                            onChange={handleCityChange}
-                            placeholder="Ville..."
-                            icon={Buildings}
-                          />
+                      <div className="space-y-1.5">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-300 mb-1">Ville :</label>
+                            <CustomDropdown
+                              options={cityOptions}
+                              value={selectedCity}
+                              onChange={handleCityChange}
+                              placeholder="Ville..."
+                              icon={Buildings}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-300 mb-1">Quartier :</label>
+                            <CustomDropdown
+                              options={districtOptions}
+                              value={selectedDistrict}
+                              onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
+                              placeholder="Quartier..."
+                              icon={MapPinLine}
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1">Quartier :</label>
-                          <CustomDropdown
-                            options={districtOptions}
-                            value={selectedDistrict}
-                            onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
-                            placeholder="Quartier..."
-                            icon={MapPinLine}
-                          />
-                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleDetectGPS}
+                          disabled={detectingGps}
+                          className="w-full py-2 px-3 bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+                        >
+                          <Navigation className={`w-3.5 h-3.5 text-cyan-400 ${detectingGps ? 'animate-spin' : ''}`} />
+                          <span>{detectingGps ? 'Localisation en cours...' : '📍 Détecter ma Ville & Quartier par GPS'}</span>
+                        </button>
                       </div>
 
                       <div>
@@ -1283,27 +1295,39 @@ export const AuthModal = () => {
                     </div>
 
                     {/* Ville & Zone d'intervention */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1">Ville d'intervention :</label>
-                        <CustomDropdown
-                          options={cityOptions}
-                          value={selectedCity}
-                          onChange={handleCityChange}
-                          placeholder="Ville..."
-                          icon={Buildings}
-                        />
+                    <div className="space-y-1.5">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Ville d'intervention :</label>
+                          <CustomDropdown
+                            options={cityOptions}
+                            value={selectedCity}
+                            onChange={handleCityChange}
+                            placeholder="Ville..."
+                            icon={Buildings}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Zone principale :</label>
+                          <CustomDropdown
+                            options={districtOptions}
+                            value={selectedDistrict}
+                            onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
+                            placeholder="Zone..."
+                            icon={MapPinLine}
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1">Zone principale :</label>
-                        <CustomDropdown
-                          options={districtOptions}
-                          value={selectedDistrict}
-                          onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
-                          placeholder="Zone..."
-                          icon={MapPinLine}
-                        />
-                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleDetectGPS}
+                        disabled={detectingGps}
+                        className="w-full py-2 px-3 bg-slate-900/90 hover:bg-slate-800 border border-amber-500/30 hover:border-amber-400 text-amber-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+                      >
+                        <Navigation className={`w-3.5 h-3.5 text-amber-400 ${detectingGps ? 'animate-spin' : ''}`} />
+                        <span>{detectingGps ? 'Localisation en cours...' : '📍 Détecter ma Ville & Zone par GPS'}</span>
+                      </button>
                     </div>
 
                     {/* Numéro GSM Marocain Pro (+212) */}
