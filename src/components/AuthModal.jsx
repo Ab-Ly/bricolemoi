@@ -22,7 +22,9 @@ import {
   Trash2,
   Plus,
   Lock,
-  ArrowLeft
+  ArrowLeft,
+  ChevronDown,
+  Globe
 } from 'lucide-react';
 import { 
   WhatsappLogo, 
@@ -38,6 +40,24 @@ import {
 } from '@phosphor-icons/react';
 import { SpecialtySelect } from './SpecialtySelect';
 import { CustomDropdown } from './CustomDropdown';
+
+export const COUNTRY_DIAL_CODES = [
+  { code: 'MA', dial: '+212', flag: '🇲🇦', name: 'Maroc', placeholder: '661001122' },
+  { code: 'FR', dial: '+33', flag: '🇫🇷', name: 'France (MRE)', placeholder: '612345678' },
+  { code: 'ES', dial: '+34', flag: '🇪🇸', name: 'Espagne (MRE)', placeholder: '612345678' },
+  { code: 'BE', dial: '+32', flag: '🇧🇪', name: 'Belgique (MRE)', placeholder: '470123456' },
+  { code: 'IT', dial: '+39', flag: '🇮🇹', name: 'Italie (MRE)', placeholder: '3123456789' },
+  { code: 'NL', dial: '+31', flag: '🇳🇱', name: 'Pays-Bas (MRE)', placeholder: '612345678' },
+  { code: 'DE', dial: '+49', flag: '🇩🇪', name: 'Allemagne (MRE)', placeholder: '15123456789' },
+  { code: 'GB', dial: '+44', flag: '🇬🇧', name: 'Royaume-Uni', placeholder: '7123456789' },
+  { code: 'CA', dial: '+1', flag: '🇨🇦', name: 'Canada (MRE)', placeholder: '5141234567' },
+  { code: 'US', dial: '+1', flag: '🇺🇸', name: 'États-Unis', placeholder: '2025550123' },
+  { code: 'AE', dial: '+971', flag: '🇦🇪', name: 'Émirats (Dubaï)', placeholder: '501234567' },
+  { code: 'SA', dial: '+966', flag: '🇸🇦', name: 'Arabie Saoudite', placeholder: '501234567' },
+  { code: 'QA', dial: '+974', flag: '🇶🇦', name: 'Qatar', placeholder: '33123456' },
+  { code: 'CH', dial: '+41', flag: '🇨🇭', name: 'Suisse (MRE)', placeholder: '781234567' },
+  { code: 'SE', dial: '+46', flag: '🇸🇪', name: 'Suède (MRE)', placeholder: '701234567' }
+];
 
 export const MOROCCAN_CITIES = [
   {
@@ -268,6 +288,29 @@ export const AuthModal = () => {
   const [phone, setPhone] = useState('');
   const [fullName, setFullName] = useState('');
 
+  // Pays / Indicatif
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRY_DIAL_CODES[0]);
+  const [isCountryOpen, setIsCountryOpen] = useState(false);
+  const countryDropdownRef = useRef(null);
+
+  // Fermer dropdown pays lors d'un clic extérieur
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(e.target)) {
+        setIsCountryOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Si l'utilisateur choisit le rôle MAALEM, forcer l'indicatif Maroc (+212)
+  useEffect(() => {
+    if (role === 'MAALEM') {
+      setSelectedCountry(COUNTRY_DIAL_CODES[0]);
+    }
+  }, [role]);
+
   // 1: Phone & Details / Sign In, 2: OTP Verification, 3: Set PIN Code
   const [step, setStep] = useState(1);
   const [channel, setChannel] = useState('whatsapp'); // 'whatsapp' | 'sms'
@@ -276,7 +319,6 @@ export const AuthModal = () => {
   const [loginPin, setLoginPin] = useState(['', '', '', '']);
   const [newPin, setNewPin] = useState(['', '', '', '']);
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
-  const [generatedOtp, setGeneratedOtp] = useState('');
 
   const loginPinRefs = useRef([]);
   const newPinRefs = useRef([]);
@@ -366,18 +408,35 @@ export const AuthModal = () => {
     setNewPin(['', '', '', '']);
     setOtpDigits(['', '', '', '', '', '']);
     setPortfolioPhotos([]);
+    setIsCountryOpen(false);
   };
 
-  const cleanMoroccanPhone = (input) => {
-    let cleaned = String(input || '').replace(/\D/g, '');
-    if (cleaned.startsWith('212')) cleaned = cleaned.substring(3);
-    if (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
-    return cleaned;
+  // Normalisation du numéro selon l'indicatif choisi
+  const cleanPhoneInput = (input, dial) => {
+    let digits = String(input || '').replace(/\D/g, '');
+    const dialDigits = String(dial || '+212').replace(/\D/g, '');
+    if (digits.startsWith(dialDigits)) {
+      digits = digits.substring(dialDigits.length);
+    }
+    if (digits.startsWith('0')) {
+      digits = digits.substring(1);
+    }
+    return digits;
+  };
+
+  const getFullInternationalNumber = () => {
+    const rawDigits = phone.replace(/\D/g, '');
+    const dialDigits = selectedCountry.dial.replace(/\D/g, '');
+    if (rawDigits.startsWith(dialDigits)) {
+      return `+${rawDigits}`;
+    }
+    const clean = rawDigits.startsWith('0') ? rawDigits.substring(1) : rawDigits;
+    return `${selectedCountry.dial}${clean}`;
   };
 
   const handlePhoneChange = (e) => {
     const raw = e.target.value;
-    const sanitized = cleanMoroccanPhone(raw);
+    const sanitized = cleanPhoneInput(raw, selectedCountry.dial);
     setPhone(sanitized);
   };
 
@@ -542,9 +601,9 @@ export const AuthModal = () => {
 
   // 1. ACTION CONNEXION INSTANTANÉE (0 DH)
   const handleDirectLogin = async (pinCode) => {
-    const sanitized = cleanMoroccanPhone(phone);
-    if (!sanitized || sanitized.length < 9) {
-      setErrorBanner('Veuillez saisir votre numéro marocain (ex: 661001122).');
+    const fullNumber = getFullInternationalNumber();
+    if (!phone || phone.length < 6) {
+      setErrorBanner('Veuillez saisir votre numéro de téléphone.');
       return;
     }
     const finalPin = pinCode || loginPin.join('');
@@ -558,7 +617,7 @@ export const AuthModal = () => {
     setConflictMsg('');
 
     try {
-      await loginWithPin({ phone: sanitized, pin: finalPin });
+      await loginWithPin({ phone: fullNumber, pin: finalPin });
       handleClose();
     } catch (err) {
       setErrorBanner(err.message || 'Code PIN incorrect ou compte introuvable.');
@@ -570,9 +629,9 @@ export const AuthModal = () => {
   // 2. ACTION DÉPART INSCRIPTION AVEC DÉTECTION PROACTIVE
   const handleStartSignUp = async (e) => {
     if (e) e.preventDefault();
-    const sanitized = cleanMoroccanPhone(phone);
-    if (!sanitized || sanitized.length < 9) {
-      setErrorBanner('Veuillez saisir un numéro de téléphone marocain valide (ex: 661001122)');
+    const fullNumber = getFullInternationalNumber();
+    if (!phone || phone.length < 6) {
+      setErrorBanner('Veuillez saisir un numéro de téléphone valide.');
       return;
     }
 
@@ -582,7 +641,7 @@ export const AuthModal = () => {
 
     try {
       // Détection Proactive : le numéro existe-t-il déjà ?
-      const profileCheck = await checkPhoneProfile(sanitized);
+      const profileCheck = await checkPhoneProfile(fullNumber);
       if (profileCheck?.exists) {
         const roleName = profileCheck.role === 'MAALEM' ? 'Artisan Maâlem Pro' : 'Client Particulier';
         setConflictMsg(`👋 Bon retour parmi nous ! Ce numéro est déjà enregistré en tant que ${roleName}. Veuillez vous connecter avec votre Code PIN.`);
@@ -594,14 +653,11 @@ export const AuthModal = () => {
       }
 
       // Nouveau compte : envoi OTP WhatsApp ou SMS
-      const res = await sendPhoneOTP(sanitized, channel);
+      const res = await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
       setStep(2);
       setResendCountdown(60);
-      if (res?.code) {
-        setGeneratedOtp(res.code);
-      }
       const channelLabel = (res?.channel || channel) === 'whatsapp' ? 'WhatsApp' : 'SMS Direct';
-      setInfoMsg(`Code OTP à 6 chiffres envoyé via ${channelLabel} au +212 ${sanitized}`);
+      setInfoMsg(`Code OTP à 6 chiffres envoyé via ${channelLabel} au ${fullNumber}`);
     } catch (err) {
       setErrorBanner(err.message || 'Impossible d\'envoyer le code OTP.');
     } finally {
@@ -612,8 +668,8 @@ export const AuthModal = () => {
   // 3. ACTION DÉPART PIN OUBLIÉ
   const handleStartForgotPin = async (e) => {
     if (e) e.preventDefault();
-    const sanitized = cleanMoroccanPhone(phone);
-    if (!sanitized || sanitized.length < 9) {
+    const fullNumber = getFullInternationalNumber();
+    if (!phone || phone.length < 6) {
       setErrorBanner('Veuillez saisir votre numéro de téléphone.');
       return;
     }
@@ -623,20 +679,17 @@ export const AuthModal = () => {
     setConflictMsg('');
 
     try {
-      const profileCheck = await checkPhoneProfile(sanitized);
+      const profileCheck = await checkPhoneProfile(fullNumber);
       if (!profileCheck?.exists) {
         setErrorBanner('Ce numéro n\'est associé à aucun compte. Veuillez d\'abord vous inscrire.');
         setLoading(false);
         return;
       }
 
-      const res = await sendPhoneOTP(sanitized, channel);
+      const res = await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
       setStep(2);
       setResendCountdown(60);
-      if (res?.code) {
-        setGeneratedOtp(res.code);
-      }
-      setInfoMsg(`Code de sécurité envoyé via ${channel === 'whatsapp' ? 'WhatsApp' : 'SMS'} au +212 ${sanitized}`);
+      setInfoMsg(`Code de sécurité envoyé via ${channel === 'whatsapp' ? 'WhatsApp' : 'SMS'} au ${fullNumber}`);
     } catch (err) {
       setErrorBanner(err.message || 'Impossible d\'envoyer le code OTP.');
     } finally {
@@ -652,7 +705,7 @@ export const AuthModal = () => {
       return;
     }
     setErrorBanner('');
-    setStep(3); // Passe à la création / réinitialisation du PIN
+    setStep(3);
   };
 
   // 5. ACTION CRÉATION OU RÉINITIALISATION FINALE DU PIN
@@ -667,14 +720,14 @@ export const AuthModal = () => {
     setLoading(true);
     setErrorBanner('');
 
-    const sanitized = cleanMoroccanPhone(phone);
+    const fullNumber = getFullInternationalNumber();
     const otpToken = otpDigits.join('');
 
     try {
       if (authMode === 'SIGN_UP') {
         const combinedCityZone = `${selectedCity} - ${selectedDistrict}`;
         await verifyPhoneOTP({
-          phone: sanitized,
+          phone: fullNumber,
           token: otpToken,
           pin: pinStr,
           role,
@@ -686,7 +739,7 @@ export const AuthModal = () => {
         });
       } else if (authMode === 'FORGOT_PIN') {
         await resetPinWithOtp({
-          phone: sanitized,
+          phone: fullNumber,
           token: otpToken,
           newPin: pinStr
         });
@@ -697,6 +750,62 @@ export const AuthModal = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Render Sélecteur d'Indicatif Pays
+  const renderCountryCodeSelector = () => {
+    if (role === 'MAALEM') {
+      return (
+        <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-950/90 border border-cyan-500/30 rounded-xl text-cyan-300 text-xs font-mono font-bold shadow-inner z-10">
+          <span className="text-sm">🇲🇦</span>
+          <span>+212</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20" ref={countryDropdownRef}>
+        <button
+          type="button"
+          onClick={() => setIsCountryOpen(!isCountryOpen)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-950/90 hover:bg-slate-900 border border-cyan-500/40 hover:border-cyan-400 rounded-xl text-cyan-300 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+        >
+          <span className="text-sm">{selectedCountry.flag}</span>
+          <span>{selectedCountry.dial}</span>
+          <ChevronDown className="w-3 h-3 text-cyan-400 opacity-70" />
+        </button>
+
+        {isCountryOpen && (
+          <div className="absolute left-0 top-full mt-1.5 w-60 max-h-52 overflow-y-auto bg-slate-950/95 border border-cyan-500/50 rounded-2xl shadow-2xl p-1.5 z-50 modal-scroll backdrop-blur-xl">
+            <div className="px-2 py-1 text-[10px] font-mono text-cyan-400 font-bold uppercase border-b border-cyan-500/20 mb-1 flex items-center gap-1">
+              <Globe className="w-3 h-3" />
+              <span>Indicatif Pays / MRE</span>
+            </div>
+            {COUNTRY_DIAL_CODES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => {
+                  setSelectedCountry(c);
+                  setIsCountryOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer ${
+                  selectedCountry.code === c.code
+                    ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-500/30'
+                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">{c.flag}</span>
+                  <span className="truncate text-left">{c.name}</span>
+                </div>
+                <span className="font-mono text-cyan-400 text-[11px] font-bold">{c.dial}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -748,7 +857,7 @@ export const AuthModal = () => {
                   ? 'Accédez à votre espace avec votre Code PIN secret'
                   : authMode === 'FORGOT_PIN'
                   ? 'Récupération sécurisée par WhatsApp ou SMS'
-                  : (step === 1 ? 'Plateforme marocaine de dépannage express & artisans' : step === 2 ? `Entrez le code reçu au +212 ${phone}` : 'Définissez 4 chiffres pour vos prochaines connexions')}
+                  : (step === 1 ? 'Plateforme marocaine de dépannage express & artisans' : step === 2 ? `Entrez le code reçu au ${getFullInternationalNumber()}` : 'Définissez 4 chiffres pour vos prochaines connexions')}
               </p>
 
               {/* Mode Toggle Bar (SIGN_IN vs SIGN_UP) */}
@@ -827,21 +936,18 @@ export const AuthModal = () => {
             {/* ======================================================== */}
             {authMode === 'SIGN_IN' && (
               <form onSubmit={(e) => { e.preventDefault(); handleDirectLogin(); }} className="space-y-4">
-                {/* Numéro de téléphone */}
+                {/* Numéro de téléphone avec sélecteur d'indicatif */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Numéro de Téléphone Maroc (+212) :</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Numéro de Téléphone :</label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-400 text-xs font-bold font-mono dir-ltr flex items-center gap-1">
-                      <span>🇲🇦</span>
-                      <span>+212</span>
-                    </span>
+                    {renderCountryCodeSelector()}
                     <input
                       type="tel"
                       required
-                      placeholder="661001122"
+                      placeholder={selectedCountry.placeholder || '612345678'}
                       value={phone}
                       onChange={handlePhoneChange}
-                      className="w-full pl-20 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
+                      className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
                       autoFocus
                     />
                   </div>
@@ -987,7 +1093,7 @@ export const AuthModal = () => {
                         <div className="space-y-2">
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="block text-xs font-bold text-slate-300 mb-1.5">Ville :</label>
+                              <label className="block text-xs font-bold text-slate-300 mb-1.5">Ville au Maroc :</label>
                               <CustomDropdown
                                 options={cityOptions}
                                 value={selectedCity}
@@ -1076,21 +1182,26 @@ export const AuthModal = () => {
                       </>
                     )}
 
-                    {/* Numéro de Téléphone */}
+                    {/* Numéro de Téléphone avec Sélecteur d'Indicatif */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1.5">Numéro de Téléphone Maroc (+212) :</label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs font-bold text-slate-300">Numéro de Téléphone :</label>
+                        {role === 'CLIENT' && (
+                          <span className="text-[10px] text-cyan-400 font-mono flex items-center gap-1">
+                            <Globe className="w-3 h-3" />
+                            Maroc & MRE International
+                          </span>
+                        )}
+                      </div>
                       <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-400 text-xs font-bold font-mono dir-ltr flex items-center gap-1">
-                          <span>🇲🇦</span>
-                          <span>+212</span>
-                        </span>
+                        {renderCountryCodeSelector()}
                         <input
                           type="tel"
                           required
-                          placeholder="661001122"
+                          placeholder={selectedCountry.placeholder || '612345678'}
                           value={phone}
                           onChange={handlePhoneChange}
-                          className="w-full pl-20 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
+                          className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
                         />
                       </div>
                     </div>
@@ -1179,7 +1290,7 @@ export const AuthModal = () => {
                         </div>
                         <div>
                           <p className="text-xs font-bold text-white">Code envoyé par {channel === 'whatsapp' ? 'WhatsApp' : 'SMS'}</p>
-                          <p className="text-[11px] text-slate-400 font-mono">+212 {phone}</p>
+                          <p className="text-[11px] text-slate-400 font-mono">{getFullInternationalNumber()}</p>
                         </div>
                       </div>
                     </div>
@@ -1249,7 +1360,7 @@ export const AuthModal = () => {
                         <span>{authMode === 'SIGN_UP' ? 'Créez votre Code PIN Secret' : 'Définissez votre Nouveau Code PIN'}</span>
                       </p>
                       <p className="text-[11px] text-slate-300">
-                        Ce code à 4 chiffres vous servira pour vos futures connexions rapides et sans frais !
+                        Ce code à 4 chiffres vous servira pour vos futures connexions rapides et sécurisées !
                       </p>
                     </div>
 

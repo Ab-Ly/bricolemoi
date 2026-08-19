@@ -4,30 +4,48 @@ const INFOBIP_API_KEY = import.meta.env.VITE_INFOBIP_API_KEY || '6609e87c2786b4a
 const INFOBIP_BASE_URL = (import.meta.env.VITE_INFOBIP_BASE_URL || 'k95d1n.api.infobip.com').replace(/^https?:\/\//, '');
 
 /**
- * Nettoie et formate un numéro marocain au format international (ex: "212619184098")
+ * Nettoie et formate un numéro de téléphone (Maroc ou International MRE/Étranger)
+ * @param {string} rawPhone - Numéro brut saisi
+ * @param {string} defaultDial - Indicatif pays sélectionné (ex: "+212", "+33", "+34")
  */
-export function formatMoroccanPhone(rawPhone) {
-  let digits = String(rawPhone || '').replace(/\D/g, '');
-  if (digits.startsWith('0')) {
-    digits = '212' + digits.slice(1);
-  } else if (!digits.startsWith('212')) {
-    digits = '212' + digits;
+export function formatInternationalPhone(rawPhone, defaultDial = '+212') {
+  const input = String(rawPhone || '').trim();
+  const dialDigits = String(defaultDial || '+212').replace(/\D/g, '');
+  let digits = input.replace(/\D/g, '');
+
+  if (input.startsWith('+')) {
+    digits = input.replace(/\D/g, '');
+  } else {
+    if (digits.startsWith('0')) {
+      digits = dialDigits + digits.slice(1);
+    } else if (!digits.startsWith(dialDigits)) {
+      digits = dialDigits + digits;
+    }
   }
-  const isValid = /^212[567]\d{8}$/.test(digits);
+
+  const isValid = digits.length >= 8 && digits.length <= 15;
   return {
     international: digits,
     formatted: `+${digits}`,
+    finalPhone: `+${digits}`,
     isValid
   };
+}
+
+/**
+ * Nettoie et formate spécifiquement un numéro marocain (+212)
+ */
+export function formatMoroccanPhone(rawPhone, defaultDial = '+212') {
+  return formatInternationalPhone(rawPhone, defaultDial);
 }
 
 const INFOBIP_WHATSAPP_SENDER = import.meta.env.VITE_INFOBIP_WHATSAPP_SENDER || '447860088970';
 
 /**
- * Envoie un code OTP par WhatsApp ou SMS direct via l'API Infobip
+ * Envoie un code OTP par WhatsApp ou SMS direct via l'API Infobip (Maroc & International)
  */
-export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp') {
-  const { international, formatted, isValid } = formatMoroccanPhone(phone);
+export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defaultDial = '+212') {
+  const { international, formatted, isValid } = formatInternationalPhone(phone, defaultDial);
   if (!isValid) {
     throw new Error('PHONE_FORMAT_INVALID');
   }

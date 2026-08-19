@@ -7,6 +7,7 @@ import {
   sendInfobipOTP, 
   verifyLocalOTP, 
   formatMoroccanPhone, 
+  formatInternationalPhone,
   checkPhoneProfile as checkPhoneProfileService,
   loginWithPin as loginWithPinService,
   updateProfilePin,
@@ -237,22 +238,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Validation numéro marocain (+212 6.../7...)
-  const formatMoroccanPhone = (phone) => {
-    const cleanDigits = String(phone || '').replace(/\D/g, '');
-    let formatted = cleanDigits;
-    if (cleanDigits.startsWith('0')) {
-      formatted = '212' + cleanDigits.slice(1);
-    } else if (!cleanDigits.startsWith('212')) {
-      formatted = '212' + cleanDigits;
-    }
-    const finalPhone = '+' + formatted;
-    const isValid = /^\+212[567]\d{8}$/.test(finalPhone);
-    return { finalPhone, formatted: finalPhone, international: formatted, isValid };
+  const formatMoroccanPhone = (phone, defaultDial = '+212') => {
+    return formatInternationalPhone(phone, defaultDial);
   };
 
   // Envoi OTP via Infobip (WhatsApp / SMS)
-  const sendPhoneOTP = async (phone, channel = 'whatsapp') => {
-    return await sendInfobipOTP(phone, channel);
+  const sendPhoneOTP = async (phone, channel = 'whatsapp', defaultDial = '+212') => {
+    return await sendInfobipOTP(phone, channel, defaultDial);
   };
 
   // Convertit un identifiant en UUID v4 PostgreSQL valide
