@@ -455,14 +455,16 @@ export const AuthModal = () => {
   };
 
   // Détection GPS automatique
+  const [gpsErrorMsg, setGpsErrorMsg] = useState('');
   const handleDetectGPS = () => {
     if (!navigator.geolocation) {
-      setErrorBanner('La géolocalisation n\'est pas supportée par votre navigateur.');
+      setGpsErrorMsg('GPS non disponible');
+      setTimeout(() => setGpsErrorMsg(''), 3000);
       return;
     }
     setDetectingGps(true);
     setGpsSuccessMsg('');
-    setErrorBanner('');
+    setGpsErrorMsg('');
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -490,9 +492,10 @@ export const AuthModal = () => {
       },
       () => {
         setDetectingGps(false);
-        setErrorBanner('Impossible d\'obtenir votre position GPS. Veuillez choisir manuellement.');
+        setGpsErrorMsg('GPS refusé (sélectionnez votre ville ci-dessus)');
+        setTimeout(() => setGpsErrorMsg(''), 3500);
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { timeout: 8000, enableHighAccuracy: false }
     );
   };
 
@@ -1096,10 +1099,18 @@ export const AuthModal = () => {
                   type="button"
                   onClick={handleDetectGPS}
                   disabled={detectingGps}
-                  className="w-full py-1.5 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-cyan-300 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                  className={`w-full py-1.5 bg-slate-900/60 hover:bg-slate-800 border rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 ${
+                    gpsErrorMsg ? 'border-amber-500/50 text-amber-300' : 'border-slate-800 hover:border-cyan-500/40 text-cyan-300'
+                  }`}
                 >
-                  <Navigation className={`w-3 h-3 text-cyan-400 ${detectingGps ? 'animate-spin' : ''}`} />
-                  <span>{detectingGps ? 'Localisation en cours...' : '📍 Détecter ma position automatiquement'}</span>
+                  <Navigation className={`w-3 h-3 ${gpsErrorMsg ? 'text-amber-400' : 'text-cyan-400'} ${detectingGps ? 'animate-spin' : ''}`} />
+                  <span>
+                    {detectingGps 
+                      ? 'Localisation en cours...' 
+                      : gpsErrorMsg 
+                      ? gpsErrorMsg 
+                      : '📍 Détecter ma position automatiquement'}
+                  </span>
                 </button>
 
                 <motion.button
