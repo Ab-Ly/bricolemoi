@@ -39,7 +39,7 @@ export function formatMoroccanPhone(rawPhone, defaultDial = '+212') {
   return formatInternationalPhone(rawPhone, defaultDial);
 }
 
-const INFOBIP_WHATSAPP_SENDER = import.meta.env.VITE_INFOBIP_WHATSAPP_SENDER || '447860088970';
+const INFOBIP_WHATSAPP_SENDER = import.meta.env.VITE_INFOBIP_WHATSAPP_SENDER || '212638853698';
 const INFOBIP_SMS_SENDER = import.meta.env.VITE_INFOBIP_SMS_SENDER || '447860061379';
 
 /**

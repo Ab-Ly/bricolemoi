@@ -106,7 +106,7 @@ serve(async (req) => {
               "Accept": "application/json"
             },
             body: JSON.stringify({
-              from: Deno.env.get("INFOBIP_WHATSAPP_SENDER") || "447860088970",
+              from: Deno.env.get("INFOBIP_WHATSAPP_SENDER") || "212638853698",
               to: international,
               content: {
                 text: messageText
