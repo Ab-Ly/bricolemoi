@@ -275,6 +275,8 @@ export const AuthModal = () => {
   const { 
     authModalOpen, 
     setAuthModalOpen, 
+    profileModalOpen,
+    setProfileModalOpen,
     sendPhoneOTP, 
     verifyPhoneOTP, 
     loginWithPin, 
@@ -604,21 +606,18 @@ export const AuthModal = () => {
     }
   };
 
-  // 1. ACTION CONNEXION / INSCRIPTION 1-CLIC GOOGLE AVEC EXIGENCE DU NUMÉRO DE TÉLÉPHONE
+  // 1. ACTION CONNEXION / INSCRIPTION 1-CLIC GOOGLE AVEC OUVERTURE DIRECTE DE LA VUE PROFIL
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setErrorBanner('');
     setConflictMsg('');
     try {
       const authUser = await loginWithGoogle(role);
-      // Logique métier essentielle : Si le compte Google n'a pas encore de numéro de téléphone enregistré
+      handleClose();
+      // Si le compte Google n'a pas encore de numéro de téléphone enregistré :
+      // On ouvre immédiatement sa fiche Profil pour qu'il le renseigne en toute fluidité
       if (!authUser?.phone) {
-        setGoogleUserTemp(authUser);
-        setFullName(authUser.full_name || '');
-        setStep(4); // Étape obligatoire : Liaison du numéro de téléphone
-        setInfoMsg(`👋 Bienvenue ${authUser.full_name || ''} ! Indiquez votre numéro de téléphone pour permettre la mise en relation avec vos artisans.`);
-      } else {
-        handleClose();
+        setProfileModalOpen(true);
       }
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {

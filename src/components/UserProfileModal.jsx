@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
@@ -21,11 +21,15 @@ import {
   Star,
   Clock,
   ChevronRight,
-  Lock
+  ChevronDown,
+  Lock,
+  Globe,
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { EnhancedCategoryIcon, getSpecialtyLabel } from './EnhancedCategoryIcon';
 import { SpecialtySelect } from './SpecialtySelect';
+import { COUNTRY_DIAL_CODES } from './AuthModal';
 
 const CITIES = [
   { name: 'Casablanca', districts: ['Maârif', 'Gauthier', 'Bourgogne', 'Ain Diab', 'Californie', 'Sidi Maârouf', 'Oasis', 'Centre Ville'] },
@@ -40,15 +44,50 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
   const { user, setUser, logout } = useAuth();
   const { interventions = [] } = useApp();
 
-  const [activeTab, setActiveTab] = useState('info'); // 'info' | 'edit' | 'stats'
+  const isMissingPhone = !user?.phone || user.phone.length < 8;
+  const [activeTab, setActiveTab] = useState(isMissingPhone ? 'edit' : 'info');
   
   // Edit Form State
   const [fullName, setFullName] = useState(user?.full_name || '');
-  const [phone, setPhone] = useState(user?.phone || '');
+  const [phone, setPhone] = useState(user?.phone ? user.phone.replace(/^\+\d{1,4}/, '') : '');
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRY_DIAL_CODES[0]);
+  const [isCountryOpen, setIsCountryOpen] = useState(false);
+  const countryDropdownRef = useRef(null);
+
   const [selectedCity, setSelectedCity] = useState(user?.city_zone?.split(' - ')[0] || 'Casablanca');
   const [selectedDistrict, setSelectedDistrict] = useState(user?.city_zone?.split(' - ')[1] || 'Maârif');
   const [specialty, setSpecialty] = useState(user?.maalem_details?.specialty || 'PLUMBING');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFullName(user.full_name || '');
+      if (user.phone) {
+        // Détecter indicatif existant si présent
+        const matchingCountry = COUNTRY_DIAL_CODES.find(c => user.phone.startsWith(c.dial));
+        if (matchingCountry) {
+          setSelectedCountry(matchingCountry);
+          setPhone(user.phone.replace(matchingCountry.dial, ''));
+        } else {
+          setPhone(user.phone.replace(/^\+/, ''));
+        }
+      }
+      if (isMissingPhone) {
+        setActiveTab('edit');
+      }
+    }
+  }, [user, isMissingPhone]);
+
+  // Fermer dropdown pays lors d'un clic extérieur
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(e.target)) {
+        setIsCountryOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!isOpen || !user) return null;
 
@@ -82,8 +121,42 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
 
   const currentCityObj = CITIES.find(c => c.name === selectedCity) || CITIES[0];
 
+  const cleanPhoneInput = (input, dial) => {
+    let digits = String(input || '').replace(/\D/g, '');
+    const dialDigits = String(dial || '+212').replace(/\D/g, '');
+    if (digits.startsWith(dialDigits)) {
+      digits = digits.substring(dialDigits.length);
+    }
+    if (digits.startsWith('0')) {
+      digits = digits.substring(1);
+    }
+    return digits;
+  };
+
+  const handlePhoneChange = (e) => {
+    const raw = e.target.value;
+    const sanitized = cleanPhoneInput(raw, selectedCountry.dial);
+    setPhone(sanitized);
+  };
+
+  const getFullPhone = () => {
+    if (!phone) return '';
+    const cleanDigits = phone.replace(/\D/g, '');
+    const dialDigits = selectedCountry.dial.replace(/\D/g, '');
+    if (cleanDigits.startsWith(dialDigits)) {
+      return `+${cleanDigits}`;
+    }
+    return `${selectedCountry.dial}${cleanDigits}`;
+  };
+
   const handleSaveProfile = async (e) => {
     e.preventDefault();
+    const formattedPhone = getFullPhone();
+    if (!formattedPhone || formattedPhone.length < 8) {
+      toast.error('Veuillez renseigner un numéro de téléphone valide.');
+      return;
+    }
+
     setSaving(true);
     const fullCityZone = `${selectedCity} - ${selectedDistrict}`;
 
@@ -91,7 +164,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
       const updatedUser = {
         ...user,
         full_name: fullName.trim() || user.full_name,
-        phone: phone.trim() || user.phone,
+        phone: formattedPhone,
         city_zone: fullCityZone,
       };
 
@@ -108,7 +181,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           .from('profiles')
           .update({
             full_name: updatedUser.full_name,
-            phone: updatedUser.phone,
+            phone: formattedPhone,
             city_zone: fullCityZone
           })
           .eq('id', user.id);
@@ -122,6 +195,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
       }
 
       setUser(updatedUser);
+      sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
       toast.success('✨ Vos coordonnées ont été enregistrées avec succès !');
       setActiveTab('info');
     } catch (err) {
@@ -157,13 +231,21 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           {/* Header Avatar & Role Badge */}
           <div className="flex items-center gap-4 pt-1">
             <div className="relative">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 border border-cyan-400/50 flex items-center justify-center font-black text-2xl text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]">
-                {isMaalem ? (
-                  <EnhancedCategoryIcon type={specialty} className="w-9 h-9" />
-                ) : (
-                  (user.full_name?.charAt(0) || 'U').toUpperCase()
-                )}
-              </div>
+              {user.avatar_url ? (
+                <img 
+                  src={user.avatar_url} 
+                  alt={user.full_name} 
+                  className="w-16 h-16 rounded-2xl object-cover border border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 border border-cyan-400/50 flex items-center justify-center font-black text-2xl text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                  {isMaalem ? (
+                    <EnhancedCategoryIcon type={specialty} className="w-9 h-9" />
+                  ) : (
+                    (user.full_name?.charAt(0) || 'U').toUpperCase()
+                  )}
+                </div>
+              )}
               <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-950 rounded-full shadow-md"></span>
             </div>
 
@@ -180,24 +262,35 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                   {isAdmin ? '🛡️ Administrateur' : isMaalem ? `🛠️ ${getSpecialtyLabel(specialty)}` : '👤 Client Particulier'}
                 </span>
 
-                {isMaalem ? (
+                {user.phone && user.phone.length >= 8 ? (
                   <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1 shadow-sm">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" /> Numéro Vérifié (SMS)
+                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" /> Téléphone Enregistré
                   </span>
                 ) : (
-                  (user.phone && user.phone.length >= 8) ? (
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
-                      <CheckCircle2 className="w-2.5 h-2.5" /> Mobile Vérifié (OTP)
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-slate-400 bg-slate-900 px-2.5 py-0.5 rounded-full border border-slate-700">
-                      Standard
-                    </span>
-                  )
+                  <span className="text-[10px] font-bold text-amber-400 bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1 shadow-sm">
+                    <AlertCircle className="w-2.5 h-2.5" /> Numéro requis
+                  </span>
                 )}
               </div>
             </div>
           </div>
+
+          {/* Bandeau d'accueil Google & Complétion requise */}
+          {isMissingPhone && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-3 bg-gradient-to-r from-cyan-950/90 to-blue-950/90 border border-cyan-400/50 rounded-2xl space-y-1 shadow-[0_0_20px_rgba(6,182,212,0.2)]"
+            >
+              <p className="text-xs font-black text-cyan-300 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-cyan-400" />
+                <span>👋 Bienvenue {user.full_name || ''} !</span>
+              </p>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Votre compte Google est connecté. Veuillez renseigner votre <strong>numéro de téléphone</strong> et votre <strong>quartier</strong> pour que les artisans puissent vous joindre lors de vos demandes de dépannage !
+              </p>
+            </motion.div>
+          )}
 
           {/* Tab Switcher */}
           <div className="flex bg-slate-900/90 p-1 rounded-xl border border-cyan-500/20">
@@ -222,7 +315,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
               }`}
             >
               <Edit3 className="w-3 h-3" />
-              <span>Modifier</span>
+              <span>{isMissingPhone ? 'Compléter' : 'Modifier'}</span>
             </button>
             {!isMaalem && (
               <button
@@ -247,7 +340,9 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                   <Phone className="w-4 h-4 text-cyan-400" />
                   <span className="text-xs font-bold text-slate-300">Téléphone Mobile</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-cyan-300 dir-ltr">{user.phone || '+212600000000'}</span>
+                <span className="text-xs font-mono font-bold text-cyan-300 dir-ltr">
+                  {user.phone || <span className="text-amber-400 italic">Non renseigné</span>}
+                </span>
               </div>
 
               <div className="bg-slate-900/90 border border-cyan-500/20 p-3.5 rounded-2xl flex items-center justify-between">
@@ -286,7 +381,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
 
           {/* Tab 2: Edit Form */}
           {activeTab === 'edit' && (
-            <motion.form initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={handleSaveProfile} className="space-y-3">
+            <motion.form initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={handleSaveProfile} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1">Nom Complet :</label>
                 <input
@@ -294,32 +389,67 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Votre nom complet"
-                  className="w-full p-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs focus:border-cyan-400 focus:outline-none"
+                  className="w-full p-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs font-bold focus:border-cyan-400 focus:outline-none"
                   required
                 />
               </div>
 
-              {/* Téléphone Mobile Verrouillé & Protégé */}
+              {/* Téléphone Mobile avec Sélecteur d'Indicatif International */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-slate-300">Téléphone Mobile :</label>
-                  <span className="text-[10px] font-bold text-amber-400 flex items-center gap-1 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-500/30">
-                    <Lock className="w-3 h-3" /> Clé de Sécurité OTP
-                  </span>
-                </div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Numéro de Téléphone :</label>
                 <div className="relative">
+                  {/* Sélecteur d'indicatif pays */}
+                  <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20" ref={countryDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setIsCountryOpen(!isCountryOpen)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-950/90 hover:bg-slate-900 border border-cyan-500/40 hover:border-cyan-400 rounded-xl text-cyan-300 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                    >
+                      <span className="text-sm">{selectedCountry.flag}</span>
+                      <span>{selectedCountry.dial}</span>
+                      <ChevronDown className="w-3 h-3 text-cyan-400 opacity-70" />
+                    </button>
+
+                    {isCountryOpen && (
+                      <div className="absolute left-0 top-full mt-1.5 w-60 max-h-52 overflow-y-auto bg-slate-950/95 border border-cyan-500/50 rounded-2xl shadow-2xl p-1.5 z-50 modal-scroll backdrop-blur-xl">
+                        <div className="px-2 py-1 text-[10px] font-mono text-cyan-400 font-bold uppercase border-b border-cyan-500/20 mb-1 flex items-center gap-1">
+                          <Globe className="w-3 h-3" />
+                          <span>Indicatif Pays / MRE</span>
+                        </div>
+                        {COUNTRY_DIAL_CODES.map((c) => (
+                          <button
+                            key={c.code}
+                            type="button"
+                            onClick={() => {
+                              setSelectedCountry(c);
+                              setIsCountryOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer ${
+                              selectedCountry.code === c.code
+                                ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-500/30'
+                                : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{c.flag}</span>
+                              <span className="truncate text-left">{c.name}</span>
+                            </div>
+                            <span className="font-mono text-cyan-400 text-[11px] font-bold">{c.dial}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <input
-                    type="text"
-                    value={user?.phone || '+212600000000'}
-                    readOnly
-                    disabled
-                    className="w-full p-2.5 bg-slate-950/90 border border-slate-800 rounded-xl text-slate-400 text-xs font-mono cursor-not-allowed select-none"
+                    type="tel"
+                    required
+                    placeholder={selectedCountry.placeholder || '612345678'}
+                    value={phone}
+                    onChange={handlePhoneChange}
+                    className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
                   />
-                  <Lock className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
                 </div>
-                <p className="text-[10px] text-slate-500 mt-1 italic">
-                  🛡️ Numéro certifié par SMS OTP. Impossible à modifier directement pour garantir la traçabilité des interventions.
-                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -332,7 +462,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                       const city = CITIES.find(c => c.name === e.target.value);
                       if (city && city.districts[0]) setSelectedDistrict(city.districts[0]);
                     }}
-                    className="w-full p-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs focus:border-cyan-400 focus:outline-none"
+                    className="w-full p-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs font-bold focus:border-cyan-400 focus:outline-none cursor-pointer"
                   >
                     {CITIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
                   </select>
@@ -343,7 +473,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                   <select
                     value={selectedDistrict}
                     onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="w-full p-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs focus:border-cyan-400 focus:outline-none"
+                    className="w-full p-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs font-bold focus:border-cyan-400 focus:outline-none cursor-pointer"
                   >
                     {currentCityObj.districts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
@@ -361,10 +491,10 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 whileTap={{ scale: 0.95 }}
                 type="submit"
                 disabled={saving}
-                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-[0_0_15px_rgba(52,211,153,0.4)] flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
+                className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-[0_0_20px_rgba(52,211,153,0.4)] flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 mt-2"
               >
                 <Save className="w-4 h-4" />
-                <span>{saving ? 'Enregistrement...' : 'Enregistrer les Modifications'}</span>
+                <span>{saving ? 'Enregistrement...' : 'Enregistrer mon Profil BricoleMoi'}</span>
               </motion.button>
             </motion.form>
           )}
