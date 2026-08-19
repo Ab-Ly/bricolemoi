@@ -798,40 +798,7 @@ export const AuthModal = () => {
     );
   };
 
-  // Render Sélecteur de Canal OTP (SMS / WhatsApp)
-  const renderChannelSelector = (accent = 'cyan') => (
-    <div className="space-y-1 my-1">
-      <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-950/90 border border-slate-800 rounded-xl shadow-inner">
-        <button
-          type="button"
-          onClick={() => setChannel('sms')}
-          className={`py-1.5 px-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-            channel === 'sms'
-              ? accent === 'amber'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-[0_0_12px_rgba(245,158,11,0.4)] border border-amber-400/50'
-                : 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-[0_0_12px_rgba(6,182,212,0.4)] border border-cyan-400/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <ChatCenteredText weight="duotone" className={`w-3.5 h-3.5 ${channel === 'sms' ? (accent === 'amber' ? 'text-slate-950' : 'text-white') : (accent === 'amber' ? 'text-amber-400' : 'text-cyan-400')}`} />
-          <span>SMS Direct 💬</span>
-        </button>
 
-        <button
-          type="button"
-          onClick={() => setChannel('whatsapp')}
-          className={`py-1.5 px-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-            channel === 'whatsapp'
-              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(16,185,129,0.4)] border border-emerald-400/50'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-          }`}
-        >
-          <WhatsappLogo weight="fill" className={`w-3.5 h-3.5 ${channel === 'whatsapp' ? 'text-white' : 'text-emerald-400'}`} />
-          <span>WhatsApp 📲</span>
-        </button>
-      </div>
-    </div>
-  );
 
   const isClient = role === 'CLIENT';
 
@@ -1080,25 +1047,14 @@ export const AuthModal = () => {
                         </button>
                       </div>
 
-                      {/* Sélecteur Canal WhatsApp / SMS */}
-                      {renderChannelSelector('cyan')}
-
                       <motion.button
                         whileTap={{ scale: 0.96 }}
                         type="submit"
                         disabled={loading}
-                        className={`w-full py-2.5 font-extrabold text-xs rounded-xl shadow-lg flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1 ${
-                          channel === 'whatsapp'
-                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.35)]'
-                            : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]'
-                        }`}
+                        className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1"
                       >
-                        {channel === 'whatsapp' ? (
-                          <WhatsappLogo weight="fill" className="w-4 h-4 text-white" />
-                        ) : (
-                          <ChatCenteredText weight="duotone" className="w-4 h-4 text-white" />
-                        )}
-                        <span>{loading ? 'Vérification...' : (channel === 'whatsapp' ? 'Recevoir mon Code WhatsApp →' : 'Recevoir mon Code SMS →')}</span>
+                        <ChatCenteredText weight="duotone" className="w-4 h-4 text-white" />
+                        <span>{loading ? 'Vérification...' : 'Recevoir mon Code SMS Sécurisé →'}</span>
                       </motion.button>
                     </form>
                   </div>
@@ -1264,21 +1220,14 @@ export const AuthModal = () => {
                       </button>
                     </div>
 
-                    {/* Sélecteur Canal WhatsApp / SMS */}
-                    {renderChannelSelector('amber')}
-
                     <motion.button
                       whileTap={{ scale: 0.96 }}
                       type="submit"
                       disabled={loading}
                       className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer mt-1"
                     >
-                      {channel === 'whatsapp' ? (
-                        <WhatsappLogo weight="fill" className="w-4 h-4 text-slate-950" />
-                      ) : (
-                        <Handshake weight="duotone" className="w-4 h-4 text-slate-950" />
-                      )}
-                      <span>{loading ? 'Validation...' : (channel === 'whatsapp' ? 'Rejoindre via Code WhatsApp →' : 'Rejoindre le Réseau Pro →')}</span>
+                      <Handshake weight="duotone" className="w-4 h-4 text-slate-950" />
+                      <span>{loading ? 'Validation...' : 'Rejoindre le Réseau Pro →'}</span>
                     </motion.button>
                   </form>
                 )}
@@ -1367,25 +1316,14 @@ export const AuthModal = () => {
                       />
                     </div>
 
-                    {/* Sélecteur Canal WhatsApp / SMS */}
-                    {renderChannelSelector('cyan')}
-
                     <motion.button
                       whileTap={{ scale: 0.96 }}
                       type="submit"
                       disabled={loading}
-                      className={`w-full py-2.5 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer ${
-                        channel === 'whatsapp'
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400'
-                          : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400'
-                      }`}
+                      className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                     >
-                      {channel === 'whatsapp' ? (
-                        <WhatsappLogo weight="fill" className="w-4 h-4" />
-                      ) : (
-                        <ChatCenteredText weight="duotone" className="w-4 h-4" />
-                      )}
-                      <span>{loading ? 'Envoi...' : (channel === 'whatsapp' ? 'Recevoir le Code WhatsApp →' : 'Recevoir le Code SMS →')}</span>
+                      <ChatCenteredText weight="duotone" className="w-4 h-4 text-white" />
+                      <span>{loading ? 'Envoi...' : 'Recevoir le Code SMS →'}</span>
                     </motion.button>
 
                     <button
@@ -1405,32 +1343,18 @@ export const AuthModal = () => {
             )}
 
             {/* ======================================================== */}
-            {/* ETAPE 2 : CODE OTP (WHATSAPP / SMS)                      */}
+            {/* ETAPE 2 : CODE OTP (SMS DIRECT)                          */}
             {/* ======================================================== */}
             {step === 2 && (
               <form onSubmit={(e) => { e.preventDefault(); handleOtpProceed(); }} className="space-y-3">
-                <div className={`p-2.5 rounded-xl border flex items-center justify-between shadow-sm ${
-                  channel === 'whatsapp' 
-                    ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-100' 
-                    : 'bg-slate-900/90 border-cyan-500/30 text-slate-200'
-                }`}>
+                <div className="p-2.5 rounded-xl border bg-slate-900/90 border-cyan-500/30 text-slate-200 flex items-center justify-between shadow-sm">
                   <div className="flex items-center gap-2">
-                    {channel === 'whatsapp' ? (
-                      <WhatsappLogo weight="fill" className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                    ) : (
-                      <ChatCenteredText weight="duotone" className="w-5 h-5 text-cyan-400 flex-shrink-0" />
-                    )}
+                    <ChatCenteredText weight="duotone" className="w-5 h-5 text-cyan-400 flex-shrink-0" />
                     <div>
-                      <p className="text-[11px] font-bold text-white">
-                        {channel === 'whatsapp' ? 'Code envoyé sur WhatsApp' : 'Code envoyé par SMS'}
-                      </p>
-                      <p className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
+                      <p className="text-[11px] font-bold text-white">Code de sécurité envoyé par SMS</p>
+                      <p className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5">
                         <span>{getFullInternationalNumber()}</span>
-                        {channel === 'whatsapp' && (
-                          <span className="text-emerald-400/90 font-sans text-[9px] font-bold">
-                            (Expéditeur: +212 638 853 698)
-                          </span>
-                        )}
+                        <span className="text-cyan-400/90 font-sans text-[9px] font-bold">(Expéditeur: BricoleMoi)</span>
                       </p>
                     </div>
                   </div>
@@ -1458,29 +1382,7 @@ export const AuthModal = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] pt-0.5">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const nextChannel = channel === 'whatsapp' ? 'sms' : 'whatsapp';
-                      setChannel(nextChannel);
-                      setLoading(true);
-                      try {
-                        const fullNumber = getFullInternationalNumber();
-                        await sendPhoneOTP(fullNumber, nextChannel, selectedCountry.dial);
-                        setResendCountdown(60);
-                        setInfoMsg(nextChannel === 'whatsapp' ? `Code envoyé sur WhatsApp au ${fullNumber}` : `Code envoyé par SMS au ${fullNumber}`);
-                      } catch (err) {
-                        setErrorBanner(err.message || 'Erreur lors du renvoi.');
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    className="text-cyan-400 hover:text-cyan-300 font-bold underline cursor-pointer flex items-center gap-1"
-                  >
-                    {channel === 'whatsapp' ? '💬 Essayer par SMS' : '📲 Essayer par WhatsApp'}
-                  </button>
-
+                <div className="flex items-center justify-end text-[10px] pt-0.5">
                   {resendCountdown > 0 ? (
                     <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1 bg-slate-900 px-2 py-1 rounded-lg">
                       <ClockCounterClockwise className="w-3 h-3 text-cyan-400 animate-spin" />
@@ -1493,7 +1395,7 @@ export const AuthModal = () => {
                       className="text-[10px] text-amber-400 hover:text-amber-300 underline font-bold flex items-center gap-1 transition-all cursor-pointer"
                     >
                       <RotateCcw className="w-3 h-3 text-amber-400" />
-                      <span>Renvoyer</span>
+                      <span>Renvoyer le code SMS</span>
                     </button>
                   )}
                 </div>
