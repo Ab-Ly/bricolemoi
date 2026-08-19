@@ -40,6 +40,7 @@ export function formatMoroccanPhone(rawPhone, defaultDial = '+212') {
 }
 
 const INFOBIP_WHATSAPP_SENDER = import.meta.env.VITE_INFOBIP_WHATSAPP_SENDER || '447860088970';
+const INFOBIP_SMS_SENDER = import.meta.env.VITE_INFOBIP_SMS_SENDER || '447860061379';
 
 /**
  * Envoie un code OTP par WhatsApp ou SMS direct via l'API Infobip (Maroc & International)
@@ -107,7 +108,7 @@ export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defau
     // 2. Si SMS demandé ou si WhatsApp n'a pas pu aboutir :
     if (!sentSuccessfully) {
       try {
-        const smsRes = await fetch(`https://${INFOBIP_BASE_URL}/sms/2/text/advanced`, {
+        const smsRes = await fetch(`https://${INFOBIP_BASE_URL}/sms/3/messages`, {
           method: 'POST',
           headers: {
             'Authorization': authHeader,
@@ -118,17 +119,21 @@ export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defau
             messages: [
               {
                 destinations: [{ to: international }],
-                from: 'BricoleMoi',
-                text: `[BricoleMoi] Votre code de confirmation est : ${otpCode}. Valable 5 minutes.`
+                sender: INFOBIP_SMS_SENDER,
+                content: {
+                  text: `[BricoleMoi] Votre code de confirmation est : ${otpCode}. Valable 5 minutes.`
+                }
               }
             ]
           })
         });
 
         const smsData = await smsRes.json().catch(() => ({}));
-        if (smsRes.ok) {
+        if (smsRes.ok && smsData?.messages?.[0]?.status?.groupName !== 'REJECTED') {
           sentSuccessfully = true;
           channelUsed = 'sms';
+        } else {
+          console.warn('[Infobip SMS notice]:', smsData);
         }
       } catch (smsErr) {
         console.warn('[Infobip SMS notice]:', smsErr);
