@@ -16,9 +16,9 @@ export const MaalemApp = () => {
     const demoMaalem = {
       id: '22222222-2222-2222-2222-222222222222',
       role: 'MAALEM',
-      full_name: 'Hassan Plombier',
+      full_name: 'Artisan Partenaire',
       phone: '+212661234567',
-      credits: 1200,
+      credits: 15.00,
       city: 'Casablanca',
       district: 'Maârif',
       lat: 33.5883,
@@ -27,8 +27,8 @@ export const MaalemApp = () => {
       cin_verified: true,
       maalem_details: {
         specialty: 'PLUMBING',
-        rating_avg: 4.9,
-        credit_balance: 1200,
+        rating_avg: 5.0,
+        credit_balance: 15.00,
         is_verified: true,
         cin_verified: true,
         is_online: true,
@@ -51,8 +51,8 @@ export const MaalemApp = () => {
       cin_verified: true,
       maalem_details: {
         specialty: 'PLUMBING',
-        rating_avg: 4.9,
-        credit_balance: user.credits || 1200,
+        rating_avg: 5.0,
+        credit_balance: user.credits || 15.00,
         is_verified: true,
         cin_verified: true,
         is_online: true,

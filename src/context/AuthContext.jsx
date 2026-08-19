@@ -3,6 +3,15 @@ import { translations } from '../lib/i18n';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { auth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from '../lib/firebaseClient';
 import { switchSubdomainInDev } from '../lib/subdomain';
+import { 
+  sendInfobipOTP, 
+  verifyLocalOTP, 
+  formatMoroccanPhone, 
+  checkPhoneProfile as checkPhoneProfileService,
+  loginWithPin as loginWithPinService,
+  updateProfilePin,
+  hashPin
+} from '../lib/infobipAuthService';
 
 const AuthContext = createContext();
 
@@ -229,7 +238,7 @@ export const AuthProvider = ({ children }) => {
 
   // Validation numéro marocain (+212 6.../7...)
   const formatMoroccanPhone = (phone) => {
-    const cleanDigits = String(phone).replace(/\D/g, '');
+    const cleanDigits = String(phone || '').replace(/\D/g, '');
     let formatted = cleanDigits;
     if (cleanDigits.startsWith('0')) {
       formatted = '212' + cleanDigits.slice(1);
@@ -238,67 +247,15 @@ export const AuthProvider = ({ children }) => {
     }
     const finalPhone = '+' + formatted;
     const isValid = /^\+212[567]\d{8}$/.test(finalPhone);
-    return { finalPhone, isValid };
+    return { finalPhone, formatted: finalPhone, international: formatted, isValid };
   };
 
-  // Envoi OTP via Firebase Phone Auth avec fallback automatique en mode Test / Sandbox
-  const sendPhoneOTP = async (phone, containerId = 'recaptcha-container') => {
-    const { finalPhone, isValid } = formatMoroccanPhone(phone);
-    if (!isValid) {
-      throw new Error('PHONE_FORMAT_INVALID');
-    }
-
-    const isTestPhone = 
-      finalPhone.includes('000000') || 
-      finalPhone.includes('661001122') || 
-      finalPhone.includes('600000000') ||
-      finalPhone.includes('111111') ||
-      finalPhone.includes('222222');
-
-    if (isTestPhone) {
-      window.confirmationResult = {
-        confirm: async (code) => {
-          if (code === '123456' || code === '000000' || code === '999999' || (code && code.length >= 4)) {
-            return {
-              user: {
-                uid: 'dev-uid-' + finalPhone.replace(/\D/g, ''),
-                phoneNumber: finalPhone
-              }
-            };
-          }
-          throw new Error('OTP_INVALID');
-        }
-      };
-      return 'DEV_MODE';
-    }
-
-    try {
-      const verifier = getRecaptchaVerifier(containerId);
-      const confirmationResult = await signInWithPhoneNumber(auth, finalPhone, verifier);
-      window.confirmationResult = confirmationResult;
-      return true;
-    } catch (err) {
-      console.warn('[Firebase] Phone Auth error / fallback to Test OTP Sandbox:', err.code, err.message);
-
-      // Fallback sandbox automatique : permet de tester l'OTP même sans facturation Firebase SMS
-      window.confirmationResult = {
-        confirm: async (code) => {
-          if (code === '123456' || code === '000000' || code === '999999' || (code && code.length >= 4)) {
-            return {
-              user: {
-                uid: 'dev-uid-' + finalPhone.replace(/\D/g, ''),
-                phoneNumber: finalPhone
-              }
-            };
-          }
-          throw new Error('OTP_INVALID');
-        }
-      };
-      return 'DEV_MODE';
-    }
+  // Envoi OTP via Infobip (WhatsApp / SMS)
+  const sendPhoneOTP = async (phone, channel = 'whatsapp') => {
+    return await sendInfobipOTP(phone, channel);
   };
 
-  // Convertit un UID Firebase (format libre) en UUID v4 PostgreSQL valide
+  // Convertit un identifiant en UUID v4 PostgreSQL valide
   const toValidUUID = (input) => {
     if (!input) return '00000000-0000-4000-8000-000000000000';
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -314,10 +271,11 @@ export const AuthProvider = ({ children }) => {
     return `${hex}-${cleanHex.slice(0, 4)}-4${cleanHex.slice(5, 8)}-8${cleanHex.slice(9, 12)}-${cleanHex.slice(12, 24)}`;
   };
 
-  // Vérification OTP et sync profil Supabase
+  // Vérification OTP et sync profil Supabase via Infobip
   const verifyPhoneOTP = async ({
     phone,
     token,
+    pin = '',
     role = 'CLIENT',
     fullName = 'Utilisateur Maroc',
     cityZone = 'Casablanca',
@@ -326,149 +284,159 @@ export const AuthProvider = ({ children }) => {
     mode = 'SIGN_IN'
   }) => {
     const { finalPhone } = formatMoroccanPhone(phone);
-    let rawUid = 'user-' + Date.now();
+    const normRole = (role || 'CLIENT').toUpperCase();
+    let authenticatedUser = null;
 
-    const isTestToken = token === '123456' || token === '000000' || token === '999999';
-
-    if (isTestToken) {
-      // Validation directe immédiate pour les tests QA & Démo (Client et Maâlem)
-      rawUid = 'demo-' + finalPhone.replace(/\D/g, '');
-    } else if (window.confirmationResult && typeof window.confirmationResult.confirm === 'function') {
-      try {
-        const result = await window.confirmationResult.confirm(token);
-        if (result && result.user) {
-          rawUid = result.user.uid;
-        }
-      } catch (err) {
-        console.warn('[Firebase] OTP Verification error / fallback to test token:', err.message);
-        if (token && token.length >= 4) {
-          rawUid = 'demo-' + finalPhone.replace(/\D/g, '');
-        } else {
-          throw new Error('OTP_INVALID');
-        }
-      }
-    } else if (token && token.length >= 4) {
-      rawUid = 'demo-' + finalPhone.replace(/\D/g, '');
-    } else {
-      throw new Error('OTP_SESSION_EXPIRED');
+    // 1. Validation de l'OTP
+    const otpValidation = verifyLocalOTP(phone, token);
+    if (!otpValidation.valid) {
+      throw new Error(otpValidation.error || 'Code OTP incorrect.');
     }
 
-    const firebaseUid = toValidUUID(rawUid);
-    const normRole = (role || 'CLIENT').toUpperCase();
+    const pinHash = pin ? await hashPin(pin) : null;
 
-    let authenticatedUser = {
-      id: firebaseUid,
-      phone: finalPhone,
-      role: normRole,
-      full_name: fullName || 'Utilisateur Maroc',
-      city_zone: cityZone || 'Casablanca'
-    };
-
+    // 2. Appel Edge Function Supabase verify-infobip-otp si disponible
     if (isSupabaseConfigured) {
       try {
-        // Cherche un profil existant par numéro de téléphone
-        const { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('phone', finalPhone)
-          .maybeSingle();
-
-        if (existingProfile) {
-          const effectiveRole = (existingProfile.role || 'CLIENT').toUpperCase();
-
-          // Unicité stricte : blocage si inscription avec un rôle différent
-          if (mode === 'SIGN_UP' && effectiveRole !== normRole) {
-            throw new Error(`PHONE_ROLE_CONFLICT:${effectiveRole}`);
-          }
-
-          authenticatedUser = {
-            ...authenticatedUser,
-            id: existingProfile.id || firebaseUid,
-            role: effectiveRole,
-            full_name: existingProfile.full_name || fullName,
-            city_zone: existingProfile.city_zone || cityZone,
-            credits: existingProfile.credits || (effectiveRole === 'MAALEM' ? 15.00 : 0)
-          };
-
-          if (effectiveRole === 'MAALEM') {
-            const { data: maalemDetails } = await supabase
-              .from('maalem_details')
-              .select('*')
-              .eq('id', authenticatedUser.id)
-              .maybeSingle();
-
-            if (maalemDetails) {
-              authenticatedUser.maalem_details = {
-                ...maalemDetails,
-                is_verified: true,
-                status: maalemDetails.status || 'active'
-              };
-            }
-          }
-        } else {
-          // Création du profil (première inscription)
-          const profileData = {
-            id: firebaseUid,
+        const { data, error } = await supabase.functions.invoke('verify-infobip-otp', {
+          body: {
             phone: finalPhone,
+            token,
             role: normRole,
-            full_name: fullName || 'Utilisateur Maroc',
-            city_zone: cityZone || 'Casablanca',
-            credits: normRole === 'MAALEM' ? 15.00 : 0.00
-          };
-
-          let { data: insertedProfiles, error: pError } = await supabase.from('profiles').upsert([profileData]).select();
-
-          // Fallback si la colonne credits n'est pas encore rechargée dans le cache Supabase PostgREST
-          if (pError && pError.message?.includes('credits')) {
-            delete profileData.credits;
-            const fallbackRes = await supabase.from('profiles').upsert([profileData]).select();
-            pError = fallbackRes.error;
+            fullName,
+            cityZone,
+            specialty,
+            portfolioUrls,
+            mode,
+            pin
           }
+        });
 
-          if (pError) {
-            console.error('[Supabase Error] Profile upsert failed:', pError.message, pError);
-            throw new Error(`Erreur enregistrement profil Supabase: ${pError.message}`);
-          }
-
-          if (normRole === 'MAALEM') {
-            const defaultDetails = {
-              id: firebaseUid,
-              specialty: specialty || 'PLUMBING',
-              credit_balance: 15.00,
-              is_verified: true,
-              cin_verified: true,
-              status: 'active',
-              portfolio_urls: Array.isArray(portfolioUrls) ? portfolioUrls : []
-            };
-            let { error: dError } = await supabase.from('maalem_details').upsert([defaultDetails]).select();
-
-            // Fallback si colonnes portfolio_urls, cin_verified ou status pas encore rechargées dans le cache PostgREST
-            if (dError && (dError.message?.includes('cin_verified') || dError.message?.includes('portfolio_urls') || dError.message?.includes('status'))) {
-              const cleanDetails = {
-                id: firebaseUid,
-                specialty: specialty || 'PLUMBING',
-                credit_balance: 15.00,
-                is_verified: true
-              };
-              const fallbackDErr = await supabase.from('maalem_details').upsert([cleanDetails]).select();
-              dError = fallbackDErr.error;
-            }
-
-            if (dError) {
-              console.error('[Supabase Error] Maalem details upsert failed:', dError.message, dError);
-              throw new Error(`Erreur enregistrement Maalem Supabase: ${dError.message}`);
-            }
-            authenticatedUser.maalem_details = defaultDetails;
+        if (error) {
+          const errMsg = error.message || '';
+          if (errMsg.includes('PHONE_ROLE_CONFLICT') || data?.error?.includes('PHONE_ROLE_CONFLICT')) {
+            throw new Error(data?.error || errMsg);
           }
         }
-      } catch (dbErr) {
-        console.error('[Supabase DB Error]:', dbErr.message || dbErr);
-        throw dbErr;
+
+        if (data?.success && data?.user) {
+          authenticatedUser = data.user;
+        }
+      } catch (edgeErr) {
+        if (edgeErr.message?.startsWith('PHONE_ROLE_CONFLICT')) {
+          throw edgeErr;
+        }
+        console.warn('[verify-infobip-otp] Edge Function fallback notice:', edgeErr.message);
       }
     }
 
-    // Broadcast inscription Maalem vers les autres onglets (Admin Dashboard)
-    if (normRole === 'MAALEM') {
+    // 3. Fallback direct Supabase REST
+    if (!authenticatedUser) {
+      const firebaseUid = toValidUUID('user-' + finalPhone.replace(/\D/g, ''));
+      sessionStorage.removeItem('bricolemoi_pending_otp');
+
+      authenticatedUser = {
+        id: firebaseUid,
+        phone: finalPhone,
+        role: normRole,
+        full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
+        city_zone: cityZone || 'Casablanca'
+      };
+
+      if (isSupabaseConfigured) {
+        try {
+          const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('phone', finalPhone)
+            .maybeSingle();
+
+          if (existingProfile) {
+            const effectiveRole = (existingProfile.role || 'CLIENT').toUpperCase();
+
+            if (mode === 'SIGN_UP' && effectiveRole !== normRole) {
+              throw new Error(`PHONE_ROLE_CONFLICT:${effectiveRole}`);
+            }
+
+            const updateFields = {
+              full_name: existingProfile.full_name || fullName,
+              city_zone: existingProfile.city_zone || cityZone
+            };
+            if (pinHash) updateFields.pin_hash = pinHash;
+
+            await supabase.from('profiles').update(updateFields).eq('id', existingProfile.id);
+
+            authenticatedUser = {
+              ...authenticatedUser,
+              id: existingProfile.id || firebaseUid,
+              role: effectiveRole,
+              full_name: existingProfile.full_name || fullName,
+              city_zone: existingProfile.city_zone || cityZone,
+              credits: existingProfile.credits || (effectiveRole === 'MAALEM' ? 15.00 : 0)
+            };
+
+            if (effectiveRole === 'MAALEM') {
+              const { data: maalemDetails } = await supabase
+                .from('maalem_details')
+                .select('*')
+                .eq('id', authenticatedUser.id)
+                .maybeSingle();
+
+              if (maalemDetails) {
+                authenticatedUser.maalem_details = {
+                  ...maalemDetails,
+                  is_verified: true,
+                  status: maalemDetails.status || 'active'
+                };
+              }
+            }
+          } else {
+            const profileData = {
+              id: firebaseUid,
+              phone: finalPhone,
+              role: normRole,
+              full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
+              city_zone: cityZone || 'Casablanca'
+            };
+            if (pinHash) profileData.pin_hash = pinHash;
+
+            let { error: pError } = await supabase.from('profiles').upsert([profileData]).select();
+            if (pError) {
+              // Retry without pin_hash or credits if custom columns are not yet added
+              const baseProfile = {
+                id: firebaseUid,
+                phone: finalPhone,
+                role: normRole,
+                full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
+                city_zone: cityZone || 'Casablanca'
+              };
+              await supabase.from('profiles').upsert([baseProfile]).select();
+            }
+
+            if (normRole === 'MAALEM') {
+              const defaultDetails = {
+                id: firebaseUid,
+                specialty: specialty || 'PLUMBING',
+                is_verified: true,
+                cin_verified: true,
+                status: 'active',
+                portfolio_urls: Array.isArray(portfolioUrls) ? portfolioUrls : []
+              };
+              await supabase.from('maalem_details').upsert([defaultDetails]).select().catch(() => {});
+              authenticatedUser.maalem_details = defaultDetails;
+            }
+          }
+        } catch (dbErr) {
+          if (dbErr.message?.startsWith('PHONE_ROLE_CONFLICT')) {
+            throw dbErr;
+          }
+          console.error('[Supabase DB Error]:', dbErr.message || dbErr);
+        }
+      }
+    }
+
+    // Broadcast inscription Maalem vers les autres onglets
+    if (authenticatedUser.role === 'MAALEM') {
       try {
         const bc = new BroadcastChannel('bricolemoi_intertab_sync');
         bc.postMessage({
@@ -493,10 +461,40 @@ export const AuthProvider = ({ children }) => {
 
     setUser(authenticatedUser);
     setCurrentRole(authenticatedUser.role);
+    sessionStorage.setItem('bricolemoi_session', JSON.stringify(authenticatedUser));
     setAuthModalOpen(false);
     switchSubdomainInDev(authenticatedUser.role);
 
     return authenticatedUser;
+  };
+
+  // Connexion instantanée gratuite par Code PIN à 4 chiffres (0 DH)
+  const loginWithPin = async ({ phone, pin }) => {
+    const res = await loginWithPinService({ phone, pin });
+    if (res?.success && res?.user) {
+      setUser(res.user);
+      setCurrentRole(res.user.role);
+      sessionStorage.setItem('bricolemoi_session', JSON.stringify(res.user));
+      setAuthModalOpen(false);
+      switchSubdomainInDev(res.user.role);
+      return res.user;
+    }
+    throw new Error('Connexion impossible.');
+  };
+
+  // Réinitialisation du PIN après validation OTP
+  const resetPinWithOtp = async ({ phone, token, newPin }) => {
+    const otpValidation = verifyLocalOTP(phone, token);
+    if (!otpValidation.valid) {
+      throw new Error(otpValidation.error || 'Code OTP incorrect.');
+    }
+    await updateProfilePin({ phone, pin: newPin });
+    return await loginWithPin({ phone, pin: newPin });
+  };
+
+  // Vérification de profil
+  const checkPhoneProfile = async (phone) => {
+    return await checkPhoneProfileService(phone);
   };
 
   const logout = async (onLoggedOut) => {
@@ -535,6 +533,9 @@ export const AuthProvider = ({ children }) => {
         verifyAdminPIN,
         sendPhoneOTP,
         verifyPhoneOTP,
+        loginWithPin,
+        resetPinWithOtp,
+        checkPhoneProfile,
         logout
       }}
     >

@@ -59,6 +59,19 @@ export const ABLY_CHANNELS = {
 let ablyInstance = null;
 let currentClientId = null;
 
+const getStableAnonymousClientId = () => {
+  try {
+    let id = sessionStorage.getItem('bricolemoi_anon_client_id');
+    if (!id) {
+      id = 'anon-' + Math.random().toString(36).substring(2, 9);
+      sessionStorage.setItem('bricolemoi_anon_client_id', id);
+    }
+    return id;
+  } catch (e) {
+    return 'anon-user';
+  }
+};
+
 /**
  * Initialise ou retourne l'instance unique du client Ably Realtime
  * avec gestion de la persistance de session et récupération de connexion.
@@ -74,19 +87,16 @@ export const getAblyClient = (clientId = null) => {
     return null;
   }
 
-  // Si l'instance existe déjà avec le bon clientId, la réutiliser
-  const targetClientId = clientId || currentClientId || 'anonymous-user';
-  if (ablyInstance && currentClientId === targetClientId) {
-    return ablyInstance;
-  }
+  const targetClientId = clientId || currentClientId || getStableAnonymousClientId();
 
-  // Si le clientId change, on ferme l'ancienne connexion proprement
+  // Si l'instance existe déjà et est active, la réutiliser
   if (ablyInstance) {
+    if (currentClientId === targetClientId || (targetClientId.startsWith('anon-') && currentClientId?.startsWith('anon-'))) {
+      return ablyInstance;
+    }
     try {
       ablyInstance.close();
-    } catch (e) {
-      console.warn('[Ably] Erreur lors de la fermeture de l’ancienne instance:', e);
-    }
+    } catch (e) {}
   }
 
   currentClientId = targetClientId;

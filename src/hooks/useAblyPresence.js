@@ -118,7 +118,7 @@ export const useAblyPresence = ({ user, isOnline, onPresenceChange } = {}) => {
       return;
     }
 
-    const clientId = user?.id || 'client-browser-' + Math.random().toString(36).substring(2, 9);
+    const clientId = user?.id || null;
     const client = getAblyClient(clientId);
     if (!client) return;
 

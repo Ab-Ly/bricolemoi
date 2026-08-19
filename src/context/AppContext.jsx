@@ -355,7 +355,7 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Auto-Sync du Maalem connecté dans la liste globale (via Supabase Realtime)
+  // Auto-Sync du Maalem connecté dans la liste globale (uniquement si son rôle réel est MAALEM)
   useEffect(() => {
     if (user && String(user.role || '').toUpperCase() === 'MAALEM') {
       const isVerified = Boolean(
@@ -382,15 +382,15 @@ export const AppProvider = ({ children }) => {
           } else if (zone.includes('agadir')) {
             mLat = 30.4278; mLng = -9.5981;
           } else {
-            mLat = 33.5883; mLng = -7.6328; // Casablanca par défaut
+            mLat = 33.5883; mLng = -7.6328;
           }
         }
 
         const newMaalem = {
           id: user.id,
-          full_name: user.full_name || 'Artisan Maalem',
+          full_name: user.full_name || 'Artisan Maâlem',
           phone: user.phone || '',
-          specialty: user.maalem_details?.specialty || 'PLUMBING',
+          specialty: user.maalem_details?.specialty || user.specialty || 'PLUMBING',
           rating_avg: user.maalem_details?.rating_avg ?? 5.0,
           is_verified: isVerified,
           cin_verified: isVerified,
@@ -400,7 +400,7 @@ export const AppProvider = ({ children }) => {
           is_available: isMaalemOnline,
           lat: mLat,
           lng: mLng,
-          credit_balance: user.maalem_details?.credit_balance ?? user.credits ?? 0,
+          credit_balance: user.maalem_details?.credit_balance ?? user.credits ?? 15.00,
           district: user.city_zone || 'Casablanca'
         };
         const filtered = prev.filter((m) => m.id !== user.id);
