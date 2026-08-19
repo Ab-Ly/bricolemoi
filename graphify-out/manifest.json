@@ -42,10 +42,10 @@
     "semantic_hash": "c187df2c1993bfcb1233873887bf9462"
   },
   "src/components/AuthModal.jsx": {
-    "mtime": 1787172253.8795426,
-    "seen": 1787172381.875686,
-    "ast_hash": "19893e87df48e8a934c04e50881c0231",
-    "semantic_hash": "19893e87df48e8a934c04e50881c0231"
+    "mtime": 1787173819.9644427,
+    "seen": 1787173889.618631,
+    "ast_hash": "b11eea7f806e3b635cbaac4a43616c0b",
+    "semantic_hash": ""
   },
   "src/components/BottomNav.jsx": {
     "mtime": 1786994454.0546026,
