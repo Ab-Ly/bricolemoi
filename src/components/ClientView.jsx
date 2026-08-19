@@ -33,6 +33,9 @@ import {
   Siren,
   ShieldCheck as LucideShieldCheck
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { COUNTRY_DIAL_CODES } from './AuthModal';
 import { CustomDropdown } from './CustomDropdown';
 import { 
   Buildings, 
@@ -228,7 +231,7 @@ const mapCategoryToSlug = (cat) => {
 };
 
 export const ClientView = ({ initialCategory, initialCity, initialDistrict }) => {
-  const { t, user, setAuthModalOpen } = useAuth();
+  const { t, user, setUser, setAuthModalOpen } = useAuth();
   const { interventions, maalems, createIntervention, confirmFinalDevis, completeIntervention, submitReview, cancelIntervention } = useApp();
   const {
     state: emergencyState,
@@ -570,13 +573,25 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     setReviewModalInt(null);
   };
 
-  const handleSOSSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) {
-      setAuthModalOpen(true);
-      return;
-    }
+  // State pour la saisie urgente du numéro de téléphone lors d'un SOS Google sans numéro
+  const [sosPhoneModalOpen, setSosPhoneModalOpen] = useState(false);
+  const [sosPhoneInput, setSosPhoneInput] = useState('');
+  const [sosCountry, setSosCountry] = useState(COUNTRY_DIAL_CODES[0]);
+  const [sosCountryOpen, setSosCountryOpen] = useState(false);
+  const [savingSosPhone, setSavingSosPhone] = useState(false);
+  const sosCountryDropdownRef = useRef(null);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sosCountryDropdownRef.current && !sosCountryDropdownRef.current.contains(e.target)) {
+        setSosCountryOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const executeSOSCreation = async (overridePhone) => {
     setSubmitting(true);
     const fullDistrictLabel = `${selectedCity} - ${selectedDistrict}`;
     const primaryPhoto = photos[0] || photoUrl || (serviceType === 'plomberie' 
@@ -594,7 +609,8 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
         photos_list: photos.length > 0 ? photos : [primaryPhoto],
         access_details: accessDetails,
         urgency_level: urgencyLevel,
-        audio_note_url: audioUrl
+        audio_note_url: audioUrl,
+        client_phone: overridePhone || user?.phone
       });
 
       if (created) {
@@ -608,6 +624,52 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSOSSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    // Sécurité essentielle : Si le client Google n'a pas encore de numéro, lui demander en 1 clic
+    if (!user.phone || user.phone.length < 8) {
+      setSosPhoneModalOpen(true);
+      return;
+    }
+
+    await executeSOSCreation();
+  };
+
+  const handleConfirmSosPhone = async (e) => {
+    e.preventDefault();
+    const cleanDigits = sosPhoneInput.replace(/\D/g, '');
+    if (cleanDigits.length < 6) {
+      toast.error('Veuillez renseigner un numéro de téléphone valide.');
+      return;
+    }
+    setSavingSosPhone(true);
+    const dialDigits = sosCountry.dial.replace(/\D/g, '');
+    const cleanNumber = cleanDigits.startsWith('0') ? cleanDigits.substring(1) : cleanDigits;
+    const formatted = cleanDigits.startsWith(dialDigits) ? `+${cleanDigits}` : `${sosCountry.dial}${cleanNumber}`;
+
+    const updatedUser = { ...user, phone: formatted };
+    setUser(updatedUser);
+    sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+
+    if (isSupabaseConfigured && user.id) {
+      try {
+        await supabase.from('profiles').update({ phone: formatted }).eq('id', user.id);
+      } catch (err) {
+        console.error('Erreur save phone SOS:', err);
+      }
+    }
+
+    setSavingSosPhone(false);
+    setSosPhoneModalOpen(false);
+    toast.success('📱 Numéro enregistré avec succès ! Lancement de l\'alerte SOS...');
+    await executeSOSCreation(formatted);
   };
 
   const toggleBadge = (badgeText) => {
@@ -1516,6 +1578,110 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
                   Vérifier sur place / Plus tard
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ======================================================== */}
+      {/* MODALE D'URGENCE : NUMÉRO DE CONTACT POUR SOS GOOGLE    */}
+      {/* ======================================================== */}
+      <AnimatePresence>
+        {sosPhoneModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.93, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.93, opacity: 0, y: 10 }}
+              className="bg-slate-950 border border-red-500/50 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-[0_0_40px_rgba(239,68,68,0.3)] relative text-slate-100 space-y-4"
+            >
+              <button
+                onClick={() => setSosPhoneModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-900 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="text-center space-y-2 pt-1">
+                <div className="w-14 h-14 rounded-2xl bg-red-950 border border-red-500/50 flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(239,68,68,0.5)]">
+                  <Siren className="w-7 h-7 text-red-400 animate-bounce" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-white">Numéro de Contact d'Urgence</h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  L'artisan doit pouvoir <strong>vous appeler directement</strong> avant de prendre la route pour intervenir chez vous.
+                </p>
+              </div>
+
+              <form onSubmit={handleConfirmSosPhone} className="space-y-4 pt-1">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Votre Numéro de Téléphone :</label>
+                  <div className="relative">
+                    {/* Sélecteur Pays */}
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20" ref={sosCountryDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setSosCountryOpen(!sosCountryOpen)}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-950/90 hover:bg-slate-900 border border-cyan-500/40 hover:border-cyan-400 rounded-xl text-cyan-300 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                      >
+                        <span className="text-sm">{sosCountry.flag}</span>
+                        <span>{sosCountry.dial}</span>
+                        <ChevronRight className="w-3 h-3 text-cyan-400 opacity-70 rotate-90" />
+                      </button>
+
+                      {sosCountryOpen && (
+                        <div className="absolute left-0 top-full mt-1.5 w-60 max-h-52 overflow-y-auto bg-slate-950/95 border border-cyan-500/50 rounded-2xl shadow-2xl p-1.5 z-50 modal-scroll backdrop-blur-xl">
+                          {COUNTRY_DIAL_CODES.map((c) => (
+                            <button
+                              key={c.code}
+                              type="button"
+                              onClick={() => {
+                                setSosCountry(c);
+                                setSosCountryOpen(false);
+                              }}
+                              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer ${
+                                sosCountry.code === c.code
+                                  ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-500/30'
+                                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm">{c.flag}</span>
+                                <span className="truncate text-left">{c.name}</span>
+                              </div>
+                              <span className="font-mono text-cyan-400 text-[11px] font-bold">{c.dial}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <input
+                      type="tel"
+                      required
+                      placeholder={sosCountry.placeholder || '612345678'}
+                      value={sosPhoneInput}
+                      onChange={(e) => setSosPhoneInput(e.target.value)}
+                      className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-red-500/40 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-red-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  type="submit"
+                  disabled={savingSosPhone}
+                  className="w-full py-3.5 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-black text-xs sm:text-sm rounded-xl shadow-[0_0_25px_rgba(239,68,68,0.5)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Zap className="w-4 h-4" />
+                  <span>{savingSosPhone ? 'Validation...' : 'Confirmer & Déclencher l\'Alerte SOS ⚡'}</span>
+                </motion.button>
+              </form>
             </motion.div>
           </motion.div>
         )}
