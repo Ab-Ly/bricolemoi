@@ -36,7 +36,8 @@ import {
   Coins,
   Buildings,
   MapPinLine,
-  Password
+  Password,
+  DeviceMobile
 } from '@phosphor-icons/react';
 import { SpecialtySelect } from './SpecialtySelect';
 import { CustomDropdown } from './CustomDropdown';
@@ -284,7 +285,8 @@ export const AuthModal = () => {
     t 
   } = useAuth();
   
-  const [authMode, setAuthMode] = useState('SIGN_IN'); // 'SIGN_IN' | 'SIGN_UP' | 'FORGOT_PIN'
+  // Ordre UX prioritaire : 1. Inscription (SIGN_UP) | 2. Connexion (SIGN_IN) | 3. PIN oublié (FORGOT_PIN)
+  const [authMode, setAuthMode] = useState('SIGN_UP'); 
   const [role, setRole] = useState('CLIENT'); // 'CLIENT' | 'MAALEM'
   const [phone, setPhone] = useState('');
   const [fullName, setFullName] = useState('');
@@ -312,9 +314,10 @@ export const AuthModal = () => {
     }
   }, [role]);
 
-  // 1: Phone & Details / Sign In, 2: OTP Verification, 3: Set PIN Code
+  // 1: Phone & Details / Sign In, 2: OTP Verification, 3: Set PIN Code, 4: Google Phone Linking
   const [step, setStep] = useState(1);
-  const [channel, setChannel] = useState('whatsapp'); // 'whatsapp' | 'sms'
+  const [channel, setChannel] = useState('sms'); // 'sms' (par défaut, 100% opérationnel) | 'whatsapp'
+  const [googleUserTemp, setGoogleUserTemp] = useState(null);
 
   // PIN & OTP Inputs
   const [loginPin, setLoginPin] = useState(['', '', '', '']);
@@ -410,6 +413,7 @@ export const AuthModal = () => {
     setOtpDigits(['', '', '', '', '', '']);
     setPortfolioPhotos([]);
     setIsCountryOpen(false);
+    setGoogleUserTemp(null);
   };
 
   // Normalisation du numéro selon l'indicatif choisi
@@ -600,14 +604,22 @@ export const AuthModal = () => {
     }
   };
 
-  // ACTION CONNEXION / INSCRIPTION 1-CLIC GOOGLE
+  // 1. ACTION CONNEXION / INSCRIPTION 1-CLIC GOOGLE AVEC EXIGENCE DU NUMÉRO DE TÉLÉPHONE
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setErrorBanner('');
     setConflictMsg('');
     try {
-      await loginWithGoogle(role);
-      handleClose();
+      const authUser = await loginWithGoogle(role);
+      // Logique métier essentielle : Si le compte Google n'a pas encore de numéro de téléphone enregistré
+      if (!authUser?.phone) {
+        setGoogleUserTemp(authUser);
+        setFullName(authUser.full_name || '');
+        setStep(4); // Étape obligatoire : Liaison du numéro de téléphone
+        setInfoMsg(`👋 Bienvenue ${authUser.full_name || ''} ! Indiquez votre numéro de téléphone pour permettre la mise en relation avec vos artisans.`);
+      } else {
+        handleClose();
+      }
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
         setErrorBanner(err.message || 'Impossible de se connecter avec Google.');
@@ -617,7 +629,30 @@ export const AuthModal = () => {
     }
   };
 
-  // 1. ACTION CONNEXION INSTANTANÉE (0 DH)
+  // Finalisation de la liaison du numéro de téléphone pour le compte Google
+  const handleFinalizeGooglePhone = async (e) => {
+    if (e) e.preventDefault();
+    const fullNumber = getFullInternationalNumber();
+    if (!phone || phone.length < 6) {
+      setErrorBanner('Veuillez saisir un numéro de téléphone valide.');
+      return;
+    }
+
+    setLoading(true);
+    setErrorBanner('');
+    try {
+      const res = await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
+      setStep(2); // Valider le numéro par OTP
+      setResendCountdown(60);
+      setInfoMsg(`Code de confirmation envoyé par SMS au ${fullNumber}`);
+    } catch (err) {
+      setErrorBanner(err.message || 'Erreur lors de l\'envoi du code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2. ACTION CONNEXION INSTANTANÉE (0 DH)
   const handleDirectLogin = async (pinCode) => {
     const fullNumber = getFullInternationalNumber();
     if (!phone || phone.length < 6) {
@@ -644,7 +679,7 @@ export const AuthModal = () => {
     }
   };
 
-  // 2. ACTION DÉPART INSCRIPTION AVEC DÉTECTION PROACTIVE
+  // 3. ACTION DÉPART INSCRIPTION AVEC DÉTECTION PROACTIVE
   const handleStartSignUp = async (e) => {
     if (e) e.preventDefault();
     const fullNumber = getFullInternationalNumber();
@@ -670,12 +705,12 @@ export const AuthModal = () => {
         return;
       }
 
-      // Nouveau compte : envoi OTP WhatsApp ou SMS
+      // Nouveau compte : envoi OTP SMS Direct (ou WhatsApp si explicitement choisi)
       const res = await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
       setStep(2);
       setResendCountdown(60);
-      const channelLabel = (res?.channel || channel) === 'whatsapp' ? 'WhatsApp' : 'SMS Direct';
-      setInfoMsg(`Code OTP à 6 chiffres envoyé via ${channelLabel} au ${fullNumber}`);
+      const channelLabel = (res?.channel || channel) === 'sms' ? 'SMS Direct' : 'WhatsApp';
+      setInfoMsg(`Code de sécurité envoyé par ${channelLabel} au ${fullNumber}`);
     } catch (err) {
       setErrorBanner(err.message || 'Impossible d\'envoyer le code OTP.');
     } finally {
@@ -683,7 +718,7 @@ export const AuthModal = () => {
     }
   };
 
-  // 3. ACTION DÉPART PIN OUBLIÉ
+  // 4. ACTION DÉPART PIN OUBLIÉ
   const handleStartForgotPin = async (e) => {
     if (e) e.preventDefault();
     const fullNumber = getFullInternationalNumber();
@@ -707,7 +742,7 @@ export const AuthModal = () => {
       const res = await sendPhoneOTP(fullNumber, channel, selectedCountry.dial);
       setStep(2);
       setResendCountdown(60);
-      setInfoMsg(`Code de sécurité envoyé via ${channel === 'whatsapp' ? 'WhatsApp' : 'SMS'} au ${fullNumber}`);
+      setInfoMsg(`Code de sécurité envoyé par ${channel === 'sms' ? 'SMS' : 'WhatsApp'} au ${fullNumber}`);
     } catch (err) {
       setErrorBanner(err.message || 'Impossible d\'envoyer le code OTP.');
     } finally {
@@ -715,7 +750,7 @@ export const AuthModal = () => {
     }
   };
 
-  // 4. ACTION PASSAGE À L'ÉTAPE 3 (CHOIX DU PIN) APRÈS OTP
+  // 5. ACTION PASSAGE À L'ÉTAPE 3 (CHOIX DU PIN) APRÈS OTP
   const handleOtpProceed = (code) => {
     const token = code || otpDigits.join('');
     if (token.length < 6) {
@@ -726,7 +761,7 @@ export const AuthModal = () => {
     setStep(3);
   };
 
-  // 5. ACTION CRÉATION OU RÉINITIALISATION FINALE DU PIN
+  // 6. ACTION CRÉATION OU RÉINITIALISATION FINALE DU PIN
   const handleFinalizePin = async (e) => {
     if (e) e.preventDefault();
     const pinStr = newPin.join('');
@@ -742,14 +777,14 @@ export const AuthModal = () => {
     const otpToken = otpDigits.join('');
 
     try {
-      if (authMode === 'SIGN_UP') {
+      if (authMode === 'SIGN_UP' || googleUserTemp) {
         const combinedCityZone = `${selectedCity} - ${selectedDistrict}`;
         await verifyPhoneOTP({
           phone: fullNumber,
           token: otpToken,
           pin: pinStr,
           role,
-          fullName: fullName || (role === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
+          fullName: fullName || googleUserTemp?.full_name || (role === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
           cityZone: combinedCityZone,
           specialty,
           portfolioUrls: portfolioPhotos.map(p => p.preview),
@@ -852,52 +887,35 @@ export const AuthModal = () => {
             </button>
 
             {/* Header */}
-            <div className="text-center mb-5 pt-2">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-950 border border-cyan-500/40 flex items-center justify-center mx-auto mb-3 shadow-[0_0_15px_rgba(6,182,212,0.35)]">
-                {authMode === 'SIGN_IN' ? (
+            <div className="text-center mb-4 pt-1">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-950 border border-cyan-500/40 flex items-center justify-center mx-auto mb-2.5 shadow-[0_0_15px_rgba(6,182,212,0.35)]">
+                {authMode === 'SIGN_UP' ? (
+                  <UserPlus className="w-6 h-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                ) : authMode === 'SIGN_IN' ? (
                   <Lock className="w-6 h-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                ) : authMode === 'FORGOT_PIN' ? (
-                  <KeyRound className="w-6 h-6 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
                 ) : (
-                  <ShieldCheck className="w-6 h-6 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                  <KeyRound className="w-6 h-6 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
                 )}
               </div>
 
               <h3 className="text-xl font-black text-white font-sans tracking-tight">
-                {authMode === 'SIGN_IN'
+                {authMode === 'SIGN_UP'
+                  ? (step === 1 ? 'Créer un Compte BricoleMoi' : step === 2 ? 'Vérification du Numéro' : step === 3 ? 'Définir mon Code PIN' : 'Ajouter mon Numéro')
+                  : authMode === 'SIGN_IN'
                   ? 'Connexion Sécurisée'
-                  : authMode === 'FORGOT_PIN'
-                  ? (step === 1 ? 'Réinitialisation Code PIN' : step === 2 ? 'Code de Sécurité' : 'Nouveau Code PIN')
-                  : (step === 1 ? 'Créer un Compte BricoleMoi' : step === 2 ? 'Vérification du Numéro' : 'Définir mon Code PIN')}
+                  : (step === 1 ? 'Réinitialisation Code PIN' : step === 2 ? 'Code de Sécurité' : 'Nouveau Code PIN')}
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                {authMode === 'SIGN_IN'
+                {authMode === 'SIGN_UP'
+                  ? (step === 1 ? 'Plateforme marocaine de dépannage express & artisans' : step === 2 ? `Entrez le code reçu au ${getFullInternationalNumber()}` : 'Accédez instantanément à votre espace')
+                  : authMode === 'SIGN_IN'
                   ? 'Accédez à votre espace avec votre Code PIN secret'
-                  : authMode === 'FORGOT_PIN'
-                  ? 'Récupération sécurisée par WhatsApp ou SMS'
-                  : (step === 1 ? 'Plateforme marocaine de dépannage express & artisans' : step === 2 ? `Entrez le code reçu au ${getFullInternationalNumber()}` : 'Définissez 4 chiffres pour vos prochaines connexions')}
+                  : 'Récupération sécurisée par SMS direct'}
               </p>
 
-              {/* Mode Toggle Bar (SIGN_IN vs SIGN_UP) */}
+              {/* Mode Toggle Bar - ORDRE UX CLAIR : 1. NOUVEAU COMPTE | 2. SE CONNECTER */}
               {step === 1 && authMode !== 'FORGOT_PIN' && (
-                <div className="flex bg-slate-900 border border-cyan-500/20 p-1 rounded-xl mt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode('SIGN_IN');
-                      setErrorBanner('');
-                      setConflictMsg('');
-                    }}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                      authMode === 'SIGN_IN'
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    <LogIn className="w-3.5 h-3.5" />
-                    <span>Se Connecter</span>
-                  </button>
-
+                <div className="flex bg-slate-900 border border-cyan-500/20 p-1 rounded-xl mt-3.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -914,6 +932,23 @@ export const AuthModal = () => {
                     <UserPlus className="w-3.5 h-3.5" />
                     <span>Nouveau Compte</span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode('SIGN_IN');
+                      setErrorBanner('');
+                      setConflictMsg('');
+                    }}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      authMode === 'SIGN_IN'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>Se Connecter</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -923,7 +958,7 @@ export const AuthModal = () => {
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-3 bg-amber-950/80 border border-amber-500/50 rounded-xl text-amber-200 text-xs font-medium space-y-1 shadow-[0_0_12px_rgba(251,191,36,0.2)]"
+                className="mb-3.5 p-3 bg-amber-950/80 border border-amber-500/50 rounded-xl text-amber-200 text-xs font-medium space-y-1 shadow-[0_0_12px_rgba(251,191,36,0.2)]"
               >
                 <p>{conflictMsg}</p>
               </motion.div>
@@ -933,9 +968,19 @@ export const AuthModal = () => {
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-3 bg-red-950/80 border border-red-500/50 rounded-xl text-red-200 text-xs font-medium space-y-1 shadow-[0_0_12px_rgba(239,68,68,0.2)]"
+                className="mb-3.5 p-3 bg-red-950/80 border border-red-500/50 rounded-xl text-red-200 text-xs font-medium space-y-1 shadow-[0_0_12px_rgba(239,68,68,0.2)]"
               >
                 <p>{errorBanner}</p>
+              </motion.div>
+            )}
+
+            {infoMsg && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-3.5 p-3 bg-cyan-950/80 border border-cyan-500/40 rounded-xl text-cyan-200 text-xs font-medium text-center shadow-[0_0_10px_rgba(6,182,212,0.2)]"
+              >
+                {infoMsg}
               </motion.div>
             )}
 
@@ -943,122 +988,14 @@ export const AuthModal = () => {
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-2.5 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs font-bold text-center shadow-[0_0_10px_rgba(52,211,153,0.2)]"
+                className="mb-3.5 p-2.5 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-emerald-300 text-xs font-bold text-center shadow-[0_0_10px_rgba(52,211,153,0.2)]"
               >
                 {gpsSuccessMsg}
               </motion.div>
             )}
 
             {/* ======================================================== */}
-            {/* VUE 1 : CONNEXION INSTANTANÉE (SIGN_IN)                  */}
-            {/* ======================================================== */}
-            {authMode === 'SIGN_IN' && (
-              <div className="space-y-3">
-                {/* Bouton Connexion Google 1-Clic */}
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={loading}
-                  className="w-full py-3 px-4 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-500/50 rounded-2xl text-slate-100 text-xs font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-md active:scale-95 group"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
-                  <span>Continuer avec Google (1-Clic)</span>
-                </motion.button>
-
-                <div className="relative flex items-center justify-center my-2">
-                  <div className="border-t border-cyan-500/20 w-full" />
-                  <span className="bg-slate-950 px-3 text-[10px] text-slate-400 font-mono uppercase tracking-wider">ou par Code PIN</span>
-                  <div className="border-t border-cyan-500/20 w-full" />
-                </div>
-
-                <form onSubmit={(e) => { e.preventDefault(); handleDirectLogin(); }} className="space-y-4">
-                  {/* Numéro de téléphone avec sélecteur d'indicatif */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1.5">Numéro de Téléphone :</label>
-                  <div className="relative">
-                    {renderCountryCodeSelector()}
-                    <input
-                      type="tel"
-                      required
-                      placeholder={selectedCountry.placeholder || '612345678'}
-                      value={phone}
-                      onChange={handlePhoneChange}
-                      className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
-                      autoFocus
-                    />
-                  </div>
-                </div>
-
-                {/* Saisie du PIN à 4 chiffres */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-300">Code PIN Secret (4 chiffres) :</label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthMode('FORGOT_PIN');
-                        setStep(1);
-                        setErrorBanner('');
-                      }}
-                      className="text-[11px] text-amber-400/90 hover:text-amber-300 underline font-medium cursor-pointer"
-                    >
-                      PIN oublié ?
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-2.5 sm:gap-3 py-1">
-                    {loginPin.map((digit, idx) => (
-                      <input
-                        key={idx}
-                        ref={(el) => (loginPinRefs.current[idx] = el)}
-                        type="password"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        maxLength={4}
-                        value={digit}
-                        onChange={(e) => handleLoginPinChange(idx, e.target.value)}
-                        onKeyDown={(e) => handleLoginPinKeyDown(idx, e)}
-                        className={`h-14 text-center font-mono text-2xl font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
-                          digit
-                            ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]'
-                            : 'bg-slate-900/90 border-cyan-500/25 text-cyan-300 hover:border-cyan-500/50'
-                        } focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40 focus:shadow-[0_0_20px_rgba(6,182,212,0.5)] focus:scale-105`}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Bouton de Connexion */}
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-sm rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Connexion en cours...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4 h-4" />
-                      <span>Se Connecter</span>
-                    </>
-                  )}
-                </motion.button>
-              </form>
-            </div>
-            )}
-
-            {/* ======================================================== */}
-            {/* VUE 2 : INSCRIPTION (SIGN_UP) & PIN OUBLIÉ (FORGOT_PIN)   */}
+            {/* VUE 1 : INSCRIPTION (SIGN_UP) & PIN OUBLIÉ (FORGOT_PIN)   */}
             {/* ======================================================== */}
             {(authMode === 'SIGN_UP' || authMode === 'FORGOT_PIN') && (
               <>
@@ -1100,33 +1037,6 @@ export const AuthModal = () => {
                           </div>
                         </div>
 
-                        {/* Inscription 1-Clic Google pour Clients */}
-                        {role === 'CLIENT' && (
-                          <div className="pt-1">
-                            <motion.button
-                              whileTap={{ scale: 0.97 }}
-                              type="button"
-                              onClick={handleGoogleSignIn}
-                              disabled={loading}
-                              className="w-full py-2.5 px-3 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-500/50 rounded-2xl text-slate-100 text-xs font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-md active:scale-95 group"
-                            >
-                              <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                              </svg>
-                              <span>Inscription Rapide avec Google (1-Clic)</span>
-                            </motion.button>
-
-                            <div className="relative flex items-center justify-center my-2.5">
-                              <div className="border-t border-cyan-500/20 w-full" />
-                              <span className="bg-slate-950 px-3 text-[10px] text-slate-400 font-mono uppercase tracking-wider">ou avec Téléphone & SMS</span>
-                              <div className="border-t border-cyan-500/20 w-full" />
-                            </div>
-                          </div>
-                        )}
-
                         {/* Bonus Maalem */}
                         {role === 'MAALEM' && (
                           <motion.div
@@ -1141,7 +1051,7 @@ export const AuthModal = () => {
                               <p className="text-xs font-black text-amber-300 flex items-center gap-1">
                                 <span>🎁 Bonus Inscription : +15.00 DH Offert</span>
                               </p>
-                              <p className="text-[10px] text-slate-300">Crédité automatiquement pour tester vos premières réceptions de leads SOS !</p>
+                              <p className="text-[10px] text-slate-300">Crédité automatiquement pour tester vos premières réceptions de chantiers !</p>
                             </div>
                           </motion.div>
                         )}
@@ -1252,14 +1162,14 @@ export const AuthModal = () => {
                       </>
                     )}
 
-                    {/* Numéro de Téléphone avec Sélecteur d'Indicatif */}
+                    {/* Numéro de Téléphone (Élément Central & Obligatoire) */}
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="text-xs font-bold text-slate-300">Numéro de Téléphone :</label>
                         {role === 'CLIENT' && (
                           <span className="text-[10px] text-cyan-400 font-mono flex items-center gap-1">
                             <Globe className="w-3 h-3" />
-                            Maroc & MRE International
+                            Maroc & MRE
                           </span>
                         )}
                       </div>
@@ -1276,10 +1186,10 @@ export const AuthModal = () => {
                       </div>
                     </div>
 
-                    {/* Canal de Réception */}
+                    {/* Canal de Réception : SMS Direct par Défaut */}
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-[11px] font-bold text-slate-300">Canal de réception du code :</label>
+                        <label className="text-[11px] font-bold text-slate-300">Réception du code de confirmation :</label>
                         <span className="text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                           Instantané
@@ -1288,37 +1198,37 @@ export const AuthModal = () => {
                       <div className="grid grid-cols-2 gap-2.5">
                         <button
                           type="button"
-                          onClick={() => setChannel('whatsapp')}
-                          className={`relative py-3 px-3 rounded-2xl text-xs font-bold border transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
-                            channel === 'whatsapp'
-                              ? 'bg-emerald-950/90 text-emerald-200 border-emerald-400/70 shadow-[0_0_16px_rgba(16,185,129,0.35)] scale-[1.02]'
-                              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:border-emerald-500/40 hover:text-emerald-300'
-                          }`}
-                        >
-                          <span className="absolute -top-2 right-2 px-1.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-[9px] font-black text-slate-950 rounded-full shadow-sm tracking-wider uppercase">
-                            Recommandé
-                          </span>
-                          <div className="flex items-center gap-1.5">
-                            <WhatsappLogo weight="duotone" className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-                            <span className="font-extrabold text-white">WhatsApp</span>
-                          </div>
-                          <span className="text-[9px] text-emerald-400/80 font-mono">Gratuit & Sans délai</span>
-                        </button>
-
-                        <button
-                          type="button"
                           onClick={() => setChannel('sms')}
-                          className={`py-3 px-3 rounded-2xl text-xs font-bold border transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                          className={`relative py-3 px-3 rounded-2xl text-xs font-bold border transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
                             channel === 'sms'
                               ? 'bg-cyan-950/90 text-cyan-200 border-cyan-400/70 shadow-[0_0_16px_rgba(6,182,212,0.35)] scale-[1.02]'
                               : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:border-cyan-500/40 hover:text-cyan-300'
                           }`}
                         >
+                          <span className="absolute -top-2 right-2 px-1.5 py-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-[9px] font-black text-slate-950 rounded-full shadow-sm tracking-wider uppercase">
+                            Recommandé
+                          </span>
                           <div className="flex items-center gap-1.5">
                             <ChatCenteredText weight="duotone" className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
                             <span className="font-extrabold text-white">SMS Direct</span>
                           </div>
-                          <span className="text-[9px] text-slate-400 font-mono">Réseau GSM classique</span>
+                          <span className="text-[9px] text-cyan-300/80 font-mono">Réseau GSM classique</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setChannel('whatsapp')}
+                          className={`py-3 px-3 rounded-2xl text-xs font-bold border transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                            channel === 'whatsapp'
+                              ? 'bg-emerald-950/90 text-emerald-200 border-emerald-400/70 shadow-[0_0_16px_rgba(16,185,129,0.35)] scale-[1.02]'
+                              : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:border-emerald-500/40 hover:text-emerald-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <WhatsappLogo weight="duotone" className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                            <span className="font-extrabold text-white">WhatsApp</span>
+                          </div>
+                          <span className="text-[9px] text-slate-400 font-mono">Gratuit & Sans délai</span>
                         </button>
                       </div>
                     </div>
@@ -1329,9 +1239,36 @@ export const AuthModal = () => {
                       disabled={loading}
                       className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all mt-2 cursor-pointer"
                     >
-                      <span>{loading ? 'Vérification...' : authMode === 'SIGN_UP' ? 'Recevoir Mon Code OTP' : 'Recevoir le Code de Réinitialisation'}</span>
+                      <span>{loading ? 'Vérification...' : authMode === 'SIGN_UP' ? 'Recevoir Mon Code de Confirmation' : 'Recevoir le Code de Réinitialisation'}</span>
                       <ArrowRight className="w-4 h-4 text-white" />
                     </motion.button>
+
+                    {/* Google Auth placé harmonieusement en bas de l'inscription pour pré-remplir */}
+                    {authMode === 'SIGN_UP' && role === 'CLIENT' && (
+                      <div className="pt-2">
+                        <div className="relative flex items-center justify-center my-2">
+                          <div className="border-t border-cyan-500/20 w-full" />
+                          <span className="bg-slate-950 px-2.5 text-[10px] text-slate-400 font-mono uppercase tracking-wider">ou inscription rapide</span>
+                          <div className="border-t border-cyan-500/20 w-full" />
+                        </div>
+
+                        <motion.button
+                          whileTap={{ scale: 0.97 }}
+                          type="button"
+                          onClick={handleGoogleSignIn}
+                          disabled={loading}
+                          className="w-full py-2.5 px-3 bg-slate-900/80 hover:bg-slate-850 border border-slate-700/80 hover:border-cyan-500/50 rounded-xl text-slate-200 text-xs font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-sm active:scale-95 group"
+                        >
+                          <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                          </svg>
+                          <span>Pré-remplir avec Google</span>
+                        </motion.button>
+                      </div>
+                    )}
 
                     {authMode === 'FORGOT_PIN' && (
                       <button
@@ -1356,10 +1293,10 @@ export const AuthModal = () => {
                     <div className="p-3.5 rounded-2xl border bg-slate-900/90 border-cyan-500/30 text-slate-200 flex items-center justify-between shadow-lg">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-cyan-950 border border-cyan-500/40 text-cyan-300 flex items-center justify-center">
-                          {channel === 'whatsapp' ? <WhatsappLogo weight="duotone" className="w-5 h-5 text-emerald-400" /> : <ChatCenteredText weight="duotone" className="w-5 h-5 text-cyan-400" />}
+                          {channel === 'sms' ? <ChatCenteredText weight="duotone" className="w-5 h-5 text-cyan-400" /> : <WhatsappLogo weight="duotone" className="w-5 h-5 text-emerald-400" />}
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-white">Code envoyé par {channel === 'whatsapp' ? 'WhatsApp' : 'SMS'}</p>
+                          <p className="text-xs font-bold text-white">Code envoyé par {channel === 'sms' ? 'SMS Direct' : 'WhatsApp'}</p>
                           <p className="text-[11px] text-slate-400 font-mono">{getFullInternationalNumber()}</p>
                         </div>
                       </div>
@@ -1427,10 +1364,10 @@ export const AuthModal = () => {
                     <div className="p-3.5 rounded-2xl bg-cyan-950/60 border border-cyan-500/40 text-center space-y-1">
                       <p className="text-xs font-black text-cyan-300 flex items-center justify-center gap-1.5">
                         <Password className="w-4 h-4 text-cyan-400" />
-                        <span>{authMode === 'SIGN_UP' ? 'Créez votre Code PIN Secret' : 'Définissez votre Nouveau Code PIN'}</span>
+                        <span>{authMode === 'SIGN_UP' || googleUserTemp ? 'Créez votre Code PIN Secret' : 'Définissez votre Nouveau Code PIN'}</span>
                       </p>
                       <p className="text-[11px] text-slate-300">
-                        Ce code à 4 chiffres vous servira pour vos futures connexions rapides et sécurisées !
+                        Ce code à 4 chiffres vous servira pour vos futures connexions instantanées et sécurisées !
                       </p>
                     </div>
 
@@ -1478,7 +1415,182 @@ export const AuthModal = () => {
                     </motion.button>
                   </form>
                 )}
+
+                {/* ETAPE 4 : Liaison obligatoire du numéro pour compte Google */}
+                {step === 4 && googleUserTemp && (
+                  <form onSubmit={handleFinalizeGooglePhone} className="space-y-4">
+                    <div className="p-3.5 rounded-2xl bg-cyan-950/60 border border-cyan-500/40 text-center space-y-1.5">
+                      <div className="w-10 h-10 rounded-full bg-slate-900 border border-cyan-400/40 flex items-center justify-center mx-auto shadow-sm">
+                        <DeviceMobile className="w-5 h-5 text-cyan-400" weight="duotone" />
+                      </div>
+                      <p className="text-xs font-black text-cyan-300">
+                        Associez votre Numéro de Téléphone
+                      </p>
+                      <p className="text-[11px] text-slate-300">
+                        Obligatoire pour que les artisans puissent vous joindre en cas de dépannage ou devis !
+                      </p>
+                    </div>
+
+                    {/* Ville & Quartier */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Ville :</label>
+                        <CustomDropdown
+                          options={cityOptions}
+                          value={selectedCity}
+                          onChange={handleCityChange}
+                          placeholder="Ville..."
+                          icon={Buildings}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Quartier :</label>
+                        <CustomDropdown
+                          options={districtOptions}
+                          value={selectedDistrict}
+                          onChange={(newDistrict) => setSelectedDistrict(newDistrict)}
+                          placeholder="Quartier..."
+                          icon={MapPinLine}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Numéro de Téléphone */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1.5">Votre numéro :</label>
+                      <div className="relative">
+                        {renderCountryCodeSelector()}
+                        <input
+                          type="tel"
+                          required
+                          placeholder={selectedCountry.placeholder || '612345678'}
+                          value={phone}
+                          onChange={handlePhoneChange}
+                          className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
+                          autoFocus
+                        />
+                      </div>
+                    </div>
+
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-sm rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
+                    >
+                      {loading ? 'Vérification...' : 'Confirmer mon Numéro par SMS →'}
+                    </motion.button>
+                  </form>
+                )}
               </>
+            )}
+
+            {/* ======================================================== */}
+            {/* VUE 2 : CONNEXION INSTANTANÉE (SIGN_IN)                  */}
+            {/* ======================================================== */}
+            {authMode === 'SIGN_IN' && (
+              <div className="space-y-3.5">
+                {/* Bouton Connexion Google 1-Clic bien positionné */}
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  className="w-full py-3 px-4 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-500/50 rounded-2xl text-slate-100 text-xs font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-md active:scale-95 group"
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                  <span>Connexion Rapide avec Google</span>
+                </motion.button>
+
+                <div className="relative flex items-center justify-center my-2">
+                  <div className="border-t border-cyan-500/20 w-full" />
+                  <span className="bg-slate-950 px-3 text-[10px] text-slate-400 font-mono uppercase tracking-wider">ou avec Téléphone & Code PIN</span>
+                  <div className="border-t border-cyan-500/20 w-full" />
+                </div>
+
+                <form onSubmit={(e) => { e.preventDefault(); handleDirectLogin(); }} className="space-y-3.5">
+                  {/* Numéro de téléphone avec sélecteur d'indicatif */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1.5">Numéro de Téléphone :</label>
+                    <div className="relative">
+                      {renderCountryCodeSelector()}
+                      <input
+                        type="tel"
+                        required
+                        placeholder={selectedCountry.placeholder || '612345678'}
+                        value={phone}
+                        onChange={handlePhoneChange}
+                        className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  {/* Saisie du PIN à 4 chiffres */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-300">Code PIN Secret (4 chiffres) :</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthMode('FORGOT_PIN');
+                          setStep(1);
+                          setErrorBanner('');
+                        }}
+                        className="text-[11px] text-amber-400/90 hover:text-amber-300 underline font-medium cursor-pointer"
+                      >
+                        PIN oublié ?
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2.5 sm:gap-3 py-1">
+                      {loginPin.map((digit, idx) => (
+                        <input
+                          key={idx}
+                          ref={(el) => (loginPinRefs.current[idx] = el)}
+                          type="password"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength={4}
+                          value={digit}
+                          onChange={(e) => handleLoginPinChange(idx, e.target.value)}
+                          onKeyDown={(e) => handleLoginPinKeyDown(idx, e)}
+                          className={`h-14 text-center font-mono text-2xl font-black rounded-2xl border transition-all duration-200 focus:outline-none ${
+                            digit
+                              ? 'bg-cyan-950/40 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-[1.02]'
+                              : 'bg-slate-900/90 border-cyan-500/25 text-cyan-300 hover:border-cyan-500/50'
+                          } focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40 focus:shadow-[0_0_20px_rgba(6,182,212,0.5)] focus:scale-105`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bouton de Connexion */}
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-sm rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer mt-2"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Connexion en cours...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-4 h-4" />
+                        <span>Se Connecter</span>
+                      </>
+                    )}
+                  </motion.button>
+                </form>
+              </div>
             )}
           </motion.div>
         </motion.div>
