@@ -108,3 +108,5 @@ export const ClientApp = ({ initialCategory, initialCity, initialDistrict }) => 
   );
 };
 
+export default ClientApp;
+

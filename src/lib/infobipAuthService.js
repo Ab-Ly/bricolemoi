@@ -1,6 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 
-const INFOBIP_API_KEY = import.meta.env.VITE_INFOBIP_API_KEY || '6609e87c2786b4aa487b954b47f223ee-25c768b1-ab2b-4ca1-a75b-7fe84af955d8';
+const INFOBIP_API_KEY = import.meta.env.VITE_INFOBIP_API_KEY || '';
 const INFOBIP_BASE_URL = (import.meta.env.VITE_INFOBIP_BASE_URL || 'k95d1n.api.infobip.com').replace(/^https?:\/\//, '');
 
 /**

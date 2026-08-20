@@ -28,18 +28,6 @@
       "source_location": "L30"
     },
     {
-      "id": "src_context_appcontext_calculatedistanceinkm",
-      "label": "calculateDistanceInKm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "AppContext.jsx",
-      "file_type": "code",
-      "norm_label": "calculatedistanceinkm()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L15"
-    },
-    {
       "id": "src_context_emergencyflowcontext_emergencyflowprovider",
       "label": "EmergencyFlowProvider()",
       "_callable": true,
@@ -309,11 +297,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "app()",
       "source_file": "src/App.jsx",
-      "source_location": "L327"
+      "source_location": "L343"
+    },
+    {
+      "id": "src_app_apploadingfallback",
+      "label": "AppLoadingFallback()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "apploadingfallback()",
+      "source_file": "src/App.jsx",
+      "source_location": "L23"
     },
     {
       "id": "src_app_mainapp",
@@ -321,11 +321,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "mainapp()",
       "source_file": "src/App.jsx",
-      "source_location": "L20"
+      "source_location": "L36"
     },
     {
       "id": "src_components_admin_admindashboard_admindashboard",
@@ -333,7 +333,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "admindashboard()",
       "source_file": "src/components/admin/AdminDashboard.jsx",
@@ -345,7 +345,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "adminauthmodal()",
       "source_file": "src/components/AdminAuthModal.jsx",
@@ -357,7 +357,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "adminview()",
       "source_file": "src/components/AdminView.jsx",
@@ -369,7 +369,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "bottomnav()",
       "source_file": "src/components/BottomNav.jsx",
@@ -381,7 +381,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "landingpage()",
       "source_file": "src/components/LandingPage.jsx",
@@ -393,7 +393,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "navbar()",
       "source_file": "src/components/Navbar.jsx",
@@ -405,7 +405,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "protectedroute()",
       "source_file": "src/components/ProtectedRoute.jsx",
@@ -417,11 +417,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "pwainstallprompt()",
       "source_file": "src/components/PWAInstallPrompt.jsx",
       "source_location": "L6"
+    },
+    {
+      "id": "src_components_userprofilemodal_userprofilemodal",
+      "label": "UserProfileModal()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "userprofilemodal()",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_context_appcontext_useapp",
+      "label": "useApp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "useapp()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L3303"
     },
     {
       "id": "src_context_authcontext_useauth",
@@ -429,7 +453,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "useauth()",
       "source_file": "src/context/AuthContext.jsx",
@@ -441,7 +465,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "adminapp()",
       "source_file": "src/layouts/AdminApp.jsx",
@@ -453,7 +477,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "clientapp()",
       "source_file": "src/layouts/ClientApp.jsx",
@@ -465,7 +489,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "maalemapp()",
       "source_file": "src/layouts/MaalemApp.jsx",
@@ -477,7 +501,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "getnavcontext()",
       "source_file": "src/lib/subdomain.js",
@@ -489,7 +513,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "switchsubdomainindev()",
       "source_file": "src/lib/subdomain.js",
@@ -561,7 +585,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminclientsview()",
       "source_file": "src/components/admin/AdminClientsView.jsx",
@@ -573,7 +597,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "admindisputesview()",
       "source_file": "src/components/admin/AdminDisputesView.jsx",
@@ -585,7 +609,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminlivemissions()",
       "source_file": "src/components/admin/AdminLiveMissions.jsx",
@@ -597,7 +621,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminmaalemsview()",
       "source_file": "src/components/admin/AdminMaalemsView.jsx",
@@ -609,7 +633,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminrechargesview()",
       "source_file": "src/components/admin/AdminRechargesView.jsx",
@@ -621,7 +645,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "categoryselector()",
       "source_file": "src/components/CategorySelector.jsx",
@@ -633,7 +657,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "enhancedcategoryicon()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -645,7 +669,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "getspecialtylabel()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -657,7 +681,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "getspecialtymeta()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -669,7 +693,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "specialtybadge()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -681,7 +705,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "getmapiconsvg()",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -693,7 +717,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "getmapstylejson()",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -705,7 +729,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "interactivemap()",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -717,11 +741,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "maalemselect()",
       "source_file": "src/components/MaalemSelect.jsx",
       "source_location": "L6"
+    },
+    {
+      "id": "src_components_maalemview_maalemview",
+      "label": "MaalemView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "MaalemView.jsx",
+      "file_type": "code",
+      "norm_label": "maalemview()",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L64"
     },
     {
       "id": "src_components_specialtyselect_specialtyselect",
@@ -729,23 +765,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "specialtyselect()",
       "source_file": "src/components/SpecialtySelect.jsx",
       "source_location": "L6"
     },
     {
-      "id": "src_components_userprofilemodal_userprofilemodal",
-      "label": "UserProfileModal()",
+      "id": "src_context_appcontext_calculatedistanceinkm",
+      "label": "calculateDistanceInKm()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
-      "norm_label": "userprofilemodal()",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L43"
+      "norm_label": "calculatedistanceinkm()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "src_context_emergencyflowcontext_useemergencyflow",
+      "label": "useEmergencyFlow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "MaalemView.jsx",
+      "file_type": "code",
+      "norm_label": "useemergencyflow()",
+      "source_file": "src/context/EmergencyFlowContext.jsx",
+      "source_location": "L465"
     },
     {
       "id": "src_components_cgumodal_cgumodal",
@@ -808,18 +856,6 @@
       "source_location": "L5"
     },
     {
-      "id": "src_components_maalemview_maalemview",
-      "label": "MaalemView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "maalemview()",
-      "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L64"
-    },
-    {
       "id": "src_components_voicerecorder_voicerecorder",
       "label": "VoiceRecorder()",
       "_callable": true,
@@ -832,30 +868,6 @@
       "source_location": "L7"
     },
     {
-      "id": "src_context_appcontext_useapp",
-      "label": "useApp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "useapp()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3303"
-    },
-    {
-      "id": "src_context_emergencyflowcontext_useemergencyflow",
-      "label": "useEmergencyFlow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "useemergencyflow()",
-      "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L465"
-    },
-    {
       "id": "src_components_authmodal_authmodal",
       "label": "AuthModal()",
       "_callable": true,
@@ -866,18 +878,6 @@
       "norm_label": "authmodal()",
       "source_file": "src/components/AuthModal.jsx",
       "source_location": "L55"
-    },
-    {
-      "id": "src_components_userprofilepage_userprofilepage",
-      "label": "UserProfilePage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "AuthContext.jsx",
-      "file_type": "code",
-      "norm_label": "userprofilepage()",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L21"
     },
     {
       "id": "src_context_authcontext_authprovider",
@@ -1344,18 +1344,51 @@
       "label": "App.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "app.jsx",
       "source_file": "src/App.jsx",
       "source_location": "L1"
     },
     {
+      "id": "src_app_adminapp",
+      "label": "AdminApp",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "adminapp",
+      "source_file": "src/App.jsx",
+      "source_location": "L20"
+    },
+    {
+      "id": "src_app_clientapp",
+      "label": "ClientApp",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "clientapp",
+      "source_file": "src/App.jsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "src_app_maalemapp",
+      "label": "MaalemApp",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "maalemapp",
+      "source_file": "src/App.jsx",
+      "source_location": "L19"
+    },
+    {
       "id": "src_components_adminauthmodal",
       "label": "AdminAuthModal.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "adminauthmodal.jsx",
       "source_file": "src/components/AdminAuthModal.jsx",
@@ -1366,7 +1399,7 @@
       "label": "AdminView.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "adminview.jsx",
       "source_file": "src/components/AdminView.jsx",
@@ -1377,7 +1410,7 @@
       "label": "BottomNav.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "bottomnav.jsx",
       "source_file": "src/components/BottomNav.jsx",
@@ -1388,7 +1421,7 @@
       "label": "Navbar.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "navbar.jsx",
       "source_file": "src/components/Navbar.jsx",
@@ -1399,7 +1432,7 @@
       "label": "ProtectedRoute.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "protectedroute.jsx",
       "source_file": "src/components/ProtectedRoute.jsx",
@@ -1410,7 +1443,7 @@
       "label": "PWAInstallPrompt.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "pwainstallprompt.jsx",
       "source_file": "src/components/PWAInstallPrompt.jsx",
@@ -1421,7 +1454,7 @@
       "label": "AdminApp.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "adminapp.jsx",
       "source_file": "src/layouts/AdminApp.jsx",
@@ -1432,7 +1465,7 @@
       "label": "ClientApp.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "clientapp.jsx",
       "source_file": "src/layouts/ClientApp.jsx",
@@ -1443,7 +1476,7 @@
       "label": "MaalemApp.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "maalemapp.jsx",
       "source_file": "src/layouts/MaalemApp.jsx",
@@ -1454,7 +1487,7 @@
       "label": "subdomain.js",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "subdomain.js",
       "source_file": "src/lib/subdomain.js",
@@ -1465,7 +1498,7 @@
       "label": "APP_SUBDOMAINS",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "app_subdomains",
       "source_file": "src/lib/subdomain.js",
@@ -1476,7 +1509,7 @@
       "label": "main.jsx",
       "_origin": "ast",
       "community": 1,
-      "community_name": "useAuth",
+      "community_name": "App.jsx",
       "file_type": "code",
       "norm_label": "main.jsx",
       "source_file": "src/main.jsx",
@@ -1773,7 +1806,7 @@
       "label": "AdminClientsView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminclientsview.jsx",
       "source_file": "src/components/admin/AdminClientsView.jsx",
@@ -1784,7 +1817,7 @@
       "label": "AdminDashboard.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "admindashboard.jsx",
       "source_file": "src/components/admin/AdminDashboard.jsx",
@@ -1795,7 +1828,7 @@
       "label": "AdminDisputesView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "admindisputesview.jsx",
       "source_file": "src/components/admin/AdminDisputesView.jsx",
@@ -1806,7 +1839,7 @@
       "label": "AdminLiveMissions.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminlivemissions.jsx",
       "source_file": "src/components/admin/AdminLiveMissions.jsx",
@@ -1817,7 +1850,7 @@
       "label": "AdminMaalemsView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminmaalemsview.jsx",
       "source_file": "src/components/admin/AdminMaalemsView.jsx",
@@ -1828,7 +1861,7 @@
       "label": "AdminRechargesView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminrechargesview.jsx",
       "source_file": "src/components/admin/AdminRechargesView.jsx",
@@ -1839,7 +1872,7 @@
       "label": "CategorySelector.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "categoryselector.jsx",
       "source_file": "src/components/CategorySelector.jsx",
@@ -1850,7 +1883,7 @@
       "label": "CATEGORIES_TAXONOMY",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "categories_taxonomy",
       "source_file": "src/components/CategorySelector.jsx",
@@ -1861,7 +1894,7 @@
       "label": "EnhancedCategoryIcon.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "enhancedcategoryicon.jsx",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -1872,7 +1905,7 @@
       "label": "SPECIALTY_CONFIG",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "specialty_config",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -1883,7 +1916,7 @@
       "label": "InteractiveMap.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "interactivemap.jsx",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -1894,7 +1927,7 @@
       "label": "MAP_STYLES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "map_styles",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -1905,7 +1938,7 @@
       "label": "ROAD_COLOR_THEMES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "road_color_themes",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -1916,7 +1949,7 @@
       "label": "SVG_ICONS",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "svg_icons",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -1927,10 +1960,21 @@
       "label": "MaalemSelect.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "maalemselect.jsx",
       "source_file": "src/components/MaalemSelect.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_maalemview",
+      "label": "MaalemView.jsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "MaalemView.jsx",
+      "file_type": "code",
+      "norm_label": "maalemview.jsx",
+      "source_file": "src/components/MaalemView.jsx",
       "source_location": "L1"
     },
     {
@@ -1938,33 +1982,11 @@
       "label": "SpecialtySelect.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "specialtyselect.jsx",
       "source_file": "src/components/SpecialtySelect.jsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_components_userprofilemodal",
-      "label": "UserProfileModal.jsx",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "userprofilemodal.jsx",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_userprofilemodal_cities",
-      "label": "CITIES",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "cities",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L34"
     },
     {
       "id": "supabase_services_seed",
@@ -2165,15 +2187,26 @@
       "source_location": "L1"
     },
     {
-      "id": "src_components_maalemview",
-      "label": "MaalemView.jsx",
+      "id": "src_components_userprofilemodal",
+      "label": "UserProfileModal.jsx",
       "_origin": "ast",
       "community": 3,
       "community_name": "ClientView.jsx",
       "file_type": "code",
-      "norm_label": "maalemview.jsx",
-      "source_file": "src/components/MaalemView.jsx",
+      "norm_label": "userprofilemodal.jsx",
+      "source_file": "src/components/UserProfileModal.jsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_userprofilemodal_cities",
+      "label": "CITIES",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "cities",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L34"
     },
     {
       "id": "src_components_voicerecorder",
@@ -2242,26 +2275,37 @@
       "source_location": "L19"
     },
     {
-      "id": "src_context_useemergencyflow",
-      "label": "context/useEmergencyFlow.jsx",
+      "id": "src_lib_supabaseclient",
+      "label": "supabaseClient.js",
       "_origin": "ast",
       "community": 3,
       "community_name": "ClientView.jsx",
       "file_type": "code",
-      "norm_label": "context/useemergencyflow.jsx",
-      "source_file": "src/context/useEmergencyFlow.jsx",
+      "norm_label": "supabaseclient.js",
+      "source_file": "src/lib/supabaseClient.js",
       "source_location": "L1"
     },
     {
-      "id": "src_hooks_useemergencyflow",
-      "label": "hooks/useEmergencyFlow.jsx",
+      "id": "src_lib_supabaseclient_issupabaseconfigured",
+      "label": "isSupabaseConfigured",
       "_origin": "ast",
       "community": 3,
       "community_name": "ClientView.jsx",
       "file_type": "code",
-      "norm_label": "hooks/useemergencyflow.jsx",
-      "source_file": "src/hooks/useEmergencyFlow.jsx",
-      "source_location": "L1"
+      "norm_label": "issupabaseconfigured",
+      "source_file": "src/lib/supabaseClient.js",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_lib_supabaseclient_supabase",
+      "label": "supabase",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "supabase",
+      "source_file": "src/lib/supabaseClient.js",
+      "source_location": "L10"
     },
     {
       "id": "supabase_create_storage_bucket",
@@ -2418,17 +2462,6 @@
       "source_location": "L17"
     },
     {
-      "id": "package_dependencies_leaflet",
-      "label": "leaflet",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "dependencies",
-      "file_type": "code",
-      "norm_label": "leaflet",
-      "source_file": "package.json",
-      "source_location": "L18"
-    },
-    {
       "id": "package_dependencies_lucide_react",
       "label": "lucide-react",
       "_origin": "ast",
@@ -2437,7 +2470,7 @@
       "file_type": "code",
       "norm_label": "lucide-react",
       "source_file": "package.json",
-      "source_location": "L19"
+      "source_location": "L18"
     },
     {
       "id": "package_dependencies_maplibre_gl",
@@ -2448,7 +2481,7 @@
       "file_type": "code",
       "norm_label": "maplibre-gl",
       "source_file": "package.json",
-      "source_location": "L20"
+      "source_location": "L19"
     },
     {
       "id": "package_dependencies_phosphor_icons_react",
@@ -2470,7 +2503,7 @@
       "file_type": "code",
       "norm_label": "react",
       "source_file": "package.json",
-      "source_location": "L21"
+      "source_location": "L20"
     },
     {
       "id": "package_dependencies_react_dom",
@@ -2481,18 +2514,7 @@
       "file_type": "code",
       "norm_label": "react-dom",
       "source_file": "package.json",
-      "source_location": "L22"
-    },
-    {
-      "id": "package_dependencies_react_leaflet",
-      "label": "react-leaflet",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "dependencies",
-      "file_type": "code",
-      "norm_label": "react-leaflet",
-      "source_file": "package.json",
-      "source_location": "L23"
+      "source_location": "L21"
     },
     {
       "id": "package_dependencies_sonner",
@@ -2503,7 +2525,7 @@
       "file_type": "code",
       "norm_label": "sonner",
       "source_file": "package.json",
-      "source_location": "L24"
+      "source_location": "L22"
     },
     {
       "id": "package_dependencies_supabase_supabase_js",
@@ -2550,17 +2572,6 @@
       "source_location": "L17"
     },
     {
-      "id": "leaflet",
-      "label": "leaflet",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "dependencies",
-      "file_type": "concept",
-      "norm_label": "leaflet",
-      "source_file": "package.json",
-      "source_location": "L18"
-    },
-    {
       "id": "lucide_react",
       "label": "lucide-react",
       "_origin": "ast",
@@ -2569,7 +2580,7 @@
       "file_type": "concept",
       "norm_label": "lucide-react",
       "source_file": "package.json",
-      "source_location": "L19"
+      "source_location": "L18"
     },
     {
       "id": "maplibre_gl",
@@ -2580,7 +2591,7 @@
       "file_type": "concept",
       "norm_label": "maplibre-gl",
       "source_file": "package.json",
-      "source_location": "L20"
+      "source_location": "L19"
     },
     {
       "id": "phosphor_icons_react",
@@ -2602,7 +2613,7 @@
       "file_type": "concept",
       "norm_label": "react",
       "source_file": "package.json",
-      "source_location": "L21"
+      "source_location": "L20"
     },
     {
       "id": "react_dom",
@@ -2613,18 +2624,7 @@
       "file_type": "concept",
       "norm_label": "react-dom",
       "source_file": "package.json",
-      "source_location": "L22"
-    },
-    {
-      "id": "react_leaflet",
-      "label": "react-leaflet",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "dependencies",
-      "file_type": "concept",
-      "norm_label": "react-leaflet",
-      "source_file": "package.json",
-      "source_location": "L23"
+      "source_location": "L21"
     },
     {
       "id": "sonner",
@@ -2635,7 +2635,7 @@
       "file_type": "concept",
       "norm_label": "sonner",
       "source_file": "package.json",
-      "source_location": "L24"
+      "source_location": "L22"
     },
     {
       "id": "supabase_supabase_js",
@@ -2827,7 +2827,7 @@
       "file_type": "code",
       "norm_label": "devdependencies",
       "source_file": "package.json",
-      "source_location": "L26"
+      "source_location": "L24"
     },
     {
       "id": "package_devdependencies_autoprefixer",
@@ -2838,7 +2838,7 @@
       "file_type": "code",
       "norm_label": "autoprefixer",
       "source_file": "package.json",
-      "source_location": "L30"
+      "source_location": "L28"
     },
     {
       "id": "package_devdependencies_postcss",
@@ -2849,7 +2849,7 @@
       "file_type": "code",
       "norm_label": "postcss",
       "source_file": "package.json",
-      "source_location": "L31"
+      "source_location": "L29"
     },
     {
       "id": "package_devdependencies_tailwindcss",
@@ -2860,7 +2860,7 @@
       "file_type": "code",
       "norm_label": "tailwindcss",
       "source_file": "package.json",
-      "source_location": "L32"
+      "source_location": "L30"
     },
     {
       "id": "package_devdependencies_types_react",
@@ -2871,7 +2871,7 @@
       "file_type": "code",
       "norm_label": "@types/react",
       "source_file": "package.json",
-      "source_location": "L27"
+      "source_location": "L25"
     },
     {
       "id": "package_devdependencies_types_react_dom",
@@ -2882,7 +2882,7 @@
       "file_type": "code",
       "norm_label": "@types/react-dom",
       "source_file": "package.json",
-      "source_location": "L28"
+      "source_location": "L26"
     },
     {
       "id": "package_devdependencies_vite",
@@ -2893,7 +2893,7 @@
       "file_type": "code",
       "norm_label": "vite",
       "source_file": "package.json",
-      "source_location": "L33"
+      "source_location": "L31"
     },
     {
       "id": "package_devdependencies_vitejs_plugin_react",
@@ -2904,7 +2904,7 @@
       "file_type": "code",
       "norm_label": "@vitejs/plugin-react",
       "source_file": "package.json",
-      "source_location": "L29"
+      "source_location": "L27"
     },
     {
       "id": "package_name",
@@ -3014,7 +3014,7 @@
       "file_type": "concept",
       "norm_label": "autoprefixer",
       "source_file": "package.json",
-      "source_location": "L30"
+      "source_location": "L28"
     },
     {
       "id": "package_json_tailwindcss",
@@ -3025,7 +3025,7 @@
       "file_type": "concept",
       "norm_label": "tailwindcss",
       "source_file": "package.json",
-      "source_location": "L32"
+      "source_location": "L30"
     },
     {
       "id": "postcss",
@@ -3036,7 +3036,7 @@
       "file_type": "concept",
       "norm_label": "postcss",
       "source_file": "package.json",
-      "source_location": "L31"
+      "source_location": "L29"
     },
     {
       "id": "types_react",
@@ -3047,7 +3047,7 @@
       "file_type": "concept",
       "norm_label": "@types/react",
       "source_file": "package.json",
-      "source_location": "L27"
+      "source_location": "L25"
     },
     {
       "id": "types_react_dom",
@@ -3058,7 +3058,7 @@
       "file_type": "concept",
       "norm_label": "@types/react-dom",
       "source_file": "package.json",
-      "source_location": "L28"
+      "source_location": "L26"
     },
     {
       "id": "vite",
@@ -3069,7 +3069,7 @@
       "file_type": "concept",
       "norm_label": "vite",
       "source_file": "package.json",
-      "source_location": "L33"
+      "source_location": "L31"
     },
     {
       "id": "vitejs_plugin_react",
@@ -3080,7 +3080,7 @@
       "file_type": "concept",
       "norm_label": "@vitejs/plugin-react",
       "source_file": "package.json",
-      "source_location": "L29"
+      "source_location": "L27"
     },
     {
       "id": "agents_rules_graphify",
@@ -3159,28 +3159,6 @@
       "norm_label": "rls_fix.sql",
       "source_file": "supabase/rls_fix.sql",
       "source_location": null
-    },
-    {
-      "id": "src_components_cinverificationview",
-      "label": "CINVerificationView.jsx",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "AuthContext.jsx",
-      "file_type": "code",
-      "norm_label": "cinverificationview.jsx",
-      "source_file": "src/components/CINVerificationView.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_userprofilepage",
-      "label": "UserProfilePage.jsx",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "AuthContext.jsx",
-      "file_type": "code",
-      "norm_label": "userprofilepage.jsx",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L1"
     },
     {
       "id": "src_context_authcontext",
@@ -3280,39 +3258,6 @@
       "norm_label": "infobip_base_url",
       "source_file": "src/lib/infobipAuthService.js",
       "source_location": "L4"
-    },
-    {
-      "id": "src_lib_supabaseclient",
-      "label": "supabaseClient.js",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "AuthContext.jsx",
-      "file_type": "code",
-      "norm_label": "supabaseclient.js",
-      "source_file": "src/lib/supabaseClient.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_supabaseclient_issupabaseconfigured",
-      "label": "isSupabaseConfigured",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "AuthContext.jsx",
-      "file_type": "code",
-      "norm_label": "issupabaseconfigured",
-      "source_file": "src/lib/supabaseClient.js",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_lib_supabaseclient_supabase",
-      "label": "supabase",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "AuthContext.jsx",
-      "file_type": "code",
-      "norm_label": "supabase",
-      "source_file": "src/lib/supabaseClient.js",
-      "source_location": "L10"
     },
     {
       "id": "public_manifest",
@@ -3545,7 +3490,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/App.jsx",
-      "source_location": "L112",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -3557,7 +3502,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/App.jsx",
-      "source_location": "L21",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -3569,7 +3514,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/App.jsx",
-      "source_location": "L22",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -3581,7 +3526,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/App.jsx",
-      "source_location": "L23",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -3593,7 +3538,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/App.jsx",
-      "source_location": "L24",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -3605,7 +3550,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/App.jsx",
-      "source_location": "L27",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -4170,18 +4115,6 @@
       "context": "call",
       "source_file": "src/components/UserProfileModal.jsx",
       "source_location": "L45",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_userprofilepage_userprofilepage",
-      "target": "src_context_authcontext_useauth",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -4977,51 +4910,42 @@
       "weight": 1.0
     },
     {
-      "source": "src_context_useemergencyflow",
-      "target": "src_constants_emergencystates",
-      "relation": "re_exports",
+      "source": "src_app_adminapp",
+      "target": "src_layouts_adminapp",
+      "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "context": "export",
-      "source_file": "src/context/useEmergencyFlow.jsx",
-      "source_location": "L4",
+      "context": "import",
+      "deferred": true,
+      "source_file": "src/App.jsx",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
-      "source": "src_context_useemergencyflow",
-      "target": "src_context_emergencyflowcontext",
-      "relation": "re_exports",
+      "source": "src_app_clientapp",
+      "target": "src_layouts_clientapp",
+      "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "context": "export",
-      "source_file": "src/context/useEmergencyFlow.jsx",
-      "source_location": "L4",
+      "context": "import",
+      "deferred": true,
+      "source_file": "src/App.jsx",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
-      "source": "src_hooks_useemergencyflow",
-      "target": "src_constants_emergencystates",
-      "relation": "re_exports",
+      "source": "src_app_maalemapp",
+      "target": "src_layouts_maalemapp",
+      "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "context": "export",
-      "source_file": "src/hooks/useEmergencyFlow.jsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "src_hooks_useemergencyflow",
-      "target": "src_context_emergencyflowcontext",
-      "relation": "re_exports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "export",
-      "source_file": "src/hooks/useEmergencyFlow.jsx",
-      "source_location": "L4",
+      "context": "import",
+      "deferred": true,
+      "source_file": "src/App.jsx",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -5061,18 +4985,6 @@
       "weight": 1.0
     },
     {
-      "source": "package_dependencies_leaflet",
-      "target": "leaflet",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "package.json",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
       "source": "package_dependencies_lucide_react",
       "target": "lucide_react",
       "relation": "imports",
@@ -5081,7 +4993,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L19",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -5093,7 +5005,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L20",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -5117,7 +5029,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L21",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -5129,19 +5041,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L22",
-      "weight": 1.0
-    },
-    {
-      "source": "package_dependencies_react_leaflet",
-      "target": "react_leaflet",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "package.json",
-      "source_location": "L23",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -5153,7 +5053,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -5177,7 +5077,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -5189,7 +5089,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -5201,7 +5101,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L32",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -5213,7 +5113,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L27",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -5225,7 +5125,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L28",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -5237,7 +5137,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L33",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -5249,43 +5149,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "package.json",
-      "source_location": "L29",
-      "weight": 1.0
-    },
-    {
-      "source": "src_app",
-      "target": "src_layouts_maalemapp_maalemapp",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/App.jsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "src_app",
-      "target": "src_layouts_adminapp_adminapp",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/App.jsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "src_app",
-      "target": "src_components_authmodal_authmodal",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/App.jsx",
-      "source_location": "L12",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -5297,7 +5161,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/App.jsx",
-      "source_location": "L13",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -5309,7 +5173,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/App.jsx",
-      "source_location": "L14",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -5321,7 +5185,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/App.jsx",
-      "source_location": "L15",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -5333,7 +5197,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/App.jsx",
-      "source_location": "L16",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -5345,7 +5209,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/App.jsx",
-      "source_location": "L17",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -5357,7 +5221,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/App.jsx",
-      "source_location": "L18",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -5369,7 +5233,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/App.jsx",
-      "source_location": "L18",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -5381,7 +5245,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/App.jsx",
-      "source_location": "L18",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -5482,7 +5346,7 @@
     },
     {
       "source": "src_app",
-      "target": "src_layouts_clientapp_clientapp",
+      "target": "src_components_authmodal_authmodal",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -5898,54 +5762,6 @@
       "context": "import",
       "source_file": "src/components/CategorySelector.jsx",
       "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_cinverificationview",
-      "target": "src_context_authcontext_useauth",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/CINVerificationView.jsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_cinverificationview",
-      "target": "src_context_appcontext_useapp",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/CINVerificationView.jsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_cinverificationview",
-      "target": "src_lib_supabaseclient_issupabaseconfigured",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/CINVerificationView.jsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_cinverificationview",
-      "target": "src_lib_supabaseclient_supabase",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/CINVerificationView.jsx",
-      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -6561,54 +6377,6 @@
       "weight": 1.0
     },
     {
-      "source": "src_components_userprofilepage",
-      "target": "src_components_specialtyselect_specialtyselect",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_userprofilepage",
-      "target": "src_context_authcontext_useauth",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_userprofilepage",
-      "target": "src_lib_supabaseclient_issupabaseconfigured",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_userprofilepage",
-      "target": "src_lib_supabaseclient_supabase",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
       "source": "src_components_voicerecorder",
       "target": "src_context_authcontext_useauth",
       "relation": "imports",
@@ -7089,42 +6857,6 @@
       "weight": 1.0
     },
     {
-      "source": "src_context_useemergencyflow",
-      "target": "src_context_emergencyflowcontext_emergencyflowprovider",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/context/useEmergencyFlow.jsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "src_context_useemergencyflow",
-      "target": "src_context_emergencyflowcontext_useemergencyflow",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/context/useEmergencyFlow.jsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "src_context_useemergencyflow",
-      "target": "src_constants_emergencystates_emergency_states",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/context/useEmergencyFlow.jsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
       "source": "src_hooks_useablynotifications",
       "target": "src_lib_ablyclient_ably_channels",
       "relation": "imports",
@@ -7277,42 +7009,6 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/hooks/useAblyPresence.js",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "src_hooks_useemergencyflow",
-      "target": "src_context_emergencyflowcontext_emergencyflowprovider",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/hooks/useEmergencyFlow.jsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "src_hooks_useemergencyflow",
-      "target": "src_context_emergencyflowcontext_useemergencyflow",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/hooks/useEmergencyFlow.jsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "src_hooks_useemergencyflow",
-      "target": "src_constants_emergencystates_emergency_states",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/hooks/useEmergencyFlow.jsx",
       "source_location": "L2",
       "weight": 1.0
     },
@@ -7594,7 +7290,7 @@
     },
     {
       "source": "src_app",
-      "target": "src_layouts_maalemapp",
+      "target": "src_components_adminauthmodal",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -7606,7 +7302,7 @@
     },
     {
       "source": "src_app",
-      "target": "src_layouts_adminapp",
+      "target": "src_components_userprofilemodal",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -7618,7 +7314,7 @@
     },
     {
       "source": "src_app",
-      "target": "src_components_authmodal",
+      "target": "src_context_appcontext",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -7630,7 +7326,7 @@
     },
     {
       "source": "src_app",
-      "target": "src_components_adminauthmodal",
+      "target": "src_hooks_useablynotifications",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -7642,7 +7338,7 @@
     },
     {
       "source": "src_app",
-      "target": "src_components_userprofilemodal",
+      "target": "src_components_emergencysosmodal",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -7654,42 +7350,6 @@
     },
     {
       "source": "src_app",
-      "target": "src_context_appcontext",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/App.jsx",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "src_app",
-      "target": "src_hooks_useablynotifications",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/App.jsx",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "src_app",
-      "target": "src_components_emergencysosmodal",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/App.jsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "src_app",
       "target": "src_lib_subdomain",
       "relation": "imports_from",
       "_origin": "ast",
@@ -7697,7 +7357,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/App.jsx",
-      "source_location": "L18",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -7762,7 +7422,7 @@
     },
     {
       "source": "src_app",
-      "target": "src_layouts_clientapp",
+      "target": "src_components_authmodal",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -8034,42 +7694,6 @@
       "context": "import",
       "source_file": "src/components/CategorySelector.jsx",
       "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_cinverificationview",
-      "target": "src_context_authcontext",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/CINVerificationView.jsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_cinverificationview",
-      "target": "src_context_appcontext",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/CINVerificationView.jsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_cinverificationview",
-      "target": "src_lib_supabaseclient",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/CINVerificationView.jsx",
-      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -8550,42 +8174,6 @@
       "context": "import",
       "source_file": "src/components/UserProfileModal.jsx",
       "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_userprofilepage",
-      "target": "src_components_specialtyselect",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_userprofilepage",
-      "target": "src_context_authcontext",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_userprofilepage",
-      "target": "src_lib_supabaseclient",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -9272,7 +8860,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json",
-      "source_location": "L26",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -9376,7 +8964,7 @@
     },
     {
       "source": "package_dependencies",
-      "target": "package_dependencies_leaflet",
+      "target": "package_dependencies_lucide_react",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -9387,7 +8975,7 @@
     },
     {
       "source": "package_dependencies",
-      "target": "package_dependencies_lucide_react",
+      "target": "package_dependencies_maplibre_gl",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -9398,7 +8986,7 @@
     },
     {
       "source": "package_dependencies",
-      "target": "package_dependencies_maplibre_gl",
+      "target": "package_dependencies_react",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -9409,7 +8997,7 @@
     },
     {
       "source": "package_dependencies",
-      "target": "package_dependencies_react",
+      "target": "package_dependencies_react_dom",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -9420,35 +9008,13 @@
     },
     {
       "source": "package_dependencies",
-      "target": "package_dependencies_react_dom",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "package.json",
-      "source_location": "L22",
-      "weight": 1.0
-    },
-    {
-      "source": "package_dependencies",
-      "target": "package_dependencies_react_leaflet",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "package.json",
-      "source_location": "L23",
-      "weight": 1.0
-    },
-    {
-      "source": "package_dependencies",
       "target": "package_dependencies_sonner",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -9459,7 +9025,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json",
-      "source_location": "L27",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -9470,7 +9036,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json",
-      "source_location": "L28",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -9481,7 +9047,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json",
-      "source_location": "L29",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -9492,7 +9058,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -9503,7 +9069,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -9514,7 +9080,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json",
-      "source_location": "L32",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -9525,7 +9091,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "package.json",
-      "source_location": "L33",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -9684,7 +9250,29 @@
     },
     {
       "source": "src_app",
-      "target": "src_app_mainapp",
+      "target": "src_app_clientapp",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.jsx",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app",
+      "target": "src_app_maalemapp",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.jsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app",
+      "target": "src_app_adminapp",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -9695,13 +9283,35 @@
     },
     {
       "source": "src_app",
+      "target": "src_app_apploadingfallback",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.jsx",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app",
       "target": "src_app_app",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/App.jsx",
-      "source_location": "L327",
+      "source_location": "L343",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app",
+      "target": "src_app_mainapp",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.jsx",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -10186,17 +9796,6 @@
       "confidence_score": 1.0,
       "source_file": "src/components/UserProfileModal.jsx",
       "source_location": "L43",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_userprofilepage",
-      "target": "src_components_userprofilepage_userprofilepage",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/UserProfilePage.jsx",
-      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -11267,6 +10866,33 @@
       "weight": 1.0
     },
     {
+      "source": "src_app",
+      "target": "src_layouts_adminapp",
+      "relation": "dynamic_import",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.jsx"
+    },
+    {
+      "source": "src_app",
+      "target": "src_layouts_clientapp",
+      "relation": "dynamic_import",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.jsx"
+    },
+    {
+      "source": "src_app",
+      "target": "src_layouts_maalemapp",
+      "relation": "dynamic_import",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.jsx"
+    },
+    {
       "source": "supabase_admin_dashboard_security_public_is_admin",
       "target": "supabase_admin_dashboard_security_sql_public_profiles",
       "relation": "reads_from",
@@ -11382,5 +11008,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b3b08c5fc958a96d328555d9e63ddf43ab07906a"
+  "built_at_commit": "f4a382023a95701eeb697417ad77e55b728b7a8c"
 }

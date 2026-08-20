@@ -10,5 +10,19 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'maplibre-vendor': ['maplibre-gl'],
+          'firebase-vendor': ['firebase/app', 'firebase/auth'],
+          'supabase-vendor': ['@supabase/supabase-js'],
+          'motion-vendor': ['framer-motion'],
+          'icons-vendor': ['@phosphor-icons/react', 'lucide-react']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1200
   }
 });

@@ -98,3 +98,5 @@ export const AdminApp = () => {
     </div>
   );
 };
+
+export default AdminApp;

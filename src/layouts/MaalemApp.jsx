@@ -172,3 +172,5 @@ export const MaalemApp = () => {
     </div>
   );
 };
+
+export default MaalemApp;

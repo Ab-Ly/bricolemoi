@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
@@ -6,9 +6,6 @@ import { EmergencyFlowProvider, useEmergencyFlow } from './context/EmergencyFlow
 import { Navbar } from './components/Navbar';
 import { BottomNav } from './components/BottomNav';
 import { LandingPage } from './components/LandingPage';
-import { ClientApp } from './layouts/ClientApp';
-import { MaalemApp } from './layouts/MaalemApp';
-import { AdminApp } from './layouts/AdminApp';
 import { AuthModal } from './components/AuthModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { UserProfileModal } from './components/UserProfileModal';
@@ -16,6 +13,25 @@ import { useApp } from './context/AppContext';
 import { useAblyNotifications } from './hooks/useAblyNotifications';
 import { EmergencySOSModal } from './components/EmergencySOSModal';
 import { getAppSubdomain, switchSubdomainInDev, APP_SUBDOMAINS } from './lib/subdomain';
+
+// Code Splitting & Lazy-loaded Sub-Apps
+const ClientApp = lazy(() => import('./layouts/ClientApp'));
+const MaalemApp = lazy(() => import('./layouts/MaalemApp'));
+const AdminApp = lazy(() => import('./layouts/AdminApp'));
+
+// Élégant composant de chargement pour les transitions SPA instantanées
+const AppLoadingFallback = () => (
+  <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center font-sans">
+    <div className="relative flex items-center justify-center mb-4">
+      <div className="w-12 h-12 rounded-2xl bg-blue-600 animate-pulse flex items-center justify-center shadow-lg shadow-blue-500/30">
+        <span className="text-white font-black text-xl">B</span>
+      </div>
+      <div className="absolute -inset-2 rounded-3xl border-2 border-blue-500/20 animate-spin" style={{ animationDuration: '3s' }} />
+    </div>
+    <p className="text-sm font-extrabold text-slate-800 tracking-tight">BricoleMoi 🇲🇦</p>
+    <p className="text-xs text-slate-500 font-medium mt-1">Chargement de votre espace...</p>
+  </div>
+);
 
 const MainApp = () => {
   const { user, switchRole, setAuthModalOpen, profileModalOpen, setProfileModalOpen } = useAuth();
@@ -122,7 +138,7 @@ const MainApp = () => {
   // Render 100% Dedicated Subdomain Layouts without Dev Toolbar
   if (activeSubdomain === APP_SUBDOMAINS.CLIENT) {
     return (
-      <>
+      <Suspense fallback={<AppLoadingFallback />}>
         <Toaster 
           position="top-center" 
           theme="light" 
@@ -159,13 +175,13 @@ const MainApp = () => {
           }} 
           onDismiss={dismissSosAlert} 
         />
-      </>
+      </Suspense>
     );
   }
 
   if (activeSubdomain === APP_SUBDOMAINS.MAALEM) {
     return (
-      <>
+      <Suspense fallback={<AppLoadingFallback />}>
         <Toaster 
           position="top-center" 
           theme="light" 
@@ -202,13 +218,13 @@ const MainApp = () => {
           }} 
           onDismiss={dismissSosAlert} 
         />
-      </>
+      </Suspense>
     );
   }
 
   if (activeSubdomain === APP_SUBDOMAINS.ADMIN) {
     return (
-      <>
+      <Suspense fallback={<AppLoadingFallback />}>
         <Toaster 
           position="top-center" 
           theme="light" 
@@ -245,7 +261,7 @@ const MainApp = () => {
           }} 
           onDismiss={dismissSosAlert} 
         />
-      </>
+      </Suspense>
     );
   }
 
