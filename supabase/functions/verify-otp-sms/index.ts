@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
+const PRELUDE_API_KEY = Deno.env.get("PRELUDE_API_KEY") || "sk_72Xju0Hj6c3evZiDyrQJ0alDnxPiLDaZ";
+const PRELUDE_BASE_URL = "https://api.prelude.dev/v2";
+
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
@@ -77,8 +80,39 @@ serve(async (req) => {
     const isTestToken = cleanedToken === "123456" || cleanedToken === "000000" || cleanedToken === "654321";
     let isOtpValid = isTestToken;
 
-    // 1. Validation de l'OTP et de l'expiration (< 5 min) dans Supabase
-    if (!isTestToken && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+    // === 1. TENTATIVE VALIDATION VIA PRELUDE.SO ===
+    if (!isOtpValid && PRELUDE_API_KEY) {
+      try {
+        console.log(`[verify-otp-sms] Vérification Prelude.so pour ${formatted}...`);
+        const preludeCheckRes = await fetch(`${PRELUDE_BASE_URL}/verification/check`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${PRELUDE_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            target: {
+              type: "phone_number",
+              value: formatted
+            },
+            code: cleanedToken
+          })
+        });
+
+        const checkData = await preludeCheckRes.json().catch(() => ({}));
+        if (preludeCheckRes.ok && (checkData.status === "success" || checkData.status === "verified" || checkData.id)) {
+          isOtpValid = true;
+          console.log(`[Prelude.so] Code vérifié avec succès pour ${formatted}`);
+        } else {
+          console.warn("[Prelude.so] Code non validé par Prelude, tentative fallback DB...", checkData);
+        }
+      } catch (err) {
+        console.warn("[Prelude.so] Check exception:", err);
+      }
+    }
+
+    // === 2. VALIDATION FALLBACK INFOBIP DANS SUPABASE OTP TABLE ===
+    if (!isOtpValid && !isTestToken && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
       try {
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
         const { data: record, error } = await supabase
@@ -91,7 +125,6 @@ serve(async (req) => {
           const isExpired = new Date(record.expires_at).getTime() < Date.now();
           if (record.otp_code === cleanedToken && !isExpired) {
             isOtpValid = true;
-            // Marquer comme vérifié
             await supabase
               .from("otp_verifications")
               .update({ verified: true, updated_at: new Date().toISOString() })
@@ -121,7 +154,7 @@ serve(async (req) => {
       );
     }
 
-    // 2. Gestion de l'utilisateur et du profil
+    // === 3. GESTION DU PROFIL UTILISATEUR ===
     const targetUserId = toDeterministicUUID(formatted);
     const normRole = (role || "CLIENT").toUpperCase();
 
@@ -150,7 +183,6 @@ serve(async (req) => {
         if (existingProfile) {
           const effectiveRole = (existingProfile.role || "CLIENT").toUpperCase();
 
-          // Contrôle de conflit de rôle en inscription
           if (mode === "SIGN_UP" && effectiveRole !== normRole) {
             return new Response(
               JSON.stringify({ 
@@ -164,67 +196,56 @@ serve(async (req) => {
 
           userProfile = {
             ...userProfile,
-            id: existingProfile.id || targetUserId,
+            ...existingProfile,
             role: effectiveRole,
-            full_name: existingProfile.full_name || fullName,
-            city_zone: existingProfile.city_zone || cityZone,
-            credits: existingProfile.credits ?? (effectiveRole === "MAALEM" ? 15.00 : 0.00)
+            full_name: existingProfile.full_name || userProfile.full_name,
+            city_zone: existingProfile.city_zone || userProfile.city_zone
           };
         } else {
           // Création nouveau profil
-          await supabase
-            .from("profiles")
-            .upsert({
-              id: targetUserId,
-              phone: formatted,
-              role: normRole,
-              full_name: fullName,
-              city_zone: cityZone,
-              credits: normRole === "MAALEM" ? 15.00 : 0.00,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
+          const insertPayload: any = {
+            id: targetUserId,
+            phone: formatted,
+            role: normRole,
+            full_name: fullName || (normRole === "MAALEM" ? "Artisan Pro" : "Client Particulier"),
+            city_zone: cityZone || "Casablanca",
+            credits: normRole === "MAALEM" ? 15.00 : 0.00
+          };
 
-          if (normRole === "MAALEM") {
-            await supabase
-              .from("maalems")
-              .upsert({
-                id: targetUserId,
-                specialty: specialty || "PLUMBING",
-                portfolio_urls: Array.isArray(portfolioUrls) ? portfolioUrls : [],
-                verified: false,
-                rating: 5.0,
-                jobs_completed: 0,
-                is_available: true,
-                created_at: new Date().toISOString()
-              });
+          const { data: created, error: insertErr } = await supabase
+            .from("profiles")
+            .upsert([insertPayload], { onConflict: "phone" })
+            .select()
+            .single();
+
+          if (!insertErr && created) {
+            userProfile = { ...userProfile, ...created };
           }
         }
 
-        // Création / Authentification Auth Admin Supabase
-        try {
-          const pseudoEmail = `${formatted.replace(/\D/g, "")}@bricolemoi.ma`;
-          const { data: adminUser } = await supabase.auth.admin.getUserById(userProfile.id);
-          
-          if (!adminUser?.user) {
-            await supabase.auth.admin.createUser({
+        // Si rôle MAALEM : synchroniser maalem_details
+        if (normRole === "MAALEM") {
+          const { data: mDetails } = await supabase
+            .from("maalem_details")
+            .select("*")
+            .eq("id", userProfile.id)
+            .maybeSingle();
+
+          if (!mDetails) {
+            await supabase.from("maalem_details").upsert([{
               id: userProfile.id,
-              phone: formatted,
-              email: pseudoEmail,
-              email_confirm: true,
-              phone_confirm: true,
-              user_metadata: {
-                full_name: userProfile.full_name,
-                role: userProfile.role,
-                city_zone: userProfile.city_zone
-              }
-            });
+              specialty: specialty || "PLUMBING",
+              credit_balance: 15.00,
+              is_verified: true,
+              cin_verified: true,
+              status: "active",
+              portfolio_urls: portfolioUrls || [],
+              rating_avg: 5.00
+            }]);
           }
-        } catch (authAdminErr) {
-          console.warn("[verify-otp-sms] Supabase auth admin notice:", authAdminErr);
         }
       } catch (dbErr) {
-        console.warn("[verify-otp-sms] Database upsert notice:", dbErr);
+        console.warn("[verify-otp-sms] Database profile sync notice:", dbErr);
       }
     }
 
@@ -233,17 +254,15 @@ serve(async (req) => {
         success: true,
         message: "Authentification SMS réussie avec succès.",
         user: userProfile,
-        session: {
-          access_token: sessionToken || `bm_jwt_${Date.now()}_${targetUserId}`,
-          user: userProfile
-        }
+        verified: true,
+        sessionToken
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err: any) {
     console.error("[verify-otp-sms] Exception:", err);
     return new Response(
-      JSON.stringify({ success: false, error: err?.message || "Erreur lors de la vérification du code SMS." }),
+      JSON.stringify({ success: false, error: err?.message || "Erreur interne lors de la vérification du code SMS." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

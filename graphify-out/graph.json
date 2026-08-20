@@ -409,7 +409,7 @@
       "file_type": "code",
       "norm_label": "landingpage()",
       "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L123"
+      "source_location": "L179"
     },
     {
       "id": "src_components_maalemview_maalemview",
@@ -3492,7 +3492,7 @@
       "file_type": "code",
       "norm_label": "moroccan_cities",
       "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L113"
+      "source_location": "L169"
     },
     {
       "id": "src_components_landingpage_moroccan_services",
@@ -4025,7 +4025,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L124",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -4037,7 +4037,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L309",
+      "source_location": "L365",
       "weight": 1.0
     },
     {
@@ -9838,7 +9838,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L113",
+      "source_location": "L169",
       "weight": 1.0
     },
     {
@@ -9849,7 +9849,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L123",
+      "source_location": "L179",
       "weight": 1.0
     },
     {
@@ -11260,5 +11260,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5f7095fad0376d8b54164b0a017c2ec4881bd887"
+  "built_at_commit": "71baf4926a4109ead3ae9a9a717d500a039130f3"
 }
