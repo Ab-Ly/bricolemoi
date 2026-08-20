@@ -3773,7 +3773,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L424",
+      "source_location": "L430",
       "weight": 1.0
     },
     {
@@ -3785,7 +3785,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L471",
+      "source_location": "L477",
       "weight": 1.0
     },
     {
@@ -11260,5 +11260,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3f41173db1a545ca9419c4172fa98c3c5002931c"
+  "built_at_commit": "fdf93e25db49e551f74aa57e6046bb9f54836222"
 }
