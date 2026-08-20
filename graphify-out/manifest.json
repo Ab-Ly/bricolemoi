@@ -60,15 +60,15 @@
     "semantic_hash": ""
   },
   "src/components/CategorySelector.jsx": {
-    "mtime": 1787239571.872074,
-    "seen": 1787239588.16364,
-    "ast_hash": "57eee53d6c742ceabb4c8e91f47968da",
+    "mtime": 1787251787.832058,
+    "seen": 1787252012.939129,
+    "ast_hash": "90c282a20875a3879460109cc86a1495",
     "semantic_hash": ""
   },
   "src/components/ClientView.jsx": {
-    "mtime": 1787239571.8755236,
-    "seen": 1787239588.1636422,
-    "ast_hash": "fab27866b548c329ba9ba5c40a4d529b",
+    "mtime": 1787251808.831464,
+    "seen": 1787252012.939132,
+    "ast_hash": "f897e588ee066a223ded8b45f2c73387",
     "semantic_hash": ""
   },
   "src/components/CustomDropdown.jsx": {
@@ -84,9 +84,9 @@
     "semantic_hash": ""
   },
   "src/components/EnhancedCategoryIcon.jsx": {
-    "mtime": 1787239571.8807833,
-    "seen": 1787239588.163648,
-    "ast_hash": "8af64f92f54e4bf70eb6c680afa27112",
+    "mtime": 1787251775.7550128,
+    "seen": 1787252012.939275,
+    "ast_hash": "0f5447af158c9f60961219a16b9b81ff",
     "semantic_hash": ""
   },
   "src/components/InteractiveMap.jsx": {

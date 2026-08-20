@@ -397,7 +397,7 @@
       "file_type": "code",
       "norm_label": "clientview()",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L101"
+      "source_location": "L109"
     },
     {
       "id": "src_components_landingpage_landingpage",
@@ -697,7 +697,7 @@
       "file_type": "code",
       "norm_label": "categoryselector()",
       "source_file": "src/components/CategorySelector.jsx",
-      "source_location": "L200"
+      "source_location": "L256"
     },
     {
       "id": "src_components_enhancedcategoryicon_enhancedcategoryicon",
@@ -709,7 +709,7 @@
       "file_type": "code",
       "norm_label": "enhancedcategoryicon()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L218"
+      "source_location": "L278"
     },
     {
       "id": "src_components_enhancedcategoryicon_getspecialtylabel",
@@ -721,7 +721,7 @@
       "file_type": "code",
       "norm_label": "getspecialtylabel()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L210"
+      "source_location": "L270"
     },
     {
       "id": "src_components_enhancedcategoryicon_getspecialtymeta",
@@ -733,7 +733,7 @@
       "file_type": "code",
       "norm_label": "getspecialtymeta()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L180"
+      "source_location": "L236"
     },
     {
       "id": "src_components_enhancedcategoryicon_specialtybadge",
@@ -745,7 +745,7 @@
       "file_type": "code",
       "norm_label": "specialtybadge()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L241"
+      "source_location": "L301"
     },
     {
       "id": "src_components_interactivemap_getmapiconsvg",
@@ -841,7 +841,7 @@
       "file_type": "code",
       "norm_label": "getservicedisplay()",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L70"
+      "source_location": "L74"
     },
     {
       "id": "src_components_clientview_mapcategorytoslug",
@@ -853,7 +853,7 @@
       "file_type": "code",
       "norm_label": "mapcategorytoslug()",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L85"
+      "source_location": "L93"
     },
     {
       "id": "src_components_customdropdown_customdropdown",
@@ -1968,7 +1968,7 @@
       "file_type": "code",
       "norm_label": "specialty_config",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L21"
+      "source_location": "L25"
     },
     {
       "id": "src_components_interactivemap",
@@ -3821,7 +3821,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/CategorySelector.jsx",
-      "source_location": "L244",
+      "source_location": "L300",
       "weight": 1.0
     },
     {
@@ -3833,7 +3833,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L102",
+      "source_location": "L110",
       "weight": 1.0
     },
     {
@@ -3845,7 +3845,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L103",
+      "source_location": "L111",
       "weight": 1.0
     },
     {
@@ -3857,7 +3857,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L116",
+      "source_location": "L124",
       "weight": 1.0
     },
     {
@@ -3869,7 +3869,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L141",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -3881,7 +3881,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L627",
+      "source_location": "L635",
       "weight": 1.0
     },
     {
@@ -3917,7 +3917,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L225",
+      "source_location": "L285",
       "weight": 1.0
     },
     {
@@ -3929,7 +3929,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L211",
+      "source_location": "L271",
       "weight": 1.0
     },
     {
@@ -3941,7 +3941,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L242",
+      "source_location": "L302",
       "weight": 1.0
     },
     {
@@ -9607,7 +9607,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/CategorySelector.jsx",
-      "source_location": "L200",
+      "source_location": "L256",
       "weight": 1.0
     },
     {
@@ -9640,7 +9640,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L101",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -9662,7 +9662,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L70",
+      "source_location": "L74",
       "weight": 1.0
     },
     {
@@ -9673,7 +9673,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L85",
+      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -9717,7 +9717,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L180",
+      "source_location": "L236",
       "weight": 1.0
     },
     {
@@ -9728,7 +9728,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L21",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -9739,7 +9739,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L210",
+      "source_location": "L270",
       "weight": 1.0
     },
     {
@@ -9750,7 +9750,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L218",
+      "source_location": "L278",
       "weight": 1.0
     },
     {
@@ -9761,7 +9761,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L241",
+      "source_location": "L301",
       "weight": 1.0
     },
     {
@@ -11260,5 +11260,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "fb5427cc0b392ec401b00919a66cf9da5ce268fa"
+  "built_at_commit": "5f7095fad0376d8b54164b0a017c2ec4881bd887"
 }
