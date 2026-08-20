@@ -18,9 +18,9 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1787172763.1820934,
-    "seen": 1787239588.163622,
-    "ast_hash": "ec8710e98d20be44158050784f54b186",
+    "mtime": 1787242293.5530326,
+    "seen": 1787242583.0656378,
+    "ast_hash": "1a0dfe7df1c902ab67b51b118f2ac240",
     "semantic_hash": ""
   },
   "src/App.jsx": {
@@ -192,9 +192,9 @@
     "semantic_hash": ""
   },
   "src/context/AppContext.jsx": {
-    "mtime": 1787239571.9113173,
-    "seen": 1787239588.163698,
-    "ast_hash": "87052cf6945331c1da86b35dc7a23ea4",
+    "mtime": 1787242354.5966377,
+    "seen": 1787242583.069047,
+    "ast_hash": "1bddadbb978557f94be95e5b26d029de",
     "semantic_hash": ""
   },
   "src/context/AuthContext.jsx": {
@@ -450,9 +450,9 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1787239571.8639126,
-    "seen": 1787239588.1638558,
-    "ast_hash": "510e4220ec2cba6d060f2422bcd05c46",
+    "mtime": 1787242303.7145126,
+    "seen": 1787242583.0735402,
+    "ast_hash": "89ae5038f55d10c8d1abea594916fa72",
     "semantic_hash": ""
   },
   "public/favicon.svg": {
@@ -501,6 +501,12 @@
     "mtime": 1787239571.9080727,
     "seen": 1787239588.1636941,
     "ast_hash": "c2afa51b11ced7659666e08518411760",
+    "semantic_hash": ""
+  },
+  "src/lib/pdfReceiptGenerator.js": {
+    "mtime": 1787242332.2041147,
+    "seen": 1787242583.070768,
+    "ast_hash": "2eb24b58716db9f83ab7f4d078472622",
     "semantic_hash": ""
   }
 }

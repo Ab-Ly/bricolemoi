@@ -5,18 +5,129 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#F8FAFC" />
-    <meta name="description" content="BricoleMoi - Plateforme d'urgence dépannage Plomberie, Électricité et Mécanique Auto au Maroc" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="BricoleMoi" />
+    
+    <!-- Primary SEO Metadata -->
+    <title>BricoleMoi 🇲🇦 | N°1 du Dépannage d'Urgence Express au Maroc (24h/7j)</title>
+    <meta name="description" content="BricoleMoi : Trouvez un Maâlem professionnel vérifié en moins de 15 minutes. Dépannage d'urgence 24h/7j en Plomberie, Électricité, Serrurerie et Climatisation à Casablanca, Rabat, Marrakech, Tanger, Fès et Agadir." />
+    <meta name="keywords" content="bricolemoi, maalem maroc, depannage urgence casablanca, plombier urgence rabat, electricien marrakech, serrurier tanger, artisan maroc, reparation fuite eau maroc" />
+    <meta name="author" content="BricoleMoi Maroc" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Geo & Local SEO Maroc -->
+    <meta name="geo.region" content="MA" />
+    <meta name="geo.placename" content="Casablanca, Rabat, Marrakech, Tanger, Maroc" />
+    <meta name="geo.position" content="33.5731; -7.5898" />
+    <meta name="ICBM" content="33.5731, -7.5898" />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bricolemoi.ma" />
+    <meta property="og:title" content="BricoleMoi 🇲🇦 | Le 1er Réseau de Dépannage d'Urgence au Maroc" />
+    <meta property="og:description" content="Un problème urgent ? Plombier, Électricien, Serrurier ou Frigoriste chez vous en moins de 15 minutes. Artisans 100% vérifiés par CIN." />
+    <meta property="og:image" content="/favicon.svg" />
+    <meta property="og:locale" content="fr_MA" />
+    <meta property="og:locale:alternate" content="ar_MA" />
+    <meta property="og:site_name" content="BricoleMoi" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BricoleMoi 🇲🇦 | Dépannage d'Urgence 24h/7j au Maroc" />
+    <meta name="twitter:description" content="Trouvez un artisan Maâlem vérifié en 15 minutes partout au Maroc." />
+    <meta name="twitter:image" content="/favicon.svg" />
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     
     <!-- Google Fonts: Plus Jakarta Sans (Latin/FR) & Readex Pro + Tajawal (Arabic/Darija) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Readex+Pro:wght@400;500;600;700&family=Tajawal:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <title>BricoleMoi | Dépannage d'Urgence Maroc</title>
+    <!-- Schema.org JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "EmergencyService",
+          "@id": "https://bricolemoi.ma/#service",
+          "name": "BricoleMoi Dépannage d'Urgence Maroc",
+          "alternateName": "BricoleMoi Maâlem Express",
+          "url": "https://bricolemoi.ma",
+          "logo": "https://bricolemoi.ma/favicon.svg",
+          "image": "https://bricolemoi.ma/favicon.svg",
+          "description": "Plateforme marocaine d'intervention d'urgence 24h/7j reliant les particuliers aux artisans professionnels vérifiés (Maâlems).",
+          "telephone": "+212619184098",
+          "priceRange": "$$",
+          "currenciesAccepted": "MAD",
+          "paymentAccepted": "Cash, Carte Bancaire",
+          "areaServed": [
+            { "@type": "City", "name": "Casablanca" },
+            { "@type": "City", "name": "Rabat" },
+            { "@type": "City", "name": "Marrakech" },
+            { "@type": "City", "name": "Tanger" },
+            { "@type": "City", "name": "Fès" },
+            { "@type": "City", "name": "Agadir" }
+          ],
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Services de Dépannage d'Urgence",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Dépannage Plomberie d'Urgence",
+                  "description": "Réparation express de fuites d'eau, débouchage de canalisations, chauffe-eau."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Dépannage Électricité Express",
+                  "description": "Court-circuit, coupure de courant générale, remplacement disjoncteur."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Serrurerie & Ouverture de Porte",
+                  "description": "Porte claquée, clé cassée, changement de serrure d'urgence."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Climatisation & Froid",
+                  "description": "Recharge de gaz, panne compresseur, climatiseur réversible."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://bricolemoi.ma/#organization",
+          "name": "BricoleMoi Maroc",
+          "url": "https://bricolemoi.ma",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+212619184098",
+            "contactType": "customer service",
+            "areaServed": "MA",
+            "availableLanguage": ["French", "Arabic"]
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body class="bg-slate-50 text-slate-900 min-h-screen antialiased selection:bg-blue-600 selection:text-white">
     <div id="root"></div>

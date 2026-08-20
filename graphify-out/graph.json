@@ -25,7 +25,19 @@
       "file_type": "code",
       "norm_label": "appprovider()",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L30"
+      "source_location": "L31"
+    },
+    {
+      "id": "src_context_appcontext_calculatedistanceinkm",
+      "label": "calculateDistanceInKm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "calculatedistanceinkm()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L16"
     },
     {
       "id": "src_context_emergencyflowcontext_emergencyflowprovider",
@@ -232,6 +244,18 @@
       "source_location": "L25"
     },
     {
+      "id": "src_lib_pdfreceiptgenerator_generatereceiptpdf",
+      "label": "generateReceiptPDF()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "generatereceiptpdf()",
+      "source_file": "src/lib/pdfReceiptGenerator.js",
+      "source_location": "L5"
+    },
+    {
       "id": "src_lib_pushnotificationservice_getnotificationpermissionstate",
       "label": "getNotificationPermissionState()",
       "_callable": true,
@@ -376,6 +400,18 @@
       "source_location": "L13"
     },
     {
+      "id": "src_components_clientview_clientview",
+      "label": "ClientView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "clientview()",
+      "source_file": "src/components/ClientView.jsx",
+      "source_location": "L101"
+    },
+    {
       "id": "src_components_landingpage_landingpage",
       "label": "LandingPage()",
       "_callable": true,
@@ -386,6 +422,18 @@
       "norm_label": "landingpage()",
       "source_file": "src/components/LandingPage.jsx",
       "source_location": "L123"
+    },
+    {
+      "id": "src_components_maalemview_maalemview",
+      "label": "MaalemView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "maalemview()",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L64"
     },
     {
       "id": "src_components_navbar_navbar",
@@ -445,7 +493,7 @@
       "file_type": "code",
       "norm_label": "useapp()",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3303"
+      "source_location": "L3240"
     },
     {
       "id": "src_context_authcontext_useauth",
@@ -458,6 +506,18 @@
       "norm_label": "useauth()",
       "source_file": "src/context/AuthContext.jsx",
       "source_location": "L684"
+    },
+    {
+      "id": "src_context_emergencyflowcontext_useemergencyflow",
+      "label": "useEmergencyFlow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "useemergencyflow()",
+      "source_file": "src/context/EmergencyFlowContext.jsx",
+      "source_location": "L465"
     },
     {
       "id": "src_layouts_adminapp_adminapp",
@@ -585,7 +645,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminclientsview()",
       "source_file": "src/components/admin/AdminClientsView.jsx",
@@ -597,7 +657,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "admindisputesview()",
       "source_file": "src/components/admin/AdminDisputesView.jsx",
@@ -609,7 +669,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminlivemissions()",
       "source_file": "src/components/admin/AdminLiveMissions.jsx",
@@ -621,7 +681,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminmaalemsview()",
       "source_file": "src/components/admin/AdminMaalemsView.jsx",
@@ -633,7 +693,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminrechargesview()",
       "source_file": "src/components/admin/AdminRechargesView.jsx",
@@ -645,7 +705,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "categoryselector()",
       "source_file": "src/components/CategorySelector.jsx",
@@ -657,7 +717,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "enhancedcategoryicon()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -669,7 +729,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "getspecialtylabel()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -681,7 +741,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "getspecialtymeta()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -693,47 +753,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "specialtybadge()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
       "source_location": "L241"
-    },
-    {
-      "id": "src_components_interactivemap_getmapiconsvg",
-      "label": "getMapIconSvg()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "getmapiconsvg()",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L234"
-    },
-    {
-      "id": "src_components_interactivemap_getmapstylejson",
-      "label": "getMapStyleJson()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "getmapstylejson()",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L59"
-    },
-    {
-      "id": "src_components_interactivemap_interactivemap",
-      "label": "InteractiveMap()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "interactivemap()",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L252"
     },
     {
       "id": "src_components_maalemselect_maalemselect",
@@ -741,23 +765,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "maalemselect()",
       "source_file": "src/components/MaalemSelect.jsx",
       "source_location": "L6"
     },
     {
-      "id": "src_components_maalemview_maalemview",
-      "label": "MaalemView()",
+      "id": "src_components_promovideoplayer_promovideoplayer",
+      "label": "PromoVideoPlayer()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "maalemview()",
-      "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L64"
+      "norm_label": "promovideoplayer()",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L200"
     },
     {
       "id": "src_components_specialtyselect_specialtyselect",
@@ -765,35 +789,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "specialtyselect()",
       "source_file": "src/components/SpecialtySelect.jsx",
       "source_location": "L6"
-    },
-    {
-      "id": "src_context_appcontext_calculatedistanceinkm",
-      "label": "calculateDistanceInKm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "calculatedistanceinkm()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_context_emergencyflowcontext_useemergencyflow",
-      "label": "useEmergencyFlow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "useemergencyflow()",
-      "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L465"
     },
     {
       "id": "src_components_cgumodal_cgumodal",
@@ -806,18 +806,6 @@
       "norm_label": "cgumodal()",
       "source_file": "src/components/CGUModal.jsx",
       "source_location": "L5"
-    },
-    {
-      "id": "src_components_clientview_clientview",
-      "label": "ClientView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "clientview()",
-      "source_file": "src/components/ClientView.jsx",
-      "source_location": "L101"
     },
     {
       "id": "src_components_clientview_getservicedisplay",
@@ -854,6 +842,42 @@
       "norm_label": "customdropdown()",
       "source_file": "src/components/CustomDropdown.jsx",
       "source_location": "L5"
+    },
+    {
+      "id": "src_components_interactivemap_getmapiconsvg",
+      "label": "getMapIconSvg()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "getmapiconsvg()",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L234"
+    },
+    {
+      "id": "src_components_interactivemap_getmapstylejson",
+      "label": "getMapStyleJson()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "getmapstylejson()",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L59"
+    },
+    {
+      "id": "src_components_interactivemap_interactivemap",
+      "label": "InteractiveMap()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "interactivemap()",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L252"
     },
     {
       "id": "src_components_voicerecorder_voicerecorder",
@@ -1084,18 +1108,6 @@
       "source_location": "L192"
     },
     {
-      "id": "src_components_promovideoplayer_promovideoplayer",
-      "label": "PromoVideoPlayer()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "promovideoplayer()",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L200"
-    },
-    {
       "id": "supabase_functions_verify_otp_sms_index_cleanphonenumber",
       "label": "cleanPhoneNumber()",
       "_callable": true,
@@ -1150,7 +1162,7 @@
       "file_type": "code",
       "norm_label": "appcontext",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "id": "src_context_emergencyflowcontext",
@@ -1327,6 +1339,17 @@
       "norm_label": "recentnotifications",
       "source_file": "src/lib/notify.jsx",
       "source_location": "L23"
+    },
+    {
+      "id": "src_lib_pdfreceiptgenerator",
+      "label": "pdfReceiptGenerator.js",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "pdfreceiptgenerator.js",
+      "source_file": "src/lib/pdfReceiptGenerator.js",
+      "source_location": "L1"
     },
     {
       "id": "src_lib_pushnotificationservice",
@@ -1725,15 +1748,15 @@
       "source_location": "L1"
     },
     {
-      "id": "public_sw_assets_to_cache",
-      "label": "ASSETS_TO_CACHE",
+      "id": "public_sw_precache_assets",
+      "label": "PRECACHE_ASSETS",
       "_origin": "ast",
       "community": 16,
       "community_name": "sw.js",
       "file_type": "code",
-      "norm_label": "assets_to_cache",
+      "norm_label": "precache_assets",
       "source_file": "public/sw.js",
-      "source_location": "L2"
+      "source_location": "L7"
     },
     {
       "id": "supabase_admin_dashboard_security",
@@ -1806,7 +1829,7 @@
       "label": "AdminClientsView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminclientsview.jsx",
       "source_file": "src/components/admin/AdminClientsView.jsx",
@@ -1817,7 +1840,7 @@
       "label": "AdminDashboard.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "admindashboard.jsx",
       "source_file": "src/components/admin/AdminDashboard.jsx",
@@ -1828,7 +1851,7 @@
       "label": "AdminDisputesView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "admindisputesview.jsx",
       "source_file": "src/components/admin/AdminDisputesView.jsx",
@@ -1839,7 +1862,7 @@
       "label": "AdminLiveMissions.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminlivemissions.jsx",
       "source_file": "src/components/admin/AdminLiveMissions.jsx",
@@ -1850,7 +1873,7 @@
       "label": "AdminMaalemsView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminmaalemsview.jsx",
       "source_file": "src/components/admin/AdminMaalemsView.jsx",
@@ -1861,7 +1884,7 @@
       "label": "AdminRechargesView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminrechargesview.jsx",
       "source_file": "src/components/admin/AdminRechargesView.jsx",
@@ -1872,7 +1895,7 @@
       "label": "CategorySelector.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "categoryselector.jsx",
       "source_file": "src/components/CategorySelector.jsx",
@@ -1883,7 +1906,7 @@
       "label": "CATEGORIES_TAXONOMY",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "categories_taxonomy",
       "source_file": "src/components/CategorySelector.jsx",
@@ -1894,7 +1917,7 @@
       "label": "EnhancedCategoryIcon.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "enhancedcategoryicon.jsx",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -1905,88 +1928,143 @@
       "label": "SPECIALTY_CONFIG",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "specialty_config",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
       "source_location": "L21"
     },
     {
-      "id": "src_components_interactivemap",
-      "label": "InteractiveMap.jsx",
+      "id": "src_components_landingpage",
+      "label": "LandingPage.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "interactivemap.jsx",
-      "source_file": "src/components/InteractiveMap.jsx",
+      "norm_label": "landingpage.jsx",
+      "source_file": "src/components/LandingPage.jsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_interactivemap_map_styles",
-      "label": "MAP_STYLES",
+      "id": "src_components_landingpage_moroccan_cities",
+      "label": "MOROCCAN_CITIES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "map_styles",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L11"
+      "norm_label": "moroccan_cities",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L113"
     },
     {
-      "id": "src_components_interactivemap_road_color_themes",
-      "label": "ROAD_COLOR_THEMES",
+      "id": "src_components_landingpage_moroccan_services",
+      "label": "MOROCCAN_SERVICES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "road_color_themes",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L52"
-    },
-    {
-      "id": "src_components_interactivemap_svg_icons",
-      "label": "SVG_ICONS",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "svg_icons",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L84"
+      "norm_label": "moroccan_services",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L26"
     },
     {
       "id": "src_components_maalemselect",
       "label": "MaalemSelect.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "maalemselect.jsx",
       "source_file": "src/components/MaalemSelect.jsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_maalemview",
-      "label": "MaalemView.jsx",
+      "id": "src_components_promovideoplayer",
+      "label": "PromoVideoPlayer.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "maalemview.jsx",
-      "source_file": "src/components/MaalemView.jsx",
+      "norm_label": "promovideoplayer.jsx",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_promovideoplayer_client_scenes",
+      "label": "CLIENT_SCENES",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "client_scenes",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L32"
+    },
+    {
+      "id": "src_components_promovideoplayer_maalem_scenes",
+      "label": "MAALEM_SCENES",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "maalem_scenes",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L117"
     },
     {
       "id": "src_components_specialtyselect",
       "label": "SpecialtySelect.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "specialtyselect.jsx",
       "source_file": "src/components/SpecialtySelect.jsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_userprofilemodal",
+      "label": "UserProfileModal.jsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "userprofilemodal.jsx",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_userprofilemodal_cities",
+      "label": "CITIES",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "cities",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L34"
+    },
+    {
+      "id": "src_lib_i18n",
+      "label": "i18n.js",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "i18n.js",
+      "source_file": "src/lib/i18n.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_i18n_translations",
+      "label": "translations",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "translations",
+      "source_file": "src/lib/i18n.js",
+      "source_location": "L3"
     },
     {
       "id": "supabase_services_seed",
@@ -2187,26 +2265,59 @@
       "source_location": "L1"
     },
     {
-      "id": "src_components_userprofilemodal",
-      "label": "UserProfileModal.jsx",
+      "id": "src_components_interactivemap",
+      "label": "InteractiveMap.jsx",
       "_origin": "ast",
       "community": 3,
       "community_name": "ClientView.jsx",
       "file_type": "code",
-      "norm_label": "userprofilemodal.jsx",
-      "source_file": "src/components/UserProfileModal.jsx",
+      "norm_label": "interactivemap.jsx",
+      "source_file": "src/components/InteractiveMap.jsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_userprofilemodal_cities",
-      "label": "CITIES",
+      "id": "src_components_interactivemap_map_styles",
+      "label": "MAP_STYLES",
       "_origin": "ast",
       "community": 3,
       "community_name": "ClientView.jsx",
       "file_type": "code",
-      "norm_label": "cities",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L34"
+      "norm_label": "map_styles",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "src_components_interactivemap_road_color_themes",
+      "label": "ROAD_COLOR_THEMES",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "road_color_themes",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L52"
+    },
+    {
+      "id": "src_components_interactivemap_svg_icons",
+      "label": "SVG_ICONS",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "svg_icons",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L84"
+    },
+    {
+      "id": "src_components_maalemview",
+      "label": "MaalemView.jsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "maalemview.jsx",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L1"
     },
     {
       "id": "src_components_voicerecorder",
@@ -3370,94 +3481,6 @@
       "source_location": "L8"
     },
     {
-      "id": "src_components_landingpage",
-      "label": "LandingPage.jsx",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "landingpage.jsx",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_landingpage_moroccan_cities",
-      "label": "MOROCCAN_CITIES",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "moroccan_cities",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L113"
-    },
-    {
-      "id": "src_components_landingpage_moroccan_services",
-      "label": "MOROCCAN_SERVICES",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "moroccan_services",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L26"
-    },
-    {
-      "id": "src_components_promovideoplayer",
-      "label": "PromoVideoPlayer.jsx",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "promovideoplayer.jsx",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_promovideoplayer_client_scenes",
-      "label": "CLIENT_SCENES",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "client_scenes",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L32"
-    },
-    {
-      "id": "src_components_promovideoplayer_maalem_scenes",
-      "label": "MAALEM_SCENES",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "maalem_scenes",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L117"
-    },
-    {
-      "id": "src_lib_i18n",
-      "label": "i18n.js",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "i18n.js",
-      "source_file": "src/lib/i18n.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_i18n_translations",
-      "label": "translations",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "translations",
-      "source_file": "src/lib/i18n.js",
-      "source_location": "L3"
-    },
-    {
       "id": "supabase_functions_verify_otp_sms_index",
       "label": "verify-otp-sms/index.ts",
       "_origin": "ast",
@@ -4138,7 +4161,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L1093",
+      "source_location": "L1094",
       "weight": 1.0
     },
     {
@@ -4150,7 +4173,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L1105",
+      "source_location": "L1106",
+      "weight": 1.0
+    },
+    {
+      "source": "src_context_appcontext_appprovider",
+      "target": "src_lib_pdfreceiptgenerator_generatereceiptpdf",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L3109",
       "weight": 1.0
     },
     {
@@ -4162,7 +4197,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -4174,7 +4209,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L358",
+      "source_location": "L359",
       "weight": 1.0
     },
     {
@@ -4186,7 +4221,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L393",
+      "source_location": "L394",
       "weight": 1.0
     },
     {
@@ -4198,7 +4233,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L96",
+      "source_location": "L97",
       "weight": 1.0
     },
     {
@@ -6402,6 +6437,18 @@
     },
     {
       "source": "src_context_appcontext",
+      "target": "src_lib_pdfreceiptgenerator_generatereceiptpdf",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "src_context_appcontext",
       "target": "src_lib_notify_notify",
       "relation": "imports",
       "_origin": "ast",
@@ -8202,6 +8249,18 @@
     },
     {
       "source": "src_context_appcontext",
+      "target": "src_lib_pdfreceiptgenerator",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "src_context_appcontext",
       "target": "src_lib_notify",
       "relation": "imports_from",
       "_origin": "ast",
@@ -9239,13 +9298,13 @@
     },
     {
       "source": "public_sw",
-      "target": "public_sw_assets_to_cache",
+      "target": "public_sw_precache_assets",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "public/sw.js",
-      "source_location": "L2",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -9850,7 +9909,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -9861,7 +9920,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -9872,7 +9931,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -9883,7 +9942,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3303",
+      "source_location": "L3240",
       "weight": 1.0
     },
     {
@@ -10492,6 +10551,17 @@
       "weight": 1.0
     },
     {
+      "source": "src_lib_pdfreceiptgenerator",
+      "target": "src_lib_pdfreceiptgenerator_generatereceiptpdf",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/pdfReceiptGenerator.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "src_lib_pushnotificationservice",
       "target": "src_lib_pushnotificationservice_getnotificationpermissionstate",
       "relation": "contains",
@@ -10979,7 +11049,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3281",
+      "source_location": "L3218",
       "weight": 1.0
     },
     {
@@ -11008,5 +11078,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f4a382023a95701eeb697417ad77e55b728b7a8c"
+  "built_at_commit": "582361ee3c8edafae8e47b24eaf3649b8792a8d6"
 }
