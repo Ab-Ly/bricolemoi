@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "src/context/AuthContext.jsx": {
-    "mtime": 1787249953.404762,
-    "seen": 1787250505.9736562,
-    "ast_hash": "798a119f3181053f11def7c5d4c868d7",
+    "mtime": 1787258778.676948,
+    "seen": 1787259016.40458,
+    "ast_hash": "5b628224c69f1a3626fd87c955a7f0ec",
     "semantic_hash": ""
   },
   "src/context/EmergencyFlowContext.jsx": {
@@ -531,6 +531,18 @@
     "mtime": 1787255137.975797,
     "seen": 1787256917.288384,
     "ast_hash": "e534f63e2d6f67d2e316d28392a0e2fd",
+    "semantic_hash": ""
+  },
+  "scratch/diagnose_france_otp.js": {
+    "mtime": 1787258415.248723,
+    "seen": 1787259016.401649,
+    "ast_hash": "40c98674e03b519c2e3040b9e13712bb",
+    "semantic_hash": ""
+  },
+  "scratch/inspect_prelude.js": {
+    "mtime": 1787257764.529886,
+    "seen": 1787259016.401737,
+    "ast_hash": "c1c3295f88db15979b853ba3d67b6f0b",
     "semantic_hash": ""
   }
 }

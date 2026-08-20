@@ -72,40 +72,25 @@ export async function sendInfobipOTP(phone, requestedChannel = 'sms', defaultDia
   let sentSuccessfully = false;
   let responseDetails = null;
 
-  // 2. Tentative 1 : Prelude.so API Directe (SMS + WhatsApp)
-  if (!isTestPhone && PRELUDE_API_KEY) {
-    try {
-      console.log(`[Prelude.so] Envoi OTP vers ${formatted}...`);
-      const preludeRes = await fetch('https://api.prelude.dev/v2/verification', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${PRELUDE_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          target: {
-            type: 'phone_number',
-            value: formatted
-          }
-        })
-      });
-
-      const preludeData = await preludeRes.json().catch(() => ({}));
-      responseDetails = preludeData;
-
-      if (preludeRes.ok && (preludeData.id || preludeData.status === 'success' || preludeData.status === 'pending')) {
-        sentSuccessfully = true;
-        console.log(`[Prelude.so] Succès envoi OTP (ID: ${preludeData.id})`);
-        
-        sessionStorage.setItem('bricolemoi_pending_otp', JSON.stringify({
-          phone: formatted,
-          provider: 'prelude',
-          expiresAt: Date.now() + 5 * 60 * 1000
-        }));
-      }
-    } catch (preludeErr) {
-      console.warn('[Prelude.so direct send error]:', preludeErr);
+  // 2. Tentative 1 : Vercel Serverless API (/api/send-otp avec Prelude + Infobip)
+  try {
+    const apiRes = await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: formatted })
+    });
+    const apiData = await apiRes.json().catch(() => ({}));
+    if (apiRes.ok && apiData.success) {
+      sentSuccessfully = true;
+      responseDetails = apiData;
+      sessionStorage.setItem('bricolemoi_pending_otp', JSON.stringify({
+        phone: formatted,
+        provider: apiData.provider || 'prelude',
+        expiresAt: Date.now() + 5 * 60 * 1000
+      }));
     }
+  } catch (apiErr) {
+    console.warn('[/api/send-otp Notice]:', apiErr);
   }
 
   // 3. Tentative 2 : Edge Function Supabase 'send-otp-sms'
@@ -219,32 +204,36 @@ export async function verifyInfobipOTP({ phone, token, role = 'CLIENT', fullName
   const isTestCode = ['123456', '000000', '654321'].includes(cleanToken);
   let verified = isTestCode;
 
-  // 1. Validation directe via l'API Prelude.so
-  if (!verified && PRELUDE_API_KEY) {
+  // 1. Validation via Vercel Serverless Function (/api/verify-otp)
+  if (!verified) {
     try {
-      console.log(`[Prelude.so] Vérification du code pour ${formatted}...`);
-      const preludeCheckRes = await fetch('https://api.prelude.dev/v2/verification/check', {
+      const apiRes = await fetch('/api/verify-otp', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${PRELUDE_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          target: {
-            type: 'phone_number',
-            value: formatted
-          },
-          code: cleanToken
+          phone: formatted,
+          token: cleanToken,
+          role,
+          fullName,
+          cityZone
         })
       });
-
-      const checkData = await preludeCheckRes.json().catch(() => ({}));
-      if (preludeCheckRes.ok && (checkData.status === 'success' || checkData.status === 'verified' || checkData.id)) {
+      const apiData = await apiRes.json().catch(() => ({}));
+      if (apiRes.ok && apiData.success) {
         verified = true;
-        console.log(`[Prelude.so] Code vérifié avec succès !`);
+        if (apiData.user) {
+          return {
+            success: true,
+            user: apiData.user
+          };
+        }
+      } else if (apiData.error) {
+        throw new Error(apiData.error);
       }
-    } catch (preludeErr) {
-      console.warn('[Prelude.so check error]:', preludeErr);
+    } catch (apiErr) {
+      if (apiErr.message && !apiErr.message.includes('fetch')) {
+        throw apiErr;
+      }
     }
   }
 
