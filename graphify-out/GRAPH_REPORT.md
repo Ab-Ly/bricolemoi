@@ -1,16 +1,16 @@
 # Graph Report - bricolemoi  (2026-08-20)
 
 ## Corpus Check
-- 82 files · ~210,923 words
+- 82 files · ~211,132 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 314 nodes · 655 edges · 55 communities (26 shown, 29 thin omitted)
+- 315 nodes · 657 edges · 55 communities (26 shown, 29 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1b909a0b`
+- Built from commit: `fb5427cc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -70,16 +70,16 @@
 10. `AuthProvider()` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `MainApp()` --calls--> `useEmergencyFlow()`  [EXTRACTED]
-  src/App.jsx → src/context/EmergencyFlowContext.jsx
 - `MainApp()` --calls--> `useAblyNotifications()`  [EXTRACTED]
   src/App.jsx → src/hooks/useAblyNotifications.js
 - `MainApp()` --calls--> `getAppSubdomain()`  [EXTRACTED]
   src/App.jsx → src/lib/subdomain.js
 - `AuthModal()` --calls--> `useAuth()`  [EXTRACTED]
   src/components/AuthModal.jsx → src/context/AuthContext.jsx
-- `ClientView()` --calls--> `useApp()`  [EXTRACTED]
-  src/components/ClientView.jsx → src/context/AppContext.jsx
+- `LandingPage()` --calls--> `getSpecialtyMeta()`  [EXTRACTED]
+  src/components/LandingPage.jsx → src/components/EnhancedCategoryIcon.jsx
+- `MaalemView()` --calls--> `getSpecialtyMeta()`  [EXTRACTED]
+  src/components/MaalemView.jsx → src/components/EnhancedCategoryIcon.jsx
 
 ## Import Cycles
 - None detected.
@@ -88,19 +88,19 @@
 
 ### Community 0 - "AppContext.jsx"
 Cohesion: 0.12
-Nodes (34): EmergencySOSModal(), AppContext, AppProvider(), calculateDistanceInKm(), ACTIONS, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer() (+26 more)
+Nodes (33): EmergencySOSModal(), AppContext, AppProvider(), ACTIONS, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer(), initialState (+25 more)
 
 ### Community 1 - "App.jsx"
 Cohesion: 0.15
-Nodes (22): AdminApp, App(), ClientApp, MaalemApp, MainApp(), AdminDashboard(), AdminAuthModal(), AdminView() (+14 more)
+Nodes (24): AdminApp, App(), ClientApp, MaalemApp, MainApp(), AdminDashboard(), AdminAuthModal(), AdminView() (+16 more)
 
 ### Community 2 - "getSpecialtyMeta"
-Cohesion: 0.16
-Nodes (21): AdminClientsView(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), CATEGORIES_TAXONOMY, CategorySelector(), EnhancedCategoryIcon() (+13 more)
+Cohesion: 0.15
+Nodes (22): AdminClientsView(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), CATEGORIES_TAXONOMY, CategorySelector(), EnhancedCategoryIcon() (+14 more)
 
 ### Community 3 - "ClientView.jsx"
 Cohesion: 0.17
-Nodes (15): CGUModal(), ClientView(), getServiceDisplay(), mapCategoryToSlug(), SERVICE_TYPE_MAP, CustomDropdown(), generateFallbackAudioDataUrl(), getSupportedMimeType() (+7 more)
+Nodes (14): CGUModal(), getServiceDisplay(), mapCategoryToSlug(), SERVICE_TYPE_MAP, CustomDropdown(), getSafeLabel(), generateFallbackAudioDataUrl(), getSupportedMimeType() (+6 more)
 
 ### Community 4 - "dependencies"
 Cohesion: 0.10
@@ -149,7 +149,9 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `name`, `private`, `version` to the rest of the system?**
   _68 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppContext.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12025901942645699 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12367149758454106 - nodes in this community are weakly interconnected._
+- **Should `App.jsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.14509246088193456 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**

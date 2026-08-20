@@ -28,18 +28,6 @@
       "source_location": "L31"
     },
     {
-      "id": "src_context_appcontext_calculatedistanceinkm",
-      "label": "calculateDistanceInKm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "AppContext.jsx",
-      "file_type": "code",
-      "norm_label": "calculatedistanceinkm()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L16"
-    },
-    {
       "id": "src_context_emergencyflowcontext_emergencyflowprovider",
       "label": "EmergencyFlowProvider()",
       "_callable": true,
@@ -400,6 +388,18 @@
       "source_location": "L13"
     },
     {
+      "id": "src_components_clientview_clientview",
+      "label": "ClientView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "clientview()",
+      "source_file": "src/components/ClientView.jsx",
+      "source_location": "L101"
+    },
+    {
       "id": "src_components_landingpage_landingpage",
       "label": "LandingPage()",
       "_callable": true,
@@ -493,7 +493,19 @@
       "file_type": "code",
       "norm_label": "useauth()",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L684"
+      "source_location": "L689"
+    },
+    {
+      "id": "src_context_emergencyflowcontext_useemergencyflow",
+      "label": "useEmergencyFlow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "useemergencyflow()",
+      "source_file": "src/context/EmergencyFlowContext.jsx",
+      "source_location": "L465"
     },
     {
       "id": "src_layouts_adminapp_adminapp",
@@ -796,6 +808,18 @@
       "source_location": "L6"
     },
     {
+      "id": "src_context_appcontext_calculatedistanceinkm",
+      "label": "calculateDistanceInKm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "calculatedistanceinkm()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L16"
+    },
+    {
       "id": "src_components_cgumodal_cgumodal",
       "label": "CGUModal()",
       "_callable": true,
@@ -806,18 +830,6 @@
       "norm_label": "cgumodal()",
       "source_file": "src/components/CGUModal.jsx",
       "source_location": "L5"
-    },
-    {
-      "id": "src_components_clientview_clientview",
-      "label": "ClientView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "clientview()",
-      "source_file": "src/components/ClientView.jsx",
-      "source_location": "L101"
     },
     {
       "id": "src_components_clientview_getservicedisplay",
@@ -853,7 +865,19 @@
       "file_type": "code",
       "norm_label": "customdropdown()",
       "source_file": "src/components/CustomDropdown.jsx",
-      "source_location": "L5"
+      "source_location": "L14"
+    },
+    {
+      "id": "src_components_customdropdown_getsafelabel",
+      "label": "getSafeLabel()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "getsafelabel()",
+      "source_file": "src/components/CustomDropdown.jsx",
+      "source_location": "L6"
     },
     {
       "id": "src_components_voicerecorder_generatefallbackaudiodataurl",
@@ -890,18 +914,6 @@
       "norm_label": "voicerecorder()",
       "source_file": "src/components/VoiceRecorder.jsx",
       "source_location": "L45"
-    },
-    {
-      "id": "src_context_emergencyflowcontext_useemergencyflow",
-      "label": "useEmergencyFlow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "useemergencyflow()",
-      "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L465"
     },
     {
       "id": "src_components_authmodal_authmodal",
@@ -3749,7 +3761,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L198",
+      "source_location": "L206",
       "weight": 1.0
     },
     {
@@ -3761,7 +3773,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L414",
+      "source_location": "L424",
       "weight": 1.0
     },
     {
@@ -3773,7 +3785,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L461",
+      "source_location": "L471",
       "weight": 1.0
     },
     {
@@ -3870,6 +3882,18 @@
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
       "source_location": "L627",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_customdropdown_customdropdown",
+      "target": "src_components_customdropdown_getsafelabel",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/CustomDropdown.jsx",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -4337,7 +4361,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L292",
+      "source_location": "L293",
       "weight": 1.0
     },
     {
@@ -4349,7 +4373,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L310",
+      "source_location": "L311",
       "weight": 1.0
     },
     {
@@ -4361,7 +4385,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L315",
+      "source_location": "L316",
       "weight": 1.0
     },
     {
@@ -4373,7 +4397,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L346",
+      "source_location": "L347",
       "weight": 1.0
     },
     {
@@ -4385,7 +4409,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L351",
+      "source_location": "L352",
       "weight": 1.0
     },
     {
@@ -4397,7 +4421,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L356",
+      "source_location": "L357",
       "weight": 1.0
     },
     {
@@ -4409,7 +4433,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L558",
+      "source_location": "L559",
       "weight": 1.0
     },
     {
@@ -4421,7 +4445,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L559",
+      "source_location": "L560",
       "weight": 1.0
     },
     {
@@ -9660,7 +9684,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/CustomDropdown.jsx",
-      "source_location": "L5",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_customdropdown",
+      "target": "src_components_customdropdown_getsafelabel",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/CustomDropdown.jsx",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -10111,7 +10146,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L684",
+      "source_location": "L689",
       "weight": 1.0
     },
     {
@@ -11225,5 +11260,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "1b909a0bee5666a011bf33d685fa5a76e79020a0"
+  "built_at_commit": "fb5427cc0b392ec401b00919a66cf9da5ce268fa"
 }

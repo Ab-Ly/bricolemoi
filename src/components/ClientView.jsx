@@ -59,6 +59,10 @@ const SERVICE_TYPE_MAP = {
   JARDINAGE: { label: 'Jardinage & Espaces Verts', icon: '🌿' },
   NETTOYAGE: { label: 'Nettoyage & Ménage', icon: '🧹' },
   SERRURERIE: { label: 'Serrurerie & Porte', icon: '🔑' },
+  VOLETS_RIDEAUX: { label: 'Volets Roulants & Rideaux', icon: '🪟' },
+  DEMENAGEMENT: { label: 'Déménagement & Transport', icon: '📦' },
+  SOLAIRE: { label: 'Chauffe-Eau Solaire', icon: '☀️' },
+  POMPE_PISCINE: { label: 'Pompes à Eau & Surpresseurs', icon: '🏊' },
   MENUISERIE: { label: 'Menuiserie & Meubles', icon: '🪚' },
   PEINTURE: { label: 'Peinture & Rénovation', icon: '🎨' },
   MACONNERIE: { label: 'Maçonnerie & Gros Œuvre', icon: '🧱' },
@@ -73,6 +77,10 @@ const getServiceDisplay = (type) => {
   if (key.includes('PLOMB')) return SERVICE_TYPE_MAP.PLUMBING;
   if (key.includes('ELEC')) return SERVICE_TYPE_MAP.ELECTRICIAN;
   if (key.includes('AUTO') || key.includes('MECAN')) return SERVICE_TYPE_MAP.AUTO_MECHANIC;
+  if (key.includes('VOLET') || key.includes('RIDEAU')) return SERVICE_TYPE_MAP.VOLETS_RIDEAUX;
+  if (key.includes('DEMENAG') || key.includes('MOVE') || key.includes('TRUCK')) return SERVICE_TYPE_MAP.DEMENAGEMENT;
+  if (key.includes('SOLAR') || key.includes('SOLAIRE')) return SERVICE_TYPE_MAP.SOLAIRE;
+  if (key.includes('POMPE') || key.includes('PISCINE')) return SERVICE_TYPE_MAP.POMPE_PISCINE;
   if (key.includes('JARDIN')) return SERVICE_TYPE_MAP.JARDINAGE;
   if (key.includes('NETT') || key.includes('MENAG')) return SERVICE_TYPE_MAP.NETTOYAGE;
   if (key.includes('SERRUR')) return SERVICE_TYPE_MAP.SERRURERIE;

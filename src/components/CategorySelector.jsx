@@ -194,6 +194,62 @@ export const CATEGORIES_TAXONOMY = [
       { name: 'Câblage réseau Ethernet & Répéteur Wi-Fi', icon: '📶' },
       { name: 'Installation interphone & Visiophone', icon: '🔔' }
     ]
+  },
+  {
+    id: 'cat-volets',
+    name: 'Volets Roulants & Rideaux Métalliques',
+    nameAr: 'ألمنيوم و ريدو كهربائي',
+    slug: 'volets-rideaux',
+    iconType: 'VOLETS_RIDEAUX',
+    colorTheme: 'text-cyan-600',
+    subcategories: [
+      { name: 'Dépannage Rideau métallique bloqué (Magasin / Garage)', icon: '🏪' },
+      { name: 'Réparation Moteur volet roulant électrique (Somfy)', icon: '⚡' },
+      { name: 'Remplacement sangle & Manivelle de volet', icon: '🪟' },
+      { name: 'Installation moustiquaires & Baies aluminium', icon: '🚪' }
+    ]
+  },
+  {
+    id: 'cat-demenagement',
+    name: 'Déménagement & Montage Meubles',
+    nameAr: 'ترحيل و تركيب الأثاث',
+    slug: 'demenagement-transport',
+    iconType: 'DEMENAGEMENT',
+    colorTheme: 'text-amber-700',
+    subcategories: [
+      { name: 'Déménagement appartement / Villa avec porteurs', icon: '🚛' },
+      { name: 'Transport petit volume & Électroménager express', icon: '📦' },
+      { name: 'Montage et démontage meubles en kit (IKEA / Kitea)', icon: '🪛' },
+      { name: 'Emballage, Protection & Manutention lourde', icon: '📦' }
+    ]
+  },
+  {
+    id: 'cat-solaire',
+    name: 'Chauffe-Eau Solaire & Énergie',
+    nameAr: 'طاقة شمسية و سخان السطح',
+    slug: 'chauffe-eau-solaire',
+    iconType: 'SOLAIRE',
+    colorTheme: 'text-amber-500',
+    subcategories: [
+      { name: 'Dépannage Chauffe-eau solaire (Ne chauffe plus)', icon: '☀️' },
+      { name: 'Remplacement résistance & Thermostat solaire', icon: '♨️' },
+      { name: 'Nettoyage & Détartrage panneaux solaires thermiques', icon: '✨' },
+      { name: 'Installation nouveau système solaire de toiture', icon: '🏡' }
+    ]
+  },
+  {
+    id: 'cat-pompe-piscine',
+    name: 'Pompes à Eau & Surpresseurs',
+    nameAr: 'موطور الماء و مسابح',
+    slug: 'pompe-eau-piscine',
+    iconType: 'POMPE_PISCINE',
+    colorTheme: 'text-teal-600',
+    subcategories: [
+      { name: 'Réparation Moteur / Pompe de surpression eau', icon: '💧' },
+      { name: 'Dépannage Pompe de puits & Ballon vessie', icon: '🚰' },
+      { name: 'Entretien système de filtration & Pompe piscine', icon: '🏊' },
+      { name: 'Remplacement pressostat & Clapet anti-retour', icon: '🔧' }
+    ]
   }
 ];
 

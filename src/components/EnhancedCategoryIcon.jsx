@@ -15,7 +15,11 @@ import {
   Wall,
   Wrench,
   ShieldCheck,
-  HouseLine
+  HouseLine,
+  Sun,
+  Truck,
+  Package,
+  Door
 } from '@phosphor-icons/react';
 
 export const SPECIALTY_CONFIG = {
@@ -83,6 +87,58 @@ export const SPECIALTY_CONFIG = {
     activeCard: 'bg-emerald-50/90 border-2 border-emerald-600 ring-2 ring-emerald-500/20 text-emerald-950 shadow-md',
     activeIconBox: 'bg-emerald-600 text-white shadow-xs',
     activeBadge: 'bg-emerald-600 text-white'
+  },
+  VOLETS_RIDEAUX: {
+    key: 'VOLETS_RIDEAUX',
+    label: 'Volets Roulants & Rideaux Métalliques',
+    labelAr: 'ألمنيوم و ريدو كهربائي',
+    iconEmoji: '🪟',
+    IconComponent: Door,
+    colorClass: 'text-cyan-700',
+    glowColor: 'rgba(14,116,144,0.2)',
+    bgClass: 'bg-cyan-50 text-cyan-800 border border-cyan-200 shadow-xs',
+    activeCard: 'bg-cyan-50/90 border-2 border-cyan-600 ring-2 ring-cyan-500/20 text-cyan-950 shadow-md',
+    activeIconBox: 'bg-cyan-600 text-white shadow-xs',
+    activeBadge: 'bg-cyan-600 text-white'
+  },
+  DEMENAGEMENT: {
+    key: 'DEMENAGEMENT',
+    label: 'Déménagement & Montage Meubles',
+    labelAr: 'ترحيل و تركيب الأثاث',
+    iconEmoji: '📦',
+    IconComponent: Truck,
+    colorClass: 'text-amber-700',
+    glowColor: 'rgba(180,83,9,0.2)',
+    bgClass: 'bg-amber-50 text-amber-900 border border-amber-200 shadow-xs',
+    activeCard: 'bg-amber-50/90 border-2 border-amber-600 ring-2 ring-amber-500/20 text-amber-950 shadow-md',
+    activeIconBox: 'bg-amber-600 text-white shadow-xs',
+    activeBadge: 'bg-amber-600 text-white'
+  },
+  SOLAIRE: {
+    key: 'SOLAIRE',
+    label: 'Chauffe-Eau Solaire & Énergie',
+    labelAr: 'طاقة شمسية و سخان السطح',
+    iconEmoji: '☀️',
+    IconComponent: Sun,
+    colorClass: 'text-amber-500',
+    glowColor: 'rgba(245,158,11,0.2)',
+    bgClass: 'bg-amber-50 text-amber-700 border border-amber-200 shadow-xs',
+    activeCard: 'bg-amber-50/90 border-2 border-amber-500 ring-2 ring-amber-500/20 text-amber-950 shadow-md',
+    activeIconBox: 'bg-amber-500 text-white shadow-xs',
+    activeBadge: 'bg-amber-500 text-white'
+  },
+  POMPE_PISCINE: {
+    key: 'POMPE_PISCINE',
+    label: 'Pompes à Eau & Surpresseurs',
+    labelAr: 'موطور الماء و مسابح',
+    iconEmoji: '🏊',
+    IconComponent: Waves,
+    colorClass: 'text-teal-600',
+    glowColor: 'rgba(13,148,136,0.2)',
+    bgClass: 'bg-teal-50 text-teal-700 border border-teal-200 shadow-xs',
+    activeCard: 'bg-teal-50/90 border-2 border-teal-600 ring-2 ring-teal-500/20 text-teal-950 shadow-md',
+    activeIconBox: 'bg-teal-600 text-white shadow-xs',
+    activeBadge: 'bg-teal-600 text-white'
   },
   PEINTURE: {
     key: 'PEINTURE',
@@ -183,6 +239,10 @@ export const getSpecialtyMeta = (type) => {
   if (norm.includes('ELEC')) return SPECIALTY_CONFIG.ELECTRICIAN;
   if (norm.includes('CLIM') || norm.includes('FROID') || norm.includes('HVAC')) return SPECIALTY_CONFIG.CLIMATISATION;
   if (norm.includes('ELECTRO') || norm.includes('WASH') || norm.includes('FOUR')) return SPECIALTY_CONFIG.ELECTROMENAGER;
+  if (norm.includes('VOLET') || norm.includes('RIDEAU') || norm.includes('STORE')) return SPECIALTY_CONFIG.VOLETS_RIDEAUX;
+  if (norm.includes('DEMENAG') || norm.includes('DEM') || norm.includes('MOVE') || norm.includes('TRUCK')) return SPECIALTY_CONFIG.DEMENAGEMENT;
+  if (norm.includes('SOLAR') || norm.includes('SOLAIRE') || norm.includes('CHAUFFE_SOLAIRE')) return SPECIALTY_CONFIG.SOLAIRE;
+  if (norm.includes('POMPE') || norm.includes('PISCINE') || norm.includes('MOTEUR_EAU')) return SPECIALTY_CONFIG.POMPE_PISCINE;
   if (norm.includes('SERRUR') || norm.includes('KEY') || norm.includes('LOCK')) return SPECIALTY_CONFIG.SERRURERIE;
   if (norm.includes('PEINT') || norm.includes('PAINT') || norm.includes('PLATRE') || norm.includes('BA13')) return SPECIALTY_CONFIG.PEINTURE;
   if (norm.includes('MENUIS') || norm.includes('CARPENTER') || norm.includes('ALU') || norm.includes('WOOD')) return SPECIALTY_CONFIG.MENUISERIE;
