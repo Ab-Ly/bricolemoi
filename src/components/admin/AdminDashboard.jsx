@@ -250,82 +250,112 @@ export const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* 2. Barre de Navigation par Onglets */}
-      <div className="flex flex-wrap items-center gap-2 bg-white border border-slate-200 p-2 rounded-2xl shadow-sm">
-        <button
-          type="button"
-          onClick={() => setActiveTab('CLIENTS')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-            activeTab === 'CLIENTS'
-              ? 'bg-blue-600 text-white shadow-xs font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>1. Clients &amp; Historique ({clients.length})</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('MISSIONS')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-            activeTab === 'MISSIONS'
-              ? 'bg-amber-500 text-white shadow-xs font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-        >
-          <Activity className="w-4 h-4" />
-          <span>2. Tour de Contrôle Live ({interventions.length})</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('MAALEMS')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-            activeTab === 'MAALEMS'
-              ? 'bg-emerald-600 text-white shadow-xs font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-        >
-          <Wrench className="w-4 h-4" />
-          <span>3. Maâlems &amp; Crédits ({maalems.length})</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('DISPUTES')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer relative ${
-            activeTab === 'DISPUTES'
-              ? 'bg-rose-600 text-white shadow-xs font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-        >
-          <ShieldAlert className="w-4 h-4" />
-          <span>4. Litiges &amp; Remplacement Lead</span>
-          {pendingDisputesCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-mono font-black ml-1 animate-bounce">
-              {pendingDisputesCount}
+      {/* 2. Barre de Navigation par Onglets (Segmented Control SaaS Pro) */}
+      <div className="bg-slate-100/90 border border-slate-200 p-1.5 rounded-2xl shadow-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
+          {/* Tab 1: Clients */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('CLIENTS')}
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'CLIENTS'
+                ? 'bg-white text-blue-700 shadow-sm font-black border border-slate-200/90'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
+            }`}
+          >
+            <Users className={`w-4 h-4 ${activeTab === 'CLIENTS' ? 'text-blue-600' : 'text-slate-500'}`} />
+            <span>Clients</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
+              activeTab === 'CLIENTS' ? 'bg-blue-100 text-blue-800' : 'bg-slate-200/80 text-slate-600'
+            }`}>
+              {clients.length}
             </span>
-          )}
-        </button>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('RECHARGES')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-            activeTab === 'RECHARGES'
-              ? 'bg-purple-600 text-white shadow-xs font-bold'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-          }`}
-        >
-          <Receipt className="w-4 h-4" />
-          <span>5. Recharges &amp; Rapprochement</span>
-          {pendingRechargesCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-mono font-black ml-1 animate-pulse">
-              {pendingRechargesCount}
+          {/* Tab 2: Tour de Contrôle Live */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('MISSIONS')}
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'MISSIONS'
+                ? 'bg-white text-amber-700 shadow-sm font-black border border-slate-200/90'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
+            }`}
+          >
+            <Activity className={`w-4 h-4 ${activeTab === 'MISSIONS' ? 'text-amber-600' : 'text-slate-500'}`} />
+            <span>Tour de Contrôle</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
+              activeTab === 'MISSIONS' ? 'bg-amber-100 text-amber-900' : 'bg-slate-200/80 text-slate-600'
+            }`}>
+              {interventions.length}
             </span>
-          )}
-        </button>
+          </button>
+
+          {/* Tab 3: Maâlems */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('MAALEMS')}
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'MAALEMS'
+                ? 'bg-white text-emerald-700 shadow-sm font-black border border-slate-200/90'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
+            }`}
+          >
+            <Wrench className={`w-4 h-4 ${activeTab === 'MAALEMS' ? 'text-emerald-600' : 'text-slate-500'}`} />
+            <span>Maâlems Pro</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
+              activeTab === 'MAALEMS' ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-200/80 text-slate-600'
+            }`}>
+              {maalems.length}
+            </span>
+          </button>
+
+          {/* Tab 4: Litiges & Remplacement */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('DISPUTES')}
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer relative ${
+              activeTab === 'DISPUTES'
+                ? 'bg-white text-rose-700 shadow-sm font-black border border-slate-200/90'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
+            }`}
+          >
+            <ShieldAlert className={`w-4 h-4 ${activeTab === 'DISPUTES' ? 'text-rose-600' : 'text-slate-500'}`} />
+            <span>Litiges &amp; SAV</span>
+            {pendingDisputesCount > 0 ? (
+              <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-mono font-black animate-pulse">
+                {pendingDisputesCount}
+              </span>
+            ) : (
+              <span className="px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600 text-[10px] font-mono font-bold">
+                0
+              </span>
+            )}
+          </button>
+
+          {/* Tab 5: Recharges */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('RECHARGES')}
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'RECHARGES'
+                ? 'bg-white text-purple-700 shadow-sm font-black border border-slate-200/90'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
+            }`}
+          >
+            <Receipt className={`w-4 h-4 ${activeTab === 'RECHARGES' ? 'text-purple-600' : 'text-slate-500'}`} />
+            <span>Recharges</span>
+            {pendingRechargesCount > 0 ? (
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-mono font-black animate-pulse">
+                {pendingRechargesCount}
+              </span>
+            ) : (
+              <span className="px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600 text-[10px] font-mono font-bold">
+                0
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* 3. Contenu de l'Onglet Actif */}
