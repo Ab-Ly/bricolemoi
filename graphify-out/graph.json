@@ -28,6 +28,18 @@
       "source_location": "L31"
     },
     {
+      "id": "src_context_appcontext_calculatedistanceinkm",
+      "label": "calculateDistanceInKm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "calculatedistanceinkm()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L16"
+    },
+    {
       "id": "src_context_emergencyflowcontext_emergencyflowprovider",
       "label": "EmergencyFlowProvider()",
       "_callable": true,
@@ -400,6 +412,18 @@
       "source_location": "L123"
     },
     {
+      "id": "src_components_maalemview_maalemview",
+      "label": "MaalemView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "maalemview()",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L64"
+    },
+    {
       "id": "src_components_navbar_navbar",
       "label": "Navbar()",
       "_callable": true,
@@ -434,6 +458,30 @@
       "norm_label": "pwainstallprompt()",
       "source_file": "src/components/PWAInstallPrompt.jsx",
       "source_location": "L6"
+    },
+    {
+      "id": "src_components_userprofilemodal_userprofilemodal",
+      "label": "UserProfileModal()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "userprofilemodal()",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_context_appcontext_useapp",
+      "label": "useApp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "useapp()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L3329"
     },
     {
       "id": "src_context_authcontext_useauth",
@@ -688,6 +736,42 @@
       "source_location": "L241"
     },
     {
+      "id": "src_components_interactivemap_getmapiconsvg",
+      "label": "getMapIconSvg()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "getmapiconsvg()",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L234"
+    },
+    {
+      "id": "src_components_interactivemap_getmapstylejson",
+      "label": "getMapStyleJson()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "getmapstylejson()",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L59"
+    },
+    {
+      "id": "src_components_interactivemap_interactivemap",
+      "label": "InteractiveMap()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "interactivemap()",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L252"
+    },
+    {
       "id": "src_components_maalemselect_maalemselect",
       "label": "MaalemSelect()",
       "_callable": true,
@@ -710,18 +794,6 @@
       "norm_label": "specialtyselect()",
       "source_file": "src/components/SpecialtySelect.jsx",
       "source_location": "L6"
-    },
-    {
-      "id": "src_components_userprofilemodal_userprofilemodal",
-      "label": "UserProfileModal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "userprofilemodal()",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L43"
     },
     {
       "id": "src_components_cgumodal_cgumodal",
@@ -784,52 +856,28 @@
       "source_location": "L5"
     },
     {
-      "id": "src_components_interactivemap_getmapiconsvg",
-      "label": "getMapIconSvg()",
+      "id": "src_components_voicerecorder_generatefallbackaudiodataurl",
+      "label": "generateFallbackAudioDataUrl()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "ClientView.jsx",
       "file_type": "code",
-      "norm_label": "getmapiconsvg()",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L234"
+      "norm_label": "generatefallbackaudiodataurl()",
+      "source_file": "src/components/VoiceRecorder.jsx",
+      "source_location": "L29"
     },
     {
-      "id": "src_components_interactivemap_getmapstylejson",
-      "label": "getMapStyleJson()",
+      "id": "src_components_voicerecorder_getsupportedmimetype",
+      "label": "getSupportedMimeType()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "ClientView.jsx",
       "file_type": "code",
-      "norm_label": "getmapstylejson()",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L59"
-    },
-    {
-      "id": "src_components_interactivemap_interactivemap",
-      "label": "InteractiveMap()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "interactivemap()",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L252"
-    },
-    {
-      "id": "src_components_maalemview_maalemview",
-      "label": "MaalemView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "maalemview()",
-      "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L64"
+      "norm_label": "getsupportedmimetype()",
+      "source_file": "src/components/VoiceRecorder.jsx",
+      "source_location": "L8"
     },
     {
       "id": "src_components_voicerecorder_voicerecorder",
@@ -841,31 +889,7 @@
       "file_type": "code",
       "norm_label": "voicerecorder()",
       "source_file": "src/components/VoiceRecorder.jsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "src_context_appcontext_calculatedistanceinkm",
-      "label": "calculateDistanceInKm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "calculatedistanceinkm()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_context_appcontext_useapp",
-      "label": "useApp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "useapp()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3329"
+      "source_location": "L45"
     },
     {
       "id": "src_context_emergencyflowcontext_useemergencyflow",
@@ -1935,6 +1959,50 @@
       "source_location": "L21"
     },
     {
+      "id": "src_components_interactivemap",
+      "label": "InteractiveMap.jsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "interactivemap.jsx",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_interactivemap_map_styles",
+      "label": "MAP_STYLES",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "map_styles",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "src_components_interactivemap_road_color_themes",
+      "label": "ROAD_COLOR_THEMES",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "road_color_themes",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L52"
+    },
+    {
+      "id": "src_components_interactivemap_svg_icons",
+      "label": "SVG_ICONS",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "svg_icons",
+      "source_file": "src/components/InteractiveMap.jsx",
+      "source_location": "L84"
+    },
+    {
       "id": "src_components_maalemselect",
       "label": "MaalemSelect.jsx",
       "_origin": "ast",
@@ -2175,50 +2243,6 @@
       "norm_label": "customdropdown.jsx",
       "source_file": "src/components/CustomDropdown.jsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_components_interactivemap",
-      "label": "InteractiveMap.jsx",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "interactivemap.jsx",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_interactivemap_map_styles",
-      "label": "MAP_STYLES",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "map_styles",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L11"
-    },
-    {
-      "id": "src_components_interactivemap_road_color_themes",
-      "label": "ROAD_COLOR_THEMES",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "road_color_themes",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L52"
-    },
-    {
-      "id": "src_components_interactivemap_svg_icons",
-      "label": "SVG_ICONS",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "svg_icons",
-      "source_file": "src/components/InteractiveMap.jsx",
-      "source_location": "L84"
     },
     {
       "id": "src_components_maalemview",
@@ -4186,6 +4210,30 @@
     },
     {
       "source": "src_components_voicerecorder_voicerecorder",
+      "target": "src_components_voicerecorder_getsupportedmimetype",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/VoiceRecorder.jsx",
+      "source_location": "L129",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_voicerecorder_voicerecorder",
+      "target": "src_components_voicerecorder_generatefallbackaudiodataurl",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/VoiceRecorder.jsx",
+      "source_location": "L202",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_voicerecorder_voicerecorder",
       "target": "src_context_authcontext_useauth",
       "relation": "calls",
       "_origin": "ast",
@@ -4193,7 +4241,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/VoiceRecorder.jsx",
-      "source_location": "L8",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -9903,13 +9951,35 @@
     },
     {
       "source": "src_components_voicerecorder",
+      "target": "src_components_voicerecorder_generatefallbackaudiodataurl",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/VoiceRecorder.jsx",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_voicerecorder",
       "target": "src_components_voicerecorder_voicerecorder",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/VoiceRecorder.jsx",
-      "source_location": "L7",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_voicerecorder",
+      "target": "src_components_voicerecorder_getsupportedmimetype",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/VoiceRecorder.jsx",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -11155,5 +11225,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "78b5ee1b61ed09a32c39a56a65f4bdf8fa94302e"
+  "built_at_commit": "1b909a0bee5666a011bf33d685fa5a76e79020a0"
 }

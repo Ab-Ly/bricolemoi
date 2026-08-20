@@ -145,7 +145,8 @@ export const AuthModal = () => {
     try {
       const intent = JSON.parse(localStorage.getItem('bricolemoi_pending_intent') || '{}');
       const gps = JSON.parse(localStorage.getItem('bricolemoi_client_gps') || '{}');
-      return intent.district || gps.district || 'Maârif';
+      const val = intent.district || gps.district || 'Maârif';
+      return typeof val === 'object' ? (val.name || 'Maârif') : String(val);
     } catch (e) {
       return 'Maârif';
     }
@@ -155,7 +156,10 @@ export const AuthModal = () => {
 
   const cityOptions = MOROCCAN_CITIES.map((c) => ({ value: c.name, label: c.name }));
   const currentCityObj = MOROCCAN_CITIES.find((c) => c.name === selectedCity) || MOROCCAN_CITIES[0];
-  const districtOptions = (currentCityObj.districts || []).map((d) => ({ value: d, label: d }));
+  const districtOptions = (currentCityObj.districts || []).map((d) => {
+    const dName = typeof d === 'string' ? d : (d?.name || String(d));
+    return { value: dName, label: dName };
+  });
 
   // Synchronisation dynamique quand la modal s'ouvre
   useEffect(() => {
@@ -167,8 +171,10 @@ export const AuthModal = () => {
           const cName = intent.city || gps.city;
           setSelectedCity(cName);
           const cObj = MOROCCAN_CITIES.find(c => c.name === cName);
-          if (cObj && cObj.districts) {
-            setSelectedDistrict(intent.district || gps.district || cObj.districts[0]);
+          if (cObj && cObj.districts && cObj.districts.length > 0) {
+            const rawD = intent.district || gps.district || cObj.districts[0];
+            const dName = typeof rawD === 'object' ? (rawD.name || 'Centre') : String(rawD);
+            setSelectedDistrict(dName);
           }
         }
       } catch (e) {}
@@ -180,7 +186,9 @@ export const AuthModal = () => {
     setSelectedCity(newCity);
     const matched = MOROCCAN_CITIES.find((c) => c.name === newCity);
     if (matched && matched.districts && matched.districts.length > 0) {
-      setSelectedDistrict(matched.districts[0]);
+      const firstD = matched.districts[0];
+      const dName = typeof firstD === 'object' ? (firstD.name || 'Centre') : String(firstD);
+      setSelectedDistrict(dName);
     }
   };
 
@@ -354,7 +362,9 @@ export const AuthModal = () => {
 
         setSelectedCity(closestCity.name);
         if (closestCity.districts && closestCity.districts.length > 0) {
-          setSelectedDistrict(closestCity.districts[0]);
+          const firstD = closestCity.districts[0];
+          const dName = typeof firstD === 'object' ? (firstD.name || 'Centre') : String(firstD);
+          setSelectedDistrict(dName);
         }
         setDetectingGps(false);
         setGpsSuccessMsg(`📍 Ville détectée : ${closestCity.name}`);

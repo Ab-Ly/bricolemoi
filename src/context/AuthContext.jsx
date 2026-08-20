@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }) => {
       return saved ? JSON.parse(saved) : null;
     } catch (e) { return null; }
   });
+  const [isLoading, setIsLoading] = useState(false);
   const [currentRole, setCurrentRole] = useState(() => {
     try {
       const saved = sessionStorage.getItem('bricolemoi_session');
@@ -597,16 +598,19 @@ export const AuthProvider = ({ children }) => {
               ...existingProfile,
               role: existingProfile.role || preferredRole
             };
+          } else {
             const newProfile = {
               id: firebaseUid,
               full_name: fullName,
-              phone: firebaseUser.phoneNumber || 'En attente de saisie',
+              phone: firebaseUser.phoneNumber || `+212600${Math.floor(100000 + Math.random() * 900000)}`,
               role: preferredRole,
               city_zone: 'Casablanca - Centre-Ville'
             };
-            await supabase.from('profiles').upsert([newProfile]).select().catch((err) => {
+            try {
+              await supabase.from('profiles').upsert([newProfile]);
+            } catch (err) {
               console.warn('[Google Auth DB Warning]:', err);
-            });
+            }
           }
         } catch (dbErr) {
           console.warn('[Google Auth DB Warning]:', dbErr);
@@ -673,6 +677,7 @@ export const AuthProvider = ({ children }) => {
         resetPinWithOtp,
         checkPhoneProfile,
         loginWithGoogle,
+        isLoading,
         logout
       }}
     >

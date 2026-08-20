@@ -2,6 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CaretDown, Check } from '@phosphor-icons/react';
 
+// Helper pour garantir qu'aucune valeur objet n'est rendue directement dans le JSX
+const getSafeLabel = (label, fallback = '') => {
+  if (label === null || label === undefined) return fallback;
+  if (typeof label === 'object') {
+    return label.name || label.label || label.title || JSON.stringify(label);
+  }
+  return String(label);
+};
+
 export const CustomDropdown = ({
   options = [],
   value,
@@ -13,7 +22,11 @@ export const CustomDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
-  const selectedOption = options.find((opt) => opt.value === value) || options[0] || {
+  const selectedOption = options.find((opt) => {
+    const optVal = typeof opt.value === 'object' ? (opt.value?.name || opt.value?.value) : opt.value;
+    const currentVal = typeof value === 'object' ? (value?.name || value?.value) : value;
+    return optVal === currentVal;
+  }) || options[0] || {
     value: '',
     label: placeholder
   };
@@ -53,7 +66,7 @@ export const CustomDropdown = ({
             </div>
           )}
           <span className="text-xs font-bold text-slate-800 truncate">
-            {selectedOption.label}
+            {getSafeLabel(selectedOption.label, placeholder)}
           </span>
         </div>
 
@@ -73,13 +86,14 @@ export const CustomDropdown = ({
             transition={{ duration: 0.15, ease: 'easeOut' }}
             className="absolute left-0 right-0 top-full mt-1.5 z-50 max-h-56 overflow-y-auto rounded-2xl bg-white border border-slate-200 p-1.5 shadow-xl space-y-1"
           >
-            {options.map((opt) => {
-              const isSelected = opt.value === selectedOption.value;
+            {options.map((opt, idx) => {
+              const optVal = typeof opt.value === 'object' ? (opt.value?.name || opt.value?.value || idx) : opt.value;
+              const isSelected = optVal === (typeof selectedOption.value === 'object' ? selectedOption.value?.name : selectedOption.value);
               const OptIcon = opt.icon;
 
               return (
                 <button
-                  key={String(opt.value)}
+                  key={String(optVal) + '-' + idx}
                   type="button"
                   onClick={() => {
                     if (onChange) onChange(opt.value);
@@ -98,7 +112,7 @@ export const CustomDropdown = ({
                       </div>
                     )}
                     <span className={`text-xs font-bold truncate ${isSelected ? 'text-blue-700' : 'text-slate-700 group-hover:text-slate-900'}`}>
-                      {opt.label}
+                      {getSafeLabel(opt.label)}
                     </span>
                   </div>
 

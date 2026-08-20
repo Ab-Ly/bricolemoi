@@ -1,16 +1,16 @@
 # Graph Report - bricolemoi  (2026-08-20)
 
 ## Corpus Check
-- 82 files · ~210,507 words
+- 82 files · ~210,923 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 312 nodes · 651 edges · 55 communities (26 shown, 29 thin omitted)
+- 314 nodes · 655 edges · 55 communities (26 shown, 29 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `78b5ee1b`
+- Built from commit: `1b909a0b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -70,8 +70,6 @@
 10. `AuthProvider()` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `MainApp()` --calls--> `useApp()`  [EXTRACTED]
-  src/App.jsx → src/context/AppContext.jsx
 - `MainApp()` --calls--> `useEmergencyFlow()`  [EXTRACTED]
   src/App.jsx → src/context/EmergencyFlowContext.jsx
 - `MainApp()` --calls--> `useAblyNotifications()`  [EXTRACTED]
@@ -80,6 +78,8 @@
   src/App.jsx → src/lib/subdomain.js
 - `AuthModal()` --calls--> `useAuth()`  [EXTRACTED]
   src/components/AuthModal.jsx → src/context/AuthContext.jsx
+- `ClientView()` --calls--> `useApp()`  [EXTRACTED]
+  src/components/ClientView.jsx → src/context/AppContext.jsx
 
 ## Import Cycles
 - None detected.
@@ -88,19 +88,19 @@
 
 ### Community 0 - "AppContext.jsx"
 Cohesion: 0.12
-Nodes (33): EmergencySOSModal(), AppContext, AppProvider(), ACTIONS, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer(), initialState (+25 more)
+Nodes (34): EmergencySOSModal(), AppContext, AppProvider(), calculateDistanceInKm(), ACTIONS, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer() (+26 more)
 
 ### Community 1 - "App.jsx"
-Cohesion: 0.16
-Nodes (19): AdminApp, App(), ClientApp, MaalemApp, MainApp(), AdminDashboard(), AdminAuthModal(), AdminView() (+11 more)
+Cohesion: 0.15
+Nodes (22): AdminApp, App(), ClientApp, MaalemApp, MainApp(), AdminDashboard(), AdminAuthModal(), AdminView() (+14 more)
 
 ### Community 2 - "getSpecialtyMeta"
-Cohesion: 0.21
-Nodes (16): AdminClientsView(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), CATEGORIES_TAXONOMY, CategorySelector(), EnhancedCategoryIcon() (+8 more)
+Cohesion: 0.16
+Nodes (21): AdminClientsView(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), CATEGORIES_TAXONOMY, CategorySelector(), EnhancedCategoryIcon() (+13 more)
 
 ### Community 3 - "ClientView.jsx"
-Cohesion: 0.13
-Nodes (22): CGUModal(), ClientView(), getServiceDisplay(), mapCategoryToSlug(), SERVICE_TYPE_MAP, CustomDropdown(), getMapIconSvg(), getMapStyleJson() (+14 more)
+Cohesion: 0.17
+Nodes (15): CGUModal(), ClientView(), getServiceDisplay(), mapCategoryToSlug(), SERVICE_TYPE_MAP, CustomDropdown(), generateFallbackAudioDataUrl(), getSupportedMimeType() (+7 more)
 
 ### Community 4 - "dependencies"
 Cohesion: 0.10
@@ -143,15 +143,13 @@ Nodes (4): 1. Visual Identity & Palette (« Modern Clean & Trust »), 2. Action 
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `useAuth()` connect `App.jsx` to `AppContext.jsx`, `getSpecialtyMeta`, `ClientView.jsx`, `AuthContext.jsx`, `LandingPage.jsx`?**
-  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `devDependencies`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `version` to the rest of the system?**
   _68 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppContext.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12367149758454106 - nodes in this community are weakly interconnected._
-- **Should `ClientView.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.1310483870967742 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12025901942645699 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**

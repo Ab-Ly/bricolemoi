@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "src/components/VoiceRecorder.jsx": {
-    "mtime": 1787239571.8970678,
-    "seen": 1787239588.163671,
-    "ast_hash": "551786ce3cdf2ef5bbe8a5cfc43e4087",
+    "mtime": 1787244140.3781714,
+    "seen": 1787244661.461424,
+    "ast_hash": "240f63915bcc61e472a3e13b31cc69fc",
     "semantic_hash": ""
   },
   "src/components/admin/AdminClientsView.jsx": {
