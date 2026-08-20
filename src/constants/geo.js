@@ -1,19 +1,19 @@
 export const COUNTRY_DIAL_CODES = [
-  { code: 'MA', dial: '+212', flagUrl: 'https://flagcdn.com/w40/ma.png', name: 'Maroc', nameAr: 'المغرب', placeholder: '06 12 34 56 78' },
-  { code: 'FR', dial: '+33', flagUrl: 'https://flagcdn.com/w40/fr.png', name: 'France (MRE)', nameAr: 'فرنسا', placeholder: '06 12 34 56 78' },
+  { code: 'MA', dial: '+212', flagUrl: 'https://flagcdn.com/w40/ma.png', name: 'Maroc', nameAr: 'المغرب', placeholder: '6 12 34 56 78' },
+  { code: 'FR', dial: '+33', flagUrl: 'https://flagcdn.com/w40/fr.png', name: 'France (MRE)', nameAr: 'فرنسا', placeholder: '6 12 34 56 78' },
   { code: 'ES', dial: '+34', flagUrl: 'https://flagcdn.com/w40/es.png', name: 'Espagne (MRE)', nameAr: 'إسبانيا', placeholder: '612 345 678' },
-  { code: 'BE', dial: '+32', flagUrl: 'https://flagcdn.com/w40/be.png', name: 'Belgique (MRE)', nameAr: 'بلجيكا', placeholder: '0470 12 34 56' },
+  { code: 'BE', dial: '+32', flagUrl: 'https://flagcdn.com/w40/be.png', name: 'Belgique (MRE)', nameAr: 'بلجيكا', placeholder: '470 12 34 56' },
   { code: 'IT', dial: '+39', flagUrl: 'https://flagcdn.com/w40/it.png', name: 'Italie (MRE)', nameAr: 'إيطاليا', placeholder: '312 345 6789' },
-  { code: 'NL', dial: '+31', flagUrl: 'https://flagcdn.com/w40/nl.png', name: 'Pays-Bas (MRE)', nameAr: 'هولندا', placeholder: '06 12 34 56 78' },
-  { code: 'DE', dial: '+49', flagUrl: 'https://flagcdn.com/w40/de.png', name: 'Allemagne (MRE)', nameAr: 'ألمانيا', placeholder: '0151 23456789' },
-  { code: 'GB', dial: '+44', flagUrl: 'https://flagcdn.com/w40/gb.png', name: 'Royaume-Uni', nameAr: 'بريطانيا', placeholder: '07123 456789' },
+  { code: 'NL', dial: '+31', flagUrl: 'https://flagcdn.com/w40/nl.png', name: 'Pays-Bas (MRE)', nameAr: 'هولندا', placeholder: '6 12 34 56 78' },
+  { code: 'DE', dial: '+49', flagUrl: 'https://flagcdn.com/w40/de.png', name: 'Allemagne (MRE)', nameAr: 'ألمانيا', placeholder: '151 23456789' },
+  { code: 'GB', dial: '+44', flagUrl: 'https://flagcdn.com/w40/gb.png', name: 'Royaume-Uni', nameAr: 'بريطانيا', placeholder: '7123 456789' },
   { code: 'CA', dial: '+1', flagUrl: 'https://flagcdn.com/w40/ca.png', name: 'Canada (MRE)', nameAr: 'كندا', placeholder: '514 123 4567' },
   { code: 'US', dial: '+1', flagUrl: 'https://flagcdn.com/w40/us.png', name: 'États-Unis', nameAr: 'أمريكا', placeholder: '202 555 0123' },
-  { code: 'AE', dial: '+971', flagUrl: 'https://flagcdn.com/w40/ae.png', name: 'Émirats (Dubaï)', nameAr: 'الإمارات', placeholder: '050 123 4567' },
-  { code: 'SA', dial: '+966', flagUrl: 'https://flagcdn.com/w40/sa.png', name: 'Arabie Saoudite', nameAr: 'السعودية', placeholder: '050 123 4567' },
+  { code: 'AE', dial: '+971', flagUrl: 'https://flagcdn.com/w40/ae.png', name: 'Émirats (Dubaï)', nameAr: 'الإمارات', placeholder: '50 123 4567' },
+  { code: 'SA', dial: '+966', flagUrl: 'https://flagcdn.com/w40/sa.png', name: 'Arabie Saoudite', nameAr: 'السعودية', placeholder: '50 123 4567' },
   { code: 'QA', dial: '+974', flagUrl: 'https://flagcdn.com/w40/qa.png', name: 'Qatar', nameAr: 'قطر', placeholder: '33 12 34 56' },
-  { code: 'CH', dial: '+41', flagUrl: 'https://flagcdn.com/w40/ch.png', name: 'Suisse (MRE)', nameAr: 'سويسرا', placeholder: '078 123 45 67' },
-  { code: 'SE', dial: '+46', flagUrl: 'https://flagcdn.com/w40/se.png', name: 'Suède (MRE)', nameAr: 'السويد', placeholder: '070 123 45 67' }
+  { code: 'CH', dial: '+41', flagUrl: 'https://flagcdn.com/w40/ch.png', name: 'Suisse (MRE)', nameAr: 'سويسرا', placeholder: '78 123 45 67' },
+  { code: 'SE', dial: '+46', flagUrl: 'https://flagcdn.com/w40/se.png', name: 'Suède (MRE)', nameAr: 'السويد', placeholder: '70 123 45 67' }
 ];
 
 export const MOROCCAN_CITIES = [

@@ -207,10 +207,16 @@ export const AuthModal = () => {
     return formatted;
   };
 
-  // Formatage d'affichage du téléphone
+  // Formatage d'affichage du téléphone (retire intelligemment le 0 initial si indicatif présent)
   const handlePhoneChange = (e) => {
     let val = e.target.value;
     val = val.replace(/[^\d\s\-\.\+]/g, '');
+    
+    // Si l'utilisateur commence par taper un '0' alors que l'indicatif (+212, +33...) est déjà sélectionné
+    if (val.startsWith('0') && !val.startsWith('+')) {
+      val = val.slice(1);
+    }
+    
     setPhone(val);
     setErrorBanner('');
   };

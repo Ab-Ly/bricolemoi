@@ -577,7 +577,7 @@
       "file_type": "code",
       "norm_label": "cleanphonenumber()",
       "source_file": "supabase/functions/send-otp-sms/index.ts",
-      "source_location": "L21"
+      "source_location": "L23"
     },
     {
       "id": "supabase_functions_send_infobip_otp_index_cleanphonenumber",
@@ -1153,7 +1153,7 @@
       "file_type": "code",
       "norm_label": "cleanphonenumber()",
       "source_file": "supabase/functions/verify-otp-sms/index.ts",
-      "source_location": "L13"
+      "source_location": "L16"
     },
     {
       "id": "supabase_functions_verify_otp_sms_index_todeterministicuuid",
@@ -1165,7 +1165,7 @@
       "file_type": "code",
       "norm_label": "todeterministicuuid()",
       "source_file": "supabase/functions/verify-otp-sms/index.ts",
-      "source_location": "L32"
+      "source_location": "L35"
     },
     {
       "id": "src_components_emergencysosmodal",
@@ -1594,7 +1594,7 @@
       "file_type": "code",
       "norm_label": "corsheaders",
       "source_file": "supabase/functions/send-otp-sms/index.ts",
-      "source_location": "L9"
+      "source_location": "L15"
     },
     {
       "id": "supabase_functions_send_infobip_otp_index",
@@ -3580,7 +3580,7 @@
       "file_type": "code",
       "norm_label": "corsheaders",
       "source_file": "supabase/functions/verify-otp-sms/index.ts",
-      "source_location": "L7"
+      "source_location": "L10"
     }
   ],
   "links": [
@@ -10910,24 +10910,24 @@
     },
     {
       "source": "supabase_functions_send_otp_sms_index",
-      "target": "supabase_functions_send_otp_sms_index_cleanphonenumber",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "supabase/functions/send-otp-sms/index.ts",
-      "source_location": "L21",
-      "weight": 1.0
-    },
-    {
-      "source": "supabase_functions_send_otp_sms_index",
       "target": "supabase_functions_send_otp_sms_index_corsheaders",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "supabase/functions/send-otp-sms/index.ts",
-      "source_location": "L9",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "supabase_functions_send_otp_sms_index",
+      "target": "supabase_functions_send_otp_sms_index_cleanphonenumber",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/send-otp-sms/index.ts",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -10987,13 +10987,24 @@
     },
     {
       "source": "supabase_functions_verify_otp_sms_index",
+      "target": "supabase_functions_verify_otp_sms_index_corsheaders",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/functions/verify-otp-sms/index.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "supabase_functions_verify_otp_sms_index",
       "target": "supabase_functions_verify_otp_sms_index_cleanphonenumber",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "supabase/functions/verify-otp-sms/index.ts",
-      "source_location": "L13",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -11004,18 +11015,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "supabase/functions/verify-otp-sms/index.ts",
-      "source_location": "L32",
-      "weight": 1.0
-    },
-    {
-      "source": "supabase_functions_verify_otp_sms_index",
-      "target": "supabase_functions_verify_otp_sms_index_corsheaders",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "supabase/functions/verify-otp-sms/index.ts",
-      "source_location": "L7",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -11260,5 +11260,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "71baf4926a4109ead3ae9a9a717d500a039130f3"
+  "built_at_commit": "3f41173db1a545ca9419c4172fa98c3c5002931c"
 }
