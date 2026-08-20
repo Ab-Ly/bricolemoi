@@ -669,38 +669,6 @@ export const LandingPage = ({ onSelectJourney }) => {
           <span>Accès Administration</span>
         </button>
       </section>
-
-      {/* 🚨 STICKY MOBILE QUICK SOS ACTION BAR */}
-      <div className="md:hidden fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] left-3 right-3 z-40">
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            if (activeTab === 'CLIENT') {
-              onSelectJourney('CLIENT', { category: selectedServiceId, city: selectedCityName });
-            } else {
-              onSelectJourney('MAALEM', { promo: 'BONUS15' });
-            }
-          }}
-          className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-between shadow-lg cursor-pointer ${
-            activeTab === 'CLIENT'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
-              : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center">
-              {activeTab === 'CLIENT' ? <Zap className="w-4 h-4 fill-white" /> : <Wrench className="w-4 h-4" />}
-            </div>
-            <span className="truncate">
-              {activeTab === 'CLIENT' ? `🚨 SOS Express à ${selectedCityName}` : `🛠️ Inscription Maâlem (+15 DH)`}
-            </span>
-          </div>
-          <div className="flex items-center gap-1 text-[11px] font-mono font-bold bg-white/20 px-2.5 py-1 rounded-xl">
-            <span>Démarrer</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </div>
-        </motion.button>
-      </div>
     </div>
   );
 };
