@@ -1,16 +1,16 @@
 # Graph Report - bricolemoi  (2026-08-20)
 
 ## Corpus Check
-- 82 files · ~210,409 words
+- 82 files · ~210,903 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 266 nodes · 642 edges · 23 communities (14 shown, 9 thin omitted)
+- 266 nodes · 644 edges · 23 communities (14 shown, 9 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.65)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `872e0973`
+- Built from commit: `33212a33`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -89,16 +89,16 @@ Cohesion: 0.08
 Nodes (24): autoprefixer, devDependencies, autoprefixer, postcss, tailwindcss, @types/react, @types/react-dom, vite (+16 more)
 
 ### Community 6 - "AuthContext.jsx"
-Cohesion: 0.13
-Nodes (28): AuthModal(), SpecialtySelect(), CITIES, UserProfilePage(), AuthContext, AuthProvider(), app, auth (+20 more)
+Cohesion: 0.14
+Nodes (27): AuthModal(), SpecialtySelect(), CITIES, UserProfilePage(), AuthContext, AuthProvider(), app, auth (+19 more)
 
 ### Community 7 - "manifest.json"
 Cohesion: 0.20
 Nodes (9): background_color, description, display, icons, name, orientation, short_name, start_url (+1 more)
 
 ### Community 8 - "LandingPage.jsx"
-Cohesion: 0.33
-Nodes (5): MOROCCAN_CITIES, MOROCCAN_SERVICES, CLIENT_SCENES, MAALEM_SCENES, PromoVideoPlayer()
+Cohesion: 0.28
+Nodes (6): MOROCCAN_CITIES, MOROCCAN_SERVICES, CLIENT_SCENES, MAALEM_SCENES, PromoVideoPlayer(), translations
 
 ### Community 49 - "Modern Clean & Trust Engineering Guidelines (BricoleMoi)"
 Cohesion: 0.40
@@ -125,4 +125,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Should `AuthContext.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12944523470839261 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.13968253968253969 - nodes in this community are weakly interconnected._
