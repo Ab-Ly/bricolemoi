@@ -28,6 +28,18 @@
       "source_location": "L31"
     },
     {
+      "id": "src_context_appcontext_calculatedistanceinkm",
+      "label": "calculateDistanceInKm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "calculatedistanceinkm()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L16"
+    },
+    {
       "id": "src_context_emergencyflowcontext_emergencyflowprovider",
       "label": "EmergencyFlowProvider()",
       "_callable": true,
@@ -388,18 +400,6 @@
       "source_location": "L13"
     },
     {
-      "id": "src_components_clientview_clientview",
-      "label": "ClientView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "clientview()",
-      "source_file": "src/components/ClientView.jsx",
-      "source_location": "L109"
-    },
-    {
       "id": "src_components_landingpage_landingpage",
       "label": "LandingPage()",
       "_callable": true,
@@ -494,18 +494,6 @@
       "norm_label": "useauth()",
       "source_file": "src/context/AuthContext.jsx",
       "source_location": "L689"
-    },
-    {
-      "id": "src_context_emergencyflowcontext_useemergencyflow",
-      "label": "useEmergencyFlow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "useemergencyflow()",
-      "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L465"
     },
     {
       "id": "src_layouts_adminapp_adminapp",
@@ -808,18 +796,6 @@
       "source_location": "L6"
     },
     {
-      "id": "src_context_appcontext_calculatedistanceinkm",
-      "label": "calculateDistanceInKm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "calculatedistanceinkm()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L16"
-    },
-    {
       "id": "src_components_cgumodal_cgumodal",
       "label": "CGUModal()",
       "_callable": true,
@@ -830,6 +806,18 @@
       "norm_label": "cgumodal()",
       "source_file": "src/components/CGUModal.jsx",
       "source_location": "L5"
+    },
+    {
+      "id": "src_components_clientview_clientview",
+      "label": "ClientView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "clientview()",
+      "source_file": "src/components/ClientView.jsx",
+      "source_location": "L109"
     },
     {
       "id": "src_components_clientview_getservicedisplay",
@@ -916,6 +904,42 @@
       "source_location": "L45"
     },
     {
+      "id": "src_context_emergencyflowcontext_useemergencyflow",
+      "label": "useEmergencyFlow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "useemergencyflow()",
+      "source_file": "src/context/EmergencyFlowContext.jsx",
+      "source_location": "L465"
+    },
+    {
+      "id": "scratch_test_prelude_otp_testpreludeotp",
+      "label": "testPreludeOtp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "test_prelude_otp.js",
+      "file_type": "code",
+      "norm_label": "testpreludeotp()",
+      "source_file": "scratch/test_prelude_otp.js",
+      "source_location": "L10"
+    },
+    {
+      "id": "scratch_get_prelude_log_checkverificationlog",
+      "label": "checkVerificationLog()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "get_prelude_log.js",
+      "file_type": "code",
+      "norm_label": "checkverificationlog()",
+      "source_file": "scratch/get_prelude_log.js",
+      "source_location": "L5"
+    },
+    {
       "id": "src_components_authmodal_authmodal",
       "label": "AuthModal()",
       "_callable": true,
@@ -973,7 +997,7 @@
       "file_type": "code",
       "norm_label": "checkphoneprofile()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L294"
+      "source_location": "L358"
     },
     {
       "id": "src_lib_infobipauthservice_formatinternationalphone",
@@ -985,7 +1009,7 @@
       "file_type": "code",
       "norm_label": "formatinternationalphone()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L11"
+      "source_location": "L12"
     },
     {
       "id": "src_lib_infobipauthservice_formatmoroccanphone",
@@ -997,7 +1021,7 @@
       "file_type": "code",
       "norm_label": "formatmoroccanphone()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L38"
+      "source_location": "L39"
     },
     {
       "id": "src_lib_infobipauthservice_getlocalpin",
@@ -1009,7 +1033,7 @@
       "file_type": "code",
       "norm_label": "getlocalpin()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L382"
+      "source_location": "L446"
     },
     {
       "id": "src_lib_infobipauthservice_getphonecandidatevariants",
@@ -1021,7 +1045,7 @@
       "file_type": "code",
       "norm_label": "getphonecandidatevariants()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L273"
+      "source_location": "L337"
     },
     {
       "id": "src_lib_infobipauthservice_hashpin",
@@ -1033,7 +1057,7 @@
       "file_type": "code",
       "norm_label": "hashpin()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L260"
+      "source_location": "L324"
     },
     {
       "id": "src_lib_infobipauthservice_loginwithpin",
@@ -1045,7 +1069,7 @@
       "file_type": "code",
       "norm_label": "loginwithpin()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L402"
+      "source_location": "L466"
     },
     {
       "id": "src_lib_infobipauthservice_sendinfobipotp",
@@ -1057,7 +1081,7 @@
       "file_type": "code",
       "norm_label": "sendinfobipotp()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L52"
+      "source_location": "L53"
     },
     {
       "id": "src_lib_infobipauthservice_sendotpsms",
@@ -1069,7 +1093,7 @@
       "file_type": "code",
       "norm_label": "sendotpsms()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L48"
+      "source_location": "L49"
     },
     {
       "id": "src_lib_infobipauthservice_setlocalpin",
@@ -1081,7 +1105,7 @@
       "file_type": "code",
       "norm_label": "setlocalpin()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L391"
+      "source_location": "L455"
     },
     {
       "id": "src_lib_infobipauthservice_updateprofilepin",
@@ -1093,7 +1117,7 @@
       "file_type": "code",
       "norm_label": "updateprofilepin()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L495"
+      "source_location": "L559"
     },
     {
       "id": "src_lib_infobipauthservice_verifyinfobipotp",
@@ -1105,7 +1129,7 @@
       "file_type": "code",
       "norm_label": "verifyinfobipotp()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L196"
+      "source_location": "L212"
     },
     {
       "id": "src_lib_infobipauthservice_verifylocalotp",
@@ -1117,7 +1141,7 @@
       "file_type": "code",
       "norm_label": "verifylocalotp()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L167"
+      "source_location": "L183"
     },
     {
       "id": "src_lib_infobipauthservice_verifyotpsms",
@@ -1129,7 +1153,7 @@
       "file_type": "code",
       "norm_label": "verifyotpsms()",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L192"
+      "source_location": "L208"
     },
     {
       "id": "src_components_promovideoplayer_promovideoplayer",
@@ -2037,28 +2061,6 @@
       "source_location": "L1"
     },
     {
-      "id": "src_components_userprofilemodal",
-      "label": "UserProfileModal.jsx",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "userprofilemodal.jsx",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_userprofilemodal_cities",
-      "label": "CITIES",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "cities",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L34"
-    },
-    {
       "id": "supabase_services_seed",
       "label": "services_seed.sql",
       "_origin": "ast",
@@ -2266,6 +2268,28 @@
       "norm_label": "maalemview.jsx",
       "source_file": "src/components/MaalemView.jsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_userprofilemodal",
+      "label": "UserProfileModal.jsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "userprofilemodal.jsx",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_userprofilemodal_cities",
+      "label": "CITIES",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "cities",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L34"
     },
     {
       "id": "src_components_voicerecorder",
@@ -3264,6 +3288,39 @@
       "source_location": ""
     },
     {
+      "id": "scratch_test_prelude_otp",
+      "label": "test_prelude_otp.js",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "test_prelude_otp.js",
+      "file_type": "code",
+      "norm_label": "test_prelude_otp.js",
+      "source_file": "scratch/test_prelude_otp.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "scratch_test_prelude_otp_testnumbers",
+      "label": "testNumbers",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "test_prelude_otp.js",
+      "file_type": "code",
+      "norm_label": "testnumbers",
+      "source_file": "scratch/test_prelude_otp.js",
+      "source_location": "L5"
+    },
+    {
+      "id": "scratch_get_prelude_log",
+      "label": "get_prelude_log.js",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "get_prelude_log.js",
+      "file_type": "code",
+      "norm_label": "get_prelude_log.js",
+      "source_file": "scratch/get_prelude_log.js",
+      "source_location": "L1"
+    },
+    {
       "id": "src_context_authcontext",
       "label": "AuthContext.jsx",
       "_origin": "ast",
@@ -3360,7 +3417,7 @@
       "file_type": "code",
       "norm_label": "infobip_base_url",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L4"
+      "source_location": "L5"
     },
     {
       "id": "public_manifest",
@@ -4793,7 +4850,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L295",
+      "source_location": "L359",
       "weight": 1.0
     },
     {
@@ -4805,7 +4862,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L296",
+      "source_location": "L360",
       "weight": 1.0
     },
     {
@@ -4817,7 +4874,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L338",
+      "source_location": "L402",
       "weight": 1.0
     },
     {
@@ -4829,7 +4886,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -4841,7 +4898,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L274",
+      "source_location": "L338",
       "weight": 1.0
     },
     {
@@ -4853,7 +4910,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L403",
+      "source_location": "L467",
       "weight": 1.0
     },
     {
@@ -4865,7 +4922,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L404",
+      "source_location": "L468",
       "weight": 1.0
     },
     {
@@ -4877,7 +4934,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L414",
+      "source_location": "L478",
       "weight": 1.0
     },
     {
@@ -4889,7 +4946,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L415",
+      "source_location": "L479",
       "weight": 1.0
     },
     {
@@ -4901,7 +4958,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L448",
+      "source_location": "L512",
       "weight": 1.0
     },
     {
@@ -4913,7 +4970,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -4925,7 +4982,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L49",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -4937,7 +4994,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L496",
+      "source_location": "L560",
       "weight": 1.0
     },
     {
@@ -4949,7 +5006,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L498",
+      "source_location": "L562",
       "weight": 1.0
     },
     {
@@ -4961,7 +5018,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L500",
+      "source_location": "L564",
       "weight": 1.0
     },
     {
@@ -4973,7 +5030,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L197",
+      "source_location": "L213",
       "weight": 1.0
     },
     {
@@ -4985,7 +5042,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L239",
+      "source_location": "L277",
       "weight": 1.0
     },
     {
@@ -4997,7 +5054,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L168",
+      "source_location": "L184",
       "weight": 1.0
     },
     {
@@ -5009,7 +5066,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L193",
+      "source_location": "L209",
       "weight": 1.0
     },
     {
@@ -9424,6 +9481,39 @@
       "weight": 1.0
     },
     {
+      "source": "scratch_get_prelude_log",
+      "target": "scratch_get_prelude_log_checkverificationlog",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scratch/get_prelude_log.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "scratch_test_prelude_otp",
+      "target": "scratch_test_prelude_otp_testpreludeotp",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scratch/test_prelude_otp.js",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "scratch_test_prelude_otp",
+      "target": "scratch_test_prelude_otp_testnumbers",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scratch/test_prelude_otp.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "src_app",
       "target": "src_app_clientapp",
       "relation": "contains",
@@ -10476,7 +10566,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -10487,7 +10577,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L167",
+      "source_location": "L183",
       "weight": 1.0
     },
     {
@@ -10498,7 +10588,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L192",
+      "source_location": "L208",
       "weight": 1.0
     },
     {
@@ -10509,7 +10599,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L196",
+      "source_location": "L212",
       "weight": 1.0
     },
     {
@@ -10520,7 +10610,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L260",
+      "source_location": "L324",
       "weight": 1.0
     },
     {
@@ -10531,7 +10621,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L273",
+      "source_location": "L337",
       "weight": 1.0
     },
     {
@@ -10542,7 +10632,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L294",
+      "source_location": "L358",
       "weight": 1.0
     },
     {
@@ -10553,7 +10643,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L38",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -10564,7 +10654,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L382",
+      "source_location": "L446",
       "weight": 1.0
     },
     {
@@ -10575,18 +10665,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L391",
-      "weight": 1.0
-    },
-    {
-      "source": "src_lib_infobipauthservice",
-      "target": "src_lib_infobipauthservice_infobip_base_url",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L4",
+      "source_location": "L455",
       "weight": 1.0
     },
     {
@@ -10597,7 +10676,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L402",
+      "source_location": "L466",
       "weight": 1.0
     },
     {
@@ -10608,18 +10687,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L48",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
       "source": "src_lib_infobipauthservice",
-      "target": "src_lib_infobipauthservice_updateprofilepin",
+      "target": "src_lib_infobipauthservice_infobip_base_url",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L495",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -10630,7 +10709,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/infobipAuthService.js",
-      "source_location": "L52",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_infobipauthservice",
+      "target": "src_lib_infobipauthservice_updateprofilepin",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/infobipAuthService.js",
+      "source_location": "L559",
       "weight": 1.0
     },
     {
@@ -11260,5 +11350,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "fdf93e25db49e551f74aa57e6046bb9f54836222"
+  "built_at_commit": "0549ce054a10d631c12539feb011b85742b7046c"
 }

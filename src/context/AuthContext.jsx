@@ -346,52 +346,22 @@ export const AuthProvider = ({ children }) => {
   }) => {
     const { finalPhone } = formatMoroccanPhone(phone);
     const normRole = (role || 'CLIENT').toUpperCase();
-    let authenticatedUser = null;
+    
+    // 1. Validation directe via verifyInfobipOTP (Prelude.so API + Supabase sync)
+    const verificationResult = await verifyInfobipOTP({
+      phone: finalPhone,
+      token,
+      role: normRole,
+      fullName,
+      cityZone,
+      specialty,
+      portfolioUrls,
+      mode
+    });
 
-    // 1. Validation de l'OTP
-    const otpValidation = verifyLocalOTP(phone, token);
-    if (!otpValidation.valid) {
-      throw new Error(otpValidation.error || 'Code OTP incorrect.');
-    }
-
+    let authenticatedUser = verificationResult?.user;
     const pinHash = pin ? await hashPin(pin) : null;
 
-    // 2. Appel Edge Function Supabase verify-infobip-otp si disponible
-    if (isSupabaseConfigured) {
-      try {
-        const { data, error } = await supabase.functions.invoke('verify-infobip-otp', {
-          body: {
-            phone: finalPhone,
-            token,
-            role: normRole,
-            fullName,
-            cityZone,
-            specialty,
-            portfolioUrls,
-            mode,
-            pin
-          }
-        });
-
-        if (error) {
-          const errMsg = error.message || '';
-          if (errMsg.includes('PHONE_ROLE_CONFLICT') || data?.error?.includes('PHONE_ROLE_CONFLICT')) {
-            throw new Error(data?.error || errMsg);
-          }
-        }
-
-        if (data?.success && data?.user) {
-          authenticatedUser = data.user;
-        }
-      } catch (edgeErr) {
-        if (edgeErr.message?.startsWith('PHONE_ROLE_CONFLICT')) {
-          throw edgeErr;
-        }
-        console.warn('[verify-infobip-otp] Edge Function fallback notice:', edgeErr.message);
-      }
-    }
-
-    // 3. Fallback direct Supabase REST
     if (!authenticatedUser) {
       const firebaseUid = toValidUUID('user-' + finalPhone.replace(/\D/g, ''));
       sessionStorage.removeItem('bricolemoi_pending_otp');
