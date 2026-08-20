@@ -255,26 +255,44 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     return isExactId || isMaalemRole;
   });
 
+  // Identification précise des types de transactions (évite de confondre les bonus avec les recharges réelles)
+  const isBonusTx = (t) => {
+    const typeUpper = String(t.type || '').toUpperCase();
+    const methodUpper = String(t.payment_method || '').toUpperCase();
+    const refUpper = String(t.reference_ref || '').toUpperCase();
+    return typeUpper === 'BONUS' || methodUpper.includes('OFFERT') || methodUpper.includes('BONUS') || refUpper.includes('BONUS');
+  };
+
+  const isLeadTx = (t) => {
+    const typeUpper = String(t.type || '').toUpperCase();
+    return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
+  };
+
+  const isRealRechargeTx = (t) => {
+    const typeUpper = String(t.type || '').toUpperCase();
+    return (typeUpper === 'RECHARGE' || typeUpper === 'CREDIT') && !isBonusTx(t) && !isLeadTx(t);
+  };
+
   const totalRechargedSum = myTransactions
-    .filter((t) => t.status === 'VALIDATED' && t.type === 'RECHARGE')
+    .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
     .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
 
   const totalLeadsSpent = myTransactions
-    .filter((t) => t.type === 'LEAD_DEDUCTION' || t.type === 'DEBIT')
+    .filter((t) => isLeadTx(t))
     .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
 
   const totalBonusSum = myTransactions
-    .filter((t) => t.type === 'BONUS' || t.payment_method?.includes('Offert'))
+    .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
     .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
 
   const pendingMyRechargesCount = myTransactions.filter(
-    (t) => t.status === 'PENDING' && t.type === 'RECHARGE'
+    (t) => t.status === 'PENDING' && isRealRechargeTx(t)
   ).length;
 
   const filteredHistoryTransactions = myTransactions.filter((t) => {
-    if (historyFilter === 'RECHARGE') return t.type === 'RECHARGE';
-    if (historyFilter === 'LEAD') return t.type === 'LEAD_DEDUCTION' || t.type === 'DEBIT';
-    if (historyFilter === 'BONUS') return t.type === 'BONUS' || t.payment_method?.includes('Offert');
+    if (historyFilter === 'RECHARGE') return isRealRechargeTx(t);
+    if (historyFilter === 'LEAD') return isLeadTx(t);
+    if (historyFilter === 'BONUS') return isBonusTx(t);
     if (historyFilter === 'PENDING') return t.status === 'PENDING';
     return true;
   });
@@ -1664,7 +1682,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   }`}
                 >
                   <Coins className="w-3.5 h-3.5" />
-                  <span>Recharges ({myTransactions.filter(t => t.type === 'RECHARGE').length})</span>
+                  <span>Recharges ({myTransactions.filter(isRealRechargeTx).length})</span>
                 </button>
                 <button
                   type="button"
@@ -1676,7 +1694,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   }`}
                 >
                   <Zap className="w-3.5 h-3.5" />
-                  <span>Leads SOS ({myTransactions.filter(t => t.type === 'LEAD_DEDUCTION' || t.type === 'DEBIT').length})</span>
+                  <span>Leads SOS ({myTransactions.filter(isLeadTx).length})</span>
                 </button>
                 <button
                   type="button"
@@ -1688,7 +1706,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   }`}
                 >
                   <Gift className="w-3.5 h-3.5" />
-                  <span>Bonus ({myTransactions.filter(t => t.type === 'BONUS' || t.payment_method?.includes('Offert')).length})</span>
+                  <span>Bonus ({myTransactions.filter(isBonusTx).length})</span>
                 </button>
                 {pendingMyRechargesCount > 0 && (
                   <button
@@ -1716,13 +1734,27 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                 ) : (
                   filteredHistoryTransactions.map((tx) => {
                     const statusUpper = String(tx.status || 'PENDING').trim().toUpperCase();
-                    const isRecharge = String(tx.type || '').toUpperCase() === 'RECHARGE';
-                    const isLead = String(tx.type || '').toUpperCase() === 'LEAD_DEDUCTION' || String(tx.type || '').toUpperCase() === 'DEBIT';
-                    const isBonus = String(tx.type || '').toUpperCase() === 'BONUS' || tx.payment_method?.includes('Offert');
+                    const isRecharge = isRealRechargeTx(tx);
+                    const isLead = isLeadTx(tx);
+                    const isBonus = isBonusTx(tx);
                     const isPositive = Number(tx.amount_dh) > 0;
                     const isValidated = statusUpper === 'VALIDATED';
                     const isRejected = statusUpper === 'REJECTED';
                     const isPending = statusUpper === 'PENDING';
+
+                    const cleanTitle = isBonus 
+                      ? (Number(tx.amount_dh) >= 100 ? 'Bonus Récompense Plateforme' : 'Bonus de Bienvenue Artisan')
+                      : isLead 
+                      ? 'Déblocage Lead Client SOS' 
+                      : `Recharge Solde (${tx.payment_method || 'Virement'})`;
+
+                    const displayRef = (() => {
+                      if (!tx.reference_ref) return '';
+                      const raw = String(tx.reference_ref);
+                      if (raw.startsWith('INTERVENTION_')) return `Lead SOS #${raw.replace('INTERVENTION_', '').slice(0, 8)}`;
+                      if (raw.startsWith('QUICK-BONUS-')) return `Bonus #${raw.replace('QUICK-BONUS-', '').slice(0, 10)}`;
+                      return raw;
+                    })();
 
                     return (
                       <div
@@ -1749,7 +1781,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="font-bold text-slate-900 text-xs">
-                                {isBonus ? 'Bonus Récompense Platform' : isLead ? 'Déblocage Lead Client SOS' : `Recharge Solde (${tx.payment_method || 'Virement'})`}
+                                {cleanTitle}
                               </span>
                               {isPending && (
                                 <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[9px] font-bold">
@@ -1770,8 +1802,8 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
                             <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500">
                               <span className="font-mono">{new Date(tx.created_at || Date.now()).toLocaleDateString('fr-FR')} à {new Date(tx.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                              {tx.reference_ref && (
-                                <span>• Réf : <strong className="text-slate-700 font-mono">{tx.reference_ref}</strong></span>
+                              {displayRef && (
+                                <span>• Réf : <strong className="text-slate-700 font-mono">{displayRef}</strong></span>
                               )}
                               {tx.receipt_photo_url && (
                                 <button
@@ -1798,8 +1830,8 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between sm:justify-end gap-3 self-end sm:self-center">
-                          <span className={`text-base font-black font-mono ${
+                        <div className="flex items-center justify-between sm:justify-end gap-3 self-end sm:self-center shrink-0">
+                          <span className={`text-base font-black font-mono whitespace-nowrap ${
                             isPositive ? 'text-emerald-600' : 'text-slate-800'
                           }`}>
                             {isPositive ? `+${Number(tx.amount_dh).toFixed(2)}` : `${Number(tx.amount_dh).toFixed(2)}`} DH
@@ -1809,7 +1841,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                             <motion.button
                               whileTap={{ scale: 0.90 }}
                               onClick={() => generateReceiptPDF(tx)}
-                              className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-[11px] font-bold rounded-xl flex items-center gap-1 shadow-xs active:scale-90 transition-all cursor-pointer"
+                              className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-[11px] font-bold rounded-xl flex items-center gap-1 shadow-xs active:scale-90 transition-all cursor-pointer whitespace-nowrap"
                               title="Télécharger le reçu officiel PDF"
                             >
                               <Printer className="w-3.5 h-3.5 text-slate-600" />
