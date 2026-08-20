@@ -66,13 +66,15 @@ export const MaalemApp = () => {
     } catch (e) { }
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-        <Navbar appMode="MAALEM" onGoHome={() => switchSubdomainInDev('LANDING')} />
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-amber-500 selection:text-white overflow-x-hidden">
+      {/* 100% Dedicated Maalem Header */}
+      <Navbar appMode="MAALEM" onGoHome={() => switchSubdomainInDev('LANDING')} />
 
-        <main className="flex-grow max-w-md w-full mx-auto px-4 py-12 flex items-center justify-center">
-          <div className="w-full bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 text-center shadow-lg space-y-6 relative overflow-hidden">
+      {/* Main Content (Mobile-First Layout) */}
+      <main className="flex-grow max-w-4xl w-full mx-auto px-3 sm:px-6 py-4 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] md:pb-12 flex flex-col items-center justify-center">
+        {!user ? (
+          <div className="max-w-md w-full my-6 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 text-center shadow-lg space-y-6 relative overflow-hidden">
             <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto text-3xl shadow-xs">
               <Lock className="w-8 h-8" />
             </div>
@@ -105,76 +107,61 @@ export const MaalemApp = () => {
               </button>
             </div>
           </div>
-        </main>
-      </div>
-    );
-  }
+        ) : !isMaalem ? (
+          <div className="max-w-md w-full my-6 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 text-center shadow-lg space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto text-3xl shadow-xs">
+              <ShieldAlert className="w-8 h-8" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">Accès Espace Maalem Pro</h2>
+              <p className="text-sm text-slate-600 mt-2">
+                Votre session active (<span className="font-bold text-blue-600">{user.full_name}</span>) est actuellement définie en mode <span className="font-bold text-blue-600">CLIENT</span>.
+              </p>
+            </div>
+            <div className="pt-2 flex flex-col gap-2.5">
+              <button
+                onClick={handleQuickMaalemLogin}
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-xl px-6 py-3.5 shadow-sm active:scale-95 transition-all text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
+              >
+                ⚡ Connexion Directe Maâlem Démo (Hassan Plombier)
+              </button>
 
-  // Role Etanchéité Guard: If logged in as CLIENT, display quick switch & upgrade options
-  if (!isMaalem) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-center items-center px-4 py-12 font-sans">
-        <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 text-center shadow-lg space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto text-3xl shadow-xs">
-            <ShieldAlert className="w-8 h-8" />
+              <button
+                onClick={handleUpgradeCurrentToMaalem}
+                className="w-full bg-white hover:bg-slate-50 text-amber-800 border border-slate-200 rounded-xl px-6 py-3 text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
+              >
+                🔄 Activer le Rôle Artisan sur ce Compte ({user.full_name})
+              </button>
+
+              <button
+                onClick={() => {
+                  logout(() => {
+                    switchRole('MAALEM');
+                    setAuthModalOpen(true);
+                  });
+                }}
+                className="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl px-6 py-2.5 text-xs font-semibold active:scale-95 transition-all cursor-pointer"
+              >
+                🔑 Se Déconnecter &amp; Nouveau Numéro Maâlem
+              </button>
+
+              <button
+                onClick={() => {
+                  switchRole('CLIENT');
+                  switchSubdomainInDev('CLIENT');
+                }}
+                className="w-full bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-xl px-6 py-2 text-xs transition-all flex items-center justify-center gap-1.5 mt-1 cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Retourner à l'Espace Client</span>
+              </button>
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900">Accès Espace Maalem Pro</h2>
-            <p className="text-sm text-slate-600 mt-2">
-              Votre session active (<span className="font-bold text-blue-600">{user.full_name}</span>) est actuellement définie en mode <span className="font-bold text-blue-600">CLIENT</span>.
-            </p>
+        ) : (
+          <div className="w-full">
+            <MaalemView />
           </div>
-          <div className="pt-2 flex flex-col gap-2.5">
-            <button
-              onClick={handleQuickMaalemLogin}
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-xl px-6 py-3.5 shadow-sm active:scale-95 transition-all text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
-            >
-              ⚡ Connexion Directe Maâlem Démo (Hassan Plombier)
-            </button>
-
-            <button
-              onClick={handleUpgradeCurrentToMaalem}
-              className="w-full bg-white hover:bg-slate-50 text-amber-800 border border-slate-200 rounded-xl px-6 py-3 text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
-            >
-              🔄 Activer le Rôle Artisan sur ce Compte ({user.full_name})
-            </button>
-
-            <button
-              onClick={() => {
-                logout(() => {
-                  switchRole('MAALEM');
-                  setAuthModalOpen(true);
-                });
-              }}
-              className="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl px-6 py-2.5 text-xs font-semibold active:scale-95 transition-all cursor-pointer"
-            >
-              🔑 Se Déconnecter &amp; Nouveau Numéro Maâlem
-            </button>
-
-            <button
-              onClick={() => {
-                switchRole('CLIENT');
-                switchSubdomainInDev('CLIENT');
-              }}
-              className="w-full bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-xl px-6 py-2 text-xs transition-all flex items-center justify-center gap-1.5 mt-1"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Retourner à l'Espace Client</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-amber-500 selection:text-white overflow-x-hidden">
-      {/* 100% Dedicated Maalem Header */}
-      <Navbar appMode="MAALEM" onGoHome={() => switchSubdomainInDev('LANDING')} />
-
-      {/* Main Content (Mobile-First Layout) */}
-      <main className="flex-grow max-w-4xl w-full mx-auto px-3 sm:px-6 py-4 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] md:pb-12">
-        <MaalemView />
+        )}
       </main>
 
       <BottomNav 
