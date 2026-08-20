@@ -270,9 +270,9 @@
     "semantic_hash": ""
   },
   "src/lib/infobipAuthService.js": {
-    "mtime": 1787256849.132961,
-    "seen": 1787256917.291158,
-    "ast_hash": "2dd33d82b38e362f8f5699b0a4e8bb29",
+    "mtime": 1787259103.561278,
+    "seen": 1787259161.192611,
+    "ast_hash": "f3687356f0cc2ab6d1fdcdb4d57cfb23",
     "semantic_hash": ""
   },
   "src/lib/notify.jsx": {
@@ -330,9 +330,9 @@
     "semantic_hash": ""
   },
   "vercel.json": {
-    "mtime": 1786993038.0365186,
-    "seen": 1787239588.163838,
-    "ast_hash": "61bd31a2b0ac08f10f13c932b32d6ca1",
+    "mtime": 1787259087.411313,
+    "seen": 1787259161.1944609,
+    "ast_hash": "79363a9907831d4f4a992ebddc895e57",
     "semantic_hash": ""
   },
   "vite.config.js": {
@@ -543,6 +543,18 @@
     "mtime": 1787257764.529886,
     "seen": 1787259016.401737,
     "ast_hash": "c1c3295f88db15979b853ba3d67b6f0b",
+    "semantic_hash": ""
+  },
+  "api/send-otp.js": {
+    "mtime": 1787259067.2013915,
+    "seen": 1787259161.188511,
+    "ast_hash": "d8c13c1d9384c3f77f2987d240a64d27",
+    "semantic_hash": ""
+  },
+  "api/verify-otp.js": {
+    "mtime": 1787259075.5607922,
+    "seen": 1787259161.1885178,
+    "ast_hash": "1472ae5d2050fd15936702aac66eb930",
     "semantic_hash": ""
   }
 }

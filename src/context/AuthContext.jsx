@@ -5,6 +5,7 @@ import { auth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, sig
 import { switchSubdomainInDev } from '../lib/subdomain';
 import { 
   sendInfobipOTP, 
+  verifyInfobipOTP,
   verifyLocalOTP, 
   formatMoroccanPhone, 
   formatInternationalPhone,
