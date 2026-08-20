@@ -11,7 +11,6 @@ import { MaalemApp } from './layouts/MaalemApp';
 import { AdminApp } from './layouts/AdminApp';
 import { AuthModal } from './components/AuthModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
-import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { UserProfileModal } from './components/UserProfileModal';
 import { useApp } from './context/AppContext';
 import { useAblyNotifications } from './hooks/useAblyNotifications';
@@ -309,15 +308,6 @@ const MainApp = () => {
           dismissSosAlert();
         }} 
       />
-
-      {showPromptBanner && (
-        <PWAInstallPrompt
-          deferredPrompt={deferredPrompt}
-          installPWA={installPWA}
-          isInstalled={isInstalled}
-          onClose={() => setShowPromptBanner(false)}
-        />
-      )}
 
       <footer className="hidden md:block border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 mt-16">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
