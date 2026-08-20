@@ -1,16 +1,16 @@
 # Graph Report - bricolemoi  (2026-08-20)
 
 ## Corpus Check
-- 88 files · ~213,611 words
+- 88 files · ~213,612 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 331 nodes · 670 edges · 61 communities (28 shown, 33 thin omitted)
+- 331 nodes · 671 edges · 61 communities (28 shown, 33 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cf8f241a`
+- Built from commit: `793e9147`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -92,15 +92,15 @@
 
 ### Community 0 - "AppContext.jsx"
 Cohesion: 0.12
-Nodes (34): EmergencySOSModal(), AppContext, AppProvider(), calculateDistanceInKm(), ACTIONS, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer() (+26 more)
+Nodes (33): EmergencySOSModal(), AppContext, AppProvider(), ACTIONS, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer(), initialState (+25 more)
 
 ### Community 1 - "App.jsx"
 Cohesion: 0.15
 Nodes (22): AdminApp, App(), ClientApp, MaalemApp, MainApp(), AdminDashboard(), AdminAuthModal(), AdminView() (+14 more)
 
 ### Community 2 - "getSpecialtyMeta"
-Cohesion: 0.17
-Nodes (20): AdminClientsView(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), CATEGORIES_TAXONOMY, CategorySelector(), EnhancedCategoryIcon() (+12 more)
+Cohesion: 0.16
+Nodes (21): AdminClientsView(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), CATEGORIES_TAXONOMY, CategorySelector(), EnhancedCategoryIcon() (+13 more)
 
 ### Community 3 - "ClientView.jsx"
 Cohesion: 0.16
@@ -153,7 +153,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `name`, `private`, `version` to the rest of the system?**
   _70 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppContext.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12025901942645699 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12367149758454106 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
