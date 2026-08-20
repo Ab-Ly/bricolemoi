@@ -382,11 +382,11 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                   {currentScene.desc}
                 </p>
 
-                <div className="p-3 sm:p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-2.5 shadow-xs">
-                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono text-[9px] sm:text-[10px] font-black flex-shrink-0">
+                <div className="p-3 sm:p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-2.5 shadow-xs">
+                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono text-[9px] sm:text-[10px] font-black flex-shrink-0 mt-0.5">
                     🇲🇦 DARIJA
                   </span>
-                  <p className="text-[11px] sm:text-xs text-slate-800 font-medium italic truncate font-arabic" dir="rtl">
+                  <p className="text-xs sm:text-sm text-slate-800 font-medium italic leading-relaxed font-arabic break-words" dir="rtl">
                     "{currentScene.descAr}"
                   </p>
                 </div>
