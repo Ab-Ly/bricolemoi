@@ -7,16 +7,7 @@ import { startEmergencySiren, stopEmergencySiren, playNotificationSound, trigger
 import { notify } from '../lib/notify';
 import { showLocalPushNotification } from '../lib/pushNotificationService';
 import { getAppSubdomain } from '../lib/subdomain';
-
-// ==========================================
-// 1. ÉTATS STRICTS DE LA MACHINE D'ÉTATS SOS
-// ==========================================
-export const EMERGENCY_STATES = {
-  IDLE: 'IDLE',           // Veille / Repos (Carte épurée côté client / Toggle présence côté Maâlem)
-  SEARCHING: 'SEARCHING', // SOS déclenché (Radar pulsant bloquant côté client / Modale alerte bloquante côté Maâlem)
-  MATCHED: 'MATCHED',     // Mission acceptée à 15 DH (Suivi GPS live, contact débloqué, intervention en cours)
-  COMPLETED: 'COMPLETED'  // Clôture des travaux (Modale d'évaluation 5★ côté client)
-};
+import { EMERGENCY_STATES } from '../constants/emergencyStates';
 
 // Types d'actions du Reducer
 const ACTIONS = {

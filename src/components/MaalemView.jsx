@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { useEmergencyFlow, EMERGENCY_STATES } from '../context/EmergencyFlowContext';
+import { useEmergencyFlow } from '../context/EmergencyFlowContext';
+import { EMERGENCY_STATES } from '../constants/emergencyStates';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { InteractiveMap } from './InteractiveMap';
 import { 

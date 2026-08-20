@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { useEmergencyFlow, EMERGENCY_STATES } from '../context/EmergencyFlowContext';
+import { useEmergencyFlow } from '../context/EmergencyFlowContext';
+import { EMERGENCY_STATES } from '../constants/emergencyStates';
 import { VoiceRecorder } from './VoiceRecorder';
 import { InteractiveMap } from './InteractiveMap';
 import { CGUModal } from './CGUModal';
@@ -35,7 +36,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
-import { COUNTRY_DIAL_CODES } from './AuthModal';
+import { COUNTRY_DIAL_CODES, MOROCCAN_CITIES } from '../constants/geo';
 import { CustomDropdown } from './CustomDropdown';
 import { 
   Buildings, 
@@ -49,139 +50,6 @@ import {
   ClockAfternoon,
   Lightning
 } from '@phosphor-icons/react';
-
-export const MOROCCAN_CITIES = [
-  {
-    name: 'Casablanca',
-    lat: 33.5731,
-    lng: -7.5898,
-    districts: [
-      { name: 'Maârif', lat: 33.5883, lng: -7.6328 },
-      { name: 'Bourgogne', lat: 33.5950, lng: -7.6450 },
-      { name: 'Gauthier', lat: 33.5820, lng: -7.6290 },
-      { name: 'Anfa / Aïn Diab', lat: 33.5910, lng: -7.6600 },
-      { name: 'Hay Hassani', lat: 33.5650, lng: -7.6650 },
-      { name: 'Sidi Maarouf', lat: 33.5350, lng: -7.6450 },
-      { name: 'Aïn Sebaâ', lat: 33.6050, lng: -7.5300 },
-      { name: 'Bernoussi', lat: 33.6150, lng: -7.5000 },
-      { name: 'Oasis / Polo', lat: 33.5600, lng: -7.6250 },
-      { name: 'Centre-Ville', lat: 33.5930, lng: -7.6150 }
-    ]
-  },
-  {
-    name: 'Rabat',
-    lat: 34.0209,
-    lng: -6.8416,
-    districts: [
-      { name: 'Agdal', lat: 34.0000, lng: -6.8500 },
-      { name: 'Hassan / Centre', lat: 34.0200, lng: -6.8300 },
-      { name: 'Souissi', lat: 33.9750, lng: -6.8350 },
-      { name: 'Hay Riad', lat: 33.9650, lng: -6.8750 },
-      { name: 'Océan', lat: 34.0250, lng: -6.8550 },
-      { name: 'Yacoub El Mansour', lat: 34.0100, lng: -6.8800 }
-    ]
-  },
-  {
-    name: 'Marrakech',
-    lat: 31.6295,
-    lng: -7.9811,
-    districts: [
-      { name: 'Guéliz', lat: 31.6333, lng: -8.0167 },
-      { name: 'Hivernage', lat: 31.6200, lng: -8.0100 },
-      { name: 'Médina', lat: 31.6250, lng: -7.9890 },
-      { name: 'Semlalia', lat: 31.6450, lng: -8.0200 },
-      { name: 'Targa', lat: 31.6550, lng: -8.0500 },
-      { name: 'Mhamid', lat: 31.5950, lng: -8.0400 }
-    ]
-  },
-  {
-    name: 'Tanger',
-    lat: 35.7595,
-    lng: -5.8340,
-    districts: [
-      { name: 'Malabata', lat: 35.7800, lng: -5.7900 },
-      { name: 'Centre-Ville', lat: 35.7720, lng: -5.8080 },
-      { name: 'Boukhalef', lat: 35.7250, lng: -5.8950 },
-      { name: 'Iberia', lat: 35.7750, lng: -5.8180 },
-      { name: 'Marshane', lat: 35.7900, lng: -5.8200 }
-    ]
-  },
-  {
-    name: 'Salé',
-    lat: 34.0531,
-    lng: -6.7985,
-    districts: [
-      { name: 'Tabriquet', lat: 34.0450, lng: -6.8000 },
-      { name: 'Bettana', lat: 34.0350, lng: -6.8150 },
-      { name: 'Sala Al Jadida', lat: 34.0150, lng: -6.7550 },
-      { name: 'Hay Salam', lat: 34.0550, lng: -6.8100 }
-    ]
-  },
-  {
-    name: 'Fès',
-    lat: 34.0181,
-    lng: -5.0078,
-    districts: [
-      { name: 'Ville Nouvelle', lat: 34.0333, lng: -5.0000 },
-      { name: 'Narjiss', lat: 34.0050, lng: -4.9850 },
-      { name: 'Médina', lat: 34.0620, lng: -4.9780 },
-      { name: 'Route Imouzzer', lat: 33.9900, lng: -5.0100 }
-    ]
-  },
-  {
-    name: 'Agadir',
-    lat: 30.4278,
-    lng: -9.5981,
-    districts: [
-      { name: 'Centre & Baie', lat: 30.4200, lng: -9.6000 },
-      { name: 'Talborjt', lat: 30.4250, lng: -9.5900 },
-      { name: 'Dakhla', lat: 30.4100, lng: -9.5600 },
-      { name: 'Salam', lat: 30.4050, lng: -9.5500 }
-    ]
-  },
-  {
-    name: 'Mohammedia',
-    lat: 33.6866,
-    lng: -7.3828,
-    districts: [
-      { name: 'Kasbah', lat: 33.7000, lng: -7.3900 },
-      { name: 'Plage & Marina', lat: 33.7100, lng: -7.3800 },
-      { name: 'Monica', lat: 33.7150, lng: -7.3650 },
-      { name: 'Riad Salam', lat: 33.6800, lng: -7.4000 }
-    ]
-  },
-  {
-    name: 'Kénitra',
-    lat: 34.2610,
-    lng: -6.5802,
-    districts: [
-      { name: 'Centre-Ville', lat: 34.2600, lng: -6.5800 },
-      { name: 'Mehdia', lat: 34.2550, lng: -6.6750 },
-      { name: 'Mimosa', lat: 34.2650, lng: -6.5700 },
-      { name: 'Maamora', lat: 34.2500, lng: -6.5900 }
-    ]
-  },
-  {
-    name: 'Meknès',
-    lat: 33.8938,
-    lng: -5.5547,
-    districts: [
-      { name: 'Hamria', lat: 33.8950, lng: -5.5500 },
-      { name: 'Ville Nouvelle', lat: 33.8900, lng: -5.5450 },
-      { name: 'Mansour', lat: 33.8750, lng: -5.5650 }
-    ]
-  },
-  {
-    name: 'Tétouan',
-    lat: 35.5889,
-    lng: -5.3626,
-    districts: [
-      { name: 'Centre-Ville', lat: 35.5700, lng: -5.3700 },
-      { name: 'Martil / Cabo', lat: 35.6150, lng: -5.2750 },
-      { name: 'Wilaya', lat: 35.5800, lng: -5.3550 }
-    ]
-  }
-];
 
 const SERVICE_TYPE_MAP = {
   PLUMBING: { label: 'Plomberie & Sanitaire', icon: '💧' },

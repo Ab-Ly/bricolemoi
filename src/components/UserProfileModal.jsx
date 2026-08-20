@@ -29,7 +29,7 @@ import {
 import { toast } from 'sonner';
 import { EnhancedCategoryIcon, getSpecialtyLabel } from './EnhancedCategoryIcon';
 import { SpecialtySelect } from './SpecialtySelect';
-import { COUNTRY_DIAL_CODES } from './AuthModal';
+import { COUNTRY_DIAL_CODES } from '../constants/geo';
 
 const CITIES = [
   { name: 'Casablanca', districts: ['Maârif', 'Gauthier', 'Bourgogne', 'Ain Diab', 'Californie', 'Sidi Maârouf', 'Oasis', 'Centre Ville'] },
