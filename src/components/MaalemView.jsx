@@ -90,15 +90,58 @@ export const MaalemView = ({ onOpenCINVerification }) => {
   } = useEmergencyFlow();
 
   const currentLiveMaalem = maalems?.find((m) => m.id === user?.id) || user?.maalem_details || user;
-  const liveCreditBalance = parseFloat(
-    user?.credits !== undefined && user?.credits !== null
-      ? user.credits
-      : (user?.maalem_details?.credit_balance !== undefined && user?.maalem_details?.credit_balance !== null
-        ? user.maalem_details.credit_balance
-        : (currentLiveMaalem?.credit_balance !== undefined && currentLiveMaalem?.credit_balance !== null
-          ? currentLiveMaalem.credit_balance
-          : 15.00))
-  );
+
+  // Transactions spécifiques à l'artisan connecté
+  const myTransactions = (transactions || []).filter((t) => {
+    if (!user) return true;
+    const isExactId = user.id && String(t.maalem_id || '').trim() === String(user.id).trim();
+    const isPhoneMatch = user.phone && t.maalem_phone && String(t.maalem_phone).trim() === String(user.phone).trim();
+    const isMaalemRole = user.role?.toUpperCase() === 'MAALEM' && (!t.maalem_id || t.maalem_id === 'maalem-1' || String(t.maalem_id).trim() === String(user.id).trim());
+    return isExactId || isPhoneMatch || isMaalemRole;
+  });
+
+  // Identification précise des types de transactions (évite de confondre les bonus avec les recharges réelles)
+  const isBonusTx = (t) => {
+    const typeUpper = String(t.type || '').toUpperCase();
+    const methodUpper = String(t.payment_method || '').toUpperCase();
+    const refUpper = String(t.reference_ref || '').toUpperCase();
+    return typeUpper === 'BONUS' || methodUpper.includes('OFFERT') || methodUpper.includes('BONUS') || refUpper.includes('BONUS');
+  };
+
+  const isLeadTx = (t) => {
+    const typeUpper = String(t.type || '').toUpperCase();
+    return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
+  };
+
+  const isRealRechargeTx = (t) => {
+    const typeUpper = String(t.type || '').toUpperCase();
+    return (typeUpper === 'RECHARGE' || typeUpper === 'CREDIT') && !isBonusTx(t) && !isLeadTx(t);
+  };
+
+  const totalRechargedSum = myTransactions
+    .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
+    .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
+
+  const totalLeadsSpent = myTransactions
+    .filter((t) => isLeadTx(t))
+    .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
+
+  const totalBonusSum = myTransactions
+    .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
+    .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
+
+  // Solde en direct dérivé infailliblement du grand livre comptable (Recharges validées + Bonus validés - Leads SOS débloqués)
+  const liveCreditBalance = myTransactions.length > 0
+    ? Math.max(0, totalRechargedSum + totalBonusSum - totalLeadsSpent)
+    : parseFloat(
+        user?.credits !== undefined && user?.credits !== null
+          ? user.credits
+          : (user?.maalem_details?.credit_balance !== undefined && user?.maalem_details?.credit_balance !== null
+            ? user.maalem_details.credit_balance
+            : (currentLiveMaalem?.credit_balance !== undefined && currentLiveMaalem?.credit_balance !== null
+              ? currentLiveMaalem.credit_balance
+              : 15.00))
+      );
 
   const maalemDetails = user?.maalem_details || {
     specialty: currentLiveMaalem?.specialty || 'PLUMBING',
@@ -246,44 +289,6 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     const audio = audioPlayersRef.current[leadId];
     if (audio) audio.playbackRate = nextSpeed;
   };
-
-  // Transactions spécifiques à l'artisan connecté
-  const myTransactions = (transactions || []).filter((t) => {
-    if (!user) return true;
-    const isExactId = user.id && String(t.maalem_id || '').trim() === String(user.id).trim();
-    const isMaalemRole = user.role?.toUpperCase() === 'MAALEM' && (!t.maalem_id || t.maalem_id === 'maalem-1' || String(t.maalem_id).trim() === String(user.id).trim());
-    return isExactId || isMaalemRole;
-  });
-
-  // Identification précise des types de transactions (évite de confondre les bonus avec les recharges réelles)
-  const isBonusTx = (t) => {
-    const typeUpper = String(t.type || '').toUpperCase();
-    const methodUpper = String(t.payment_method || '').toUpperCase();
-    const refUpper = String(t.reference_ref || '').toUpperCase();
-    return typeUpper === 'BONUS' || methodUpper.includes('OFFERT') || methodUpper.includes('BONUS') || refUpper.includes('BONUS');
-  };
-
-  const isLeadTx = (t) => {
-    const typeUpper = String(t.type || '').toUpperCase();
-    return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
-  };
-
-  const isRealRechargeTx = (t) => {
-    const typeUpper = String(t.type || '').toUpperCase();
-    return (typeUpper === 'RECHARGE' || typeUpper === 'CREDIT') && !isBonusTx(t) && !isLeadTx(t);
-  };
-
-  const totalRechargedSum = myTransactions
-    .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
-    .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
-
-  const totalLeadsSpent = myTransactions
-    .filter((t) => isLeadTx(t))
-    .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
-
-  const totalBonusSum = myTransactions
-    .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
-    .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
 
   const pendingMyRechargesCount = myTransactions.filter(
     (t) => t.status === 'PENDING' && isRealRechargeTx(t)

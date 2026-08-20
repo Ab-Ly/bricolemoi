@@ -45,6 +45,55 @@ export const AdminMaalemsView = ({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  // Calcul infaillible du solde pour chaque Maâlem basé sur le grand livre des transactions
+  const getMaalemCreditBalance = (m) => {
+    if (!m) return 0;
+    const mId = String(m.id || '').trim();
+    const mPhone = String(m.phone || '').replace(/\D/g, '');
+
+    const maalemTxs = (transactions || []).filter((t) => {
+      const matchId = mId && String(t.maalem_id || '').trim() === mId;
+      const matchPhone = mPhone && mPhone.length > 7 && String(t.maalem_phone || '').replace(/\D/g, '') === mPhone;
+      const isFallback = (mId === 'maalem-1' || !t.maalem_id) && m.role?.toUpperCase() === 'MAALEM';
+      return matchId || matchPhone || isFallback;
+    });
+
+    if (maalemTxs.length > 0) {
+      const isBonusTx = (t) => {
+        const typeUpper = String(t.type || '').toUpperCase();
+        const methodUpper = String(t.payment_method || '').toUpperCase();
+        const refUpper = String(t.reference_ref || '').toUpperCase();
+        return typeUpper === 'BONUS' || methodUpper.includes('OFFERT') || methodUpper.includes('BONUS') || refUpper.includes('BONUS');
+      };
+
+      const isLeadTx = (t) => {
+        const typeUpper = String(t.type || '').toUpperCase();
+        return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
+      };
+
+      const isRealRechargeTx = (t) => {
+        const typeUpper = String(t.type || '').toUpperCase();
+        return (typeUpper === 'RECHARGE' || typeUpper === 'CREDIT') && !isBonusTx(t) && !isLeadTx(t);
+      };
+
+      const totalRecharges = maalemTxs
+        .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
+        .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
+
+      const totalBonuses = maalemTxs
+        .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
+        .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
+
+      const totalLeads = maalemTxs
+        .filter((t) => isLeadTx(t))
+        .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
+
+      return Math.max(0, totalRecharges + totalBonuses - totalLeads);
+    }
+
+    return parseFloat(m.credit_balance ?? m.credits ?? m.maalem_details?.credit_balance ?? 15.0) || 15.0;
+  };
+
   // Filtrage des artisans
   const filteredMaalems = useMemo(() => {
     return maalems.filter((m) => {
@@ -59,12 +108,12 @@ export const AdminMaalemsView = ({
 
       let statusOk = true;
       if (statusFilter === 'ONLINE') statusOk = Boolean(m.is_online);
-      else if (statusFilter === 'LOW_CREDIT') statusOk = (parseFloat(m.credit_balance) || 0) < 15;
+      else if (statusFilter === 'LOW_CREDIT') statusOk = getMaalemCreditBalance(m) < 15;
       else if (statusFilter === 'SUSPENDED') statusOk = Boolean(m.is_suspended);
 
       return queryOk && cityOk && specOk && statusOk;
     });
-  }, [maalems, searchTerm, cityFilter, specialtyFilter, statusFilter]);
+  }, [maalems, transactions, searchTerm, cityFilter, specialtyFilter, statusFilter]);
 
   // Données de l'artisan sélectionné dans le Slide-Over Drawer
   const maalemDrawerData = useMemo(() => {
@@ -212,7 +261,7 @@ export const AdminMaalemsView = ({
           paginatedMaalems.map((m) => {
             const isOnline = Boolean(m.is_online);
             const isSuspended = Boolean(m.is_suspended);
-            const creditBal = parseFloat(m.credit_balance) || 0;
+            const creditBal = getMaalemCreditBalance(m);
             const pClean = cleanPhone(m.phone);
             const photos = m.portfolio_urls || [];
 
@@ -462,7 +511,7 @@ export const AdminMaalemsView = ({
                     <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-2.5 text-center shadow-xs">
                       <span className="text-[9px] font-mono text-emerald-800 uppercase block font-bold">Solde Leads</span>
                       <p className="text-base font-black text-emerald-800 font-mono mt-0.5">
-                        {parseFloat(selectedMaalem.credit_balance || 0).toFixed(2)} DH
+                        {getMaalemCreditBalance(selectedMaalem).toFixed(2)} DH
                       </p>
                     </div>
 
