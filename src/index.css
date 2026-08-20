@@ -22,6 +22,42 @@
   }
 }
 
+/* MapLibre Modern Clean & Trust Popup Overrides */
+.maplibregl-popup-content {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 1.25rem !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: #ffffff !important;
+  border-bottom-color: #ffffff !important;
+}
+
+.maplibregl-popup-close-button {
+  top: 10px !important;
+  right: 10px !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 9999px !important;
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  font-size: 13px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  z-index: 10 !important;
+}
+
+.maplibregl-popup-close-button:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
 .font-arabic {
   font-family: 'Readex Pro', 'Tajawal', 'Cairo', system-ui, sans-serif;
   letter-spacing: 0.01em;

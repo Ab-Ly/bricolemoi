@@ -390,14 +390,14 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
       el.style.height = '36px';
       el.className = 'relative flex items-center justify-center cursor-pointer';
       el.innerHTML = `
-        <div class="absolute w-10 h-10 rounded-full bg-blue-500/30 animate-ping"></div>
-        <div class="w-5 h-5 rounded-full bg-blue-600 border-2 border-white shadow-[0_0_15px_rgba(37,99,235,0.95)]"></div>
+        <div class="absolute w-10 h-10 rounded-full bg-blue-500/25 animate-ping"></div>
+        <div class="w-5 h-5 rounded-full bg-blue-600 border-2 border-white shadow-md shadow-blue-500/40"></div>
       `;
 
-      const popup = new maplibregl.Popup({ offset: 25, className: 'dark-scifi-popup' }).setHTML(
-        `<div class="bg-slate-950/95 backdrop-blur-xl border border-cyan-500/40 p-3 rounded-2xl text-center shadow-2xl">
-          <p class="font-extrabold text-cyan-300 text-xs">Votre Position GPS</p>
-          <p class="text-[10px] text-slate-400 font-mono mt-0.5">${userGPSPos.lat.toFixed(4)}, ${userGPSPos.lng.toFixed(4)}</p>
+      const popup = new maplibregl.Popup({ offset: 25, className: 'clean-trust-popup' }).setHTML(
+        `<div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 p-3 rounded-2xl text-center shadow-xl font-sans">
+          <p class="font-black text-slate-900 text-xs">Votre Position GPS</p>
+          <p class="text-[10px] text-slate-500 font-mono mt-0.5">${userGPSPos.lat.toFixed(4)}, ${userGPSPos.lng.toFixed(4)}</p>
         </div>`
       );
 
@@ -424,17 +424,17 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
         el.className = 'cursor-move transform -translate-y-full transition-transform hover:scale-110 z-30';
         el.innerHTML = `
           <div class="relative flex flex-col items-center">
-            <div class="w-11 h-11 rounded-2xl bg-slate-950 text-cyan-400 flex items-center justify-center shadow-[0_0_25px_rgba(6,182,212,0.9)] border-2 border-cyan-400">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <div class="w-11 h-11 rounded-2xl bg-white text-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25 border-2 border-blue-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
             </div>
-            <div class="w-1.5 h-3.5 bg-cyan-400 shadow-md"></div>
+            <div class="w-1.5 h-3.5 bg-blue-600 shadow-sm rounded-b-full"></div>
           </div>
         `;
 
-        const popup = new maplibregl.Popup({ offset: 25, className: 'dark-scifi-popup' }).setHTML(
-          `<div class="bg-slate-950/95 backdrop-blur-xl border border-cyan-500/40 p-3 rounded-2xl text-center shadow-2xl">
-            <p class="text-xs font-black text-cyan-300">Point d'Intervention</p>
-            <p class="text-[10px] text-slate-300 mt-0.5">Glissez le marqueur pour affiner</p>
+        const popup = new maplibregl.Popup({ offset: 25, className: 'clean-trust-popup' }).setHTML(
+          `<div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 p-3 rounded-2xl text-center shadow-xl font-sans">
+            <p class="text-xs font-black text-slate-900">Point d'Intervention</p>
+            <p class="text-[10px] text-slate-500 mt-0.5">Glissez le marqueur pour affiner</p>
           </div>`
         );
 
@@ -457,24 +457,19 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
       }
     }
 
-    // C. Nearby Maalems High-Contrast Badges (Style Uber / Careem / Glovo)
+    // C. Nearby Maalems High-Contrast Badges
     const mapCenterLat = parseFloat(selectedLat || userGPSPos?.lat || 33.5883);
     const mapCenterLng = parseFloat(selectedLng || userGPSPos?.lng || -7.6328);
 
     const filteredMaalems = (maalems || []).filter((m) => {
-      // 1. L'artisan doit être STRICTEMENT en ligne
       if (m.is_online !== true || m.is_available === false) return false;
-
-      // 2. Vérification des coordonnées marocaines valides
       const rawPos = liveMaalemCoords[m.id] || { lat: m.lat, lng: m.lng };
       const mLat = parseFloat(rawPos.lat);
       const mLng = parseFloat(rawPos.lng);
       if (isNaN(mLat) || isNaN(mLng) || mLat < 20 || mLat > 38 || mLng >= 0) return false;
-
       return true;
     });
 
-    // Nettoyage des Maâlems déconnectés
     Object.keys(maalemMarkersRef.current).forEach((id) => {
       const stillActive = filteredMaalems.some((m) => String(m.id).trim() === String(id).trim());
       if (!stillActive) {
@@ -493,6 +488,10 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
       const svgIcon = getMapIconSvg(m.specialty);
       const distanceKm = calculateDistanceInKm(mapCenterLat, mapCenterLng, mLat, mLng);
       const etaMin = Math.max(3, Math.round((distanceKm / 30) * 60));
+      const formattedName = (m.full_name || 'Artisan Maâlem')
+        .split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
 
       if (!maalemMarkersRef.current[m.id]) {
         const el = document.createElement('div');
@@ -502,43 +501,43 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
 
         if (isSelf) {
           el.innerHTML = `
-            <div class="absolute w-12 h-12 rounded-2xl bg-emerald-500/40 animate-ping"></div>
-            <div class="w-10 h-10 rounded-2xl bg-slate-950 border-2 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.9)] flex items-center justify-center">
+            <div class="absolute w-12 h-12 rounded-2xl bg-emerald-500/30 animate-ping"></div>
+            <div class="w-10 h-10 rounded-2xl bg-white border-2 border-emerald-500 shadow-md flex items-center justify-center text-emerald-600">
               ${svgIcon}
             </div>
-            <span class="absolute -top-1 -right-1 px-1.5 py-0.2 bg-emerald-500 text-[8px] font-black text-slate-950 rounded-full border border-white">VOUS</span>
+            <span class="absolute -top-1 -right-1 px-1.5 py-0.2 bg-emerald-600 text-[8px] font-black text-white rounded-full border border-white">VOUS</span>
           `;
         } else {
           el.innerHTML = `
-            <div class="absolute w-10 h-10 rounded-2xl bg-emerald-500/20 animate-pulse"></div>
-            <div class="w-10 h-10 rounded-2xl bg-slate-950 border-2 border-emerald-500 shadow-[0_0_15px_rgba(52,211,153,0.7)] flex items-center justify-center">
+            <div class="absolute w-10 h-10 rounded-2xl bg-blue-500/20 animate-pulse"></div>
+            <div class="w-10 h-10 rounded-2xl bg-white border-2 border-blue-600 shadow-md flex items-center justify-center text-blue-600">
               ${svgIcon}
             </div>
-            <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white shadow-sm"></span>
+            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white shadow-xs"></span>
           `;
         }
 
-        const popup = new maplibregl.Popup({ offset: 20, className: 'dark-scifi-popup' }).setHTML(
-          `<div class="bg-slate-950/95 backdrop-blur-xl border ${isSelf ? 'border-emerald-500/60' : 'border-cyan-500/40'} p-4 rounded-2xl text-slate-100 font-sans shadow-2xl min-w-[220px]">
-            <div class="flex items-center justify-between border-b border-cyan-500/20 pb-2 mb-2.5">
+        const popup = new maplibregl.Popup({ offset: 20, className: 'clean-trust-popup' }).setHTML(
+          `<div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 p-3.5 rounded-2xl text-slate-800 font-sans shadow-xl min-w-[240px]">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
               <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="font-black text-sm text-white">${isSelf ? 'Votre Position Artisan' : m.full_name}</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <span class="font-black text-sm text-slate-900 truncate max-w-[140px]">${isSelf ? 'Votre Position Artisan' : formattedName}</span>
               </div>
-              <span class="text-[10px] font-mono text-emerald-300 font-extrabold bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30">
+              <span class="text-[10px] font-mono text-emerald-700 font-extrabold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
                 ${isSelf ? '🟢 En Ligne' : 'En direct'}
               </span>
             </div>
-            <div class="space-y-2 text-xs text-slate-300">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] text-slate-400 font-semibold">${getSpecialtyLabel(m.specialty)}</span>
-                <span class="text-amber-300 font-bold bg-slate-900 px-2 py-0.5 rounded-md border border-cyan-500/20 font-mono text-[11px]">
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] text-slate-600 font-semibold truncate">${getSpecialtyLabel(m.specialty)}</span>
+                <span class="text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 font-mono text-[11px] whitespace-nowrap shrink-0">
                   ⭐ ${(m.rating_avg || 5.0).toFixed(1)} / 5.0
                 </span>
               </div>
-              <div class="flex items-center justify-between text-[11px] text-cyan-300 font-mono pt-2 border-t border-cyan-500/15">
-                <span>Distance : <strong class="text-white">${distanceKm} km</strong></span>
-                <span>Arrivée : <strong class="text-white">~${etaMin} min</strong></span>
+              <div class="flex items-center justify-between text-[11px] text-slate-600 font-mono pt-2 border-t border-slate-100 whitespace-nowrap">
+                <span>Distance : <strong class="text-slate-900">${distanceKm} km</strong></span>
+                <span>Arrivée : <strong class="text-blue-700 font-bold">~${etaMin} min</strong></span>
               </div>
             </div>
           </div>`
@@ -548,31 +547,17 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
           .setLngLat([mLng, mLat])
           .setPopup(popup)
           .addTo(map);
-        if (!maalemMarkersRef.current[m.id].getElement().parentNode) {
-          maalemMarkersRef.current[m.id].addTo(map);
-        }
       }
     });
 
-    // D. REAL-TIME Emergency SOS Leads Pins Management (STRICT PRIVACY & ROLE-BASED ISOLATION)
-    // Confidentialité absolue : Si le profil est CLIENT ou non connecté, masquer tous les SOS d'autrui
+    // D. Emergency SOS Leads
     if (!isMaalemOrAdmin) {
       Object.keys(emergencyMarkersRef.current).forEach((id) => {
         emergencyMarkersRef.current[id].remove();
         delete emergencyMarkersRef.current[id];
       });
     } else {
-      // Pour les Maâlems et Admins : Afficher les chantiers ouverts dans leur zone
-      Object.keys(emergencyMarkersRef.current).forEach((id) => {
-        const active = interventions.find((i) => i.id === id && i.status === 'PENDING');
-        if (!active) {
-          emergencyMarkersRef.current[id].remove();
-          delete emergencyMarkersRef.current[id];
-        }
-      });
-
       const pendingInterventions = interventions.filter((i) => i.status === 'PENDING');
-
       pendingInterventions.forEach((item) => {
         const lat = parseFloat(item.lat || 33.5883);
         const lng = parseFloat(item.lng || -7.6328);
@@ -588,11 +573,11 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
           el.style.willChange = 'transform';
           el.className = 'relative flex items-center justify-center cursor-pointer transform transition-transform hover:scale-125';
           el.innerHTML = `
-            <div class="absolute w-11 h-11 rounded-2xl bg-red-500/30 animate-ping"></div>
-            <div class="w-10 h-10 rounded-2xl bg-slate-950 border-2 border-red-500 shadow-[0_0_18px_rgba(239,68,68,0.8)] flex items-center justify-center">
+            <div class="absolute w-11 h-11 rounded-2xl bg-red-500/20 animate-ping"></div>
+            <div class="w-10 h-10 rounded-2xl bg-white border-2 border-red-500 shadow-md flex items-center justify-center text-red-600">
               ${svgIcon}
             </div>
-            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white animate-bounce shadow-md"></span>
+            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white animate-bounce shadow-xs"></span>
           `;
 
           const serviceLabel = 
@@ -606,23 +591,25 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
             item.service_type === 'SERRURERIE' ? 'Serrurerie' : 'Dépannage Urgent';
 
           const subcategoryHtml = item.subcategory 
-            ? `<div class="text-[11px] font-black text-cyan-300 bg-slate-900 px-2.5 py-1 rounded-xl border border-cyan-500/30">${item.subcategory}</div>` 
+            ? `<div class="text-[11px] font-bold text-blue-800 bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-200">${item.subcategory}</div>` 
             : '';
 
-          const popup = new maplibregl.Popup({ offset: 25, className: 'dark-scifi-popup' }).setHTML(
-            `<div class="bg-slate-950/95 backdrop-blur-xl border border-red-500/50 p-4 min-w-[250px] space-y-2 font-sans text-slate-100 rounded-2xl shadow-2xl">
-              <div class="flex items-center justify-between border-b border-red-500/30 pb-2">
+          const popup = new maplibregl.Popup({ offset: 25, className: 'clean-trust-popup' }).setHTML(
+            `<div class="bg-white/95 backdrop-blur-xl border border-red-200 p-3.5 min-w-[240px] space-y-2 font-sans text-slate-800 rounded-2xl shadow-xl">
+              <div class="flex items-center justify-between border-b border-red-100 pb-2">
                 <div class="flex items-center gap-1.5">
                   <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping inline-block"></span>
-                  <span class="font-black text-xs text-red-400 uppercase tracking-tight">SOS ${serviceLabel}</span>
+                  <span class="font-black text-xs text-red-600 uppercase tracking-tight">SOS ${serviceLabel}</span>
                 </div>
-                <span class="px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 text-[10px] font-extrabold font-mono border border-cyan-500/40">15 DH</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-extrabold font-mono border border-amber-200">15 DH</span>
               </div>
               ${subcategoryHtml}
-              <div class="space-y-1 pt-1">
-                <p class="text-xs font-bold text-slate-200">Quartier : <span class="text-cyan-400 font-extrabold">${item.district || 'Casablanca'}</span></p>
-                <p class="text-[11px] text-slate-300">Distance : <strong class="text-white font-mono">${distanceKm} km</strong></p>
-                <p class="text-[11px] text-slate-400">Budget estimé : <strong class="text-cyan-300 font-mono">${item.estimated_price_min || 120} - ${item.estimated_price_max || 180} DH</strong></p>
+              <div class="space-y-1 pt-1 text-xs">
+                <p class="font-bold text-slate-900">Quartier : <span class="text-blue-600 font-extrabold">${item.district || 'Casablanca'}</span></p>
+                <div class="flex items-center justify-between text-[11px] text-slate-600 font-mono pt-1 whitespace-nowrap">
+                  <span>Distance : <strong class="text-slate-900">${distanceKm} km</strong></span>
+                  <span>Budget : <strong class="text-emerald-700 font-bold">${item.estimated_price_min || 120}-${item.estimated_price_max || 180} DH</strong></span>
+                </div>
               </div>
             </div>`
           );
