@@ -28,18 +28,6 @@
       "source_location": "L31"
     },
     {
-      "id": "src_context_appcontext_calculatedistanceinkm",
-      "label": "calculateDistanceInKm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "AppContext.jsx",
-      "file_type": "code",
-      "norm_label": "calculatedistanceinkm()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L16"
-    },
-    {
       "id": "src_context_emergencyflowcontext_emergencyflowprovider",
       "label": "EmergencyFlowProvider()",
       "_callable": true,
@@ -400,18 +388,6 @@
       "source_location": "L13"
     },
     {
-      "id": "src_components_clientview_clientview",
-      "label": "ClientView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "clientview()",
-      "source_file": "src/components/ClientView.jsx",
-      "source_location": "L101"
-    },
-    {
       "id": "src_components_landingpage_landingpage",
       "label": "LandingPage()",
       "_callable": true,
@@ -422,18 +398,6 @@
       "norm_label": "landingpage()",
       "source_file": "src/components/LandingPage.jsx",
       "source_location": "L123"
-    },
-    {
-      "id": "src_components_maalemview_maalemview",
-      "label": "MaalemView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "maalemview()",
-      "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L64"
     },
     {
       "id": "src_components_navbar_navbar",
@@ -472,30 +436,6 @@
       "source_location": "L6"
     },
     {
-      "id": "src_components_userprofilemodal_userprofilemodal",
-      "label": "UserProfileModal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "userprofilemodal()",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L43"
-    },
-    {
-      "id": "src_context_appcontext_useapp",
-      "label": "useApp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "useapp()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3240"
-    },
-    {
       "id": "src_context_authcontext_useauth",
       "label": "useAuth()",
       "_callable": true,
@@ -506,18 +446,6 @@
       "norm_label": "useauth()",
       "source_file": "src/context/AuthContext.jsx",
       "source_location": "L684"
-    },
-    {
-      "id": "src_context_emergencyflowcontext_useemergencyflow",
-      "label": "useEmergencyFlow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "useemergencyflow()",
-      "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L465"
     },
     {
       "id": "src_layouts_adminapp_adminapp",
@@ -772,18 +700,6 @@
       "source_location": "L6"
     },
     {
-      "id": "src_components_promovideoplayer_promovideoplayer",
-      "label": "PromoVideoPlayer()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "promovideoplayer()",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L200"
-    },
-    {
       "id": "src_components_specialtyselect_specialtyselect",
       "label": "SpecialtySelect()",
       "_callable": true,
@@ -796,6 +712,18 @@
       "source_location": "L6"
     },
     {
+      "id": "src_components_userprofilemodal_userprofilemodal",
+      "label": "UserProfileModal()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "userprofilemodal()",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L43"
+    },
+    {
       "id": "src_components_cgumodal_cgumodal",
       "label": "CGUModal()",
       "_callable": true,
@@ -806,6 +734,18 @@
       "norm_label": "cgumodal()",
       "source_file": "src/components/CGUModal.jsx",
       "source_location": "L5"
+    },
+    {
+      "id": "src_components_clientview_clientview",
+      "label": "ClientView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "clientview()",
+      "source_file": "src/components/ClientView.jsx",
+      "source_location": "L101"
     },
     {
       "id": "src_components_clientview_getservicedisplay",
@@ -880,6 +820,18 @@
       "source_location": "L252"
     },
     {
+      "id": "src_components_maalemview_maalemview",
+      "label": "MaalemView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "maalemview()",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L64"
+    },
+    {
       "id": "src_components_voicerecorder_voicerecorder",
       "label": "VoiceRecorder()",
       "_callable": true,
@@ -890,6 +842,42 @@
       "norm_label": "voicerecorder()",
       "source_file": "src/components/VoiceRecorder.jsx",
       "source_location": "L7"
+    },
+    {
+      "id": "src_context_appcontext_calculatedistanceinkm",
+      "label": "calculateDistanceInKm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "calculatedistanceinkm()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "src_context_appcontext_useapp",
+      "label": "useApp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "useapp()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L3329"
+    },
+    {
+      "id": "src_context_emergencyflowcontext_useemergencyflow",
+      "label": "useEmergencyFlow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "useemergencyflow()",
+      "source_file": "src/context/EmergencyFlowContext.jsx",
+      "source_location": "L465"
     },
     {
       "id": "src_components_authmodal_authmodal",
@@ -1106,6 +1094,18 @@
       "norm_label": "verifyotpsms()",
       "source_file": "src/lib/infobipAuthService.js",
       "source_location": "L192"
+    },
+    {
+      "id": "src_components_promovideoplayer_promovideoplayer",
+      "label": "PromoVideoPlayer()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "promovideoplayer()",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L200"
     },
     {
       "id": "supabase_functions_verify_otp_sms_index_cleanphonenumber",
@@ -1935,39 +1935,6 @@
       "source_location": "L21"
     },
     {
-      "id": "src_components_landingpage",
-      "label": "LandingPage.jsx",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "landingpage.jsx",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_landingpage_moroccan_cities",
-      "label": "MOROCCAN_CITIES",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "moroccan_cities",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L113"
-    },
-    {
-      "id": "src_components_landingpage_moroccan_services",
-      "label": "MOROCCAN_SERVICES",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "moroccan_services",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L26"
-    },
-    {
       "id": "src_components_maalemselect",
       "label": "MaalemSelect.jsx",
       "_origin": "ast",
@@ -1977,39 +1944,6 @@
       "norm_label": "maalemselect.jsx",
       "source_file": "src/components/MaalemSelect.jsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_components_promovideoplayer",
-      "label": "PromoVideoPlayer.jsx",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "promovideoplayer.jsx",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_promovideoplayer_client_scenes",
-      "label": "CLIENT_SCENES",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "client_scenes",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L32"
-    },
-    {
-      "id": "src_components_promovideoplayer_maalem_scenes",
-      "label": "MAALEM_SCENES",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "maalem_scenes",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L117"
     },
     {
       "id": "src_components_specialtyselect",
@@ -2043,28 +1977,6 @@
       "norm_label": "cities",
       "source_file": "src/components/UserProfileModal.jsx",
       "source_location": "L34"
-    },
-    {
-      "id": "src_lib_i18n",
-      "label": "i18n.js",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "i18n.js",
-      "source_file": "src/lib/i18n.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_i18n_translations",
-      "label": "translations",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "getSpecialtyMeta",
-      "file_type": "code",
-      "norm_label": "translations",
-      "source_file": "src/lib/i18n.js",
-      "source_location": "L3"
     },
     {
       "id": "supabase_services_seed",
@@ -3272,6 +3184,50 @@
       "source_location": null
     },
     {
+      "id": "supabase_backend_optimizations",
+      "label": "backend_optimizations.sql",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "backend_optimizations.sql",
+      "file_type": "code",
+      "norm_label": "backend_optimizations.sql",
+      "source_file": "supabase/backend_optimizations.sql",
+      "source_location": null
+    },
+    {
+      "id": "supabase_backend_optimizations_public_purge_expired_otps",
+      "label": "public.purge_expired_otps()",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "backend_optimizations.sql",
+      "file_type": "code",
+      "norm_label": "public.purge_expired_otps()",
+      "source_file": "supabase/backend_optimizations.sql",
+      "source_location": "L56"
+    },
+    {
+      "id": "supabase_backend_optimizations_public_safe_accept_intervention",
+      "label": "public.safe_accept_intervention()",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "backend_optimizations.sql",
+      "file_type": "code",
+      "norm_label": "public.safe_accept_intervention()",
+      "source_file": "supabase/backend_optimizations.sql",
+      "source_location": "L13"
+    },
+    {
+      "id": "supabase_backend_optimizations_sql_public_interventions",
+      "label": "public.interventions",
+      "_origin": "ast",
+      "community": 54,
+      "community_name": "backend_optimizations.sql",
+      "file_type": "code",
+      "norm_label": "public.interventions",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "src_context_authcontext",
       "label": "AuthContext.jsx",
       "_origin": "ast",
@@ -3479,6 +3435,94 @@
       "norm_label": "theme_color",
       "source_file": "public/manifest.json",
       "source_location": "L8"
+    },
+    {
+      "id": "src_components_landingpage",
+      "label": "LandingPage.jsx",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "landingpage.jsx",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_landingpage_moroccan_cities",
+      "label": "MOROCCAN_CITIES",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "moroccan_cities",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L113"
+    },
+    {
+      "id": "src_components_landingpage_moroccan_services",
+      "label": "MOROCCAN_SERVICES",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "moroccan_services",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L26"
+    },
+    {
+      "id": "src_components_promovideoplayer",
+      "label": "PromoVideoPlayer.jsx",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "promovideoplayer.jsx",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_promovideoplayer_client_scenes",
+      "label": "CLIENT_SCENES",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "client_scenes",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L32"
+    },
+    {
+      "id": "src_components_promovideoplayer_maalem_scenes",
+      "label": "MAALEM_SCENES",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "maalem_scenes",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L117"
+    },
+    {
+      "id": "src_lib_i18n",
+      "label": "i18n.js",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "i18n.js",
+      "source_file": "src/lib/i18n.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_i18n_translations",
+      "label": "translations",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "translations",
+      "source_file": "src/lib/i18n.js",
+      "source_location": "L3"
     },
     {
       "id": "supabase_functions_verify_otp_sms_index",
@@ -4161,7 +4205,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L1094",
+      "source_location": "L1119",
       "weight": 1.0
     },
     {
@@ -4173,7 +4217,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L1106",
+      "source_location": "L1131",
       "weight": 1.0
     },
     {
@@ -4185,7 +4229,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3109",
+      "source_location": "L3198",
       "weight": 1.0
     },
     {
@@ -9942,7 +9986,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3240",
+      "source_location": "L3329",
       "weight": 1.0
     },
     {
@@ -10683,6 +10727,28 @@
       "weight": 1.0
     },
     {
+      "source": "supabase_backend_optimizations",
+      "target": "supabase_backend_optimizations_public_safe_accept_intervention",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/backend_optimizations.sql",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "supabase_backend_optimizations",
+      "target": "supabase_backend_optimizations_public_purge_expired_otps",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/backend_optimizations.sql",
+      "source_location": "L56",
+      "weight": 1.0
+    },
+    {
       "source": "supabase_create_banking_reconciliation",
       "target": "supabase_create_banking_reconciliation_public_reconcile_transaction",
       "relation": "contains",
@@ -10974,6 +11040,17 @@
       "weight": 1.0
     },
     {
+      "source": "supabase_backend_optimizations_public_safe_accept_intervention",
+      "target": "supabase_backend_optimizations_sql_public_interventions",
+      "relation": "reads_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/backend_optimizations.sql",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
       "source": "supabase_create_banking_reconciliation_public_reconcile_transaction",
       "target": "supabase_create_banking_reconciliation_public_transactions",
       "relation": "reads_from",
@@ -11049,7 +11126,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3218",
+      "source_location": "L3307",
       "weight": 1.0
     },
     {
@@ -11078,5 +11155,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "582361ee3c8edafae8e47b24eaf3649b8792a8d6"
+  "built_at_commit": "78b5ee1b61ed09a32c39a56a65f4bdf8fa94302e"
 }

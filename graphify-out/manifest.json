@@ -192,9 +192,9 @@
     "semantic_hash": ""
   },
   "src/context/AppContext.jsx": {
-    "mtime": 1787242354.5966377,
-    "seen": 1787242583.069047,
-    "ast_hash": "1bddadbb978557f94be95e5b26d029de",
+    "mtime": 1787243664.620797,
+    "seen": 1787243747.470347,
+    "ast_hash": "dab44d37defea2bbc0a05fb51e2973f8",
     "semantic_hash": ""
   },
   "src/context/AuthContext.jsx": {
@@ -507,6 +507,18 @@
     "mtime": 1787242332.2041147,
     "seen": 1787242583.070768,
     "ast_hash": "2eb24b58716db9f83ab7f4d078472622",
+    "semantic_hash": ""
+  },
+  "supabase/backend_optimizations.sql": {
+    "mtime": 1787243187.1117818,
+    "seen": 1787243747.4717598,
+    "ast_hash": "dc5850c886621e54924ed5158180b120",
+    "semantic_hash": ""
+  },
+  "public/robots.txt": {
+    "mtime": 1787242718.8830822,
+    "seen": 1787243747.474841,
+    "ast_hash": "060d8fcb325c4a1e16ebf0929f024c89",
     "semantic_hash": ""
   }
 }

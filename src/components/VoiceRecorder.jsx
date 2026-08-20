@@ -1,49 +1,157 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Square, Play, Pause, Trash2, Volume2, RotateCcw } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Square } from 'lucide-react';
 import { Microphone, Play as PhosphorPlay, Pause as PhosphorPause, Trash, SpeakerHigh } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 
+// Helper de détection multi-plateforme (iOS Safari, Android Chrome, Desktop)
+const getSupportedMimeType = () => {
+  if (typeof window === 'undefined' || typeof MediaRecorder === 'undefined') return '';
+  const candidates = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/mp4',
+    'audio/aac',
+    'audio/ogg;codecs=opus',
+    'audio/wav'
+  ];
+  for (const candidate of candidates) {
+    try {
+      if (MediaRecorder.isTypeSupported(candidate)) {
+        return candidate;
+      }
+    } catch (e) {}
+  }
+  return '';
+};
+
+// Synthétiseur d'audio de démonstration si le micro n'est pas autorisé
+const generateFallbackAudioDataUrl = () => {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, ctx.currentTime);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch (e) {}
+  return 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/wD/';
+};
+
 export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
-  const { t } = useAuth();
+  const { lang } = useAuth();
+  const isAr = lang === 'ar';
+
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackTime, setPlaybackTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [audioLevels, setAudioLevels] = useState([25, 40, 20, 50, 30, 60, 35, 45, 20, 30]);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
   const audioRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const animationFrameRef = useRef(null);
 
-  // Démarrer l'enregistrement réel par micro
+  // Nettoyage lors du démontage
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(() => {});
+      }
+    };
+  }, []);
+
+  // Analyse en temps réel du volume du micro pour animer les barres
+  const startVolumeAnalyser = (stream) => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      audioContextRef.current = ctx;
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 32;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const updateLevels = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+        
+        // Extraire 10 points de volume représentatifs
+        const sampledBars = [
+          dataArray[1] || 20,
+          dataArray[2] || 40,
+          dataArray[3] || 25,
+          dataArray[4] || 60,
+          dataArray[5] || 35,
+          dataArray[6] || 80,
+          dataArray[7] || 45,
+          dataArray[8] || 30,
+          dataArray[9] || 50,
+          dataArray[10] || 20
+        ].map(val => Math.max(15, Math.min(100, Math.round((val / 255) * 100))));
+
+        setAudioLevels(sampledBars);
+        animationFrameRef.current = requestAnimationFrame(updateLevels);
+      };
+      updateLevels();
+    } catch (e) {
+      console.warn('[AudioContext] Visualizer notice:', e);
+    }
+  };
+
+  // Démarrer l'enregistrement par micro
   const startRecording = async () => {
     audioChunksRef.current = [];
     setRecordingTime(0);
 
+    // Vibration haptique
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(40);
+    }
+
     try {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-          ? 'audio/webm;codecs=opus'
-          : 'audio/webm';
-        
-        mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
-        
+        const selectedMime = getSupportedMimeType();
+        const options = selectedMime ? { mimeType: selectedMime } : {};
+
+        mediaRecorderRef.current = new MediaRecorder(stream, options);
+        startVolumeAnalyser(stream);
+
         mediaRecorderRef.current.ondataavailable = (event) => {
-          if (event.data.size > 0) {
+          if (event.data && event.data.size > 0) {
             audioChunksRef.current.push(event.data);
           }
         };
 
         mediaRecorderRef.current.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-          const url = URL.createObjectURL(audioBlob);
-          onAudioRecorded(url);
+          const finalMime = mediaRecorderRef.current?.mimeType || selectedMime || 'audio/webm';
+          const audioBlob = new Blob(audioChunksRef.current, { type: finalMime });
+
+          // Convertir en Data URL Base64 universel (lisible sur tous les appareils et onglets)
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64Url = reader.result;
+            onAudioRecorded(base64Url);
+          };
+          reader.readAsDataURL(audioBlob);
         };
 
-        mediaRecorderRef.current.start(200);
+        mediaRecorderRef.current.start(100);
         setIsRecording(true);
 
         timerRef.current = setInterval(() => {
@@ -56,15 +164,15 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
           });
         }, 1000);
       } else {
-        simulateRecording();
+        fallbackSimulatedRecording();
       }
     } catch (err) {
-      console.warn('Microphone permission denied or not supported, using simulation mode.', err);
-      simulateRecording();
+      console.warn('[Microphone] Notice:', err.message);
+      fallbackSimulatedRecording();
     }
   };
 
-  const simulateRecording = () => {
+  const fallbackSimulatedRecording = () => {
     setIsRecording(true);
     let seconds = 0;
     timerRef.current = setInterval(() => {
@@ -77,13 +185,23 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
   };
 
   const stopRecording = () => {
+    // Vibration haptique
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(60);
+    }
+
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close().catch(() => {});
+    }
+
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
     } else {
-      onAudioRecorded('sample-simulated-audio-note');
+      onAudioRecorded(generateFallbackAudioDataUrl());
     }
-    clearInterval(timerRef.current);
+    if (timerRef.current) clearInterval(timerRef.current);
     setIsRecording(false);
   };
 
@@ -93,7 +211,9 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play();
+      audioRef.current.play().catch((err) => {
+        console.warn('[Audio Playback] Error:', err);
+      });
       setIsPlaying(true);
     }
   };
@@ -117,60 +237,64 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
   };
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs text-slate-900 space-y-3">
-      {/* Header */}
+    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs text-slate-900 space-y-3 font-sans">
+      {/* En-tête */}
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-          <Microphone weight="duotone" className="w-4 h-4 text-blue-600" />
-          <span>Message Vocal / تسجيل صوتي (Darija / FR)</span>
+        <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
+          <Microphone weight="fill" className="w-4 h-4 text-blue-600" />
+          <span>{isAr ? 'تسجيل صوتي (أوديو بالدارجة)' : 'Message Vocal (Darija / FR)'}</span>
         </label>
         
         {isRecording && (
-          <span className="flex items-center gap-1.5 text-xs text-red-600 font-mono font-bold animate-pulse bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200">
-            <span className="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
+          <span className="flex items-center gap-1.5 text-xs text-red-600 font-mono font-black animate-pulse bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200">
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
             REC {formatTime(recordingTime)} / 01:00
           </span>
         )}
       </div>
 
-      {/* État 1 : Bouton Micro Tactile Style WhatsApp */}
+      {/* État 1 : Bouton Micro Style WhatsApp */}
       {!audioUrl && !isRecording && (
-        <div className="flex flex-col sm:flex-row items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 shadow-xs">
+        <div className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-200 shadow-xs">
           <motion.button
-            whileTap={{ scale: 0.92 }}
+            whileTap={{ scale: 0.90 }}
+            whileHover={{ scale: 1.03 }}
             type="button"
             onClick={startRecording}
-            className="w-14 h-14 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center justify-center shadow-sm active:scale-90 transition-all cursor-pointer flex-shrink-0"
-            title="Appuyer pour enregistrer votre explication en Darija ou Français"
+            className="w-13 h-13 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center justify-center shadow-md shadow-blue-500/20 active:scale-90 transition-all cursor-pointer flex-shrink-0"
+            title="Appuyer pour enregistrer votre message vocal"
           >
-            <Microphone weight="fill" className="w-7 h-7 animate-pulse" />
+            <Microphone weight="fill" className="w-6 h-6" />
           </motion.button>
 
-          <div className="text-center sm:text-left">
-            <p className="text-xs font-extrabold text-slate-900">Appuyez sur le micro pour enregistrer</p>
-            <p className="text-[11px] text-slate-500 mt-0.5" dir="rtl">
-              سجل رسالة صوتية بالدارجة كتشرح فيها المشكل ديالك بكل وضوح
+          <div className="min-w-0">
+            <p className="text-xs font-black text-slate-900 leading-snug">
+              {isAr ? 'اضغط لتسجيل المشكل ديالك بصوتك' : 'Touchez le micro pour expliquer la panne'}
+            </p>
+            <p className="text-[11px] text-slate-500 mt-0.5" dir={isAr ? 'rtl' : 'ltr'}>
+              {isAr ? 'شرح بالدارجة كيسهل على المعلم يفهم بسرعة' : 'Expliquez en Darija ou Français pour aider le Maâlem'}
             </p>
           </div>
         </div>
       )}
 
-      {/* État 2 : Enregistrement En Cours avec Ondes Sonores */}
+      {/* État 2 : Enregistrement En Cours avec Visualiseur Audio en Direct */}
       {isRecording && (
-        <div className="flex items-center justify-between gap-3 p-3.5 bg-red-50 border border-red-200 rounded-xl shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-xs animate-pulse">
+        <div className="flex items-center justify-between gap-3 p-3.5 bg-red-50 border border-red-200 rounded-2xl shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-xs flex-shrink-0 animate-pulse">
               <Microphone weight="fill" className="w-5 h-5" />
             </div>
             
-            {/* Animated Sound Waveform Simulation */}
-            <div className="flex items-center gap-1 h-6">
-              {[40, 70, 30, 90, 60, 100, 45, 80, 50, 95].map((h, i) => (
+            {/* Spectre Audio Réactif au volume du micro */}
+            <div className="flex items-center gap-1 h-7">
+              {audioLevels.map((lvl, i) => (
                 <motion.span
                   key={i}
-                  animate={{ height: ['20%', `${h}%`, '30%'] }}
-                  transition={{ repeat: Infinity, duration: 0.5 + (i % 3) * 0.2, ease: 'easeInOut' }}
-                  className="w-1 bg-red-500 rounded-full"
+                  animate={{ height: `${lvl}%` }}
+                  transition={{ duration: 0.08 }}
+                  className="w-1.5 bg-red-500 rounded-full"
+                  style={{ minHeight: '6px' }}
                 />
               ))}
             </div>
@@ -180,47 +304,48 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
             whileTap={{ scale: 0.92 }}
             type="button"
             onClick={stopRecording}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
+            className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer flex-shrink-0"
           >
-            <Square className="w-4 h-4 fill-current" />
-            <span>Terminer</span>
+            <Square className="w-3.5 h-3.5 fill-current" />
+            <span>{isAr ? 'إيقاف' : 'Terminer'}</span>
           </motion.button>
         </div>
       )}
 
-      {/* État 3 : Lecteur Audio Réel avec Réécoute & Supprimer */}
+      {/* État 3 : Lecteur Audio avec Réécoute & Barre de Progression */}
       {audioUrl && !isRecording && (
-        <div className="bg-white border border-slate-200 p-3.5 rounded-xl flex items-center justify-between gap-3 shadow-xs">
+        <div className="bg-white border border-slate-200 p-3 rounded-2xl flex items-center justify-between gap-3 shadow-xs">
           <audio
             ref={audioRef}
             src={audioUrl}
             onEnded={handleAudioEnded}
             onTimeUpdate={handleTimeUpdate}
+            preload="metadata"
             className="hidden"
           />
 
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
             <motion.button
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.92 }}
               type="button"
               onClick={togglePlayAudio}
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs flex-shrink-0 cursor-pointer"
+              className="w-9 h-9 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs flex-shrink-0 cursor-pointer"
               title={isPlaying ? 'Pause' : 'Écouter'}
             >
               {isPlaying ? (
-                <PhosphorPause weight="fill" className="w-5 h-5" />
+                <PhosphorPause weight="fill" className="w-4 h-4" />
               ) : (
-                <PhosphorPlay weight="fill" className="w-5 h-5 ml-0.5" />
+                <PhosphorPlay weight="fill" className="w-4 h-4 ml-0.5" />
               )}
             </motion.button>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between text-xs font-mono font-bold text-blue-700 mb-1">
-                <span>{isPlaying ? 'Lecture en cours...' : 'Note Vocale Prête'}</span>
+              <div className="flex items-center justify-between text-[11px] font-mono font-bold text-blue-700 mb-1">
+                <span>{isPlaying ? (isAr ? 'جاري الاستماع...' : 'Lecture...') : (isAr ? 'جاهز للإرسال' : 'Note Vocale Prête')}</span>
                 <span>{formatTime(playbackTime || recordingTime || duration)} / {formatTime(duration || recordingTime || 6)}</span>
               </div>
               
-              {/* Progress bar */}
+              {/* Barre de progression */}
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                 <div
                   className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-100"
@@ -230,25 +355,23 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              type="button"
-              onClick={() => {
-                if (audioRef.current) {
-                  audioRef.current.pause();
-                  audioRef.current.currentTime = 0;
-                }
-                setIsPlaying(false);
-                setPlaybackTime(0);
-                onClearAudio();
-              }}
-              className="p-2 rounded-xl bg-slate-100 text-slate-500 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition-colors cursor-pointer"
-              title="Supprimer la note vocale"
-            >
-              <Trash className="w-4 h-4" />
-            </motion.button>
-          </div>
+          <motion.button
+            whileTap={{ scale: 0.90 }}
+            type="button"
+            onClick={() => {
+              if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+              }
+              setIsPlaying(false);
+              setPlaybackTime(0);
+              onClearAudio();
+            }}
+            className="p-2 rounded-xl bg-slate-100 text-slate-500 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition-colors cursor-pointer flex-shrink-0"
+            title="Supprimer la note vocale"
+          >
+            <Trash className="w-4 h-4" />
+          </motion.button>
         </div>
       )}
     </div>
