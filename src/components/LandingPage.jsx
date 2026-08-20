@@ -1,38 +1,21 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { translations } from '../lib/i18n';
 import { 
   Zap, 
   Wrench, 
   ShieldCheck, 
   Clock, 
-  Sparkles, 
   ArrowRight, 
-  CheckCircle2, 
-  Star, 
   Lock,
   Gift,
   Coins,
   MapPin,
-  PhoneCall,
-  Check,
   TrendingUp,
-  AlertTriangle,
-  Flame,
-  Radio,
   Sliders,
-  Car,
-  Wind
+  Building2
 } from 'lucide-react';
-import { 
-  WhatsappLogo, 
-  Wrench as PhosphorWrench, 
-  ShieldCheck as PhosphorShieldCheck, 
-  Coins as PhosphorCoins,
-  Sparkle as PhosphorSparkle,
-  Buildings,
-  NavigationArrow
-} from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyMeta } from './EnhancedCategoryIcon';
 import { PromoVideoPlayer } from './PromoVideoPlayer';
 
@@ -45,10 +28,9 @@ const MOROCCAN_SERVICES = [
     minPrice: 80, 
     maxPrice: 200, 
     time: '< 15 min', 
-    sampleProblems: ['Fuite sous évier', 'Robinet cassé', 'Tuyau bouché', 'Chauffe-eau en panne'],
+    timeAr: '< 15 دقيقة',
     color: 'from-cyan-500 to-blue-600',
-    borderColor: 'border-cyan-500/40',
-    glowColor: 'rgba(6,182,212,0.3)'
+    borderColor: 'border-cyan-500/40'
   },
   { 
     id: 'ELECTRICIAN', 
@@ -58,10 +40,9 @@ const MOROCCAN_SERVICES = [
     minPrice: 100, 
     maxPrice: 250, 
     time: '< 15 min', 
-    sampleProblems: ['Disjoncteur qui saute', 'Prise brûlée', 'Tableau électrique', 'Court-circuit général'],
+    timeAr: '< 15 دقيقة',
     color: 'from-amber-500 to-yellow-600',
-    borderColor: 'border-amber-500/40',
-    glowColor: 'rgba(245,158,11,0.3)'
+    borderColor: 'border-amber-500/40'
   },
   { 
     id: 'SERRURERIE', 
@@ -71,10 +52,9 @@ const MOROCCAN_SERVICES = [
     minPrice: 100, 
     maxPrice: 300, 
     time: '< 15 min', 
-    sampleProblems: ['Clé cassée dans serrure', 'Porte blindée bloquée', 'Changement de cylindre', 'Ouverture express'],
+    timeAr: '< 15 دقيقة',
     color: 'from-emerald-500 to-teal-600',
-    borderColor: 'border-emerald-500/40',
-    glowColor: 'rgba(16,185,129,0.3)'
+    borderColor: 'border-emerald-500/40'
   },
   { 
     id: 'AUTO_MECHANIC', 
@@ -84,10 +64,9 @@ const MOROCCAN_SERVICES = [
     minPrice: 120, 
     maxPrice: 350, 
     time: '< 20 min', 
-    sampleProblems: ['Batterie à plat', 'Crevaison sur route', 'Panne de démarrage', 'Vidange express'],
+    timeAr: '< 20 دقيقة',
     color: 'from-blue-500 to-indigo-600',
-    borderColor: 'border-blue-500/40',
-    glowColor: 'rgba(59,130,246,0.3)'
+    borderColor: 'border-blue-500/40'
   },
   { 
     id: 'CLIMATISATION', 
@@ -97,51 +76,51 @@ const MOROCCAN_SERVICES = [
     minPrice: 150, 
     maxPrice: 400, 
     time: '< 25 min', 
-    sampleProblems: ['Clim qui ne refroidit pas', 'Fuite de gaz fréon', 'Nettoyage & entretien', 'Bruit compresseur'],
+    timeAr: '< 25 دقيقة',
     color: 'from-sky-400 to-cyan-600',
-    borderColor: 'border-sky-500/40',
-    glowColor: 'rgba(56,189,248,0.3)'
+    borderColor: 'border-sky-500/40'
   },
   { 
     id: 'APPLIANCE', 
     name: 'Électroménager & Chauffe-eau', 
-    nameAr: 'أجهزة منزلية',
+    nameAr: 'أجهزة منزلية وسخانات',
     iconType: 'APPLIANCE',
     minPrice: 100, 
     maxPrice: 280, 
     time: '< 20 min', 
-    sampleProblems: ['Machine à laver en panne', 'Réfrigérateur ne givre pas', 'Four électrique', 'Micro-ondes'],
+    timeAr: '< 20 دقيقة',
     color: 'from-purple-500 to-pink-600',
-    borderColor: 'border-purple-500/40',
-    glowColor: 'rgba(168,85,247,0.3)'
+    borderColor: 'border-purple-500/40'
   }
 ];
 
 const MOROCCAN_CITIES = [
-  { name: 'Casablanca', activeMaalems: 420, districts: ['Maârif', 'Bourgogne', 'Gauthier', 'Aïn Sebaâ', 'Hay Hassani', 'Oasis'] },
-  { name: 'Rabat - Salé', activeMaalems: 260, districts: ['Agdal', 'Hay Riad', 'Hassan', 'Souissi', 'Tabriquet', 'Bettana'] },
-  { name: 'Marrakech', activeMaalems: 190, districts: ['Guéliz', 'Hivernage', 'Médina', 'Targa', 'Semlalia'] },
-  { name: 'Tanger', activeMaalems: 175, districts: ['Malabata', 'Boukhalef', 'Centre-Ville', 'California', 'Marshan'] },
-  { name: 'Fès', activeMaalems: 140, districts: ['Atlas', 'Narjiss', 'Saïss', 'Ville Nouvelle', 'Batha'] },
-  { name: 'Agadir', activeMaalems: 110, districts: ['Talborjt', 'Sonaba', 'Haut Founty', 'Charaf', 'Dakhla'] },
-  { name: 'Meknès', activeMaalems: 85, districts: ['Hamria', 'Bassatine', 'Marjane', 'Mansour'] }
+  { name: 'Casablanca', nameAr: 'الدار البيضاء', activeMaalems: 420 },
+  { name: 'Rabat - Salé', nameAr: 'الرباط - سلا', activeMaalems: 260 },
+  { name: 'Marrakech', nameAr: 'مراكش', activeMaalems: 190 },
+  { name: 'Tanger', nameAr: 'طنجة', activeMaalems: 175 },
+  { name: 'Fès', nameAr: 'فاس', activeMaalems: 140 },
+  { name: 'Agadir', nameAr: 'أكادير', activeMaalems: 110 },
+  { name: 'Meknès', nameAr: 'مكناس', activeMaalems: 85 }
 ];
 
 export const LandingPage = ({ onSelectJourney }) => {
-  const { setAdminAuthModalOpen } = useAuth();
+  const { lang, setAdminAuthModalOpen } = useAuth();
+  const t = translations[lang] || translations.fr;
+  const isAr = lang === 'ar';
   
   // Interactive Hero Switcher: 'CLIENT' (B2C) | 'MAALEM' (B2B)
   const [activeTab, setActiveTab] = useState('CLIENT');
 
-  // Client Simulator State
+  // Client Request State
   const [selectedServiceId, setSelectedServiceId] = useState('PLUMBING');
   const [selectedCityName, setSelectedCityName] = useState('Casablanca');
 
   // Maalem Revenue Calculator State
   const [dailyJobs, setDailyJobs] = useState(3);
-  const avgJobPrice = 140; // DH par intervention moyenne
+  const avgJobPrice = 140; // DH moyen
   const monthlyWorkingDays = 26;
-  const leadCost = 15; // Coût lead BricoleMoi
+  const leadCost = 15; // 15 DH par lead
   const netPerJob = avgJobPrice - leadCost;
   const calculatedMonthlyRevenue = dailyJobs * netPerJob * monthlyWorkingDays;
 
@@ -149,19 +128,19 @@ export const LandingPage = ({ onSelectJourney }) => {
   const currentCity = MOROCCAN_CITIES.find((c) => c.name === selectedCityName) || MOROCCAN_CITIES[0];
 
   return (
-    <div className="space-y-16 pb-12 font-sans">
+    <div className={`space-y-16 pb-12 ${isAr ? 'font-arabic' : 'font-sans'}`}>
       
       {/* 1. HERO SECTION : Interactive Switcher (Client vs Maâlem) */}
       <section className="relative pt-4 pb-2 text-center max-w-5xl mx-auto space-y-6">
         
-        {/* Badge */}
+        {/* Badge Live Status */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold shadow-xs"
         >
           <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping inline-block" />
-          <span>Plateforme N°1 de Dépannage d'Urgence Express au Maroc 🇲🇦</span>
+          <span>{t.hero_badge_live}</span>
         </motion.div>
 
         {/* Hero Title */}
@@ -173,16 +152,16 @@ export const LandingPage = ({ onSelectJourney }) => {
         >
           {activeTab === 'CLIENT' ? (
             <>
-              Un Artisan Qualifié chez Vous <br />
+              {t.hero_client_title} <br />
               <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 bg-clip-text text-transparent">
-                en Moins de 15 Minutes
+                {t.hero_client_highlight}
               </span>
             </>
           ) : (
             <>
-              Développez vos Chantiers Pro <br />
+              {t.hero_maalem_title} <br />
               <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent">
-                0% Commission & Leads Directs
+                {t.hero_maalem_highlight}
               </span>
             </>
           )}
@@ -195,14 +174,10 @@ export const LandingPage = ({ onSelectJourney }) => {
           transition={{ delay: 0.15 }}
           className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed"
         >
-          {activeTab === 'CLIENT' ? (
-            <>Plomberie, électricité, serrurerie ou panne auto ? Lancez votre alerte SOS et suivez votre <strong className="text-blue-600 font-bold">Maâlem vérifié</strong> en direct sur la carte radar.</>
-          ) : (
-            <>Rejoignez le réseau des artisans vérifiés au Maroc. Recevez des alertes WhatsApp instantanées dans votre quartier. <strong className="text-amber-700 font-bold">+15 DH offerts à l'inscription</strong> pour votre 1er lead offert.</>
-          )}
+          {activeTab === 'CLIENT' ? t.hero_client_sub : t.hero_maalem_sub}
         </motion.p>
 
-        {/* 🎛️ HERO TAB SWITCHER (Client vs Artisan) */}
+        {/* HERO TAB SWITCHER (Client vs Artisan) */}
         <div className="pt-2 flex justify-center">
           <div className="p-1.5 bg-slate-100 border border-slate-200 rounded-2xl flex items-center gap-1 shadow-xs max-w-md w-full">
             <button
@@ -215,7 +190,7 @@ export const LandingPage = ({ onSelectJourney }) => {
               }`}
             >
               <Zap className="w-4 h-4" />
-              <span>J'ai une Urgence (Client)</span>
+              <span>{t.hero_client_tab}</span>
             </button>
 
             <button
@@ -228,7 +203,7 @@ export const LandingPage = ({ onSelectJourney }) => {
               }`}
             >
               <Wrench className="w-4 h-4" />
-              <span>Espace Artisan (Maâlem)</span>
+              <span>{t.hero_maalem_tab}</span>
             </button>
           </div>
         </div>
@@ -238,7 +213,7 @@ export const LandingPage = ({ onSelectJourney }) => {
       <AnimatePresence mode="wait">
         {activeTab === 'CLIENT' ? (
           /* ============================================================== */
-          /* 🚨 PARCOURS CLIENT : SIMULATEUR D'URGENCE & TARIF INDICATIF */
+          /* 🚨 PARCOURS CLIENT : SÉLECTION D'URGENCE & TARIF TRANSPARENT   */
           /* ============================================================== */
           <motion.section
             id="bricolemoi-simulator"
@@ -253,17 +228,17 @@ export const LandingPage = ({ onSelectJourney }) => {
               <div>
                 <span className="text-xs font-black text-blue-600 tracking-wider uppercase flex items-center gap-1.5">
                   <Sliders className="w-4 h-4" />
-                  <span>Simulateur d'Urgence Express</span>
+                  <span>{t.selector_badge}</span>
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
-                  Quel est votre problème de dépannage ?
+                  {t.selector_title}
                 </h3>
               </div>
 
               {/* City Selector */}
               <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl shadow-xs">
                 <MapPin className="w-4 h-4 text-blue-600" />
-                <span className="text-xs text-slate-500 font-bold">Ville :</span>
+                <span className="text-xs text-slate-500 font-bold">{t.city_label}</span>
                 <select
                   value={selectedCityName}
                   onChange={(e) => setSelectedCityName(e.target.value)}
@@ -271,7 +246,7 @@ export const LandingPage = ({ onSelectJourney }) => {
                 >
                   {MOROCCAN_CITIES.map((city) => (
                     <option key={city.name} value={city.name} className="bg-white text-slate-800">
-                      {city.name} ({city.activeMaalems} en ligne)
+                      {isAr ? city.nameAr : city.name} ({city.activeMaalems} {t.online_count})
                     </option>
                   ))}
                 </select>
@@ -321,52 +296,54 @@ export const LandingPage = ({ onSelectJourney }) => {
 
                     <div>
                       <p className={`text-xs font-black leading-tight ${isSelected ? 'text-slate-950' : 'text-slate-900'}`}>
-                        {srv.name}
+                        {isAr ? srv.nameAr : srv.name}
                       </p>
-                      <p className={`text-[11px] sm:text-xs font-medium font-arabic mt-0.5 leading-snug ${isSelected ? meta.colorClass : 'text-slate-500'}`}>{srv.nameAr}</p>
+                      <p className={`text-[11px] sm:text-xs font-medium font-arabic mt-0.5 leading-snug ${isSelected ? meta.colorClass : 'text-slate-500'}`}>
+                        {isAr ? srv.name : srv.nameAr}
+                      </p>
                     </div>
 
                     <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-100 font-mono">
-                      <span className={`font-bold ${isSelected ? meta.colorClass : 'text-blue-600'}`}>{srv.minPrice}-{srv.maxPrice} DH</span>
-                      <span className="text-emerald-600 font-bold">{srv.time}</span>
+                      <span className={`font-bold ${isSelected ? meta.colorClass : 'text-blue-600'}`}>{srv.minPrice}-{srv.maxPrice} {t.dh}</span>
+                      <span className="text-emerald-600 font-bold">{isAr ? srv.timeAr : srv.time}</span>
                     </div>
                   </motion.button>
                 );
               })}
             </div>
 
-            {/* Live Result Card & Action */}
+            {/* Live Result Card & Direct Action */}
             <div className="mt-6 p-5 sm:p-6 bg-slate-50 border border-slate-200 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               
-              {/* Metric 1 : Tarif Indicatif */}
+              {/* Metric 1 : Tarif Garanti */}
               <div className="flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-blue-600 shadow-xs flex-shrink-0">
                   <Coins className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Tarif Indicatif Maroc</p>
+                  <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{t.price_guarantee_title}</p>
                   <p className="text-2xl font-black text-slate-900 font-mono">
-                    {currentService.minPrice} - {currentService.maxPrice} <span className="text-sm text-amber-600 font-bold">DH</span>
+                    {currentService.minPrice} - {currentService.maxPrice} <span className="text-sm text-amber-600 font-bold">{t.dh}</span>
                   </p>
-                  <p className="text-[10px] text-slate-500">Devis convenu avant démarrage</p>
+                  <p className="text-[10px] text-slate-500">{t.price_guarantee_sub}</p>
                 </div>
               </div>
 
-              {/* Metric 2 : Disponibilité & Délai */}
+              {/* Metric 2 : Délai Moyen & Disponibilité */}
               <div className="flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-emerald-600 shadow-xs flex-shrink-0">
                   <Clock className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Délai d'Arrivée à {selectedCityName}</p>
-                  <p className="text-xl font-black text-emerald-600 font-mono">{currentService.time}</p>
+                  <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{t.arrival_time_title}</p>
+                  <p className="text-xl font-black text-emerald-600 font-mono">{isAr ? currentService.timeAr : currentService.time}</p>
                   <p className="text-[10px] text-slate-500">
-                    <strong className="text-emerald-700 font-bold">{Math.round(currentCity.activeMaalems * 0.35)}</strong> artisans dispo près de chez vous
+                    <strong className="text-emerald-700 font-bold">{Math.round(currentCity.activeMaalems * 0.35)}</strong> {t.pros_nearby}
                   </p>
                 </div>
               </div>
 
-              {/* Direct Launch Button */}
+              {/* Direct Action Button */}
               <div>
                 <motion.button
                   whileTap={{ scale: 0.95 }}
@@ -374,15 +351,15 @@ export const LandingPage = ({ onSelectJourney }) => {
                   className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm shadow-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
                 >
                   <Zap className="w-5 h-5 fill-current" />
-                  <span>Demander mon Dépannage Immédiat</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <span>{t.btn_request_now}</span>
+                  <ArrowRight className={`w-4 h-4 group-hover:translate-x-1 transition-transform ${isAr ? 'rotate-180' : ''}`} />
                 </motion.button>
               </div>
             </div>
           </motion.section>
         ) : (
           /* ============================================================== */
-          /* 🛠️ PARCOURS ARTISAN : CALCULATEUR DE REVENUS & BONUS 15 DH */
+          /* 🛠️ PARCOURS ARTISAN : BARÈME DE REVENUS & BONUS 15 DH         */
           /* ============================================================== */
           <motion.section
             key="maalem-calculator"
@@ -396,17 +373,17 @@ export const LandingPage = ({ onSelectJourney }) => {
               <div>
                 <span className="text-xs font-black text-amber-600 tracking-wider uppercase flex items-center gap-1.5">
                   <TrendingUp className="w-4 h-4" />
-                  <span>Calculateur de Gains Maâlem Pro</span>
+                  <span>{t.calc_badge}</span>
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
-                  Combien pouvez-vous gagner avec BricoleMoi ?
+                  {t.calc_title}
                 </h3>
               </div>
 
               {/* Bonus Callout Pill */}
               <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-2xl shadow-xs">
                 <Gift className="w-4 h-4 text-amber-600" />
-                <span className="text-xs font-black text-amber-900">+15 DH Offerts à l'Inscription !</span>
+                <span className="text-xs font-black text-amber-900">{t.bonus_pill}</span>
               </div>
             </div>
 
@@ -416,10 +393,10 @@ export const LandingPage = ({ onSelectJourney }) => {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <label className="text-sm font-bold text-slate-800">
-                      Interventions réalisées par jour :
+                      {t.jobs_per_day_label}
                     </label>
                     <span className="px-3 py-1 bg-amber-100 border border-amber-300 rounded-xl text-amber-900 font-mono font-black text-base">
-                      {dailyJobs} chantiers / jour
+                      {dailyJobs} {t.jobs_suffix}
                     </span>
                   </div>
 
@@ -433,37 +410,37 @@ export const LandingPage = ({ onSelectJourney }) => {
                     className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
                   />
                   <div className="flex justify-between text-[10px] text-slate-500 font-mono font-bold mt-1.5">
-                    <span>1 job/j (Temps partiel)</span>
-                    <span>4 jobs/j (Actif)</span>
-                    <span>8 jobs/j (Intensif)</span>
+                    <span>{t.part_time}</span>
+                    <span>{t.active_time}</span>
+                    <span>{t.full_time}</span>
                   </div>
                 </div>
 
                 {/* Economic Transparency Breakdown */}
                 <div className="space-y-2 pt-2 text-xs border-t border-slate-200">
                   <div className="flex justify-between text-slate-600">
-                    <span>Prix moyen par dépannage client :</span>
-                    <strong className="text-slate-900 font-mono font-bold">~{avgJobPrice} DH</strong>
+                    <span>{t.avg_price_label}</span>
+                    <strong className="text-slate-900 font-mono font-bold">~{avgJobPrice} {t.dh}</strong>
                   </div>
                   <div className="flex justify-between text-slate-600">
-                    <span>Coût forfaitaire lead BricoleMoi :</span>
-                    <strong className="text-blue-600 font-mono font-bold">-15 DH</strong>
+                    <span>{t.lead_cost_label}</span>
+                    <strong className="text-blue-600 font-mono font-bold">-15 {t.dh}</strong>
                   </div>
                   <div className="flex justify-between text-emerald-700 font-bold">
-                    <span>Votre gain net moyen par chantier :</span>
-                    <strong className="font-mono">{netPerJob} DH (100% direct)</strong>
+                    <span>{t.net_per_job_label}</span>
+                    <strong className="font-mono">{netPerJob} {t.dh} (100% direct)</strong>
                   </div>
                 </div>
               </div>
 
               {/* Calculated Net Result Card */}
               <div className="bg-amber-50/70 border border-amber-200 p-6 rounded-2xl text-center space-y-4 shadow-xs">
-                <p className="text-xs font-bold uppercase tracking-wider text-amber-800">Revenu Net Mensuel Estimé :</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-amber-800">{t.net_monthly_title}</p>
                 <p className="text-4xl sm:text-5xl font-black text-amber-950 font-mono">
-                  {calculatedMonthlyRevenue.toLocaleString('fr-FR')} <span className="text-xl text-amber-600 font-bold">DH</span>
+                  {calculatedMonthlyRevenue.toLocaleString('fr-FR')} <span className="text-xl text-amber-600 font-bold">{t.dh}</span>
                 </p>
                 <p className="text-xs text-slate-600 max-w-xs mx-auto">
-                  Basé sur 26 jours de travail par mois. Aucun pourcentage prélevé sur vos devis finaux !
+                  {t.monthly_note}
                 </p>
 
                 <motion.button
@@ -472,8 +449,8 @@ export const LandingPage = ({ onSelectJourney }) => {
                   className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
                 >
                   <Wrench className="w-5 h-5 group-hover:rotate-45 transition-transform" />
-                  <span>Rejoindre BricoleMoi &amp; Recevoir +15 DH</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <span>{t.btn_join_maalem}</span>
+                  <ArrowRight className={`w-4 h-4 group-hover:translate-x-1 transition-transform ${isAr ? 'rotate-180' : ''}`} />
                 </motion.button>
               </div>
             </div>
@@ -481,7 +458,7 @@ export const LandingPage = ({ onSelectJourney }) => {
         )}
       </AnimatePresence>
 
-      {/* 🎬 SPOT VIDÉO PROMO & DÉMO ANIMÉE */}
+      {/* 🎬 SPOT VIDÉO PROMO & DÉMONSTRATION DU SERVICE */}
       <section className="pt-2">
         <PromoVideoPlayer onSelectJourney={onSelectJourney} />
       </section>
@@ -490,10 +467,10 @@ export const LandingPage = ({ onSelectJourney }) => {
       <section className="max-w-5xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Comment fonctionne BricoleMoi ?
+            {t.steps_title}
           </h3>
           <p className="text-slate-500 text-xs sm:text-sm font-medium">
-            Un processus fluide, transparent et 100% sécurisé pour les deux parties
+            {t.steps_sub}
           </p>
         </div>
 
@@ -507,13 +484,11 @@ export const LandingPage = ({ onSelectJourney }) => {
                     1
                   </span>
                   <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                    Étape 1
+                    {isAr ? 'المرحلة 1' : 'Étape 1'}
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-slate-900 mb-2">Lancez votre Alerte SOS</h4>
-                <p className="text-slate-600 text-xs leading-relaxed">
-                  Sélectionnez votre panne et décrivez votre urgence vocalement en Darija 🇲🇦 ou avec une photo. L'IA géolocalise automatiquement votre quartier.
-                </p>
+                <h4 className="text-lg font-black text-slate-900 mb-2">{t.step1_client_title}</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.step1_client_desc}</p>
               </div>
 
               {/* Step 2 Client */}
@@ -523,13 +498,11 @@ export const LandingPage = ({ onSelectJourney }) => {
                     2
                   </span>
                   <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                    Étape 2
+                    {isAr ? 'المرحلة 2' : 'Étape 2'}
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-slate-900 mb-2">Suivez votre Maâlem en Route</h4>
-                <p className="text-slate-600 text-xs leading-relaxed">
-                  Un artisan certifié prend en charge votre SOS. Vous recevez son nom, sa photo, son contact WhatsApp direct et suivez son trajet GPS en temps réel.
-                </p>
+                <h4 className="text-lg font-black text-slate-900 mb-2">{t.step2_client_title}</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.step2_client_desc}</p>
               </div>
 
               {/* Step 3 Client */}
@@ -539,13 +512,11 @@ export const LandingPage = ({ onSelectJourney }) => {
                     3
                   </span>
                   <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                    Garantie
+                    {isAr ? 'ضمان وأمان' : 'Garantie'}
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-slate-900 mb-2">Devis Convenu &amp; Notation</h4>
-                <p className="text-slate-600 text-xs leading-relaxed">
-                  Le diagnostic sur place établit un devis convenu avant toute réparation. Après accomplissement, confirmez la fin des travaux et notez votre Maâlem.
-                </p>
+                <h4 className="text-lg font-black text-slate-900 mb-2">{t.step3_client_title}</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.step3_client_desc}</p>
               </div>
             </>
           ) : (
@@ -557,13 +528,11 @@ export const LandingPage = ({ onSelectJourney }) => {
                     1
                   </span>
                   <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                    +15 DH Offerts
+                    +15 {t.dh}
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-slate-900 mb-2">Inscription Pro Rapide</h4>
-                <p className="text-slate-600 text-xs leading-relaxed">
-                  Créez votre compte pro avec votre numéro de téléphone et votre métier. Votre compte est activé instantanément pour recevoir vos premiers chantiers.
-                </p>
+                <h4 className="text-lg font-black text-slate-900 mb-2">{t.step1_maalem_title}</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.step1_maalem_desc}</p>
               </div>
 
               {/* Step 2 Maalem */}
@@ -573,13 +542,11 @@ export const LandingPage = ({ onSelectJourney }) => {
                     2
                   </span>
                   <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                    Temps Réel
+                    {isAr ? 'مباشر' : 'Live'}
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-slate-900 mb-2">Radar Live &amp; Déblocage à 15 DH</h4>
-                <p className="text-slate-600 text-xs leading-relaxed">
-                  Recevez des alertes de chantiers dans votre ville. Écoutez le vocal client et débloquez son contact direct pour seulement 15 DH (1er lead offert avec votre bonus).
-                </p>
+                <h4 className="text-lg font-black text-slate-900 mb-2">{t.step2_maalem_title}</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.step2_maalem_desc}</p>
               </div>
 
               {/* Step 3 Maalem */}
@@ -589,13 +556,11 @@ export const LandingPage = ({ onSelectJourney }) => {
                     3
                   </span>
                   <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    0% Commission
+                    0%
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-slate-900 mb-2">Intervention &amp; Encaissement Direct</h4>
-                <p className="text-slate-600 text-xs leading-relaxed">
-                  Appelez le client, réalisez le dépannage au tarif convenu et encaissez 100% de la prestation en direct (0% de commission sur vos travaux).
-                </p>
+                <h4 className="text-lg font-black text-slate-900 mb-2">{t.step3_maalem_title}</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">{t.step3_maalem_desc}</p>
               </div>
             </>
           )}
@@ -607,21 +572,21 @@ export const LandingPage = ({ onSelectJourney }) => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
-              <Buildings weight="duotone" className="w-5 h-5" />
+              <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-base font-black text-slate-900 tracking-tight">Couverture Nationale au Maroc</h4>
-              <p className="text-xs text-slate-500">Sélectionnez une ville pour simuler les artisans disponibles</p>
+              <h4 className="text-base font-black text-slate-900 tracking-tight">{t.coverage_title}</h4>
+              <p className="text-xs text-slate-500">{t.coverage_sub}</p>
             </div>
           </div>
 
           <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono flex items-center gap-1.5 shadow-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Réseau Opérationnel 100%</span>
+            <span>{t.network_status}</span>
           </span>
         </div>
 
-        {/* Cities Grid with Click-to-Filter Simulator */}
+        {/* Cities Grid with Click-to-Filter */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
           {MOROCCAN_CITIES.map((city) => (
             <motion.button
@@ -642,8 +607,10 @@ export const LandingPage = ({ onSelectJourney }) => {
                   : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-white'
               }`}
             >
-              <p className={`text-xs font-black truncate transition-colors ${selectedCityName === city.name ? 'text-blue-700 font-black' : 'text-slate-800 group-hover:text-blue-600'}`}>{city.name}</p>
-              <p className="text-[10px] text-blue-600 font-mono font-bold mt-0.5">{city.activeMaalems} Pros</p>
+              <p className={`text-xs font-black truncate transition-colors ${selectedCityName === city.name ? 'text-blue-700 font-black' : 'text-slate-800 group-hover:text-blue-600'}`}>
+                {isAr ? city.nameAr : city.name}
+              </p>
+              <p className="text-[10px] text-blue-600 font-mono font-bold mt-0.5">{city.activeMaalems} {t.pros_active}</p>
             </motion.button>
           ))}
         </div>
@@ -656,8 +623,8 @@ export const LandingPage = ({ onSelectJourney }) => {
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-sm">Garantie Anti-Arnaque &amp; Artisans Vérifiés</p>
-            <p className="text-slate-500">Tous les Maâlems sont vérifiés par notre équipe et évalués après chaque intervention.</p>
+            <p className="font-bold text-slate-900 text-sm">{t.trust_title}</p>
+            <p className="text-slate-500">{t.trust_desc}</p>
           </div>
         </div>
 
@@ -666,10 +633,9 @@ export const LandingPage = ({ onSelectJourney }) => {
           className="bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 flex items-center gap-2 font-bold transition-all whitespace-nowrap cursor-pointer shadow-xs active:scale-95"
         >
           <Lock className="w-3.5 h-3.5 text-slate-600" />
-          <span>Accès Administration</span>
+          <span>{t.admin_access}</span>
         </button>
       </section>
     </div>
   );
 };
-
