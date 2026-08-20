@@ -1,0 +1,6 @@
+# BricoleMoi Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://bricolemoi.ma/sitemap.xml
