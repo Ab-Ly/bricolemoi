@@ -5,38 +5,46 @@
 
 @layer base {
   body {
-    background-color: #0B0F17;
-    color: #f1f5f9;
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   html[dir="rtl"] {
-    font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
+    font-family: 'Readex Pro', 'Tajawal', system-ui, sans-serif;
   }
 
   html[dir="ltr"] {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   }
 }
 
-/* Custom Dark Futuristic Scrollbars */
+.font-arabic {
+  font-family: 'Readex Pro', 'Tajawal', 'Cairo', system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+}
+
+/* Custom Clean Soft Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0f17;
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border: 1px solid rgba(6, 182, 212, 0.3);
+  background: #CBD5E1;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #06b6d4;
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+  background: #94A3B8;
 }
 
 /* Keyframe animations */
@@ -255,66 +263,74 @@
   overscroll-behavior: contain;
 }
 
-/* Custom Dark Sci-Fi Sonner Toast Overrides */
+/* Modern Clean & Trust Sonner Toast Styling */
 [data-sonner-toaster] {
   z-index: 99999 !important;
-  font-family: inherit !important;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
 }
 
 [data-sonner-toast] {
-  background: rgba(11, 15, 23, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(6, 182, 212, 0.3) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
   border-radius: 1.25rem !important;
-  color: #f1f5f9 !important;
-  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8), 0 0 20px rgba(6, 182, 212, 0.2) !important;
-  padding: 0.85rem 1rem !important;
+  color: #0f172a !important;
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04) !important;
+  padding: 0.9rem 1.15rem !important;
 }
 
 [data-sonner-toast][data-type="success"] {
-  border-color: rgba(52, 211, 153, 0.5) !important;
-  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8), 0 0 25px rgba(52, 211, 153, 0.25) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  background: #ffffff !important;
 }
 
 [data-sonner-toast][data-type="error"] {
-  border-color: rgba(244, 63, 94, 0.6) !important;
-  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8), 0 0 25px rgba(244, 63, 94, 0.3) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  background: #ffffff !important;
 }
 
 [data-sonner-toast][data-type="warning"] {
-  border-color: rgba(251, 191, 36, 0.5) !important;
-  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8), 0 0 25px rgba(251, 191, 36, 0.25) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  background: #ffffff !important;
 }
 
 [data-sonner-toast][data-type="info"] {
-  border-color: rgba(6, 182, 212, 0.5) !important;
-  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8), 0 0 25px rgba(6, 182, 212, 0.25) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  background: #ffffff !important;
+}
+
+[data-sonner-toast] [data-icon] {
+  margin-right: 0.75rem !important;
 }
 
 [data-sonner-toast] [data-title] {
-  color: #ffffff !important;
+  color: #0f172a !important;
   font-weight: 800 !important;
-  font-size: 0.825rem !important;
+  font-size: 0.875rem !important;
+  letter-spacing: -0.01em !important;
 }
 
 [data-sonner-toast] [data-description] {
-  color: #94a3b8 !important;
-  font-size: 0.75rem !important;
-  margin-top: 0.25rem !important;
+  color: #475569 !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  margin-top: 0.2rem !important;
+  line-height: 1.4 !important;
 }
 
 [data-sonner-toast] [data-close-button] {
-  background: rgba(15, 23, 42, 0.9) !important;
-  border: 1px solid rgba(6, 182, 212, 0.3) !important;
-  color: #94a3b8 !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
   border-radius: 9999px !important;
   transition: all 0.2s ease !important;
 }
 
 [data-sonner-toast] [data-close-button]:hover {
-  background: rgba(239, 68, 68, 0.2) !important;
-  color: #f87171 !important;
-  border-color: rgba(239, 68, 68, 0.5) !important;
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
 }
+
 

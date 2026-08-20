@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EnhancedCategoryIcon } from './EnhancedCategoryIcon';
+import { EnhancedCategoryIcon, getSpecialtyMeta } from './EnhancedCategoryIcon';
 import { 
   Sparkles, 
   Zap, 
@@ -217,34 +217,35 @@ export const CategorySelector = ({ selectedCategory, selectedSubcategory, onSele
       {/* Search Input Filter */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-          <MagnifyingGlass weight="bold" className="w-4 h-4 text-cyan-400" />
+          <MagnifyingGlass weight="bold" className="w-4 h-4 text-blue-600" />
         </div>
         <input
           type="text"
           placeholder="Rechercher une panne ou un besoin (ex: fuite d'eau, chauffe-eau, disjoncteur, clé cassée, BA13, canapé...)"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-10 py-3 bg-slate-950/90 border border-cyan-500/30 hover:border-cyan-400/60 focus:border-cyan-400 rounded-2xl text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition-all shadow-inner"
+          className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white rounded-2xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-xs"
         />
         {searchQuery && (
           <button
             type="button"
             onClick={() => setSearchQuery('')}
-            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white"
+            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700"
           >
             ✕
           </button>
         )}
       </div>
 
-      {/* Grid of Clickable Category Cards with Dark Sci-Fi Glassmorphism */}
+      {/* Grid of Clickable Category Cards with Modern Clean Trust */}
       <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
         {filteredCategories.map((cat) => {
           const isSelected = cat.slug === currentCat.slug;
+          const meta = getSpecialtyMeta(cat.iconType || cat.slug);
 
           return (
             <motion.button
-              whileTap={{ scale: 0.92 }}
+              whileTap={{ scale: 0.94 }}
               key={cat.id}
               type="button"
               onClick={() => {
@@ -253,30 +254,37 @@ export const CategorySelector = ({ selectedCategory, selectedSubcategory, onSele
                   onSelectSubcategory(cat.subcategories[0].name);
                 }
               }}
-              className={`p-2.5 xs:p-3 sm:p-4 rounded-2xl border text-left transition-all duration-300 flex flex-col justify-between min-h-[7.25rem] sm:min-h-[8rem] relative overflow-hidden shadow-lg cursor-pointer ${
+              className={`p-2.5 xs:p-3 sm:p-4 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between min-h-[7.25rem] sm:min-h-[8rem] relative overflow-hidden cursor-pointer ${
                 isSelected
-                  ? 'bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white border-cyan-400 ring-2 ring-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.35)]'
-                  : 'bg-slate-900/70 backdrop-blur-md text-slate-200 border-cyan-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:bg-slate-900/90'
+                  ? meta.activeCard
+                  : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-xs'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                {/* Futuristic Dark Glassmorphism 3D Icon Badge */}
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-slate-950/90 backdrop-blur-md border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.25)] flex items-center justify-center transition-transform hover:scale-110 flex-shrink-0">
-                  <EnhancedCategoryIcon type={cat.iconType || 'PLUMBING'} className="w-5 h-5 sm:w-6 sm:h-6" />
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center transition-transform hover:scale-105 flex-shrink-0 ${
+                  isSelected 
+                    ? meta.activeIconBox 
+                    : 'bg-slate-50 text-slate-600 border border-slate-200/80 shadow-2xs'
+                }`}>
+                  <EnhancedCategoryIcon 
+                    type={cat.iconType || 'PLUMBING'} 
+                    className="w-5 h-5 sm:w-6 sm:h-6" 
+                    colorClass={isSelected ? 'text-white' : undefined}
+                  />
                 </div>
 
                 {isSelected && (
-                  <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-cyan-400 text-black flex items-center justify-center text-[10px] sm:text-xs font-black shadow-[0_0_10px_rgba(34,211,238,0.8)]">
+                  <span className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black shadow-xs ${meta.activeBadge}`}>
                     ✓
                   </span>
                 )}
               </div>
 
               <div>
-                <span className="font-black text-[11px] sm:text-xs font-sans leading-tight block text-white line-clamp-2">
+                <span className={`font-black text-[11px] sm:text-xs font-sans leading-tight block line-clamp-2 ${isSelected ? 'text-slate-950' : 'text-slate-900'}`}>
                   {cat.name}
                 </span>
-                <span className="text-[9px] sm:text-[10px] text-cyan-400/80 font-bold block mt-0.5" dir="rtl">
+                <span className={`text-[10px] sm:text-[11px] font-bold block mt-0.5 font-arabic ${isSelected ? meta.colorClass : 'text-slate-500'}`} dir="rtl">
                   {cat.nameAr}
                 </span>
               </div>
@@ -291,21 +299,21 @@ export const CategorySelector = ({ selectedCategory, selectedSubcategory, onSele
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="bg-slate-950/80 backdrop-blur-md border border-cyan-500/30 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl space-y-2.5 sm:space-y-3 shadow-inner"
+          className="bg-slate-50 border border-slate-200 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl space-y-2.5 sm:space-y-3 shadow-xs"
         >
           <div className="flex items-center justify-between flex-wrap gap-1.5 sm:gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-cyan-950 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.3)] flex-shrink-0">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shadow-xs flex-shrink-0">
                 <EnhancedCategoryIcon type={currentCat.iconType} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
               <div>
-                <span className="text-[11px] sm:text-xs font-black text-white tracking-wide uppercase font-sans">
+                <span className="text-[11px] sm:text-xs font-black text-slate-900 tracking-wide uppercase font-sans">
                   Sous-catégories pour {currentCat.name} :
                 </span>
-                <span className="text-[10px] text-cyan-400 ml-1 font-bold">({currentCat.nameAr})</span>
+                <span className="text-[10px] text-blue-600 ml-1 font-bold">({currentCat.nameAr})</span>
               </div>
             </div>
-            <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium hidden xs:inline">Sélectionnez le besoin exact</span>
+            <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium hidden xs:inline">Sélectionnez le besoin exact</span>
           </div>
 
           <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1">
@@ -320,10 +328,10 @@ export const CategorySelector = ({ selectedCategory, selectedSubcategory, onSele
                   key={subName}
                   type="button"
                   onClick={() => onSelectSubcategory(subName)}
-                  className={`py-1.5 sm:py-2 px-2.5 sm:px-3.5 rounded-xl text-[11px] sm:text-xs font-bold border transition-all duration-200 shadow-sm flex items-center gap-1.5 sm:gap-2 cursor-pointer active:scale-95 ${
+                  className={`py-1.5 sm:py-2 px-2.5 sm:px-3.5 rounded-xl text-[11px] sm:text-xs font-bold border transition-all duration-200 shadow-xs flex items-center gap-1.5 sm:gap-2 cursor-pointer active:scale-95 ${
                     isSubSelected
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-cyan-300 shadow-[0_0_18px_rgba(6,182,212,0.45)] ring-1 ring-cyan-400'
-                      : 'bg-slate-900 text-slate-200 border-cyan-500/25 hover:border-cyan-400/70 hover:bg-slate-850'
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
                   <span className="text-xs sm:text-sm">{subIcon}</span>

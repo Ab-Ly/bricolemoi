@@ -27,7 +27,7 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
   return (
     <nav 
       aria-label="Navigation Basse Mobile"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0B0F17]/95 backdrop-blur-2xl border-t border-cyan-500/25 px-2 pt-1.5 pb-[calc(0.6rem+env(safe-area-inset-bottom,0px))] shadow-[0_-8px_30px_rgba(0,0,0,0.85)] select-none"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200 px-2 pt-1.5 pb-[calc(0.6rem+env(safe-area-inset-bottom,0px))] shadow-lg select-none"
     >
       <div className="max-w-md mx-auto flex items-center justify-around gap-1">
         
@@ -37,27 +37,27 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('CLIENT')}
-              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-300 hover:text-cyan-300 transition-all active:scale-95 cursor-pointer bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-400/50"
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-blue-700 hover:text-blue-800 transition-all active:scale-95 cursor-pointer bg-blue-50 border border-blue-200"
             >
-              <Zap className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+              <Zap className="w-5 h-5 text-blue-600 fill-blue-600" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">SOS Urgence</span>
             </motion.button>
 
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('MAALEM')}
-              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-300 hover:text-amber-300 transition-all active:scale-95 cursor-pointer bg-slate-900/60 border border-amber-500/20 hover:border-amber-400/50"
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-amber-800 hover:text-amber-900 transition-all active:scale-95 cursor-pointer bg-amber-50 border border-amber-200"
             >
-              <Wrench className="w-5 h-5 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
+              <Wrench className="w-5 h-5 text-amber-600" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Espace Maâlem</span>
             </motion.button>
 
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={handleProfileClick}
-              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
-              <User className="w-5 h-5 drop-shadow-[0_0_4px_rgba(34,211,238,0.5)]" />
+              <User className="w-5 h-5 text-slate-600" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">{user ? 'Profil' : 'Connexion'}</span>
             </motion.button>
           </>
@@ -69,27 +69,27 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('LANDING')}
-              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
-              <Home className="w-5 h-5 text-slate-400" />
+              <Home className="w-5 h-5 text-slate-500" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Accueil</span>
             </motion.button>
 
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('CLIENT')}
-              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.25)] font-bold transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-blue-700 bg-blue-50 border border-blue-200 font-bold transition-all active:scale-95 cursor-pointer"
             >
-              <Zap className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+              <Zap className="w-5 h-5 text-blue-600 fill-blue-600" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">SOS Dépannage</span>
             </motion.button>
 
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={handleProfileClick}
-              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[110px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
-              <User className="w-5 h-5 drop-shadow-[0_0_4px_rgba(34,211,238,0.5)]" />
+              <User className="w-5 h-5 text-slate-600" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">{user ? 'Profil' : 'Connexion'}</span>
             </motion.button>
           </>
@@ -102,9 +102,9 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('LANDING')}
-              className="min-h-[46px] flex-1 max-w-[80px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[80px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
-              <Home className="w-5 h-5 text-slate-400" />
+              <Home className="w-5 h-5 text-slate-500" />
               <span className="text-[10px] mt-0.5 font-medium tracking-tight truncate max-w-full">Accueil</span>
             </motion.button>
 
@@ -112,22 +112,22 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('MAALEM')}
-              className="min-h-[46px] flex-1 max-w-[88px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-amber-300 bg-amber-950/70 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.25)] font-bold transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[88px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-amber-800 bg-amber-50 border border-amber-200 font-bold transition-all active:scale-95 cursor-pointer"
             >
-              <Wrench className="w-5 h-5 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
+              <Wrench className="w-5 h-5 text-amber-600" />
               <span className="text-[10px] mt-0.5 font-bold tracking-tight truncate max-w-full">Missions</span>
             </motion.button>
 
-            {/* 3. Recharge Action (Modal Trigger) */}
+            {/* 3. Recharge Action */}
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => {
                 if (typeof onOpenRecharge === 'function') onOpenRecharge();
                 else window.dispatchEvent(new CustomEvent('bricolemoi_open_recharge_modal'));
               }}
-              className="min-h-[46px] flex-1 max-w-[80px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 hover:bg-slate-900/50 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[80px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
-              <Wallet className="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" />
+              <Wallet className="w-5 h-5 text-slate-500 hover:text-blue-600 transition-colors" />
               <span className="text-[10px] mt-0.5 font-medium tracking-tight truncate max-w-full">Recharge</span>
             </motion.button>
 
@@ -135,9 +135,9 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={handleProfileClick}
-              className="min-h-[46px] flex-1 max-w-[80px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-cyan-300 hover:bg-slate-900/50 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[80px] px-1 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
-              <User className="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" />
+              <User className="w-5 h-5 text-slate-500 hover:text-blue-600 transition-colors" />
               <span className="text-[10px] mt-0.5 font-medium tracking-tight truncate max-w-full">Profil</span>
             </motion.button>
           </>
@@ -149,7 +149,7 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('LANDING')}
-              className="min-h-[46px] flex-1 max-w-[110px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[110px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
               <Home className="w-5 h-5" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Accueil</span>
@@ -158,16 +158,16 @@ export const BottomNav = ({ activeView, onChangeView, onOpenRecharge }) => {
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={() => onChangeView('ADMIN')}
-              className="min-h-[46px] flex-1 max-w-[130px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-purple-300 bg-purple-950/70 border border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.3)] font-bold transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[130px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-purple-800 bg-purple-50 border border-purple-200 font-bold transition-all active:scale-95 cursor-pointer"
             >
-              <ShieldCheck className="w-5 h-5 text-purple-400" />
+              <ShieldCheck className="w-5 h-5 text-purple-600" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Dashboard Admin</span>
             </motion.button>
 
             <motion.button
               whileTap={{ scale: 0.90 }}
               onClick={handleProfileClick}
-              className="min-h-[46px] flex-1 max-w-[110px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-400 hover:text-purple-300 border border-transparent transition-all active:scale-95 cursor-pointer"
+              className="min-h-[46px] flex-1 max-w-[110px] px-2 py-1 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:text-purple-800 border border-transparent transition-all active:scale-95 cursor-pointer"
             >
               <User className="w-5 h-5" />
               <span className="text-[10px] sm:text-[11px] mt-0.5 font-bold tracking-tight truncate max-w-full">Profil</span>

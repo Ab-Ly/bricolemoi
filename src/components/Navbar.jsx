@@ -36,7 +36,15 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
   const [refreshing, setRefreshing] = useState(false);
 
   const currentLiveMaalem = maalems?.find((m) => m.id === user?.id) || user?.maalem_details || user;
-  const liveCreditBalance = parseFloat(currentLiveMaalem?.credit_balance ?? user?.credits ?? user?.maalem_details?.credit_balance ?? 0);
+  const liveCreditBalance = parseFloat(
+    user?.credits !== undefined && user?.credits !== null
+      ? user.credits
+      : (user?.maalem_details?.credit_balance !== undefined && user?.maalem_details?.credit_balance !== null
+        ? user.maalem_details.credit_balance
+        : (currentLiveMaalem?.credit_balance !== undefined && currentLiveMaalem?.credit_balance !== null
+          ? currentLiveMaalem.credit_balance
+          : (user?.role?.toUpperCase() === 'MAALEM' ? 15.00 : 0)))
+  );
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -45,44 +53,48 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0B0F17]/95 backdrop-blur-xl border-b border-cyan-500/20 shadow-[0_4px_25px_rgba(6,182,212,0.15)] font-sans">
-      {/* Top Ticker Bar */}
-      <div className="bg-slate-950/90 text-slate-200 text-xs py-1.5 px-3 sm:px-4 font-medium flex justify-between items-center max-w-7xl mx-auto border-b border-cyan-500/10 gap-2">
-        <span className="flex items-center gap-2 min-w-0">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping inline-block shadow-[0_0_8px_rgba(34,211,238,0.9)] flex-shrink-0" />
-          <span className="text-cyan-300 font-bold truncate text-[11px] sm:text-xs max-w-[180px] xs:max-w-[240px] sm:max-w-none">
-            {appMode === 'MAALEM'
-              ? 'Espace Maalem Pro 24h/7j - Radar d\'Urgence Maroc'
-              : appMode === 'ADMIN'
-              ? 'Plateforme Administration BricoleMoi - Maroc'
-              : 'SOS Dépannage Express 24h/7j - Maroc'}
-          </span>
-          {isAblyConfigured && (
-            <span className="hidden md:inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-[10px] font-mono text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-              <span className={`w-1.5 h-1.5 rounded-full ${isAblyConnected ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)] animate-pulse' : 'bg-amber-400'}`} />
-              {isAblyConnected ? 'Ably Live' : 'Ably Reconnexion...'}
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200/80 shadow-xs font-sans">
+      {/* Top Ticker Bar (100% Full Width Wrapper) */}
+      <div className="w-full bg-slate-900 text-slate-200 border-b border-slate-800/80">
+        <div className="max-w-7xl mx-auto py-1.5 px-3 sm:px-6 text-xs font-medium flex justify-between items-center gap-2">
+          <span className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block flex-shrink-0" />
+            <span className="text-slate-200 font-bold truncate text-[11px] sm:text-xs">
+              {appMode === 'MAALEM'
+                ? 'Espace Maalem Pro 24h/7j - Radar d\'Urgence Maroc'
+                : appMode === 'ADMIN'
+                ? 'Plateforme Administration BricoleMoi - Maroc'
+                : 'SOS Dépannage Express 24h/7j - Maroc'}
             </span>
-          )}
-        </span>
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <a
-            href="https://wa.me/212619184098"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900/80 hover:bg-emerald-950/40 border border-emerald-500/20 hover:border-emerald-400/50 text-slate-300 hover:text-emerald-300 transition-all text-[11px] shadow-sm group"
-          >
-            <WhatsappLogo weight="fill" className="w-3.5 h-3.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.8)] group-hover:scale-110 transition-transform" />
-            <span className="text-slate-400 group-hover:text-slate-200">Support WhatsApp :</span>
-            <strong className="text-emerald-400 font-mono font-bold tracking-wider">+212 619 18 40 98</strong>
-          </a>
-          <motion.button 
-            whileTap={{ scale: 0.90 }}
-            onClick={toggleLanguage}
-            className="bg-slate-900/90 hover:bg-slate-800 px-2.5 sm:px-3 py-1 rounded-xl text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5 transition-all text-[10px] sm:text-[11px] font-bold shadow-[0_0_10px_rgba(6,182,212,0.2)] active:scale-90"
-          >
-            <Globe className="w-3.5 h-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)] flex-shrink-0" />
-            <span>{lang === 'fr' ? 'العربية' : 'Français'}</span>
-          </motion.button>
+            {isAblyConfigured && (
+              <span className="hidden md:inline-flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-mono text-emerald-400">
+                <span className={`w-1.5 h-1.5 rounded-full ${isAblyConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                {isAblyConnected ? 'En direct' : 'Reconnexion...'}
+              </span>
+            )}
+          </span>
+
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <a
+              href="https://wa.me/212619184098"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-all text-[11px] group cursor-pointer"
+            >
+              <WhatsappLogo weight="fill" className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span className="hidden sm:inline text-slate-400 group-hover:text-slate-200">WhatsApp :</span>
+              <strong className="text-emerald-400 font-mono font-bold tracking-wider">+212 619 18 40 98</strong>
+            </a>
+
+            <motion.button 
+              whileTap={{ scale: 0.90 }}
+              onClick={toggleLanguage}
+              className="bg-slate-800 hover:bg-slate-700 px-2.5 sm:px-3 py-1 rounded-xl text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-all text-[10px] sm:text-[11px] font-bold active:scale-90 cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+              <span>{lang === 'fr' ? 'العربية' : 'Français'}</span>
+            </motion.button>
+          </div>
         </div>
       </div>
 
@@ -93,38 +105,38 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
           className="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-0 flex-shrink-0" 
           onClick={onGoHome}
         >
-          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-900/90 backdrop-blur-md border ${
-            appMode === 'MAALEM' ? 'border-amber-500/40 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)] group-hover:border-amber-400' :
-            appMode === 'ADMIN' ? 'border-purple-500/40 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)] group-hover:border-purple-400' :
-            'border-cyan-500/40 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)] group-hover:border-cyan-400'
+          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl border ${
+            appMode === 'MAALEM' ? 'bg-amber-500 text-white border-amber-600 shadow-sm' :
+            appMode === 'ADMIN' ? 'bg-purple-600 text-white border-purple-700 shadow-sm' :
+            'bg-blue-600 text-white border-blue-700 shadow-sm'
           } flex items-center justify-center font-black text-lg sm:text-xl transition-all flex-shrink-0`}>
-            {appMode === 'MAALEM' ? <Wrench className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" /> : appMode === 'ADMIN' ? <PhosphorShieldCheck weight="duotone" className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]" /> : <Zap className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />}
+            {appMode === 'MAALEM' ? <Wrench className="w-4 h-4 sm:w-5 sm:h-5" /> : appMode === 'ADMIN' ? <PhosphorShieldCheck weight="duotone" className="w-4 h-4 sm:w-5 sm:h-5" /> : <Zap className="w-4 h-4 sm:w-5 sm:h-5" />}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h1 className="text-lg sm:text-xl font-black text-white tracking-tight leading-none truncate">
+              <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none truncate">
                 Bricole<span className={
-                  appMode === 'MAALEM' ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.7)]' :
-                  appMode === 'ADMIN' ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.7)]' :
-                  'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]'
+                  appMode === 'MAALEM' ? 'text-amber-600' :
+                  appMode === 'ADMIN' ? 'text-purple-600' :
+                  'text-blue-600'
                 }>Moi</span>
               </h1>
-              <span className={`text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full border shadow-sm ${
-                appMode === 'MAALEM' ? 'bg-amber-950/80 text-amber-300 border-amber-500/40' :
-                appMode === 'ADMIN' ? 'bg-purple-950/80 text-purple-300 border-purple-500/40' :
-                appMode === 'CLIENT' ? 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40' :
-                'bg-cyan-950/80 text-cyan-300 border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.25)]'
+              <span className={`text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full border ${
+                appMode === 'MAALEM' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                appMode === 'ADMIN' ? 'bg-purple-50 text-purple-800 border-purple-200' :
+                appMode === 'CLIENT' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                'bg-slate-100 text-slate-800 border-slate-200'
               }`}>
                 {appMode === 'MAALEM' ? 'PRO' : appMode === 'ADMIN' ? 'ADMIN' : appMode === 'CLIENT' ? 'CLIENT' : 'MAROC 🇲🇦'}
               </span>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5 truncate hidden sm:block">
+            <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium mt-0.5 truncate hidden sm:block">
               {appMode === 'MAALEM' ? 'Portail Artisans & Dépannage' : appMode === 'ADMIN' ? 'Dashboard Administration' : appMode === 'CLIENT' ? 'Espace Client Dépannage' : 'Dépannage d\'Urgence Express 24h/7j'}
             </p>
           </div>
         </motion.div>
 
-        {/* Dynamic Dedicated Header Actions (All with Harmonious Unified Height h-10/h-11) */}
+        {/* Dynamic Dedicated Header Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
           {/* 1. CLIENT HEADER ACTIONS */}
           {appMode === 'CLIENT' && (
@@ -133,7 +145,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               <motion.button
                 whileTap={{ scale: 0.90 }}
                 onClick={() => switchSubdomainInDev('LANDING')}
-                className="h-10 sm:h-11 bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-cyan-500/20 hover:border-cyan-400/50 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                className="h-10 sm:h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
                 title="Retour à l'accueil"
               >
                 <span>←</span>
@@ -144,7 +156,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                 <motion.button
                   whileTap={{ scale: 0.90 }}
                   onClick={installPWA}
-                  className="hidden sm:inline-flex h-10 sm:h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-90"
+                  className="hidden sm:inline-flex h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl items-center gap-1.5 transition-all shadow-sm active:scale-90"
                 >
                   <Download className="w-4 h-4 text-white" />
                   <span>{t('pwa_install')}</span>
@@ -155,47 +167,37 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setProfileModalOpen(true)}
-                  className="h-10 sm:h-11 flex items-center gap-2 sm:gap-2.5 bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 px-2.5 sm:px-3 rounded-2xl shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all cursor-pointer"
+                  className="h-10 sm:h-11 flex items-center gap-2 sm:gap-2.5 bg-white hover:bg-slate-50 border border-slate-200 px-2.5 sm:px-3 rounded-2xl shadow-xs transition-all cursor-pointer"
                 >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center font-extrabold text-xs shadow-[0_0_8px_rgba(34,211,238,0.8)] flex-shrink-0">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-xs flex-shrink-0">
                     {user.full_name?.charAt(0) || 'U'}
                   </div>
                   <div className="hidden sm:flex flex-col justify-center text-left leading-none">
-                    <p className="text-xs font-bold text-slate-100 leading-none">{user.full_name}</p>
-                    <p className="text-[10px] text-cyan-400 font-semibold mt-1 leading-none">Mon Compte Client</p>
+                    <p className="text-xs font-bold text-slate-800 leading-none">{user.full_name}</p>
+                    <p className="text-[10px] text-blue-600 font-semibold mt-1 leading-none">Mon Compte</p>
                   </div>
                 </motion.button>
               ) : (
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <motion.button
-                    whileTap={{ scale: 0.90 }}
-                    onClick={() => setAuthModalOpen(true)}
-                    className="h-10 sm:h-11 bg-slate-900 hover:bg-slate-800 text-cyan-300 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-cyan-500/30 flex items-center gap-1.5 transition-all shadow-sm active:scale-90 cursor-pointer"
-                  >
-                    <PhosphorUser weight="bold" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
-                    <span>Connexion</span>
-                  </motion.button>
-
-                  <motion.button
-                    whileTap={{ scale: 0.90 }}
-                    onClick={() => setAuthModalOpen(true)}
-                    className="hidden sm:inline-flex h-10 sm:h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-[11px] sm:text-xs font-bold px-3 sm:px-4 rounded-2xl items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-90 cursor-pointer"
-                  >
-                    <span>Inscription</span>
-                  </motion.button>
-                </div>
+                <motion.button
+                  whileTap={{ scale: 0.92 }}
+                  onClick={() => setAuthModalOpen(true)}
+                  className="h-10 sm:h-11 bg-white hover:bg-slate-50 text-slate-800 hover:text-blue-600 text-[11px] sm:text-xs font-bold px-3 sm:px-4 rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-2 transition-all shadow-xs active:scale-95 cursor-pointer"
+                >
+                  <PhosphorUser weight="bold" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
+                  <span>Connexion / S'inscrire</span>
+                </motion.button>
               )}
             </>
           )}
 
-          {/* 2. MAALEM HEADER ACTIONS (Unified Height h-11 / 44px) */}
+          {/* 2. MAALEM HEADER ACTIONS */}
           {appMode === 'MAALEM' && (
             <>
               {/* Back to Home / Landing Button */}
               <motion.button
                 whileTap={{ scale: 0.90 }}
                 onClick={() => switchSubdomainInDev('LANDING')}
-                className="h-11 bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-amber-300 text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-amber-500/20 hover:border-amber-400/50 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                className="h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-amber-600 text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
                 title="Retour à l'accueil"
               >
                 <span>←</span>
@@ -204,11 +206,11 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
 
               {user ? (
                 <>
-                  {/* Credit Balance Badge (Seulement si connecté) */}
-                  <div className="h-11 flex items-center gap-2 bg-gradient-to-r from-slate-900/95 to-cyan-950/40 border border-cyan-500/40 px-2.5 sm:px-3.5 rounded-2xl shadow-[0_0_15px_rgba(6,182,212,0.2)] text-xs font-bold text-cyan-300">
-                    <Coins weight="duotone" className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)] flex-shrink-0" />
-                    <span className="text-[11px] text-slate-400 hidden xs:inline">Solde :</span>
-                    <span className="text-white font-mono font-black">{liveCreditBalance.toFixed(2)} <span className="text-amber-400 text-[10px]">DH</span></span>
+                  {/* Credit Balance Badge */}
+                  <div className="h-11 flex items-center gap-2 bg-amber-50 border border-amber-200 px-2.5 sm:px-3.5 rounded-2xl text-xs font-bold text-amber-900 shadow-xs">
+                    <Coins weight="duotone" className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span className="text-[11px] text-amber-700 hidden xs:inline">Solde :</span>
+                    <span className="text-slate-900 font-mono font-black">{liveCreditBalance.toFixed(2)} <span className="text-amber-600 text-[10px]">DH</span></span>
                   </div>
 
                   {/* User Profile & Pro Badge Card */}
@@ -216,23 +218,22 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setProfileModalOpen(true)}
-                      className="h-11 flex items-center gap-2 bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 hover:border-cyan-400/60 px-2.5 sm:px-3 rounded-2xl shadow-sm transition-all cursor-pointer"
+                      className="h-11 flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 px-2.5 sm:px-3 rounded-2xl shadow-xs transition-all cursor-pointer"
                     >
                       <div className="relative flex-shrink-0">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-black text-xs shadow-[0_0_10px_rgba(6,182,212,0.7)]">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
                           {user.full_name?.charAt(0) || 'M'}
                         </div>
-                        {/* Mobile verified indicator badge */}
-                        <span className="sm:hidden absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-950 border border-slate-800">
-                          <CheckCircle weight="fill" className="w-3 h-3 text-emerald-400" />
+                        <span className="sm:hidden absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white border border-slate-200">
+                          <CheckCircle weight="fill" className="w-3 h-3 text-emerald-600" />
                         </span>
                       </div>
 
                       <div className="hidden sm:flex flex-col justify-center text-left leading-none">
-                        <p className="text-xs font-bold text-slate-100 leading-none">{user.full_name}</p>
+                        <p className="text-xs font-bold text-slate-800 leading-none">{user.full_name}</p>
                         <div className="flex items-center gap-1 mt-1 leading-none">
-                          <span className="text-emerald-400 flex items-center gap-1 font-extrabold text-[10px]">
-                            <CheckCircle weight="fill" className="w-3 h-3 text-emerald-400 drop-shadow-[0_0_4px_rgba(52,211,153,0.8)]" />
+                          <span className="text-emerald-700 flex items-center gap-1 font-extrabold text-[10px]">
+                            <CheckCircle weight="fill" className="w-3 h-3 text-emerald-600" />
                             Artisan Vérifié
                           </span>
                         </div>
@@ -243,10 +244,10 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                     <motion.button
                       whileTap={{ scale: 0.90 }}
                       onClick={() => logout()}
-                      className="h-11 flex items-center gap-2 bg-slate-900/90 hover:bg-red-950/80 text-slate-300 hover:text-red-300 border border-slate-700/80 hover:border-red-500/50 px-2.5 sm:px-3.5 rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+                      className="h-11 flex items-center gap-2 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 px-2.5 sm:px-3.5 rounded-2xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
                       title="Se Déconnecter"
                     >
-                      <SignOut weight="bold" className="w-4 h-4 text-red-400 drop-shadow-[0_0_6px_rgba(248,113,113,0.7)]" />
+                      <SignOut weight="bold" className="w-4 h-4 text-red-500" />
                       <span className="hidden sm:inline">Déconnexion</span>
                     </motion.button>
                   </div>
@@ -256,9 +257,9 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                   <motion.button
                     whileTap={{ scale: 0.90 }}
                     onClick={() => setAuthModalOpen(true)}
-                    className="h-11 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs px-3.5 sm:px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(245,158,11,0.4)] active:scale-90 cursor-pointer"
+                    className="h-11 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs px-3.5 sm:px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-sm active:scale-90 cursor-pointer"
                   >
-                    <PhosphorUser weight="bold" className="w-4 h-4 text-slate-950" />
+                    <PhosphorUser weight="bold" className="w-4 h-4 text-white" />
                     <span>Espace Pro <span className="hidden xs:inline">• Connexion</span></span>
                   </motion.button>
                 </div>
@@ -266,11 +267,11 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
             </>
           )}
 
-          {/* 3. ADMIN HEADER ACTIONS (Unified Height h-11) */}
+          {/* 3. ADMIN HEADER ACTIONS */}
           {appMode === 'ADMIN' && (
             <div className="flex items-center gap-2">
-              <span className="h-11 hidden sm:inline-flex items-center gap-1.5 px-3.5 rounded-2xl bg-purple-950/80 border border-purple-500/40 text-purple-300 text-xs font-bold shadow-sm">
-                <LockKey weight="duotone" className="w-4 h-4 text-purple-400" />
+              <span className="h-11 hidden sm:inline-flex items-center gap-1.5 px-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-purple-800 text-xs font-bold shadow-xs">
+                <LockKey weight="duotone" className="w-4 h-4 text-purple-600" />
                 <span>Accès Protégé</span>
               </span>
               {/* Bouton Rafraîchir données Supabase */}
@@ -278,10 +279,10 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                 whileTap={{ scale: 0.90 }}
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="h-11 bg-slate-900/90 hover:bg-cyan-950/80 text-slate-300 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/50 px-3.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                className="h-11 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs active:scale-95"
                 title="Rafraîchir les données depuis Supabase"
               >
-                <RefreshCw className={`w-4 h-4 text-cyan-400 ${refreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 text-blue-600 ${refreshing ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">{refreshing ? 'Chargement...' : 'Rafraîchir'}</span>
               </motion.button>
               {/* Bouton Quitter Admin */}
@@ -293,46 +294,46 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                     switchSubdomainInDev('LANDING');
                   });
                 }}
-                className="h-11 bg-slate-900/90 hover:bg-red-950/80 text-slate-300 hover:text-red-300 border border-purple-500/30 hover:border-red-500/40 px-3.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                className="h-11 bg-white hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 px-3.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
                 title="Quitter le Dashboard Admin"
               >
-                <SignOut weight="bold" className="w-4 h-4 text-red-400" />
+                <SignOut weight="bold" className="w-4 h-4 text-red-500" />
                 <span className="hidden sm:inline">Quitter Admin</span>
               </motion.button>
             </div>
           )}
 
-          {/* 4. LANDING ROOT HEADER ACTIONS (Direct Quick Journey Links on md+ & Connect) */}
+          {/* 4. LANDING ROOT HEADER ACTIONS */}
           {appMode === 'LANDING' && (
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Direct Quick Link to Client SOS - Visible on md+ */}
+              {/* Direct Quick Link to Client SOS */}
               <motion.button
                 whileTap={{ scale: 0.92 }}
                 whileHover={{ scale: 1.02 }}
                 onClick={() => switchSubdomainInDev('CLIENT')}
-                className="hidden md:inline-flex h-10 sm:h-11 bg-slate-900/90 hover:bg-cyan-950/50 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 text-xs font-extrabold px-3.5 sm:px-4 rounded-2xl items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] cursor-pointer group"
+                className="hidden md:inline-flex h-10 sm:h-11 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-extrabold px-3.5 sm:px-4 rounded-2xl items-center gap-2 transition-all shadow-xs cursor-pointer group"
                 title="Demander une intervention d'urgence"
               >
-                <div className="w-6 h-6 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
-                  <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)] group-hover:scale-110 transition-transform" />
+                <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                  <Zap className="w-3.5 h-3.5 fill-current" />
                 </div>
                 <span className="tracking-tight">SOS Urgence</span>
               </motion.button>
 
-              {/* Direct Quick Link to Maalem Pro - Visible on md+ */}
+              {/* Direct Quick Link to Maalem Pro */}
               <motion.button
                 whileTap={{ scale: 0.92 }}
                 whileHover={{ scale: 1.02 }}
                 onClick={() => switchSubdomainInDev('MAALEM')}
-                className="hidden md:inline-flex h-10 sm:h-11 bg-slate-900/90 hover:bg-amber-950/40 text-amber-300 hover:text-amber-200 border border-amber-500/40 hover:border-amber-400 text-xs font-extrabold px-3.5 sm:px-4 rounded-2xl items-center gap-2.5 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] cursor-pointer group"
+                className="hidden md:inline-flex h-10 sm:h-11 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-extrabold px-3.5 sm:px-4 rounded-2xl items-center gap-2.5 transition-all shadow-xs cursor-pointer group"
                 title="Espace Artisans & Professionnels"
               >
-                <div className="w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
-                  <Wrench className="w-3.5 h-3.5 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.9)] group-hover:scale-110 transition-transform" />
+                <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center">
+                  <Wrench className="w-3.5 h-3.5" />
                 </div>
                 <span className="tracking-tight hidden lg:inline">Espace Maâlem</span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/50 font-mono text-[10px] font-black shadow-[0_0_8px_rgba(245,158,11,0.3)]">
-                  <Sparkles className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-mono text-[10px] font-black">
+                  <Sparkles className="w-2.5 h-2.5 text-amber-600" />
                   +15 DH Offerts
                 </span>
               </motion.button>
@@ -341,22 +342,22 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setProfileModalOpen(true)}
-                  className="h-10 sm:h-11 flex items-center gap-2 bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 px-3 sm:px-3.5 rounded-2xl shadow-sm transition-all cursor-pointer"
+                  className="h-10 sm:h-11 flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 px-3 sm:px-3.5 rounded-2xl shadow-xs transition-all cursor-pointer"
                 >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center font-extrabold text-xs">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-extrabold text-xs">
                     {user.full_name?.charAt(0) || 'U'}
                   </div>
-                  <span className="text-xs font-bold text-slate-100 hidden md:inline">{user.full_name}</span>
+                  <span className="text-xs font-bold text-slate-800 hidden md:inline">{user.full_name}</span>
                 </motion.button>
               ) : (
                 <motion.button
                   whileTap={{ scale: 0.92 }}
                   whileHover={{ scale: 1.02 }}
                   onClick={() => setAuthModalOpen(true)}
-                  className="h-10 sm:h-11 bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs px-4 sm:px-5 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.45)] hover:shadow-[0_0_25px_rgba(6,182,212,0.65)] flex items-center gap-2 cursor-pointer transition-all active:scale-95"
+                  className="h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-4 sm:px-5 rounded-2xl shadow-sm flex items-center gap-2 cursor-pointer transition-all active:scale-95"
                 >
-                  <PhosphorUser weight="bold" className="w-4 h-4 text-slate-950" />
-                  <span>Connexion</span>
+                  <PhosphorUser weight="bold" className="w-4 h-4 text-white" />
+                  <span>Connexion / S'inscrire</span>
                 </motion.button>
               )}
             </div>

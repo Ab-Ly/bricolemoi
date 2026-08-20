@@ -39,19 +39,23 @@ export function formatMoroccanPhone(rawPhone, defaultDial = '+212') {
   return formatInternationalPhone(rawPhone, defaultDial);
 }
 
-const INFOBIP_WHATSAPP_SENDER = import.meta.env.VITE_INFOBIP_WHATSAPP_SENDER || '212638853698';
-const INFOBIP_SMS_SENDER = import.meta.env.VITE_INFOBIP_SMS_SENDER || '447860061379';
-
 /**
- * Envoie un code OTP par WhatsApp ou SMS direct via l'API Infobip (Maroc & International)
+ * Envoie un code OTP par SMS via l'API standard Infobip et l'Edge Function Supabase
+ * @param {string} phone - Numéro de téléphone brut
+ * @param {string} channel - Canal (défaut 'sms')
+ * @param {string} defaultDial - Indicatif (défaut '+212')
  */
-export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defaultDial = '+212') {
+export async function sendOtpSms(phone, defaultDial = '+212') {
+  return sendInfobipOTP(phone, 'sms', defaultDial);
+}
+
+export async function sendInfobipOTP(phone, requestedChannel = 'sms', defaultDial = '+212') {
   const { international, formatted, isValid } = formatInternationalPhone(phone, defaultDial);
   if (!isValid) {
     throw new Error('PHONE_FORMAT_INVALID');
   }
 
-  // 1. Détection numéro de test
+  // 1. Détection des numéros de test
   const isTestPhone = 
     international.endsWith('000000') || 
     international.includes('661001122') || 
@@ -59,93 +63,86 @@ export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defau
     international.includes('222222');
 
   const otpCode = isTestPhone ? '123456' : String(Math.floor(100000 + Math.random() * 900000));
-  const authHeader = INFOBIP_API_KEY.startsWith('App ') ? INFOBIP_API_KEY : `App ${INFOBIP_API_KEY}`;
-  const messageText = `🇲🇦 *BRICOLEMOI MAROC* | بريكول موا 🛠️
-━━━━━━━━━━━━━━━━━━━━
-🔐 *Code de vérification / كود التحقق :*
-👉 *${otpCode}* 👈
+  const cleanPhone = international; // Ex: '33771937768' ou '212612345678'
+  const messageText = `BricoleMoi : Votre code de verification est ${otpCode}. Valable 5 minutes.`;
 
-⏱️ _Valable 5 minutes / صالح لمدة 5 دقائق_
-⚠️ _Ne partagez ce code avec personne / ما تبارطاجيش هاد الكود مع حتى واحد_
-━━━━━━━━━━━━━━━━━━━━
-👷‍♂️ _BricoleMoi – Artisans qualifiés & Dépannage express au Maroc_`;
+  console.log(`🔑 [BricoleMoi SMS Auth] Envoi OTP pour ${formatted} (${cleanPhone}) : [ ${otpCode} ]`);
 
-  let channelUsed = requestedChannel;
   let sentSuccessfully = false;
+  let responseDetails = null;
 
-  console.log(`🔑 [BricoleMoi Security] Code OTP généré pour ${formatted} : [ ${otpCode} ]`);
+  // 2. Tentative via l'Edge Function Supabase 'send-otp-sms'
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-otp-sms', {
+        body: { phone: formatted }
+      });
+      if (!error && data?.success) {
+        sentSuccessfully = true;
+        responseDetails = data;
+      }
+    } catch (edgeErr) {
+      console.warn('[send-otp-sms Edge Function notice]:', edgeErr);
+    }
+  }
 
-  if (!isTestPhone) {
-    // 1. Si WhatsApp demandé :
-    if (requestedChannel === 'whatsapp') {
-      try {
-        const waRes = await fetch(`https://${INFOBIP_BASE_URL}/whatsapp/1/message/text`, {
-          method: 'POST',
-          headers: {
-            'Authorization': authHeader,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            from: INFOBIP_WHATSAPP_SENDER,
-            to: international,
-            content: {
+  // 3. Fallback direct via l'API Standard Infobip (Sender ID alphanumérique direct BricoleMoi)
+  if (!sentSuccessfully && !isTestPhone && INFOBIP_API_KEY) {
+    const authHeader = INFOBIP_API_KEY.startsWith('App ') ? INFOBIP_API_KEY : `App ${INFOBIP_API_KEY}`;
+    try {
+      const smsRes = await fetch(`https://${INFOBIP_BASE_URL}/sms/2/text/advanced`, {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              from: 'BricoleMoi',
+              destinations: [{ to: cleanPhone }],
               text: messageText
             }
-          })
-        });
+          ]
+        })
+      });
 
-        const waData = await waRes.json().catch(() => ({}));
-        if (waRes.ok && waData?.status?.groupName !== 'REJECTED') {
-          sentSuccessfully = true;
-          channelUsed = 'whatsapp';
-        } else {
-          console.warn('[Infobip WhatsApp notice]:', waData);
-        }
-      } catch (waErr) {
-        console.warn('[Infobip WhatsApp error]:', waErr);
+      const smsData = await smsRes.json().catch(() => ({}));
+      responseDetails = smsData;
+
+      if (smsRes.ok && smsData?.messages?.[0]?.status?.groupName !== 'REJECTED') {
+        sentSuccessfully = true;
+      } else {
+        console.warn('[Infobip Direct SMS notice]:', smsData);
       }
+    } catch (smsErr) {
+      console.warn('[Infobip Direct SMS error]:', smsErr);
     }
-
-    // 2. Envoi SMS garanti (si SMS demandé ou en fallback/complément WhatsApp tant que le template Meta n'est pas validé) :
-    if (!sentSuccessfully || requestedChannel === 'whatsapp') {
-      try {
-        const smsRes = await fetch(`https://${INFOBIP_BASE_URL}/sms/2/text/advanced`, {
-          method: 'POST',
-          headers: {
-            'Authorization': authHeader,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            messages: [
-              {
-                destinations: [{ to: international }],
-                from: 'BricoleMoi',
-                text: `[BricoleMoi] Votre code de confirmation est : ${otpCode}. Valable 5 minutes.`
-              }
-            ]
-          })
-        });
-
-        const smsData = await smsRes.json().catch(() => ({}));
-        if (smsRes.ok && smsData?.messages?.[0]?.status?.groupName !== 'REJECTED') {
-          sentSuccessfully = true;
-          if (requestedChannel === 'sms') {
-            channelUsed = 'sms';
-          }
-        } else {
-          console.warn('[Infobip SMS notice]:', smsData);
-        }
-      } catch (smsErr) {
-        console.warn('[Infobip SMS error]:', smsErr);
-      }
-    }
-  } else {
+  } else if (isTestPhone) {
     sentSuccessfully = true;
   }
 
-  // Stocker l'OTP pour vérification dans la session
+  // 4. Enregistrement en BDD Supabase (table otp_verifications) avec expiration 5 minutes
+  if (isSupabaseConfigured) {
+    try {
+      await supabase
+        .from('otp_verifications')
+        .upsert({
+          phone: formatted,
+          otp_code: otpCode,
+          channel: 'sms',
+          expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+          verified: false,
+          attempts: 0,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'phone' });
+    } catch (dbErr) {
+      console.warn('[otp_verifications db write]:', dbErr);
+    }
+  }
+
+  // Stocker dans le sessionStorage pour validation locale de secours (5 minutes)
   sessionStorage.setItem('bricolemoi_pending_otp', JSON.stringify({
     phone: formatted,
     code: otpCode,
@@ -154,10 +151,13 @@ export async function sendInfobipOTP(phone, requestedChannel = 'whatsapp', defau
 
   return {
     success: true,
-    channel: channelUsed,
+    channel: 'sms',
     phone: formatted,
+    cleanPhoneNumber: cleanPhone,
+    expires_in: 300,
     isTest: isTestPhone,
-    code: otpCode
+    code: isTestPhone ? otpCode : undefined,
+    details: responseDetails
   };
 }
 
@@ -187,6 +187,74 @@ export function verifyLocalOTP(phone, inputCode) {
 }
 
 /**
+ * Vérifie le code OTP SMS via l'Edge Function Supabase 'verify-otp-sms'
+ */
+export async function verifyOtpSms(params) {
+  return verifyInfobipOTP(params);
+}
+
+export async function verifyInfobipOTP({ phone, token, role = 'CLIENT', fullName, cityZone, specialty, portfolioUrls, mode = 'SIGN_IN' }) {
+  const { formatted, isValid } = formatInternationalPhone(phone);
+  if (!isValid) throw new Error('Format de numéro de téléphone invalide.');
+
+  const cleanToken = String(token || '').trim();
+  if (!cleanToken) throw new Error('Code de vérification SMS requis.');
+
+  // 1. Appel Edge Function Supabase 'verify-otp-sms'
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-otp-sms', {
+        body: {
+          phone: formatted,
+          token: cleanToken,
+          role,
+          fullName,
+          cityZone,
+          specialty,
+          portfolioUrls,
+          mode
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Erreur lors de la vérification du code SMS.');
+      }
+
+      if (data && !data.success) {
+        throw new Error(data.error || 'Code SMS incorrect ou expiré.');
+      }
+
+      if (data?.success) {
+        return data;
+      }
+    } catch (edgeErr) {
+      console.warn('[verify-otp-sms Edge Notice]:', edgeErr);
+      if (edgeErr.message && !edgeErr.message.includes('Failed to send') && !edgeErr.message.includes('fetch')) {
+        throw edgeErr;
+      }
+    }
+  }
+
+  // 2. Fallback de validation locale (5 min)
+  const localRes = verifyLocalOTP(formatted, cleanToken);
+  if (!localRes.valid) {
+    throw new Error(localRes.error || 'Code SMS invalide ou expiré (validité 5 minutes).');
+  }
+
+  return {
+    success: true,
+    user: {
+      id: 'usr_' + formatted.replace(/\D/g, ''),
+      phone: formatted,
+      role: role || 'CLIENT',
+      full_name: fullName || (role === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
+      city_zone: cityZone || 'Casablanca',
+      credits: role === 'MAALEM' ? 15.00 : 0
+    }
+  };
+}
+
+/**
  * Calcule un hash sécurisé SHA-256 du Code PIN à 4 chiffres
  */
 export async function hashPin(pin) {
@@ -199,46 +267,108 @@ export async function hashPin(pin) {
 }
 
 /**
- * Vérifie proactivement l'existence d'un numéro dans la base Supabase
+ * Helper: génère toutes les variantes possibles d'un numéro de téléphone
+ * (ex: "+212619184098", "212619184098", "0619184098", "619184098")
+ */
+function getPhoneCandidateVariants(phone, defaultDial = '+212') {
+  const { international, formatted, isValid } = formatInternationalPhone(phone, defaultDial);
+  if (!isValid && !international) return [];
+  const national = international.startsWith('212') ? international.slice(3) : international;
+  const withZero = '0' + national;
+  const candidates = [
+    formatted,
+    international,
+    withZero,
+    national,
+    `+212${national}`,
+    `212${national}`,
+    `0${national}`,
+    `+212 ${national}`
+  ];
+  return [...new Set(candidates.filter(Boolean))];
+}
+
+/**
+ * Vérifie proactivement l'existence d'un numéro dans la base Supabase (multi-formats)
  */
 export async function checkPhoneProfile(phone) {
   const { formatted, isValid } = formatMoroccanPhone(phone);
-  if (!isValid) return { isValid: false, exists: false };
+  const candidates = getPhoneCandidateVariants(phone);
+  if (candidates.length === 0) return { isValid: false, exists: false };
 
   if (!isSupabaseConfigured) {
     const localMap = JSON.parse(localStorage.getItem('bricolemoi_local_users') || '{}');
-    const localUser = localMap[formatted];
-    if (localUser) {
-      return {
-        isValid: true,
-        exists: true,
-        role: localUser.role || 'CLIENT',
-        fullName: localUser.full_name,
-        hasPin: Boolean(localUser.pin_hash),
-        phone: formatted
-      };
+    for (const c of candidates) {
+      if (localMap[c]) {
+        const u = localMap[c];
+        return {
+          isValid: true,
+          exists: true,
+          role: u.role || 'CLIENT',
+          fullName: u.full_name,
+          hasPin: Boolean(u.pin_hash),
+          phone: formatted,
+          user: u
+        };
+      }
     }
     return { isValid: true, exists: false, phone: formatted };
   }
 
   try {
-    const { data: profile, error } = await supabase
+    let { data: profiles, error } = await supabase
       .from('profiles')
-      .select('id, phone, role, full_name, city_zone, credits, pin_hash')
-      .eq('phone', formatted)
-      .maybeSingle();
+      .select('*')
+      .in('phone', candidates);
 
-    if (profile) {
+    // Si non trouvé par égalité stricte, recherche tolérante par sous-chaîne des chiffres nationaux
+    const national = candidates[3] || candidates[1] || '';
+    if ((!profiles || profiles.length === 0) && national.length >= 8) {
+      const { data: fuzzyProfiles } = await supabase
+        .from('profiles')
+        .select('*')
+        .ilike('phone', `%${national}%`);
+      if (fuzzyProfiles && fuzzyProfiles.length > 0) {
+        profiles = fuzzyProfiles;
+      }
+    }
+
+    if (profiles && profiles.length > 0) {
+      const profile = profiles[0];
+      const storedLocalPin = getLocalPin(formatted) || getLocalPin(profile.phone);
       return {
         isValid: true,
         exists: true,
         role: (profile.role || 'CLIENT').toUpperCase(),
         fullName: profile.full_name,
-        hasPin: Boolean(profile.pin_hash),
+        cityZone: profile.city_zone,
+        hasPin: Boolean(profile.pin_hash || storedLocalPin),
         phone: formatted,
         user: profile
       };
     }
+
+    // 3. Fallback: Vérifier dans les données locales ou maalem_details
+    try {
+      const onlineMap = JSON.parse(localStorage.getItem('bricolemoi_online_maalems_map') || '{}');
+      for (const mId in onlineMap) {
+        const m = onlineMap[mId];
+        const mPhoneDigits = String(m.phone || '').replace(/\D/g, '');
+        if (mPhoneDigits && national && (mPhoneDigits.includes(national) || national.includes(mPhoneDigits))) {
+          return {
+            isValid: true,
+            exists: true,
+            role: 'MAALEM',
+            fullName: m.full_name || 'Artisan Maâlem',
+            cityZone: m.city_zone || m.district || 'Casablanca',
+            hasPin: true,
+            phone: formatted,
+            user: m
+          };
+        }
+      }
+    } catch (e) {}
+
     return { isValid: true, exists: false, phone: formatted };
   } catch (err) {
     console.warn('[checkPhoneProfile Error]:', err.message);
@@ -270,8 +400,9 @@ function setLocalPin(phone, hashedPin) {
  * Connexion instantanée sécurisée par Code PIN à 4 chiffres (Strict sans passe-droit)
  */
 export async function loginWithPin({ phone, pin }) {
+  const candidates = getPhoneCandidateVariants(phone);
   const { formatted, isValid } = formatMoroccanPhone(phone);
-  if (!isValid) {
+  if (candidates.length === 0) {
     throw new Error('Numéro de téléphone marocain invalide.');
   }
 
@@ -284,11 +415,23 @@ export async function loginWithPin({ phone, pin }) {
   const localHashed = getLocalPin(formatted);
 
   if (isSupabaseConfigured) {
-    const { data: profile, error } = await supabase
+    let { data: profiles, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('phone', formatted)
-      .maybeSingle();
+      .in('phone', candidates);
+
+    const national = candidates[3] || candidates[1] || '';
+    if ((!profiles || profiles.length === 0) && national.length >= 8) {
+      const { data: fuzzyProfiles } = await supabase
+        .from('profiles')
+        .select('*')
+        .ilike('phone', `%${national}%`);
+      if (fuzzyProfiles && fuzzyProfiles.length > 0) {
+        profiles = fuzzyProfiles;
+      }
+    }
+
+    const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 
     if (!profile) {
       throw new Error('Compte introuvable. Veuillez d\'abord vous inscrire.');
@@ -301,7 +444,7 @@ export async function loginWithPin({ phone, pin }) {
         throw new Error('Code PIN incorrect. Veuillez réessayer ou réinitialiser votre PIN.');
       }
     } else {
-      // Aucun PIN enregistré : premier enregistrement
+      // Aucun PIN enregistré : premier enregistrement du PIN
       setLocalPin(formatted, hashed);
       try {
         await supabase.from('profiles').update({ pin_hash: hashed }).eq('id', profile.id);

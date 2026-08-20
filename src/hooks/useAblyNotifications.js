@@ -4,6 +4,7 @@ import { subscribeToRealtimeChannel, publishRealtimeEvent } from '../lib/ablyRea
 import { startEmergencySiren, stopEmergencySiren, playNotificationSound, triggerVibration } from '../lib/audioNotifier';
 import { showLocalPushNotification } from '../lib/pushNotificationService';
 import { notify } from '../lib/notify';
+import { getAppSubdomain } from '../lib/subdomain';
 
 /**
  * Hook centralisé unifié pour les notifications Ably (In-app, Sons/Vibrations, Push)
@@ -41,8 +42,13 @@ export const useAblyNotifications = ({ user, onSosAlert, onSosClaimed, onUserMes
       ({ event, payload }) => {
         if (!payload) return;
 
+        const currentApp = getAppSubdomain();
+        const currentRole = (userRef.current?.role || user?.role || '').toUpperCase();
+        const isClient = currentApp === 'CLIENT' && currentRole !== 'ADMIN' && currentRole !== 'MAALEM';
+        const isMaalem = currentApp === 'MAALEM' && currentRole === 'MAALEM';
+
         const intvId = payload.intervention_id || payload.id || 'current';
-        if (event === 'job:accepted' || event === 'sos:claimed') {
+        if ((event === 'job:accepted' || event === 'sos:claimed') && isClient) {
           notify.success(
             'Artisan en Route 🛠️',
             `Votre intervention a été prise en charge par ${payload.maalem_name || 'un artisan'} !`,
@@ -54,19 +60,19 @@ export const useAblyNotifications = ({ user, onSosAlert, onSosClaimed, onUserMes
               tag: `job-accepted-${intvId}`
             });
           }
-        } else if (event === 'job:progress') {
+        } else if (event === 'job:progress' && isClient) {
           if (payload.progress_step === 'ON_THE_WAY') {
             notify.progress('ON_THE_WAY', 'Maâlem en route', 'Votre Maâlem se déplace actuellement vers votre adresse.', { id: `progress-ontheway-${intvId}` });
           } else if (payload.progress_step === 'ARRIVED') {
             notify.progress('ARRIVED', 'Maâlem arrivé sur place', 'Votre artisan est arrivé pour le diagnostic.', { id: `progress-arrived-${intvId}` });
           }
-        } else if (event === 'work:completion_requested') {
+        } else if (event === 'work:completion_requested' && isClient) {
           notify.info(
             'Travaux Finalisés ✨',
             `L'artisan a terminé l'intervention (${payload.final_agreed_price || 150} DH). Veuillez confirmer.`,
             { id: `work-completion-${intvId}`, badge: 'Confirmation Requise' }
           );
-        } else if (event === 'credit:added' || event === 'recharge:approved') {
+        } else if ((event === 'credit:added' || event === 'recharge:approved') && isMaalem) {
           notify.credit(payload.amount || 15, payload.new_balance, payload.reason || 'Recharge / Remplacement validé', { id: `credit-${payload.new_balance}` });
           try {
             const bc = new BroadcastChannel('bricolemoi_intertab_sync');

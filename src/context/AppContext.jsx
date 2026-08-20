@@ -7,6 +7,7 @@ import { playNotificationSound } from '../lib/audioNotifier';
 import { getAblyClient, ABLY_CHANNELS, isAblyConfigured } from '../lib/ablyClient';
 import { publishRealtimeEvent, subscribeToRealtimeChannel } from '../lib/ablyRealtimeService';
 import { useAblyPresence } from '../hooks/useAblyPresence';
+import { getAppSubdomain } from '../lib/subdomain';
 
 const AppContext = createContext();
 
@@ -58,7 +59,14 @@ export const AppProvider = ({ children }) => {
   const [adminNotifications, setAdminNotifications] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
   const [whatsappMsg, setWhatsappMsg] = useState(null);
-  const [adminAlerts, setAdminAlerts] = useState([]);
+  const [adminAlerts, setAdminAlerts] = useState(() => {
+    try {
+      const cached = localStorage.getItem('bricolemoi_admin_alerts');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
 
   // État de Disponibilité En Ligne / Hors Ligne pour le Maâlem
   const [isMaalemOnline, setIsMaalemOnline] = useState(() => {
@@ -82,9 +90,23 @@ export const AppProvider = ({ children }) => {
 
   const isCurrentUserClientOf = (intv) => {
     if (!intv) return false;
+
+    // Règle d'étanchéité absolue : Si l'utilisateur est actuellement sur l'Espace Admin ou Maâlem,
+    // il ne doit JAMAIS recevoir les notifications réservées aux clients demandeurs.
+    const currentApp = getAppSubdomain();
+    if (currentApp === 'ADMIN' || currentApp === 'MAALEM') {
+      return false;
+    }
+
+    const curr = userRef.current;
+    const currentRole = String(curr?.role || '').toUpperCase();
+    if (currentRole === 'ADMIN' || currentRole === 'MAALEM') {
+      return false;
+    }
+
     const intvId = String(intv.id || intv.intervention_id || '').trim();
 
-    // 1. Priorité absolue : Vérifier si cet appareil précis a créé cette demande
+    // 1. Vérifier si cet appareil précis a créé cette demande (uniquement pour un client)
     try {
       const myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
       if (intvId && myCreated.includes(intvId)) {
@@ -92,7 +114,6 @@ export const AppProvider = ({ children }) => {
       }
     } catch (e) {}
 
-    const curr = userRef.current;
     if (!curr) return false;
 
     // 2. Vérifier par ID utilisateur authentifié réel (exclure le dummy ID générique 11111111-...)
@@ -120,6 +141,9 @@ export const AppProvider = ({ children }) => {
 
   const isCurrentUserAssignedMaalemOf = (intv) => {
     if (!intv) return false;
+    const currentApp = getAppSubdomain();
+    if (currentApp === 'ADMIN' || currentApp === 'CLIENT') return false;
+
     const curr = userRef.current;
     if (!curr) return false;
     const role = String(curr.role || '').toUpperCase();
@@ -130,6 +154,9 @@ export const AppProvider = ({ children }) => {
 
   const isCurrentUserEligibleMaalemForNewJob = (intv) => {
     if (!intv) return false;
+    const currentApp = getAppSubdomain();
+    if (currentApp === 'ADMIN' || currentApp === 'CLIENT') return false;
+
     const curr = userRef.current;
     if (!curr) return false;
     const role = String(curr.role || '').toUpperCase();
@@ -150,13 +177,20 @@ export const AppProvider = ({ children }) => {
   };
 
   const isCurrentUserAdmin = () => {
+    const currentApp = getAppSubdomain();
+    if (currentApp !== 'ADMIN') return false;
     const curr = userRef.current;
     return Boolean(curr && String(curr.role || '').toUpperCase() === 'ADMIN');
   };
 
   const isCurrentUserMaalemOfTransaction = (txOrMaalemId) => {
+    const currentApp = getAppSubdomain();
+    if (currentApp === 'ADMIN' || currentApp === 'CLIENT') return false;
+
     const curr = userRef.current;
     if (!curr) return false;
+    const role = String(curr.role || '').toUpperCase();
+    if (role !== 'MAALEM') return false;
     const maalemId = typeof txOrMaalemId === 'object' ? (txOrMaalemId?.maalem_id || txOrMaalemId?.maalemId) : txOrMaalemId;
     return Boolean(maalemId && String(maalemId).trim() === String(curr.id).trim());
   };
@@ -197,17 +231,32 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const getTabId = () => {
+    if (typeof window === 'undefined') return 'server';
+    if (!window.__bricolemoi_tab_id) {
+      window.__bricolemoi_tab_id = 'tab_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+    }
+    return window.__bricolemoi_tab_id;
+  };
+
   // Helper Multi-Canaux Infaillible (BroadcastChannel + LocalStorage Event)
   const broadcastSync = (payload) => {
+    const originTab = getTabId();
+    const enrichedPayload = {
+      ...payload,
+      _origin_tab: originTab,
+      _sync_time: Date.now()
+    };
+
     try {
       const bc = new BroadcastChannel('bricolemoi_intertab_sync');
-      bc.postMessage(payload);
+      bc.postMessage(enrichedPayload);
       bc.close();
     } catch (e) { }
 
     try {
       localStorage.setItem('bricolemoi_sync_payload', JSON.stringify({
-        ...payload,
+        ...enrichedPayload,
         _sync_time: Date.now() + Math.random()
       }));
     } catch (e) { }
@@ -400,7 +449,11 @@ export const AppProvider = ({ children }) => {
           is_available: isMaalemOnline,
           lat: mLat,
           lng: mLng,
-          credit_balance: user.maalem_details?.credit_balance ?? user.credits ?? 15.00,
+          credit_balance: user.credits !== undefined && user.credits !== null
+            ? Number(user.credits)
+            : (user.maalem_details?.credit_balance !== undefined && user.maalem_details?.credit_balance !== null
+              ? Number(user.maalem_details.credit_balance)
+              : 15.00),
           district: user.city_zone || 'Casablanca'
         };
         const filtered = prev.filter((m) => m.id !== user.id);
@@ -533,7 +586,17 @@ export const AppProvider = ({ children }) => {
               is_available: onlineStatus,
               lat: mLat,
               lng: mLng,
-              credit_balance: details.credit_balance ?? m.credits ?? 0,
+              credit_balance: isThisSelf
+                ? (user.credits !== undefined && user.credits !== null
+                  ? Number(user.credits)
+                  : (user.maalem_details?.credit_balance !== undefined && user.maalem_details?.credit_balance !== null
+                    ? Number(user.maalem_details.credit_balance)
+                    : (details.credit_balance ?? m.credits ?? 15.00)))
+                : (details.credit_balance !== undefined && details.credit_balance !== null
+                  ? Number(details.credit_balance)
+                  : (m.credits !== undefined && m.credits !== null
+                    ? Number(m.credits)
+                    : 15.00)),
               district: m.city_zone || 'Casablanca'
             };
           });
@@ -552,6 +615,24 @@ export const AppProvider = ({ children }) => {
               is_suspended: Boolean(c.is_suspended),
               role: c.role || 'client'
             }));
+
+          // Inclure le client connecté en local s'il n'est pas encore propagé
+          if (user && String(user.role || '').toUpperCase() === 'CLIENT') {
+            const alreadyInList = clientProfiles.some(c => String(c.id).trim() === String(user.id).trim());
+            if (!alreadyInList) {
+              clientProfiles.unshift({
+                id: user.id,
+                full_name: user.full_name || 'Client BricoleMoi',
+                phone: user.phone || 'En attente',
+                city_zone: user.city_zone || 'Casablanca',
+                district: user.city_zone || 'Casablanca',
+                created_at: new Date().toISOString(),
+                is_suspended: false,
+                role: 'CLIENT'
+              });
+            }
+          }
+
           setClients(clientProfiles);
         }
       } catch (err) {
@@ -651,6 +732,52 @@ export const AppProvider = ({ children }) => {
       return () => window.removeEventListener('focus', onFocus);
     }, []);
 
+    // Synchronisation automatique des avis insatisfaisants (<= 3 étoiles) vers le tableau de bord Admin Litiges
+    useEffect(() => {
+      if (!interventions || interventions.length === 0) return;
+      const lowRatingItems = interventions.filter(
+        (i) => i.rating && Number(i.rating) <= 3
+      );
+
+      if (lowRatingItems.length > 0) {
+        setAdminAlerts((prev) => {
+          let hasChange = false;
+          const existingIds = new Set(prev.map((a) => String(a.intervention_id || a.id).trim()));
+          const merged = [...prev];
+
+          lowRatingItems.forEach((item) => {
+            const cleanId = String(item.id).trim();
+            if (!existingIds.has(cleanId)) {
+              hasChange = true;
+              merged.unshift({
+                id: `alert-review-${cleanId}`,
+                intervention_id: cleanId,
+                maalem_id: item.maalem_id || '22222222-2222-2222-2222-222222222222',
+                maalem_name: item.maalem_name || 'Artisan Maâlem',
+                maalem_phone: item.maalem_phone || '',
+                client_name: item.client_name || 'Client BricoleMoi',
+                client_phone: item.client_phone || '',
+                district: item.district || 'Casablanca',
+                rating: Number(item.rating),
+                comment: item.comment || `Avis ${item.rating}★ laissé par le client.`,
+                reason_label: `Avis Insatisfaisant (${item.rating}⭐)`,
+                status: 'PENDING',
+                created_at: item.created_at || new Date().toISOString()
+              });
+            }
+          });
+
+          if (hasChange) {
+            try {
+              localStorage.setItem('bricolemoi_admin_alerts', JSON.stringify(merged));
+            } catch (e) { }
+            return merged;
+          }
+          return prev;
+        });
+      }
+    }, [interventions]);
+
     // Alias public pour refresh manuel depuis l'UI
     const refreshData = () => fetchRealSupabaseData();
 
@@ -661,7 +788,14 @@ export const AppProvider = ({ children }) => {
       const handleSyncPayload = (data) => {
         if (!data || !data.type) return;
 
-        if (data.type === 'NEW_MAALEM_REGISTERED' && data.maalem) {
+        // Évite le double traitement dans l'onglet émetteur
+        if (data._origin_tab && data._origin_tab === getTabId()) {
+          return;
+        }
+
+        if (data.type === 'PROFILE_UPDATED' || data.type === 'NEW_CLIENT_REGISTERED') {
+          fetchRealSupabaseData();
+        } else if (data.type === 'NEW_MAALEM_REGISTERED' && data.maalem) {
           const newM = data.maalem;
           setMaalems((prev) => [newM, ...prev.filter((m) => m.id !== newM.id)]);
           if (isCurrentUserAdmin()) {
@@ -749,10 +883,12 @@ export const AppProvider = ({ children }) => {
             return updated;
           });
           if (isCurrentUserAssignedMaalemOf(targetIntv || { id: intervention_id })) {
+            const rScore = Number(rating) || 5;
+            const emoji = rScore >= 5 ? '🏆' : rScore >= 4 ? '⭐' : rScore === 3 ? '👍' : '💬';
             notify.success(
-              'Avis 5★ Client Reçu 🏆',
-              `Le client a validé les travaux et laissé une note de ${rating || 5} étoiles !`,
-              { badge: '+1 Job Confirmé' }
+              `Avis ${rScore}★ Client Reçu ${emoji}`,
+              `Le client a validé les travaux et laissé une note de ${rScore} étoile${rScore > 1 ? 's' : ''} !`,
+              { badge: `+1 Job (${rScore}/5 ⭐)` }
             );
           }
         } else if (data.type === 'RECHARGE_SUBMITTED') {
@@ -857,11 +993,15 @@ export const AppProvider = ({ children }) => {
           }
         } else if (data.type === 'NEW_DISPUTE_REPORTED' && data.alert) {
           const { alert } = data;
-          setAdminAlerts((prev) => [alert, ...prev.filter(a => a.id !== alert.id)]);
+          setAdminAlerts((prev) => {
+            const next = [alert, ...prev.filter(a => a.id !== alert.id)];
+            try { localStorage.setItem('bricolemoi_admin_alerts', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
           if (isCurrentUserAdmin()) {
             notify.warning(
-              'Litige Client Injoignable ⚠️',
-              `Signalement transmis par l'artisan ${alert.maalem_name}`
+              'Signalement / Litige Reçu ⚠️',
+              alert.reason_label || `Alerte transmise pour l'intervention de ${alert.client_name || 'Client'}`
             );
           }
         } else if (data.type === 'MAALEM_HEARTBEAT' && data.maalem_id) {
@@ -2211,7 +2351,7 @@ export const AppProvider = ({ children }) => {
       });
 
       const payload = {
-        type: 'INTERVENTION_COMPLETED_WITH_REVIEW',
+        type: 'INTERVENTION_COMPLETED',
         intervention_id: cleanId,
         _ts: Date.now()
       };
@@ -2330,14 +2470,26 @@ export const AppProvider = ({ children }) => {
           intervention_id,
           maalem_id: targetMaalemId,
           maalem_name: targetMaalemName,
+          maalem_phone: currentInt?.maalem_phone || '',
           client_name: user?.full_name || currentInt?.client_name || 'Client Maroc',
           client_phone: user?.phone || currentInt?.client_phone || '',
+          district: currentInt?.district || 'Maroc',
           rating: Number(rating),
           comment: fullComment,
+          reason_label: `Avis Insatisfaisant (${rating}⭐)`,
+          status: 'PENDING',
           badges: badges || [],
           created_at: new Date().toISOString()
         };
-        setAdminAlerts((prev) => [alertItem, ...prev.filter((a) => a.intervention_id !== intervention_id)]);
+        setAdminAlerts((prev) => {
+          const next = [alertItem, ...prev.filter((a) => a.intervention_id !== intervention_id)];
+          try { localStorage.setItem('bricolemoi_admin_alerts', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+        broadcastSync({
+          type: 'NEW_DISPUTE_REPORTED',
+          alert: alertItem
+        });
         showToast(`⚠️ Note de ${rating}★ transmise à l'équipe Admin pour litige/arbitrage !`, 'error');
       } else {
         showToast('⭐ Évaluation & Confirmation d\'accomplissement enregistrées ! Merci.', 'success');

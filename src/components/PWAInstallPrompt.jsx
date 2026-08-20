@@ -15,22 +15,23 @@ export const PWAInstallPrompt = ({ deferredPrompt, installPWA, isInstalled, onCl
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 z-40 max-w-sm bg-slate-950/95 backdrop-blur-2xl border border-cyan-500/40 p-4.5 rounded-2xl shadow-[0_0_25px_rgba(6,182,212,0.3)] text-slate-100"
+        className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 z-40 max-w-sm bg-white/95 backdrop-blur-xl border border-slate-200 p-4 sm:p-5 rounded-3xl shadow-xl text-slate-900 font-sans"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-slate-900 border border-cyan-500/40 text-cyan-400 flex items-center justify-center font-bold flex-shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.25)]">
-              <Smartphone className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+            <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold flex-shrink-0 shadow-xs">
+              <Smartphone className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white font-sans">Installer BricoleMoi (PWA)</h4>
-              <p className="text-[11px] text-slate-400">Accès rapide sur l'écran d'accueil &amp; mode d'urgence hors-ligne</p>
+              <h4 className="text-sm font-black text-slate-900 font-sans">Installer BricoleMoi (PWA)</h4>
+              <p className="text-xs text-slate-500 mt-0.5 leading-snug">Accès rapide sur l'écran d'accueil &amp; mode d'urgence hors-ligne</p>
             </div>
           </div>
           <motion.button 
             whileTap={{ scale: 0.9 }}
             onClick={onClose} 
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-900 transition-colors"
+            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+            title="Fermer"
           >
             <X className="w-4 h-4" />
           </motion.button>
@@ -39,7 +40,7 @@ export const PWAInstallPrompt = ({ deferredPrompt, installPWA, isInstalled, onCl
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={installPWA}
-          className="w-full mt-3.5 py-3 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 transition-all active:scale-95"
+          className="w-full mt-3.5 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
         >
           <Download className="w-4 h-4" />
           <span>{t('pwa_install')} (Gratuit)</span>

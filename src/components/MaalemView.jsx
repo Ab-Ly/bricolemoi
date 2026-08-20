@@ -90,7 +90,15 @@ export const MaalemView = ({ onOpenCINVerification }) => {
   } = useEmergencyFlow();
 
   const currentLiveMaalem = maalems?.find((m) => m.id === user?.id) || user?.maalem_details || user;
-  const liveCreditBalance = parseFloat(currentLiveMaalem?.credit_balance ?? user?.credits ?? user?.maalem_details?.credit_balance ?? 15.00);
+  const liveCreditBalance = parseFloat(
+    user?.credits !== undefined && user?.credits !== null
+      ? user.credits
+      : (user?.maalem_details?.credit_balance !== undefined && user?.maalem_details?.credit_balance !== null
+        ? user.maalem_details.credit_balance
+        : (currentLiveMaalem?.credit_balance !== undefined && currentLiveMaalem?.credit_balance !== null
+          ? currentLiveMaalem.credit_balance
+          : 15.00))
+  );
 
   const maalemDetails = user?.maalem_details || {
     specialty: currentLiveMaalem?.specialty || 'PLUMBING',
@@ -442,32 +450,32 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-slate-950 text-slate-100 p-6 rounded-3xl border border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.25)] space-y-4 relative overflow-hidden"
+          className="bg-emerald-50 text-emerald-950 p-6 rounded-3xl border border-emerald-200 shadow-sm space-y-4 relative overflow-hidden"
         >
           <button
             onClick={() => setWhatsappMsg(null)}
-            className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-900 transition-colors"
+            className="absolute top-4 right-4 text-emerald-600 hover:text-emerald-900 p-1.5 rounded-xl hover:bg-emerald-100/60 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-950/90 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 shadow-xs">
                 <WhatsappLogo weight="duotone" className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-black text-base tracking-tight text-white flex items-center gap-2">
+                <h4 className="font-black text-base tracking-tight text-slate-900 flex items-center gap-2">
                   <span>Message WhatsApp Automatique (Darija 🇲🇦)</span>
                 </h4>
-                <p className="text-xs text-slate-400">Notification instantanée envoyée au Maâlem</p>
+                <p className="text-xs text-slate-600">Notification instantanée envoyée au Maâlem</p>
               </div>
             </div>
           </div>
 
           <div 
             dir="rtl"
-            className="bg-slate-900/95 border border-cyan-500/30 p-5 rounded-2xl font-sans text-sm text-slate-100 whitespace-pre-line leading-relaxed shadow-inner select-all"
+            className="bg-white border border-emerald-200/90 p-5 rounded-2xl font-sans text-sm text-slate-800 whitespace-pre-line leading-relaxed shadow-inner select-all"
           >
             {formattedWhatsAppDarija}
           </div>
@@ -477,7 +485,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={handleOpenWhatsApp}
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all cursor-pointer active:scale-95"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-95"
             >
               <WhatsappLogo weight="fill" className="w-4 h-4" />
               <span>Ouvrir dans WhatsApp</span>
@@ -486,118 +494,115 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={handleCopyWhatsAppMsg}
-              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 font-bold text-xs rounded-xl flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+              className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs rounded-xl flex items-center gap-2 transition-all cursor-pointer active:scale-95 shadow-xs"
             >
-              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>{copiedMsg ? '✔ Message Copié !' : 'Copier le Message'}</span>
             </motion.button>
           </div>
         </motion.div>
       )}
 
-      {/* 1. Tableau de Bord : Header Solde, Statut EN LIGNE, Note Globale (Dark Sci-Fi Glassmorphism) */}
+      {/* 1. Tableau de Bord : Header Solde, Statut EN LIGNE, Note Globale (Modern Clean & Trust) */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="bg-slate-900/70 backdrop-blur-md border border-cyan-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/60 relative overflow-hidden"
+        className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden text-slate-900"
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           
           {/* Profile & Status */}
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-cyan-500/40 text-cyan-400 flex items-center justify-center font-black p-3 shadow-[0_0_20px_rgba(6,182,212,0.3)] flex-shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-black p-3 shadow-xs flex-shrink-0">
               <EnhancedCategoryIcon type={maalemDetails.specialty || user?.maalem_details?.specialty} className="w-10 h-10" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <h2 className="text-2xl font-black text-white font-sans tracking-tight">{user?.full_name || 'Maalem Hassan'}</h2>
+                <h2 className="text-2xl font-black text-slate-900 font-sans tracking-tight">{user?.full_name || 'Maalem Hassan'}</h2>
                 
-                {/* Statut EN LIGNE Toggle Sci-Fi Tactile */}
+                {/* Statut EN LIGNE Toggle Tactile */}
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => toggleMaalemOnlineStatus()}
-                  className={`group relative pl-2.5 pr-3.5 py-1.5 rounded-2xl border transition-all duration-300 flex items-center gap-2.5 shadow-lg active:scale-95 cursor-pointer ${
+                  className={`group relative pl-2.5 pr-3.5 py-1.5 rounded-2xl border transition-all duration-300 flex items-center gap-2.5 shadow-xs active:scale-95 cursor-pointer ${
                     isMaalemOnline
-                      ? 'bg-gradient-to-r from-emerald-950/90 to-slate-950/95 border-emerald-400/60 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] hover:border-emerald-300'
-                      : 'bg-slate-950/90 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100/70'
+                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200/70'
                   }`}
                   title="Cliquer pour basculer votre disponibilité (En Ligne / Hors Ligne)"
                 >
                   <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
                     isMaalemOnline 
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-400/40 shadow-[0_0_10px_rgba(52,211,153,0.5)]' 
-                      : 'bg-slate-800 text-slate-500 border border-slate-700'
+                      ? 'bg-emerald-100 text-emerald-600 border border-emerald-300' 
+                      : 'bg-white text-slate-500 border border-slate-200'
                   }`}>
                     {isMaalemOnline ? (
-                      <Broadcast weight="duotone" className="w-4 h-4 animate-pulse drop-shadow-[0_0_6px_rgba(52,211,153,0.9)]" />
+                      <Broadcast weight="duotone" className="w-4 h-4 text-emerald-600" />
                     ) : (
                       <Power weight="bold" className="w-3.5 h-3.5" />
                     )}
                   </div>
 
                   <div className="flex flex-col items-start leading-none text-left">
-                    <span className={`text-xs font-black tracking-tight transition-colors ${
-                      isMaalemOnline ? 'text-emerald-300' : 'text-slate-300'
+                    <span className={`text-xs font-black tracking-tight ${
+                      isMaalemOnline ? 'text-emerald-800' : 'text-slate-700'
                     }`}>
                       {isMaalemOnline ? 'EN LIGNE' : 'HORS LIGNE'}
                     </span>
-                    <span className={`text-[9px] font-mono font-semibold mt-0.5 transition-colors ${
-                      isMaalemOnline ? 'text-emerald-400/80' : 'text-slate-500'
+                    <span className={`text-[9px] font-mono font-semibold mt-0.5 ${
+                      isMaalemOnline ? 'text-emerald-600' : 'text-slate-500'
                     }`}>
                       {isMaalemOnline ? 'Radar SOS Actif' : 'Alertes en Pause'}
                     </span>
                   </div>
 
-                  <div className={`ml-1 w-2 h-2 rounded-full transition-all ${
+                  <div className={`ml-1 w-2 h-2 rounded-full ${
                     isMaalemOnline 
-                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,1)] animate-ping' 
-                      : 'bg-slate-600'
+                      ? 'bg-emerald-500 animate-ping' 
+                      : 'bg-slate-400'
                   }`} />
                 </motion.button>
               </div>
 
               <div className="flex flex-wrap items-center gap-2.5 mt-2 text-xs font-medium">
-                <span className="px-2.5 py-1 rounded-xl bg-slate-950/90 border border-cyan-500/30 text-cyan-300 font-bold flex items-center gap-1.5 shadow-[0_0_10px_rgba(6,182,212,0.15)]">
-                  <PhosphorWrench weight="duotone" className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-bold flex items-center gap-1.5 shadow-xs">
+                  <PhosphorWrench weight="duotone" className="w-3.5 h-3.5 text-blue-600" />
                   <span>{getSpecialtyLabel(maalemDetails.specialty || user?.maalem_details?.specialty)}</span>
                 </span>
                 
-                <span className="flex items-center text-amber-300 font-mono font-black bg-slate-950/90 px-2.5 py-1 rounded-xl border border-amber-500/40 shadow-[0_0_10px_rgba(251,191,36,0.25)]">
-                  <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 mr-1 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
+                <span className="flex items-center text-amber-800 font-mono font-black bg-amber-50 px-3 py-1 rounded-xl border border-amber-200 shadow-xs">
+                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 mr-1" />
                   <span>{(maalemDetails.rating_avg || 4.9).toFixed(1)} / 5.0</span>
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Credit Balance Card (Sci-Fi Glassmorphism Card) */}
-          <div className="bg-slate-950/85 backdrop-blur-xl border border-cyan-500/30 p-5 rounded-3xl shadow-[0_0_25px_rgba(6,182,212,0.15)] hover:border-cyan-400/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)] transition-all duration-300 relative overflow-hidden flex flex-col justify-between gap-4 sm:min-w-[340px]">
-            {/* Ambient Background Glow */}
-            <div className="pointer-events-none absolute -right-8 -top-8 w-28 h-28 bg-cyan-500/10 rounded-full blur-2xl" />
-
+          {/* Credit Balance Card */}
+          <div className="bg-slate-50 border border-slate-200/90 p-5 sm:p-6 rounded-3xl shadow-xs hover:shadow-md transition-all duration-300 relative overflow-hidden flex flex-col justify-between gap-4 sm:min-w-[340px]">
             {/* Header: Title + Active Badge */}
             <div className="flex items-center justify-between gap-3 relative z-10">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-slate-900/90 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.25)] flex-shrink-0">
-                  <Coins weight="duotone" className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)]" />
+                <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-amber-600 shadow-xs flex-shrink-0">
+                  <Coins weight="duotone" className="w-4 h-4 text-amber-600" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black text-slate-100 tracking-wide flex items-center gap-1.5">
+                  <h3 className="text-xs font-black text-slate-900 tracking-wide flex items-center gap-1.5">
                     <span>Portefeuille Artisan</span>
                   </h3>
-                  <p className="text-[10px] text-slate-400 font-medium">رصيد الحساب المتاح</p>
+                  <p className="text-[10px] text-slate-500 font-medium">رصيد الحساب المتاح</p>
                 </div>
               </div>
 
               {liveCreditBalance >= 15 ? (
-                <span className="px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-[10px] font-bold font-mono flex items-center gap-1.5 shadow-[0_0_8px_rgba(52,211,153,0.2)]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold font-mono flex items-center gap-1.5 shadow-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Opérationnel</span>
                 </span>
               ) : (
-                <span className="px-2.5 py-1 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-300 text-[10px] font-bold font-mono flex items-center gap-1.5 shadow-[0_0_8px_rgba(244,63,94,0.2)]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
+                <span className="px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-bold font-mono flex items-center gap-1.5 shadow-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
                   <span>Recharge Requise</span>
                 </span>
               )}
@@ -606,31 +611,31 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
             {/* Main Balance Display */}
             <div className="relative z-10 my-0.5">
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-100 to-white font-mono tracking-tight drop-shadow-[0_0_12px_rgba(6,182,212,0.4)]">
+                <span className="text-3xl sm:text-4xl font-black text-slate-900 font-mono tracking-tight">
                   {liveCreditBalance.toFixed(2)}
                 </span>
-                <span className="text-sm font-black font-mono text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
+                <span className="text-sm font-black font-mono text-amber-600">
                   DH
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
-                <span>Coût : <strong className="text-slate-200 font-mono font-bold">15.00 DH</strong> / déblocage lead client</span>
+              <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-600" />
+                <span>Coût : <strong className="text-slate-800 font-mono font-bold">15.00 DH</strong> / déblocage lead client</span>
               </p>
             </div>
 
             {/* Action Buttons: Historique + Recharger */}
-            <div className="grid grid-cols-2 gap-2 relative z-10 pt-1 border-t border-cyan-500/15">
+            <div className="grid grid-cols-2 gap-2 relative z-10 pt-2 border-t border-slate-200">
               <motion.button
                 whileTap={{ scale: 0.94 }}
                 onClick={() => setHistoryModalOpen(true)}
-                className="bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 font-bold text-xs py-2.5 px-3 rounded-xl shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs py-2.5 px-3 rounded-xl shadow-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                 title="Consulter l'historique complet de mes transactions et recharges"
               >
-                <ClockCounterClockwise className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.7)]" />
+                <ClockCounterClockwise className="w-4 h-4 text-slate-600" />
                 <span>Historique</span>
                 {pendingMyRechargesCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 font-black text-[9px] animate-pulse">
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white font-black text-[9px]">
                     {pendingMyRechargesCount}
                   </span>
                 )}
@@ -639,9 +644,9 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
               <motion.button
                 whileTap={{ scale: 0.94 }}
                 onClick={() => setRechargeModalOpen(true)}
-                className="bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs py-2.5 px-3 rounded-xl shadow-[0_0_18px_rgba(6,182,212,0.45)] hover:shadow-[0_0_25px_rgba(6,182,212,0.65)] flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs py-2.5 px-3 rounded-xl shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
               >
-                <PlusCircle weight="bold" className="w-4 h-4 text-slate-950" />
+                <PlusCircle weight="bold" className="w-4 h-4 text-white" />
                 <span>Recharger</span>
               </motion.button>
             </div>
@@ -652,149 +657,192 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
         <motion.div
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-6 p-4 bg-gradient-to-r from-emerald-950/50 via-slate-950 to-cyan-950/40 backdrop-blur-md border border-emerald-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_0_18px_rgba(52,211,153,0.15)]"
+          className="mt-6 p-4 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(52,211,153,0.35)]">
-              <ShieldCheck className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 text-emerald-600 flex items-center justify-center flex-shrink-0 shadow-xs">
+              <ShieldCheck className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h4 className="text-xs font-black text-white font-sans tracking-wide uppercase">
+                <h4 className="text-xs font-black text-slate-900 font-sans tracking-wide uppercase">
                   Profil Artisan Opérationnel &amp; Certifié
                 </h4>
-                <span className="bg-emerald-900/80 text-emerald-300 border border-emerald-500/50 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Numéro Vérifié (SMS)
+                <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Numéro Vérifié (SMS)
                 </span>
               </div>
-              <p className="text-[11px] text-slate-300 mt-0.5">
+              <p className="text-[11px] text-slate-600 mt-0.5">
                 Authentifié par OTP. Vous recevez directement les demandes SOS de votre zone d'intervention.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-cyan-300 bg-slate-900 px-3 py-1.5 rounded-xl border border-cyan-500/30 shadow-inner">
-              <Phone className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-slate-800 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs">
+              <Phone className="w-3.5 h-3.5 text-blue-600" />
               <span>+212 {cleanUserPhone.slice(-9)}</span>
             </span>
           </div>
         </motion.div>
 
         {/* Section Interactive : Portfolio de Réalisations Chantiers */}
-        <div className="mt-4 p-4.5 bg-slate-950/90 border border-cyan-500/30 rounded-2xl space-y-3 shadow-inner">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cyan-500/15 pb-2.5">
-            <div className="flex items-center gap-2">
-              <Camera className="w-4 h-4 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.7)]" />
-              <h4 className="text-xs font-black text-slate-100 uppercase tracking-wider">
-                Mon Portfolio de Réalisations Chantiers
-              </h4>
-              <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-950/80 px-2 py-0.5 rounded-md border border-cyan-500/30">
-                {(user?.maalem_details?.portfolio_urls || currentLiveMaalem?.portfolio_urls || []).length}/3 photos
-              </span>
+        <div className="mt-5 p-5 bg-slate-50/90 border border-slate-200/90 rounded-3xl space-y-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-100/80 border border-amber-200 text-amber-700 flex items-center justify-center shadow-xs flex-shrink-0">
+                <Camera className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-black text-slate-900 tracking-tight">
+                    Portfolio &amp; Chantiers Réalisés
+                  </h4>
+                  <span className="text-[11px] font-mono text-amber-800 font-bold bg-amber-100/70 px-2.5 py-0.5 rounded-full border border-amber-200">
+                    {(user?.maalem_details?.portfolio_urls || currentLiveMaalem?.portfolio_urls || []).length} / 3 photos
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Vos photos sont mises en avant auprès des clients pour maximiser vos prises de contact.
+                </p>
+              </div>
             </div>
-            <p className="text-[11px] text-slate-400">
-              Photos de vos travaux visibles par les clients pour renforcer la confiance.
-            </p>
+
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-[11px] font-semibold text-slate-600 shadow-xs flex-shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>+3x plus d'appels clients</span>
+            </div>
           </div>
 
-          {/* Grid des photos */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-            {(user?.maalem_details?.portfolio_urls || currentLiveMaalem?.portfolio_urls || []).map((url, idx) => (
-              <div key={idx} className="relative group rounded-xl overflow-hidden border border-cyan-500/40 bg-slate-900 aspect-video sm:aspect-square flex items-center justify-center shadow-md">
-                <img
-                  src={url}
-                  alt={`Chantier ${idx + 1}`}
-                  className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform"
-                  onClick={() => setPreviewPhotoUrl(url)}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemovePortfolioPhoto(idx)}
-                  className="absolute top-1.5 right-1.5 p-1 bg-red-950/90 text-red-300 border border-red-500/50 rounded-lg hover:bg-red-900 hover:text-white transition-all shadow-sm cursor-pointer opacity-90 group-hover:opacity-100"
-                  title="Supprimer cette photo"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewPhotoUrl(url)}
-                  className="absolute bottom-1.5 right-1.5 p-1 bg-slate-950/80 text-cyan-300 border border-cyan-500/40 rounded-lg hover:bg-slate-900 transition-all shadow-sm cursor-pointer"
-                  title="Agrandir en HD"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                </button>
-                <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded bg-slate-950/80 text-[10px] font-mono font-bold text-amber-300 border border-amber-500/30">
-                  Chantier #{idx + 1}
-                </span>
-              </div>
-            ))}
+          {/* Grid des 3 Chantiers Structurés (Slot 1, Slot 2, Slot 3) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            {[0, 1, 2].map((slotIndex) => {
+              const portfolioList = user?.maalem_details?.portfolio_urls || currentLiveMaalem?.portfolio_urls || [];
+              const url = portfolioList[slotIndex];
+              const slotLabels = [
+                { title: 'Chantier Principal', desc: 'Rénovation ou gros dépannage' },
+                { title: 'Chantier Récent', desc: 'Installation ou pose propre' },
+                { title: 'Savoir-Faire', desc: 'Finitions & travail soigné' }
+              ];
+              const meta = slotLabels[slotIndex];
 
-            {/* Bouton d'ajout si < 3 photos */}
-            {(user?.maalem_details?.portfolio_urls || currentLiveMaalem?.portfolio_urls || []).length < 3 && (
-              <label className="border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 bg-slate-900/60 hover:bg-slate-900/90 rounded-xl aspect-video sm:aspect-square flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all p-3 text-center group">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAddPortfolioPhoto}
-                  className="hidden"
-                />
-                <div className="w-8 h-8 rounded-xl bg-cyan-950 border border-cyan-500/40 text-cyan-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_10px_rgba(6,182,212,0.3)]">
-                  <PlusCircle weight="bold" className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-bold text-cyan-300">
-                  + Ajouter Photo
-                </span>
-                <span className="text-[9px] text-slate-400">
-                  (Max 5 Mo)
-                </span>
-              </label>
-            )}
+              if (url) {
+                return (
+                  <div
+                    key={slotIndex}
+                    className="relative group rounded-2xl overflow-hidden border border-slate-200 bg-white aspect-[4/3] flex items-center justify-center shadow-xs hover:shadow-md transition-all"
+                  >
+                    <img
+                      src={url}
+                      alt={`Chantier ${slotIndex + 1}`}
+                      className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform duration-300"
+                      onClick={() => setPreviewPhotoUrl(url)}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+
+                    {/* Actions Top Right */}
+                    <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewPhotoUrl(url)}
+                        className="p-1.5 bg-white/95 hover:bg-white text-slate-700 hover:text-blue-600 rounded-xl shadow-xs transition-colors cursor-pointer"
+                        title="Agrandir en HD"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePortfolioPhoto(slotIndex)}
+                        className="p-1.5 bg-white/95 hover:bg-white text-red-600 hover:bg-red-50 rounded-xl shadow-xs transition-colors cursor-pointer"
+                        title="Supprimer cette photo"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Badge Bottom Left */}
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-sm text-[10px] font-bold text-slate-900 border border-slate-200 shadow-xs">
+                        📸 Chantier #{slotIndex + 1}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <label
+                  key={slotIndex}
+                  className="border-2 border-dashed border-slate-300 hover:border-amber-500 bg-white hover:bg-amber-50/40 rounded-2xl aspect-[4/3] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all p-4 text-center group shadow-xs hover:shadow-sm"
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAddPortfolioPhoto}
+                    className="hidden"
+                  />
+                  <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
+                    <Camera className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-slate-900 group-hover:text-amber-700 transition-colors block">
+                      + {meta.title}
+                    </span>
+                    <span className="text-[10px] text-slate-500 mt-0.5 block font-medium">
+                      {meta.desc}
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-mono text-slate-400 font-semibold bg-slate-100 px-2.5 py-0.5 rounded-full mt-0.5">
+                    JPG, PNG • Max 5 Mo
+                  </span>
+                </label>
+              );
+            })}
           </div>
         </div>
 
-        {/* Gamification Progress Gauges (Clean Vector Typography & Icons) */}
-        <div className="mt-6 pt-5 border-t border-cyan-500/20 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-slate-950/80 p-4 rounded-2xl border border-cyan-500/30 shadow-inner">
+        {/* Gamification Progress Gauges */}
+        <div className="mt-6 pt-5 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl shadow-xs">
             <div className="flex justify-between items-center text-xs mb-2">
-              <span className="font-black text-slate-100 flex items-center gap-1.5">
-                <Award className="w-4 h-4 text-cyan-400" />
+              <span className="font-black text-slate-900 flex items-center gap-1.5">
+                <Award className="w-4 h-4 text-amber-600" />
                 <span>Jauge 1 : Avis 5 Étoiles Consécutifs</span>
               </span>
-              <span className="font-black text-cyan-300 bg-slate-900 px-2 py-0.5 rounded-lg border border-cyan-500/30 font-mono text-xs">
+              <span className="font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 font-mono text-xs">
                 {maalemDetails.consecutive_five_stars || 0} / 5
               </span>
             </div>
-            <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-cyan-500/30 p-0.5">
+            <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden p-0.5">
               <div
-                className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all duration-500"
+                className="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full transition-all duration-500 shadow-xs"
                 style={{ width: `${((maalemDetails.consecutive_five_stars || 0) / 5) * 100}%` }}
               />
             </div>
-            <p className="text-[11px] text-slate-400 mt-2 font-medium flex items-center gap-1.5">
-              <Gift className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-              <span>5 avis 5★ consécutifs = <strong className="text-cyan-300">+15.00 DH GRATUITS (1er Lead Offert)</strong> !</span>
+            <p className="text-[11px] text-slate-600 mt-2 font-medium flex items-center gap-1.5">
+              <Gift className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+              <span>5 avis 5★ consécutifs = <strong className="text-amber-700 font-bold">+15.00 DH GRATUITS (1er Lead Offert)</strong> !</span>
             </p>
           </div>
 
-          <div className="bg-slate-950/80 p-4 rounded-2xl border border-cyan-500/30 shadow-inner">
+          <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl shadow-xs">
             <div className="flex justify-between items-center text-xs mb-2">
-              <span className="font-black text-slate-100 flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4 text-cyan-400" />
+              <span className="font-black text-slate-900 flex items-center gap-1.5">
+                <TrendingUp className="w-4 h-4 text-blue-600" />
                 <span>Jauge 2 : Recharges de 100 DH</span>
               </span>
-              <span className="font-black text-cyan-300 bg-slate-900 px-2 py-0.5 rounded-lg border border-cyan-500/30 font-mono text-xs">
+              <span className="font-black text-blue-800 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200 font-mono text-xs">
                 {maalemDetails.hundred_dh_recharges_count || 0} / 5
               </span>
             </div>
-            <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-cyan-500/30 p-0.5">
+            <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden p-0.5">
               <div
-                className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all duration-500"
+                className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500 shadow-xs"
                 style={{ width: `${((maalemDetails.hundred_dh_recharges_count || 0) / 5) * 100}%` }}
               />
             </div>
-            <p className="text-[11px] text-slate-400 mt-2 font-medium flex items-center gap-1.5">
-              <Gift className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-              <span>À la 5ème recharge de 100 DH = <strong className="text-cyan-300">+15.00 DH GRATUITS (1er Lead Offert)</strong> !</span>
+            <p className="text-[11px] text-slate-600 mt-2 font-medium flex items-center gap-1.5">
+              <Gift className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+              <span>À la 5ème recharge de 100 DH = <strong className="text-blue-700 font-bold">+15.00 DH GRATUITS (1er Lead Offert)</strong> !</span>
             </p>
           </div>
         </div>
@@ -803,12 +851,12 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
       {/* 2. Interactive Radar Map */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-black text-white flex items-center gap-2 font-sans">
-            <Compass className="w-5 h-5 text-cyan-400 animate-spin-slow drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+          <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 font-sans">
+            <Compass className="w-5 h-5 text-blue-600 animate-spin-slow" />
             Carte Radar d'Urgence (Position GPS Réelle)
           </h3>
-          <span className="text-xs text-cyan-300 font-bold bg-slate-900 px-3 py-1 rounded-full border border-cyan-500/30 flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-cyan-400" />
+          <span className="text-xs text-slate-700 font-bold bg-white px-3 py-1 rounded-full border border-slate-200 shadow-xs flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5 text-blue-600" />
             <span>Pos: {maalemPos[0].toFixed(4)}, {maalemPos[1].toFixed(4)}</span>
           </span>
         </div>
@@ -817,26 +865,26 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
           <motion.div
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-amber-950/40 backdrop-blur-md border border-amber-500/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-amber-200 text-xs shadow-lg"
+            className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-amber-900 text-xs shadow-xs"
           >
             <div className="flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-amber-400 animate-ping flex-shrink-0" />
+              <span className="w-3 h-3 rounded-full bg-amber-500 animate-ping flex-shrink-0" />
               <div>
-                <p className="font-extrabold text-amber-300 text-sm">Mode Hors Ligne Activé</p>
-                <p className="text-[11px] text-amber-200/80">Votre profil est temporairement masqué des clients et vos alertes SOS sont en pause.</p>
+                <p className="font-extrabold text-amber-900 text-sm">Mode Hors Ligne Activé</p>
+                <p className="text-[11px] text-amber-700">Votre profil est temporairement masqué des clients et vos alertes SOS sont en pause.</p>
               </div>
             </div>
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => toggleMaalemOnlineStatus(true)}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs shadow-[0_0_15px_rgba(52,211,153,0.4)] active:scale-95 transition-all flex-shrink-0"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 active:scale-95 transition-all flex-shrink-0 cursor-pointer"
             >
               Passer en Ligne 🟢
             </motion.button>
           </motion.div>
         )}
 
-        <div id="maalem-radar-map">
+        <div id="maalem-radar-map" className="rounded-3xl border border-slate-200 shadow-sm overflow-hidden bg-white">
           <InteractiveMap 
             mode="MAALEM_RADAR" 
             selectedLat={focusedMapCoords ? focusedMapCoords[0] : maalemPos[0]} 
@@ -847,56 +895,56 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
       {/* 3. Demandes d'Urgence SOS Disponibles (Directement sous la carte radar) */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-red-950/90 border border-red-500/60 shadow-[0_0_15px_rgba(239,68,68,0.5)] flex items-center justify-center">
-              <Zap className="w-5 h-5 text-red-400 animate-pulse drop-shadow-[0_0_8px_rgba(248,113,113,0.9)]" />
+            <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-200 shadow-xs flex items-center justify-center">
+              <Zap className="w-5 h-5 text-red-600 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-white font-sans tracking-tight flex items-center gap-2">
+              <h3 className="text-xl font-black text-slate-900 font-sans tracking-tight flex items-center gap-2">
                 Demandes d'Urgence SOS en Direct
-                <span className="px-2.5 py-0.5 rounded-full bg-red-950 text-red-300 border border-red-500/40 text-xs font-mono font-bold">
+                <span className="px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-xs font-mono font-bold">
                   {availableLeads.length} actives
                 </span>
               </h3>
-              <p className="text-[11px] text-slate-400 font-medium">
+              <p className="text-[11px] text-slate-500 font-medium">
                 Directement depuis Supabase Realtime • Coût déblocage : 15 DH
               </p>
             </div>
           </div>
 
-          <div className="flex items-center p-1 rounded-2xl bg-slate-950/90 border border-cyan-500/30 shadow-inner gap-1">
+          <div className="flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200 gap-1">
             <button
               type="button"
               onClick={() => setFilterBySpecialtyOnly(true)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
                 filterBySpecialtyOnly
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              <Target weight="duotone" className={`w-4 h-4 ${filterBySpecialtyOnly ? 'text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]' : 'text-cyan-400'}`} />
+              <Target weight="duotone" className={`w-4 h-4 ${filterBySpecialtyOnly ? 'text-white' : 'text-amber-600'}`} />
               <span>Ma Spécialité</span>
             </button>
 
             <button
               type="button"
               onClick={() => setFilterBySpecialtyOnly(false)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
                 !filterBySpecialtyOnly
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              <GlobeHemisphereWest weight="duotone" className={`w-4 h-4 ${!filterBySpecialtyOnly ? 'text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]' : 'text-cyan-400'}`} />
+              <GlobeHemisphereWest weight="duotone" className={`w-4 h-4 ${!filterBySpecialtyOnly ? 'text-white' : 'text-blue-600'}`} />
               <span>Toutes les Demandes</span>
             </button>
           </div>
         </div>
 
         {availableLeads.length === 0 ? (
-          <div className="p-8 text-center bg-slate-900/70 border border-cyan-500/20 rounded-2xl text-slate-400 text-sm shadow-sm space-y-2">
-            <p className="text-base font-bold text-slate-300">Aucune nouvelle demande d'urgence en attente.</p>
+          <div className="p-8 text-center bg-white border border-slate-200 rounded-2xl text-slate-500 text-sm shadow-xs space-y-2">
+            <p className="text-base font-bold text-slate-800">Aucune nouvelle demande d'urgence en attente.</p>
             <p className="text-xs text-slate-500">Les nouvelles demandes créées par les clients apparaîtront ici instantanément en temps réel.</p>
           </div>
         ) : (
@@ -919,7 +967,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   key={item.id}
-                  className="bg-slate-900/70 backdrop-blur-md border border-cyan-500/20 rounded-2xl p-5 shadow-lg hover:border-cyan-400/50 flex flex-col justify-between transition-all space-y-4"
+                  className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-amber-300 flex flex-col justify-between transition-all space-y-4"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">
@@ -934,11 +982,11 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                           setFocusedMapCoords([lat, lng]);
                           document.getElementById('maalem-radar-map')?.scrollIntoView({ behavior: 'smooth' });
                         }}
-                        className="text-xs text-cyan-300 hover:text-white font-black bg-slate-950/90 px-3 py-1.5 rounded-xl border border-cyan-500/40 hover:border-cyan-400 flex items-center gap-1 shadow-inner font-mono cursor-pointer transition-all active:scale-95"
+                        className="text-xs text-blue-700 hover:text-blue-900 font-black bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 flex items-center gap-1 font-mono cursor-pointer transition-all active:scale-95 shadow-xs"
                         title="Cliquer pour centrer la carte sur cette demande SOS"
                       >
                         <span>📍 {distanceKm} km</span>
-                        <span className="text-[10px] text-cyan-400 font-bold bg-cyan-950/80 px-1.5 py-0.5 rounded ml-1 border border-cyan-500/30">🎯 Carte</span>
+                        <span className="text-[10px] text-blue-600 font-bold bg-white px-1.5 py-0.5 rounded ml-1 border border-blue-200">🎯 Carte</span>
                       </button>
                     </div>
 
@@ -952,23 +1000,23 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                             <img
                               src={displayPhoto}
                               alt="Urgence photo"
-                              className="w-20 h-20 rounded-2xl object-cover border border-cyan-500/40 shadow-md group-hover:border-cyan-400 group-hover:scale-105 transition-all"
+                              className="w-20 h-20 rounded-2xl object-cover border border-slate-200 shadow-xs group-hover:border-amber-400 group-hover:scale-105 transition-all"
                             />
-                            <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-cyan-300">
+                            <div className="absolute inset-0 bg-black/30 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
                               <Eye className="w-5 h-5" />
                             </div>
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-white flex items-center gap-1">
-                            <MapPin className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                          <p className="text-sm font-black text-slate-900 flex items-center gap-1">
+                            <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
                             <span className="truncate">{item.district || 'Casablanca'}</span>
                           </p>
-                          <p className="text-xs text-cyan-300 font-bold mt-0.5">
+                          <p className="text-xs text-amber-700 font-bold mt-0.5">
                             {item.subcategory || 'Dépannage d\'urgence'}
                           </p>
                           {item.access_details && (
-                            <p className="text-[11px] text-slate-300 italic mt-1 line-clamp-2">
+                            <p className="text-[11px] text-slate-600 italic mt-1 line-clamp-2">
                               ✍️ "{item.access_details}"
                             </p>
                           )}
@@ -977,13 +1025,13 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
                       {/* Lecteur Audio Interactif pour l'Artisan (Avant Déblocage) */}
                       {item.audio_note_url && (
-                        <div className="p-2.5 bg-slate-950 rounded-xl border border-cyan-500/30 flex items-center justify-between gap-2 shadow-inner">
+                        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-2 shadow-xs">
                           <div className="flex items-center gap-2">
                             <motion.button
                               whileTap={{ scale: 0.9 }}
                               type="button"
                               onClick={() => togglePlayMaalemAudio(item.id, item.audio_note_url)}
-                              className="w-8 h-8 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 flex items-center justify-center font-bold shadow-[0_0_10px_rgba(6,182,212,0.4)] flex-shrink-0 cursor-pointer"
+                              className="w-8 h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center font-bold shadow-xs flex-shrink-0 cursor-pointer"
                               title="Écouter la voix du client"
                             >
                               {playingAudioId === item.id ? (
@@ -993,17 +1041,17 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                               )}
                             </motion.button>
                             <div>
-                              <p className="text-xs font-bold text-slate-200">
+                              <p className="text-xs font-bold text-slate-800">
                                 {playingAudioId === item.id ? 'Lecture en cours...' : 'Note Vocale Client (Darija / FR)'}
                               </p>
-                              <p className="text-[10px] text-cyan-400">Écoutez les explications avant d'accepter</p>
+                              <p className="text-[10px] text-slate-500">Écoutez les explications avant d'accepter</p>
                             </div>
                           </div>
 
                           <button
                             type="button"
                             onClick={() => cyclePlaybackSpeed(item.id)}
-                            className="px-2 py-1 rounded-md bg-slate-900 border border-cyan-500/30 text-[10px] font-mono font-bold text-cyan-300 hover:bg-slate-800"
+                            className="px-2 py-1 rounded-md bg-white border border-slate-200 text-[10px] font-mono font-bold text-slate-700 hover:bg-slate-50"
                             title="Vitesse de lecture"
                           >
                             {playbackSpeed}x
@@ -1013,15 +1061,15 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-cyan-500/20 flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-slate-400">
-                      Coût : <span className="text-cyan-300 font-mono font-black">15.00 DH</span>
+                  <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-slate-500">
+                      Coût : <span className="text-slate-900 font-mono font-black">15.00 DH</span>
                     </span>
 
                     <motion.button
                       whileTap={{ scale: 0.92 }}
                       onClick={() => acceptLead(item.id)}
-                      className="px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all flex items-center gap-1.5 active:scale-90 cursor-pointer"
+                      className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 active:scale-90 cursor-pointer"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Débloquer le Lead (-15 DH) 🔓</span>
@@ -1036,9 +1084,9 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
       {/* 4. SECTION LEADS DÉBLOQUÉS (Contact Direct WhatsApp + Itinéraire GPS + Audio + Photos HD) */}
       {unlockedLeads.length > 0 && (
-        <div className="space-y-4 pt-4 border-t border-cyan-500/20">
-          <h3 className="text-xl font-black text-emerald-400 flex items-center gap-2 font-sans">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+        <div className="space-y-4 pt-4 border-t border-slate-200">
+          <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 font-sans">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             Leads Débloqués - Direct Client ({unlockedLeads.length})
           </h3>
 
@@ -1059,18 +1107,18 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
               return (
                 <div 
                   key={lead.id}
-                  className="bg-slate-900/90 backdrop-blur-md border border-emerald-500/40 rounded-2xl p-5 shadow-[0_0_20px_rgba(52,211,153,0.15)] space-y-4"
+                  className="bg-white border-2 border-emerald-500/80 rounded-3xl p-5 shadow-sm space-y-4 text-slate-900"
                 >
                   {/* Header: Badge & Métier */}
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className={`text-xs font-black px-3 py-1 rounded-full border shadow-sm flex items-center gap-1.5 ${
+                    <span className={`text-xs font-black px-3 py-1 rounded-full border shadow-xs flex items-center gap-1.5 ${
                       lead.status === 'COMPLETED'
-                        ? 'text-emerald-300 bg-emerald-950/90 border-emerald-500/50 shadow-[0_0_12px_rgba(52,211,153,0.3)]'
+                        ? 'text-emerald-800 bg-emerald-50 border-emerald-200'
                         : lead.status === 'PENDING_COMPLETION'
-                        ? 'text-purple-300 bg-purple-950/90 border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.3)] animate-pulse'
-                        : 'text-cyan-300 bg-cyan-950/90 border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.25)]'
+                        ? 'text-purple-800 bg-purple-50 border-purple-200 animate-pulse'
+                        : 'text-blue-800 bg-blue-50 border-blue-200'
                     }`}>
-                      <span className={`w-2 h-2 rounded-full ${lead.status === 'COMPLETED' ? 'bg-emerald-400' : 'bg-cyan-400 animate-ping'}`} />
+                      <span className={`w-2 h-2 rounded-full ${lead.status === 'COMPLETED' ? 'bg-emerald-500' : 'bg-blue-500 animate-ping'}`} />
                       <span>
                         {lead.status === 'COMPLETED' 
                           ? '🏆 CHANTIER CLÔTURÉ' 
@@ -1079,20 +1127,20 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                           : '🟢 LEAD ACTIF DÉBLOQUÉ'}
                       </span>
                     </span>
-                    <span className="text-xs font-black text-cyan-300 bg-slate-950 px-3 py-1 rounded-xl border border-cyan-500/30 font-sans">
+                    <span className="text-xs font-black text-slate-700 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 font-sans">
                       {lead.subcategory || 'Dépannage'}
                     </span>
                   </div>
 
                   {/* Coordonnées & Précision d'Accès */}
                   <div className="space-y-1">
-                    <h4 className="text-lg font-black text-white">{lead.client_name || 'Client BricoleMoi'}</h4>
-                    <p className="text-xs text-slate-300 font-mono flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                    <h4 className="text-lg font-black text-slate-900">{lead.client_name || 'Client BricoleMoi'}</h4>
+                    <p className="text-xs text-slate-600 font-mono flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
                       <span>{lead.district || 'Casablanca'}</span>
                     </p>
                     {lead.access_details && (
-                      <p className="text-[11px] text-amber-300 bg-slate-950/90 px-3 py-1.5 rounded-xl border border-amber-500/30 mt-1 font-medium">
+                      <p className="text-[11px] text-amber-800 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 mt-1 font-medium">
                         📍 <strong>Accès :</strong> {lead.access_details}
                       </p>
                     )}
@@ -1101,7 +1149,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   {/* Galerie Photos HD du Lead Débloqué */}
                   {(lead.photos_list || lead.description_photo) && (
                     <div className="space-y-1.5">
-                      <p className="text-[11px] font-bold text-slate-400">Photos de la Panne (Cliquer pour agrandir HD) :</p>
+                      <p className="text-[11px] font-bold text-slate-500">Photos de la Panne (Cliquer pour agrandir HD) :</p>
                       <div className="flex flex-wrap gap-2">
                         {(lead.photos_list || [lead.description_photo]).map((pic, pIdx) => (
                           <div
@@ -1112,9 +1160,9 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                             <img
                               src={pic}
                               alt={`Panne ${pIdx + 1}`}
-                              className="w-16 h-16 rounded-xl object-cover border border-cyan-500/30 group-hover:border-cyan-400 transition-all"
+                              className="w-16 h-16 rounded-xl object-cover border border-slate-200 group-hover:border-amber-400 transition-all shadow-xs"
                             />
-                            <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-cyan-300">
+                            <div className="absolute inset-0 bg-black/30 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-white">
                               <Eye className="w-4 h-4" />
                             </div>
                           </div>
@@ -1125,13 +1173,13 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
                   {/* Lecteur Audio Intégré pour le Maâlem */}
                   {lead.audio_note_url && (
-                    <div className="p-3 bg-slate-950 rounded-xl border border-cyan-500/30 flex items-center justify-between gap-3 shadow-inner">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3 shadow-xs">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <motion.button
                           whileTap={{ scale: 0.9 }}
                           type="button"
                           onClick={() => togglePlayMaalemAudio(lead.id, lead.audio_note_url)}
-                          className="w-9 h-9 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-[0_0_12px_rgba(6,182,212,0.4)] flex-shrink-0 cursor-pointer"
+                          className="w-9 h-9 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-xs flex-shrink-0 cursor-pointer"
                           title="Écouter l'explication du client"
                         >
                           {playingAudioId === lead.id ? (
@@ -1142,17 +1190,17 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                         </motion.button>
 
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-100">
+                          <p className="text-xs font-bold text-slate-800">
                             {playingAudioId === lead.id ? 'Écoute en cours...' : 'Note Vocale du Client'}
                           </p>
-                          <p className="text-[10px] text-cyan-300 font-mono">Explication détaillée de la panne</p>
+                          <p className="text-[10px] text-slate-500 font-mono">Explication détaillée de la panne</p>
                         </div>
                       </div>
 
                       <button
                         type="button"
                         onClick={() => cyclePlaybackSpeed(lead.id)}
-                        className="px-2 py-1 rounded-md bg-slate-900 border border-cyan-500/30 text-[10px] font-mono font-bold text-cyan-300 hover:bg-slate-800"
+                        className="px-2 py-1 rounded-md bg-white border border-slate-200 text-[10px] font-mono font-bold text-slate-700 hover:bg-slate-50"
                         title="Vitesse de lecture"
                       >
                         {playbackSpeed}x
@@ -1161,19 +1209,19 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   )}
 
                   {/* Barre d'Action Mobile Tactile : 3 Boutons Équilibrés (Appel, WhatsApp, GPS) */}
-                  <div className="bg-slate-950 p-3 rounded-2xl border border-cyan-500/20 space-y-2.5">
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-slate-400 font-bold">Client Joignable :</span>
-                      <span className="text-xs font-mono font-black text-white dir-ltr">+{formattedWaDigits}</span>
+                      <span className="text-[11px] text-slate-500 font-bold">Client Joignable :</span>
+                      <span className="text-xs font-mono font-black text-slate-900 dir-ltr">+{formattedWaDigits}</span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
                       <a
                         href={`tel:+${formattedWaDigits}`}
-                        className="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-white border border-cyan-500/30 transition-all flex items-center justify-center gap-1.5 text-xs font-bold shadow-sm"
+                        className="py-2.5 px-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all flex items-center justify-center gap-1.5 text-xs font-bold shadow-xs"
                         title="Appeler le client directement par téléphone GSM"
                       >
-                        <PhoneCall className="w-4 h-4 text-cyan-400" />
+                        <PhoneCall className="w-4 h-4 text-blue-600" />
                         <span>Appeler</span>
                       </a>
 
@@ -1181,7 +1229,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                         href={waLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-[0_0_12px_rgba(52,211,153,0.4)] flex items-center justify-center gap-1.5 transition-all"
+                        className="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all"
                         title="Ouvrir la discussion WhatsApp avec message pré-rempli"
                       >
                         <WhatsappLogo weight="fill" className="w-4 h-4" />
@@ -1192,7 +1240,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                         href={mapsUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="py-2.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs shadow-[0_0_12px_rgba(59,130,246,0.4)] flex items-center justify-center gap-1.5 transition-all"
+                        className="py-2.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5 transition-all"
                         title="Lancer l'itinéraire GPS sur Google Maps"
                       >
                         <MapPin className="w-4 h-4" />
@@ -1203,8 +1251,8 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
                   {/* Stepper d'avancement d'intervention */}
                   {lead.status !== 'COMPLETED' && (
-                    <div className="p-3 bg-slate-950/80 rounded-xl border border-cyan-500/20 space-y-2">
-                      <p className="text-[11px] font-bold text-slate-400">Statut du déplacement :</p>
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                      <p className="text-[11px] font-bold text-slate-500">Statut du déplacement :</p>
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           type="button"
@@ -1212,10 +1260,10 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                             updateInterventionProgress(lead.id, 'ON_THE_WAY');
                             flowSetProgressStep('ON_THE_WAY');
                           }}
-                          className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
+                          className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1 border cursor-pointer ${
                             lead.progress_step === 'ON_THE_WAY'
-                              ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.5)] font-black'
-                              : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-amber-400/50'
+                              ? 'bg-amber-500 text-white border-amber-600 shadow-xs font-black'
+                              : 'bg-white text-slate-700 border-slate-200 hover:border-amber-400'
                           }`}
                         >
                           <span>🚗 En route</span>
@@ -1227,10 +1275,10 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                             updateInterventionProgress(lead.id, 'ARRIVED');
                             flowSetProgressStep('ARRIVED');
                           }}
-                          className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
+                          className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1 border cursor-pointer ${
                             lead.progress_step === 'ARRIVED'
-                              ? 'bg-blue-500 text-white border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)] font-black'
-                              : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-blue-400/50'
+                              ? 'bg-blue-600 text-white border-blue-700 shadow-xs font-black'
+                              : 'bg-white text-slate-700 border-slate-200 hover:border-blue-400'
                           }`}
                         >
                           <span>📍 Sur place</span>
@@ -1240,67 +1288,78 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   )}
 
                   {/* Action d'Accomplissement des Travaux & Saisie du Montant Réel */}
-                  <div className="pt-2 border-t border-cyan-500/20 space-y-3">
+                  <div className="pt-2 border-t border-slate-200 space-y-3">
                     {lead.status === 'PENDING_COMPLETION' ? (
-                      <div className="p-3.5 bg-amber-950/80 border border-amber-500/40 rounded-xl text-xs font-bold text-amber-300 flex items-center justify-between shadow-inner">
+                      <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 flex items-center justify-between shadow-xs">
                         <span className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-amber-400 animate-spin flex-shrink-0" />
+                          <Clock className="w-4 h-4 text-amber-600 animate-spin flex-shrink-0" />
                           <span>Demande de fin de chantier transmise ({lead.final_agreed_price || currentAgreedPrice} DH)</span>
                         </span>
-                        <span className="text-[10px] font-mono text-amber-400 bg-amber-900/60 px-2 py-0.5 rounded">En attente client</span>
+                        <span className="text-[10px] font-mono text-amber-800 bg-amber-100 px-2 py-0.5 rounded">En attente client</span>
                       </div>
                     ) : lead.status === 'COMPLETED' ? (
-                      <div className="p-3.5 bg-slate-950/90 border border-emerald-500/40 rounded-xl text-xs space-y-2 shadow-[0_0_12px_rgba(52,211,153,0.2)]">
+                      <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-2 shadow-xs">
                         <div className="flex items-center justify-between font-bold">
-                          <span className="flex items-center gap-1.5 text-emerald-400">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          <span className="flex items-center gap-1.5 text-emerald-800">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                             <span>Intervention Clôturée &amp; Validée ({lead.final_agreed_price} DH)</span>
                           </span>
-                          <span className="px-2.5 py-0.5 rounded-full font-black font-mono flex items-center gap-1 text-xs text-amber-300 bg-amber-950/90 border border-amber-500/50 shadow-[0_0_8px_rgba(251,191,36,0.4)]">
-                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span className="px-2.5 py-0.5 rounded-full font-black font-mono flex items-center gap-1 text-xs text-amber-800 bg-amber-50 border border-amber-200 shadow-xs">
+                            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                             <span>{lead.rating ? `${lead.rating} / 5` : '5 / 5'}</span>
                           </span>
                         </div>
                         {lead.comment && (
-                          <p className="text-slate-200 font-semibold italic text-[11px] bg-slate-900 p-2 rounded-lg border border-cyan-500/20">
+                          <p className="text-slate-700 font-semibold italic text-[11px] bg-white p-2 rounded-lg border border-emerald-100">
                             Avis Client : "{lead.comment}"
                           </p>
                         )}
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        <div className="bg-slate-950 p-3 rounded-xl border border-cyan-500/30 space-y-1">
-                          <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+                      <div className="space-y-3">
+                        <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2 shadow-xs">
+                          <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                            <Coins className="w-4 h-4 text-amber-600" />
                             <span>Prix Final Convenu des Travaux :</span>
-                            <span className="text-cyan-400 font-mono text-sm">{currentAgreedPrice} DH</span>
+                          </label>
+
+                          {/* Champ Saisie Manuelle Numérique Pure */}
+                          <div className="relative">
+                            <input
+                              type="number"
+                              min="0"
+                              max="50000"
+                              placeholder="Ex: 250"
+                              value={currentAgreedPrice || ''}
+                              onChange={(e) => {
+                                const val = e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0);
+                                setAgreedPrices((prev) => ({ ...prev, [lead.id]: val }));
+                              }}
+                              className="w-full py-2.5 px-4 pr-14 bg-white border border-slate-300 rounded-xl text-lg font-mono font-black text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-xs placeholder:text-slate-400 placeholder:font-normal placeholder:text-sm"
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-mono font-black text-slate-500 pointer-events-none">
+                              DH
+                            </span>
                           </div>
-                          <input
-                            type="range"
-                            min="100"
-                            max="3000"
-                            step="50"
-                            value={currentAgreedPrice}
-                            onChange={(e) => setAgreedPrices((prev) => ({ ...prev, [lead.id]: parseInt(e.target.value) }))}
-                            className="w-full accent-cyan-400 cursor-pointer"
-                          />
                         </div>
 
                         <motion.button
                           whileTap={{ scale: 0.95 }}
                           type="button"
                           onClick={() => {
-                            requestWorkCompletion(lead.id, currentAgreedPrice);
-                            flowFinishMission(currentAgreedPrice);
+                            const finalP = Number(currentAgreedPrice) || 150;
+                            requestWorkCompletion(lead.id, finalP);
+                            flowFinishMission(finalP);
                           }}
-                          className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-[0_0_15px_rgba(52,211,153,0.4)] flex items-center justify-center gap-2 transition-all active:scale-95 border border-emerald-400/30 cursor-pointer"
+                          className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                         >
                           <CheckCircle2 className="w-4 h-4 text-white" />
-                          <span>Déclarer les travaux terminés &amp; Valider</span>
+                          <span>Déclarer les travaux terminés &amp; Valider ({currentAgreedPrice || 150} DH)</span>
                         </motion.button>
                       </div>
                     )}
 
-                    {/* Bouton Litige & Règles Anti-Abus (Fenêtre 30 min max, compensation 1 Crédit de Remplacement) */}
+                    {/* Bouton Litige & Règles Anti-Abus */}
                     {lead.status !== 'COMPLETED' && lead.status !== 'UNREACHABLE_REFUNDED' && (() => {
                       const acceptedTime = lead.accepted_at
                         ? new Date(lead.accepted_at).getTime()
@@ -1309,20 +1368,20 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                       const remainingMin = Math.max(0, 30 - elapsedMin);
 
                       return remainingMin > 0 ? (
-                        <div className="flex items-center justify-between text-[11px] pt-1 border-t border-cyan-500/15 mt-2">
+                        <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200 mt-2">
                           <button
                             type="button"
                             onClick={() => setUnreachableModalLead(lead)}
-                            className="font-bold text-amber-400/90 hover:text-amber-300 transition-colors underline cursor-pointer flex items-center gap-1"
+                            className="font-bold text-amber-700 hover:text-amber-800 transition-colors underline cursor-pointer flex items-center gap-1"
                           >
                             <span>⚠️ Signaler faux numéro / client injoignable</span>
                           </button>
-                          <span className="text-[10px] font-mono font-bold text-amber-300 bg-slate-950 px-2 py-0.5 rounded-md border border-amber-500/30 shadow-inner">
+                          <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shadow-xs">
                             ⏳ {remainingMin} min
                           </span>
                         </div>
                       ) : (
-                        <div className="text-center pt-1 mt-2 border-t border-cyan-500/10">
+                        <div className="text-center pt-1 mt-2 border-t border-slate-200">
                           <span className="text-[10px] text-slate-500 font-mono italic">
                             🔒 Délai de signalement anti-abus expiré (&gt; 30 min après acceptation)
                           </span>
@@ -1344,34 +1403,34 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md"
+            className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.94, opacity: 0, y: 15 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="bg-slate-950 border border-cyan-500/40 rounded-3xl max-w-md w-full p-4 sm:p-6 sm:p-8 shadow-[0_0_30px_rgba(6,182,212,0.3)] relative text-slate-100 max-h-[85vh] overflow-y-auto modal-scroll"
+              className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-slate-900 max-h-[85vh] overflow-y-auto modal-scroll"
             >
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setRechargeModalOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-900"
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors"
               >
                 <X className="w-5 h-5" />
               </motion.button>
 
               <div className="text-center mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-cyan-500/40 text-cyan-400 flex items-center justify-center mx-auto mb-3 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                  <Wallet className="w-7 h-7 text-cyan-400" />
+                <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
+                  <Wallet className="w-7 h-7 text-amber-600" />
                 </div>
-                <h3 className="text-2xl font-black text-white font-sans">Module de Recharge Solde</h3>
-                <p className="text-xs text-slate-400 mt-1">Choisissez votre pack et créditez votre compte Supabase</p>
+                <h3 className="text-2xl font-black text-slate-900 font-sans">Module de Recharge Solde</h3>
+                <p className="text-xs text-slate-500 mt-1">Choisissez votre pack et créditez votre compte Supabase</p>
               </div>
 
               {/* Boutons Rapides 50 DH, 100 DH, 200 DH, 500 DH */}
               <div className="mb-5">
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Packs de Recharge Solde</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Packs de Recharge Solde</label>
                 <div className="grid grid-cols-4 gap-2">
                   {['50', '100', '200', '500'].map((val) => (
                     <motion.button
@@ -1379,10 +1438,10 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                       key={val}
                       type="button"
                       onClick={() => setAmountDh(val)}
-                      className={`py-3 rounded-xl border text-xs sm:text-sm font-black transition-all active:scale-90 ${
+                      className={`py-3 rounded-xl border text-xs sm:text-sm font-black transition-all cursor-pointer ${
                         amountDh === val
-                          ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                          : 'bg-slate-900 text-slate-300 border-cyan-500/30 hover:bg-slate-800'
+                          ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-600 shadow-md shadow-amber-500/20'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                       }`}
                     >
                       {val} DH
@@ -1393,60 +1452,60 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
               <form onSubmit={handleRechargeSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Mode de Paiement au Maroc</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Mode de Paiement au Maroc</label>
                   <CustomDropdown
                     value={paymentMethod}
                     onChange={setPaymentMethod}
                     options={[
-                      { value: 'CB / Instant', label: 'Paiement Immédiat (Carte Bancaire)', icon: PhosphorCreditCard, iconColor: 'text-emerald-400' },
-                      { value: 'Cash Plus', label: 'Cash Plus (Code Agence)', icon: Coins, iconColor: 'text-amber-400' },
-                      { value: 'Wafacash', label: 'Wafacash (Transfert Express)', icon: Coins, iconColor: 'text-rose-400' },
-                      { value: 'Barid Cash', label: 'Barid Cash (Reçu Agence)', icon: EnvelopeSimple, iconColor: 'text-yellow-400' },
-                      { value: 'Virement Bancaire', label: 'Virement RIB (CIH / Attijari / BMCE)', icon: Bank, iconColor: 'text-cyan-400' }
+                      { value: 'CB / Instant', label: 'Paiement Immédiat (Carte Bancaire)', icon: PhosphorCreditCard, iconColor: 'text-emerald-600' },
+                      { value: 'Cash Plus', label: 'Cash Plus (Code Agence)', icon: Coins, iconColor: 'text-amber-600' },
+                      { value: 'Wafacash', label: 'Wafacash (Transfert Express)', icon: Coins, iconColor: 'text-rose-600' },
+                      { value: 'Barid Cash', label: 'Barid Cash (Reçu Agence)', icon: EnvelopeSimple, iconColor: 'text-yellow-600' },
+                      { value: 'Virement Bancaire', label: 'Virement RIB (CIH / Attijari / BMCE)', icon: Bank, iconColor: 'text-blue-600' }
                     ]}
                   />
                 </div>
 
-                <div className="p-4 bg-slate-900/90 border border-cyan-500/30 rounded-2xl text-xs space-y-2">
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-2 text-slate-700">
                   {paymentMethod === 'CB / Instant' && (
                     <>
-                      <p className="font-black text-emerald-400 flex items-center gap-1">
-                        <CreditCard className="w-4 h-4" /> Crédit Instantané Supabase :
+                      <p className="font-black text-emerald-800 flex items-center gap-1">
+                        <CreditCard className="w-4 h-4 text-emerald-600" /> Crédit Instantané Supabase :
                       </p>
-                      <p className="text-slate-300">Votre solde <code className="text-cyan-300">profiles.credits</code> sera immédiatement crédité de <strong>{amountDh} DH</strong> dès validation.</p>
+                      <p className="text-slate-600">Votre solde sera immédiatement crédité de <strong className="text-slate-900">{amountDh} DH</strong> dès validation.</p>
                     </>
                   )}
                   {paymentMethod === 'Cash Plus' && (
                     <>
-                      <p className="font-black text-cyan-300 flex items-center gap-1.5">
-                        <Coins className="w-3.5 h-3.5 text-amber-400" />
+                      <p className="font-black text-amber-800 flex items-center gap-1.5">
+                        <Coins className="w-3.5 h-3.5 text-amber-600" />
                         <span>Instructions Cash Plus :</span>
                       </p>
-                      <p className="text-slate-300">Rendez-vous en agence Cash Plus avec le code : <strong className="text-cyan-400 font-mono">CP-BRICOLEMOI-88</strong></p>
+                      <p className="text-slate-600">Rendez-vous en agence Cash Plus avec le code : <strong className="text-slate-900 font-mono">CP-BRICOLEMOI-88</strong></p>
                     </>
                   )}
                   {paymentMethod === 'Wafacash' && (
                     <>
-                      <p className="font-black text-cyan-300 flex items-center gap-1.5">
-                        <Coins className="w-3.5 h-3.5 text-rose-400" />
+                      <p className="font-black text-rose-800 flex items-center gap-1.5">
+                        <Coins className="w-3.5 h-3.5 text-rose-600" />
                         <span>Instructions Wafacash :</span>
                       </p>
-                      <p className="text-slate-300">Mandat express au nom de : <strong className="text-cyan-400">BricoleMoi SARL (+212661000000)</strong></p>
+                      <p className="text-slate-600">Mandat express au nom de : <strong className="text-slate-900">BricoleMoi SARL (+212661000000)</strong></p>
                     </>
                   )}
                   {paymentMethod === 'Barid Cash' && (
                     <>
-                      <p className="font-black text-cyan-300 flex items-center gap-1.5">
-                        <EnvelopeSimple className="w-3.5 h-3.5 text-yellow-400" />
+                      <p className="font-black text-yellow-800 flex items-center gap-1.5">
+                        <EnvelopeSimple className="w-3.5 h-3.5 text-yellow-600" />
                         <span>Instructions Barid Cash :</span>
                       </p>
-                      <p className="text-slate-300">Guichet Poste Maroc / Barid Cash sous le compte : <strong className="text-cyan-400 font-mono">BC-998811</strong></p>
+                      <p className="text-slate-600">Guichet Poste Maroc / Barid Cash sous le compte : <strong className="text-slate-900 font-mono">BC-998811</strong></p>
                     </>
                   )}
                   {paymentMethod === 'Virement Bancaire' && (
                     <>
-                      <p className="font-black text-cyan-300">🏦 Instructions Virement RIB Bancaire :</p>
-                      <p className="text-slate-300 font-mono text-[11px]">RIB CIH : 230 780 0001234567890123 45</p>
+                      <p className="font-black text-blue-800">🏦 Instructions Virement RIB Bancaire :</p>
+                      <p className="text-slate-600 font-mono text-[11px]">RIB CIH : 230 780 0001234567890123 45</p>
                     </>
                   )}
                 </div>
@@ -1454,7 +1513,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                 {paymentMethod !== 'CB / Instant' && (
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
                         Numéro de Référence du Reçu (Recommandé)
                       </label>
                       <input
@@ -1462,45 +1521,45 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                         placeholder="ex: CP-984029102 ou WC-489201"
                         value={referenceRef}
                         onChange={(e) => setReferenceRef(e.target.value)}
-                        className="w-full p-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm uppercase focus:border-cyan-400 focus:outline-none transition-colors shadow-sm"
+                        className="w-full p-3 bg-white border border-slate-200 rounded-xl text-slate-800 font-mono text-sm uppercase focus:border-amber-500 focus:outline-none transition-colors shadow-xs"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
                         <span>📸 Photo du Reçu / Ticket Papier (Justificatif) :</span>
                         {receiptPhotoUrl && (
-                          <span className="text-[10px] text-emerald-400 font-mono font-bold">✓ Photo Attachée</span>
+                          <span className="text-[10px] text-emerald-700 font-mono font-bold">✓ Photo Attachée</span>
                         )}
                       </label>
 
                       {receiptPhotoUrl ? (
-                        <div className="relative rounded-2xl border border-emerald-500/50 p-2.5 bg-slate-900 flex items-center justify-between gap-3 shadow-[0_0_15px_rgba(52,211,153,0.2)]">
+                        <div className="relative rounded-2xl border border-emerald-300 p-2.5 bg-emerald-50 flex items-center justify-between gap-3 shadow-xs">
                           <div className="flex items-center gap-3">
                             <img
                               src={receiptPhotoUrl}
                               alt="Ticket reçu"
-                              className="w-14 h-14 object-cover rounded-xl border border-emerald-500/40 cursor-pointer"
+                              className="w-14 h-14 object-cover rounded-xl border border-emerald-200 cursor-pointer"
                               onClick={() => setPreviewPhotoUrl(receiptPhotoUrl)}
                             />
                             <div>
-                              <p className="text-xs font-bold text-emerald-300">Ticket Reçu / Virement Prêt</p>
-                              <p className="text-[10px] text-slate-400">Cliquez sur l'image pour agrandir HD</p>
+                              <p className="text-xs font-bold text-emerald-900">Ticket Reçu / Virement Prêt</p>
+                              <p className="text-[10px] text-emerald-700">Cliquez sur l'image pour agrandir HD</p>
                             </div>
                           </div>
                           <button
                             type="button"
                             onClick={() => setReceiptPhotoUrl(null)}
-                            className="p-2 text-rose-400 hover:text-rose-300 hover:bg-slate-800 rounded-xl transition-colors"
+                            className="p-2 text-rose-600 hover:text-rose-800 hover:bg-rose-100/50 rounded-xl transition-colors cursor-pointer"
                             title="Supprimer la photo"
                           >
                             <X className="w-4 h-4" />
                           </button>
                         </div>
                       ) : (
-                        <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-cyan-500/30 hover:border-cyan-400 rounded-2xl bg-slate-900/60 cursor-pointer transition-colors group">
-                          <Camera className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform mb-1" />
-                          <span className="text-xs font-bold text-slate-200">Prendre en photo le ticket papier</span>
+                        <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-300 hover:border-amber-500 rounded-2xl bg-slate-50 cursor-pointer transition-colors group">
+                          <Camera className="w-6 h-6 text-amber-600 group-hover:scale-110 transition-transform mb-1" />
+                          <span className="text-xs font-bold text-slate-700">Prendre en photo le ticket papier</span>
                           <span className="text-[10px] text-slate-400 mt-0.5">JPG, PNG ou capture d'écran de l'application</span>
                           <input
                             type="file"
@@ -1518,9 +1577,9 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black text-sm rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95 transition-all"
+                  className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm rounded-xl shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
                 >
-                  Payer & Recharger ({amountDh} DH)
+                  Payer &amp; Recharger ({amountDh} DH)
                 </motion.button>
               </form>
             </motion.div>
@@ -1533,33 +1592,33 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md font-sans"
+            className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md font-sans"
           >
             <motion.div
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="bg-slate-900 border border-cyan-500/30 p-4 sm:p-6 rounded-3xl w-full max-w-2xl shadow-[0_0_50px_rgba(6,182,212,0.25)] space-y-4 max-h-[85vh] overflow-y-auto modal-scroll flex flex-col"
+              className="bg-white border border-slate-200 p-6 rounded-3xl w-full max-w-2xl shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto modal-scroll flex flex-col text-slate-900"
             >
               {/* Header Modal */}
-              <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-slate-950 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shadow-[0_0_12px_rgba(6,182,212,0.3)]">
-                    <Receipt weight="duotone" className="w-5 h-5 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+                  <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shadow-xs">
+                    <Receipt weight="duotone" className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-white font-sans">Historique &amp; Portefeuille</h3>
-                    <p className="text-xs text-slate-400">Recharges, déblocages de leads clients et bonus</p>
+                    <h3 className="text-xl font-black text-slate-900 font-sans">Historique &amp; Portefeuille</h3>
+                    <p className="text-xs text-slate-500">Recharges, déblocages de leads clients et bonus</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-cyan-500/30 text-xs font-mono font-black text-cyan-300">
+                  <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-mono font-black text-slate-800">
                     <span>Solde :</span>
-                    <span className="text-white">{liveCreditBalance.toFixed(2)} DH</span>
+                    <span className="text-amber-700">{liveCreditBalance.toFixed(2)} DH</span>
                   </div>
                   <button
                     onClick={() => setHistoryModalOpen(false)}
-                    className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition-colors"
+                    className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -1568,29 +1627,29 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
               {/* 3 Summary KPIs */}
               <div className="grid grid-cols-3 gap-2.5">
-                <div className="p-3 bg-slate-950/80 rounded-2xl border border-emerald-500/30 text-center">
-                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Rechargé</span>
-                  <span className="text-sm font-black text-emerald-300 font-mono">+{totalRechargedSum.toFixed(2)} DH</span>
+                <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-center">
+                  <span className="text-[10px] text-emerald-800 font-bold block uppercase tracking-wider">Rechargé</span>
+                  <span className="text-sm font-black text-emerald-700 font-mono">+{totalRechargedSum.toFixed(2)} DH</span>
                 </div>
-                <div className="p-3 bg-slate-950/80 rounded-2xl border border-cyan-500/30 text-center">
-                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Leads Débloqués</span>
-                  <span className="text-sm font-black text-cyan-300 font-mono">-{totalLeadsSpent.toFixed(2)} DH</span>
+                <div className="p-3 bg-blue-50 rounded-2xl border border-blue-200 text-center">
+                  <span className="text-[10px] text-blue-800 font-bold block uppercase tracking-wider">Leads Débloqués</span>
+                  <span className="text-sm font-black text-blue-700 font-mono">-{totalLeadsSpent.toFixed(2)} DH</span>
                 </div>
-                <div className="p-3 bg-slate-950/80 rounded-2xl border border-amber-500/30 text-center">
-                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Bonus Reçus</span>
-                  <span className="text-sm font-black text-amber-300 font-mono">+{totalBonusSum.toFixed(2)} DH</span>
+                <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-center">
+                  <span className="text-[10px] text-amber-800 font-bold block uppercase tracking-wider">Bonus Reçus</span>
+                  <span className="text-sm font-black text-amber-700 font-mono">+{totalBonusSum.toFixed(2)} DH</span>
                 </div>
               </div>
 
               {/* Filter Tabs */}
-              <div className="flex flex-wrap gap-1 p-1 bg-slate-950/90 rounded-2xl border border-cyan-500/20 text-xs font-bold">
+              <div className="flex flex-wrap gap-1 p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs font-bold">
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('ALL')}
-                  className={`px-3 py-1.5 rounded-xl transition-all ${
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                     historyFilter === 'ALL'
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-slate-900 shadow-xs font-black'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   Tous ({myTransactions.length})
@@ -1598,47 +1657,47 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('RECHARGE')}
-                  className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 ${
+                  className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer ${
                     historyFilter === 'RECHARGE'
-                      ? 'bg-emerald-600 text-white shadow-sm font-black'
-                      : 'text-slate-400 hover:text-emerald-300'
+                      ? 'bg-emerald-600 text-white shadow-xs font-black'
+                      : 'text-slate-600 hover:text-emerald-700'
                   }`}
                 >
-                  <Coins className="w-3.5 h-3.5 text-emerald-400" />
+                  <Coins className="w-3.5 h-3.5" />
                   <span>Recharges ({myTransactions.filter(t => t.type === 'RECHARGE').length})</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('LEAD')}
-                  className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 ${
+                  className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer ${
                     historyFilter === 'LEAD'
-                      ? 'bg-cyan-600 text-white shadow-sm font-black'
-                      : 'text-slate-400 hover:text-cyan-300'
+                      ? 'bg-blue-600 text-white shadow-xs font-black'
+                      : 'text-slate-600 hover:text-blue-700'
                   }`}
                 >
-                  <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                  <Zap className="w-3.5 h-3.5" />
                   <span>Leads SOS ({myTransactions.filter(t => t.type === 'LEAD_DEDUCTION' || t.type === 'DEBIT').length})</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('BONUS')}
-                  className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 ${
+                  className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer ${
                     historyFilter === 'BONUS'
-                      ? 'bg-amber-500 text-black shadow-sm font-black'
-                      : 'text-slate-400 hover:text-amber-300'
+                      ? 'bg-amber-500 text-white shadow-xs font-black'
+                      : 'text-slate-600 hover:text-amber-700'
                   }`}
                 >
-                  <Gift className="w-3.5 h-3.5 text-amber-400" />
+                  <Gift className="w-3.5 h-3.5" />
                   <span>Bonus ({myTransactions.filter(t => t.type === 'BONUS' || t.payment_method?.includes('Offert')).length})</span>
                 </button>
                 {pendingMyRechargesCount > 0 && (
                   <button
                     type="button"
                     onClick={() => setHistoryFilter('PENDING')}
-                    className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer ${
                       historyFilter === 'PENDING'
-                        ? 'bg-amber-500 text-black shadow-sm font-black'
-                        : 'text-amber-400 hover:text-amber-300'
+                        ? 'bg-amber-500 text-white shadow-xs font-black'
+                        : 'text-amber-700 hover:text-amber-800'
                     }`}
                   >
                     <Clock className="w-3.5 h-3.5" />
@@ -1650,9 +1709,9 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
               {/* Transactions Scrollable List */}
               <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 max-h-[48vh]">
                 {filteredHistoryTransactions.length === 0 ? (
-                  <div className="p-8 text-center bg-slate-950/70 border border-cyan-500/20 rounded-2xl text-slate-400 text-xs space-y-2">
-                    <p className="text-sm font-bold text-slate-300">Aucune transaction trouvée pour ce filtre.</p>
-                    <p className="text-[11px] text-slate-500">Toutes vos opérations apparaîtront ici automatiquement.</p>
+                  <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl text-slate-500 text-xs space-y-2">
+                    <p className="text-sm font-bold text-slate-800">Aucune transaction trouvée pour ce filtre.</p>
+                    <p className="text-[11px] text-slate-400">Toutes vos opérations apparaîtront ici automatiquement.</p>
                   </div>
                 ) : (
                   filteredHistoryTransactions.map((tx) => {
@@ -1668,15 +1727,15 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                     return (
                       <div
                         key={tx.id}
-                        className={`p-3.5 bg-slate-950/80 border rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
-                          isPending ? 'border-amber-500/40' : isRejected ? 'border-red-500/30' : 'border-cyan-500/20 hover:border-cyan-500/40'
+                        className={`p-3.5 bg-white border rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
+                          isPending ? 'border-amber-300 bg-amber-50/20' : isRejected ? 'border-red-300 bg-red-50/20' : 'border-slate-200 hover:border-slate-300'
                         }`}
                       >
                         <div className="flex items-start gap-3">
                           <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                            isBonus ? 'bg-amber-950/80 text-amber-400 border border-amber-500/40' :
-                            isLead ? 'bg-cyan-950/80 text-cyan-400 border border-cyan-500/40' :
-                            'bg-emerald-950/80 text-emerald-400 border border-emerald-500/40'
+                            isBonus ? 'bg-amber-50 text-amber-600 border border-amber-200' :
+                            isLead ? 'bg-blue-50 text-blue-600 border border-blue-200' :
+                            'bg-emerald-50 text-emerald-600 border border-emerald-200'
                           }`}>
                             {isBonus ? (
                               <Gift className="w-4 h-4" />
@@ -1689,36 +1748,36 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-bold text-slate-100 text-xs">
+                              <span className="font-bold text-slate-900 text-xs">
                                 {isBonus ? 'Bonus Récompense Platform' : isLead ? 'Déblocage Lead Client SOS' : `Recharge Solde (${tx.payment_method || 'Virement'})`}
                               </span>
                               {isPending && (
-                                <span className="px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40 text-[9px] font-bold">
+                                <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[9px] font-bold">
                                   ⏳ En attente validation
                                 </span>
                               )}
                               {isValidated && (
-                                <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-[9px] font-bold">
+                                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[9px] font-bold">
                                   ✔ Validé
                                 </span>
                               )}
                               {isRejected && (
-                                <span className="px-2 py-0.5 rounded-full bg-red-950 text-red-300 border border-red-500/40 text-[9px] font-bold">
+                                <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-800 border border-red-200 text-[9px] font-bold">
                                   ✖ Refusé
                                 </span>
                               )}
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-400">
+                            <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500">
                               <span className="font-mono">{new Date(tx.created_at || Date.now()).toLocaleDateString('fr-FR')} à {new Date(tx.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                               {tx.reference_ref && (
-                                <span>• Réf : <strong className="text-slate-300 font-mono">{tx.reference_ref}</strong></span>
+                                <span>• Réf : <strong className="text-slate-700 font-mono">{tx.reference_ref}</strong></span>
                               )}
                               {tx.receipt_photo_url && (
                                 <button
                                   type="button"
                                   onClick={() => setPreviewPhotoUrl(tx.receipt_photo_url)}
-                                  className="text-cyan-400 hover:text-cyan-300 font-bold underline flex items-center gap-1 cursor-pointer"
+                                  className="text-blue-600 hover:text-blue-800 font-bold underline flex items-center gap-1 cursor-pointer"
                                 >
                                   <span>• 📷 Voir Mon Ticket</span>
                                 </button>
@@ -1727,11 +1786,11 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
                             {/* Rejection Motif Banner */}
                             {isRejected && tx.admin_notes && (
-                              <div className="mt-2 p-2.5 rounded-xl bg-red-950/80 border border-red-500/40 text-xs text-red-200">
-                                <p className="font-bold flex items-center gap-1 text-red-400">
+                              <div className="mt-2 p-2.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-900">
+                                <p className="font-bold flex items-center gap-1 text-red-700">
                                   <span>❌ Motif du rejet par l'Admin :</span>
                                 </p>
-                                <p className="mt-0.5 text-slate-100 font-medium italic">
+                                <p className="mt-0.5 text-slate-800 font-medium italic">
                                   "{tx.admin_notes}"
                                 </p>
                               </div>
@@ -1741,7 +1800,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
                         <div className="flex items-center justify-between sm:justify-end gap-3 self-end sm:self-center">
                           <span className={`text-base font-black font-mono ${
-                            isPositive ? 'text-emerald-400' : 'text-cyan-400'
+                            isPositive ? 'text-emerald-600' : 'text-slate-800'
                           }`}>
                             {isPositive ? `+${Number(tx.amount_dh).toFixed(2)}` : `${Number(tx.amount_dh).toFixed(2)}`} DH
                           </span>
@@ -1750,10 +1809,10 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                             <motion.button
                               whileTap={{ scale: 0.90 }}
                               onClick={() => generateReceiptPDF(tx)}
-                              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 text-[11px] font-bold rounded-xl flex items-center gap-1 shadow-sm active:scale-90 transition-all"
+                              className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-[11px] font-bold rounded-xl flex items-center gap-1 shadow-xs active:scale-90 transition-all cursor-pointer"
                               title="Télécharger le reçu officiel PDF"
                             >
-                              <Printer className="w-3.5 h-3.5" />
+                              <Printer className="w-3.5 h-3.5 text-slate-600" />
                               <span className="hidden xs:inline">Reçu</span>
                             </motion.button>
                           )}
@@ -1765,14 +1824,14 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
               </div>
 
               {/* Modal Footer */}
-              <div className="pt-3 border-t border-cyan-500/20 flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">
+              <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+                <span className="text-[11px] text-slate-500">
                   Affichage de {filteredHistoryTransactions.length} transaction(s)
                 </span>
                 <button
                   type="button"
                   onClick={() => setHistoryModalOpen(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition-all"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
                 >
                   Fermer
                 </button>
@@ -1781,26 +1840,26 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
           </motion.div>
         )}
 
-        {/* Fullscreen Photo Zoom Modal (Visionneuse HD pour l'Artisan) */}
+        {/* Fullscreen Photo Zoom Modal */}
         {previewPhotoUrl && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setPreviewPhotoUrl(null)}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md cursor-pointer"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md cursor-pointer"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-2xl max-h-[85vh] p-2 bg-slate-950 border border-cyan-500/50 rounded-3xl shadow-[0_0_40px_rgba(6,182,212,0.4)] overflow-hidden"
+              className="relative max-w-2xl max-h-[85vh] p-2 bg-white rounded-3xl shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={() => setPreviewPhotoUrl(null)}
-                className="absolute top-4 right-4 p-2 bg-slate-900/80 text-white rounded-full hover:bg-red-600 transition-colors z-10 cursor-pointer"
+                className="absolute top-4 right-4 p-2 bg-slate-100 text-slate-700 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors z-10 cursor-pointer shadow-sm"
                 title="Fermer la photo"
               >
                 <X className="w-5 h-5" />
@@ -1813,7 +1872,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
               />
 
               <div className="p-3 text-center">
-                <span className="text-xs font-bold text-cyan-300">
+                <span className="text-xs font-bold text-slate-600">
                   🔍 Photo HD de la panne — Cliquez en dehors pour fermer
                 </span>
               </div>
@@ -1821,40 +1880,40 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
           </motion.div>
         )}
 
-        {/* Modal Litige & Garantie Anti-Abus (Crédit de Remplacement 15 DH) */}
+        {/* Modal Litige & Garantie Anti-Abus */}
         {unreachableModalLead && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md"
           >
             <motion.div
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
-              className="bg-slate-950 border border-amber-500/50 rounded-3xl max-w-md w-full p-4 sm:p-6 max-h-modal overflow-y-auto modal-scroll shadow-[0_0_30px_rgba(251,191,36,0.3)] space-y-4 text-slate-100"
+              className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900"
             >
-              <div className="flex items-center justify-between border-b border-amber-500/30 pb-3">
-                <div className="flex items-center gap-2 text-amber-400">
-                  <ShieldCheck className="w-5 h-5 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-                  <h3 className="font-extrabold text-sm">Garantie Anti-Abus &amp; Crédit de Remplacement</h3>
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div className="flex items-center gap-2 text-amber-700">
+                  <ShieldCheck className="w-5 h-5" />
+                  <h3 className="font-extrabold text-sm text-slate-900">Garantie Anti-Abus &amp; Crédit de Remplacement</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setUnreachableModalLead(null)}
-                  className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900"
+                  className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="space-y-2 text-xs text-slate-300">
+              <div className="space-y-2 text-xs text-slate-600">
                 <p>
-                  Vous avez tenté de joindre <strong>{unreachableModalLead.client_name || 'le Client'}</strong> et le numéro est faux, injoignable ou la demande est annulée ?
+                  Vous avez tenté de joindre <strong className="text-slate-900">{unreachableModalLead.client_name || 'le Client'}</strong> et le numéro est faux, injoignable ou la demande est annulée ?
                 </p>
-                <div className="text-[11px] text-amber-300/90 bg-amber-950/40 p-3 rounded-xl border border-amber-500/30 space-y-1">
-                  <p className="font-bold flex items-center gap-1 text-amber-300">
+                <div className="text-[11px] text-amber-900 bg-amber-50 p-3.5 rounded-2xl border border-amber-200 space-y-1">
+                  <p className="font-bold flex items-center gap-1 text-amber-800">
                     <span>🛡️ Règles Métier Anti-Abus BricoleMoi :</span>
                   </p>
                   <p>• Signalement autorisé sous <strong>30 minutes maximum</strong> après déblocage.</p>
@@ -1864,11 +1923,11 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
               </div>
 
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-slate-300">Motif précis du signalement :</label>
+                <label className="text-[11px] font-bold text-slate-700">Motif précis du signalement :</label>
                 <select
                   value={unreachableReason}
                   onChange={(e) => setUnreachableReason(e.target.value)}
-                  className="w-full py-2.5 px-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-medium"
+                  className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-amber-500 font-medium"
                 >
                   <option value="CLIENT_UNREACHABLE">📵 Client Injoignable (Ne décroche pas / Téléphone éteint)</option>
                   <option value="CLIENT_CANCELLED">❌ Client a Déjà Trouvé / Annulé son besoin</option>
@@ -1877,11 +1936,11 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                 </select>
               </div>
 
-              <div className="flex items-center gap-2 pt-2 border-t border-cyan-500/20">
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setUnreachableModalLead(null)}
-                  className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold rounded-xl transition-all"
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
                 >
                   Annuler
                 </button>
@@ -1891,7 +1950,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                     reportUnreachableClient(unreachableModalLead.id, unreachableReason);
                     setUnreachableModalLead(null);
                   }}
-                  className="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs rounded-xl shadow-[0_0_15px_rgba(251,191,36,0.4)] transition-all cursor-pointer"
+                  className="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all cursor-pointer"
                 >
                   🛡️ Crédit de Remplacement (+15 DH)
                 </button>

@@ -18,11 +18,11 @@ import {
 import { playNotificationSound, triggerVibration } from './audioNotifier';
 
 // =========================================================================
-// 1. Cache de déduplication anti-double notification (TTL 3.5s)
+// 1. Cache de déduplication anti-double notification (TTL 4.5s)
 // =========================================================================
 const recentNotifications = new Map();
 
-const shouldSkipDuplicate = (key, cooldownMs = 3500) => {
+const shouldSkipDuplicate = (key, cooldownMs = 4500) => {
   if (!key) return false;
   const now = Date.now();
   const lastTime = recentNotifications.get(key);
@@ -31,7 +31,7 @@ const shouldSkipDuplicate = (key, cooldownMs = 3500) => {
   }
   recentNotifications.set(key, now);
   // Nettoyage automatique des anciennes entrées
-  if (recentNotifications.size > 80) {
+  if (recentNotifications.size > 100) {
     for (const [k, time] of recentNotifications.entries()) {
       if (now - time > 15000) recentNotifications.delete(k);
     }
@@ -44,7 +44,7 @@ const shouldSkipDuplicate = (key, cooldownMs = 3500) => {
 // =========================================================================
 const notificationQueue = [];
 let isProcessingQueue = false;
-const STAGGER_DELAY_MS = 380; // Délai d'échelonnement entre deux popups consécutives
+const STAGGER_DELAY_MS = 300;
 
 const processQueue = () => {
   if (notificationQueue.length === 0) {
@@ -73,17 +73,19 @@ const enqueueToast = (toastTriggerFn) => {
 };
 
 // =========================================================================
-// 3. Unified Dark Sci-Fi Glassmorphism Cascading Notification System
+// 3. Unified Modern Clean & Trust Cascading Notification System
 // =========================================================================
 export const notify = {
   /**
-   * Success Notification (Neon Emerald Glow)
+   * Success Notification (Clean Emerald Badge)
    */
   success: (title, description, options = {}) => {
-    const dedupKey = options.id || options.dedupKey || `${title}:${description || ''}`;
-    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 3500)) {
+    const dedupKey = `success:${title}:${description || ''}`;
+    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 4500)) {
       return null;
     }
+
+    const toastId = options.id || dedupKey;
 
     enqueueToast(() => {
       if (!options.silent) {
@@ -92,28 +94,23 @@ export const notify = {
       }
 
       toast.custom((t) => (
-        <div className="w-full max-w-sm sm:max-w-md bg-slate-950/95 backdrop-blur-2xl border border-emerald-500/40 rounded-2xl p-3.5 sm:p-4 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_25px_rgba(52,211,153,0.25)] flex items-start justify-between gap-3 text-slate-100 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group">
-          {/* Top accent glow bar */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_8px_rgba(52,211,153,1)]" />
-          {/* Ambient light bubble */}
-          <div className="absolute -top-6 -right-6 w-24 h-24 bg-emerald-500/20 rounded-full blur-xl pointer-events-none" />
-
+        <div className="w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xl flex items-start justify-between gap-3 text-slate-900 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group font-sans">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(52,211,153,0.4)] mt-0.5 group-hover:scale-105 transition-transform">
-              <CheckCircle2 className="w-5 h-5 drop-shadow-[0_0_6px_rgba(52,211,153,0.9)]" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5 group-hover:scale-105 transition-transform">
+              <CheckCircle2 className="w-5 h-5" />
             </div>
 
             <div className="min-w-0 flex-1">
-              <h4 className="text-xs sm:text-sm font-black text-white leading-tight truncate">
+              <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-tight truncate">
                 {title}
               </h4>
               {description && (
-                <p className="text-[11px] sm:text-xs text-slate-300 mt-1 leading-relaxed line-clamp-2">
+                <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed line-clamp-2">
                   {description}
                 </p>
               )}
               {options.badge && (
-                <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-[10px] font-mono font-bold text-emerald-300 shadow-inner">
+                <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-mono font-bold text-emerald-800 shadow-xs">
                   {options.badge}
                 </span>
               )}
@@ -123,7 +120,7 @@ export const notify = {
           <button
             type="button"
             onClick={() => toast.dismiss(t)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-900 transition-colors flex-shrink-0 cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0 cursor-pointer"
             title="Fermer"
           >
             <X className="w-4 h-4" />
@@ -131,22 +128,24 @@ export const notify = {
         </div>
       ), {
         duration: options.duration || 5000,
-        id: dedupKey,
+        id: toastId,
         ...options
       });
     });
 
-    return dedupKey;
+    return toastId;
   },
 
   /**
-   * Info Notification (Neon Cyan Glow)
+   * Info Notification (Clean Blue Badge)
    */
   info: (title, description, options = {}) => {
-    const dedupKey = options.id || options.dedupKey || `${title}:${description || ''}`;
-    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 3500)) {
+    const dedupKey = `info:${title}:${description || ''}`;
+    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 4500)) {
       return null;
     }
+
+    const toastId = options.id || dedupKey;
 
     enqueueToast(() => {
       if (!options.silent) {
@@ -154,28 +153,23 @@ export const notify = {
       }
 
       toast.custom((t) => (
-        <div className="w-full max-w-sm sm:max-w-md bg-slate-950/95 backdrop-blur-2xl border border-cyan-500/40 rounded-2xl p-3.5 sm:p-4 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_25px_rgba(6,182,212,0.25)] flex items-start justify-between gap-3 text-slate-100 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group">
-          {/* Top accent glow bar */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_8px_rgba(6,182,212,1)]" />
-          {/* Ambient light bubble */}
-          <div className="absolute -top-6 -right-6 w-24 h-24 bg-cyan-500/20 rounded-full blur-xl pointer-events-none" />
-
+        <div className="w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xl flex items-start justify-between gap-3 text-slate-900 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group font-sans">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-cyan-950/90 border border-cyan-500/50 text-cyan-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.4)] mt-0.5 group-hover:scale-105 transition-transform">
-              <Info className="w-5 h-5 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)]" />
+            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5 group-hover:scale-105 transition-transform">
+              <Info className="w-5 h-5" />
             </div>
 
             <div className="min-w-0 flex-1">
-              <h4 className="text-xs sm:text-sm font-black text-white leading-tight truncate">
+              <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-tight truncate">
                 {title}
               </h4>
               {description && (
-                <p className="text-[11px] sm:text-xs text-slate-300 mt-1 leading-relaxed line-clamp-2">
+                <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed line-clamp-2">
                   {description}
                 </p>
               )}
               {options.badge && (
-                <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-[10px] font-mono font-bold text-cyan-300 shadow-inner">
+                <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[10px] font-mono font-bold text-blue-800 shadow-xs">
                   {options.badge}
                 </span>
               )}
@@ -185,7 +179,7 @@ export const notify = {
           <button
             type="button"
             onClick={() => toast.dismiss(t)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-900 transition-colors flex-shrink-0 cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0 cursor-pointer"
             title="Fermer"
           >
             <X className="w-4 h-4" />
@@ -193,22 +187,24 @@ export const notify = {
         </div>
       ), {
         duration: options.duration || 5000,
-        id: dedupKey,
+        id: toastId,
         ...options
       });
     });
 
-    return dedupKey;
+    return toastId;
   },
 
   /**
-   * Warning Notification (Neon Amber Glow)
+   * Warning Notification (Warm Amber Badge)
    */
   warning: (title, description, options = {}) => {
-    const dedupKey = options.id || options.dedupKey || `${title}:${description || ''}`;
-    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 3500)) {
+    const dedupKey = `warning:${title}:${description || ''}`;
+    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 4500)) {
       return null;
     }
+
+    const toastId = options.id || dedupKey;
 
     enqueueToast(() => {
       if (!options.silent) {
@@ -217,23 +213,18 @@ export const notify = {
       }
 
       toast.custom((t) => (
-        <div className="w-full max-w-sm sm:max-w-md bg-slate-950/95 backdrop-blur-2xl border border-amber-500/40 rounded-2xl p-3.5 sm:p-4 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_25px_rgba(251,191,36,0.25)] flex items-start justify-between gap-3 text-slate-100 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group">
-          {/* Top accent glow bar */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_8px_rgba(251,191,36,1)]" />
-          {/* Ambient light bubble */}
-          <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber-500/20 rounded-full blur-xl pointer-events-none" />
-
+        <div className="w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xl flex items-start justify-between gap-3 text-slate-900 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group font-sans">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-amber-950/90 border border-amber-500/50 text-amber-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(251,191,36,0.4)] mt-0.5 group-hover:scale-105 transition-transform">
-              <AlertTriangle className="w-5 h-5 drop-shadow-[0_0_6px_rgba(251,191,36,0.9)]" />
+            <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5 group-hover:scale-105 transition-transform">
+              <AlertTriangle className="w-5 h-5" />
             </div>
 
             <div className="min-w-0 flex-1">
-              <h4 className="text-xs sm:text-sm font-black text-amber-300 leading-tight truncate">
+              <h4 className="text-xs sm:text-sm font-black text-amber-900 leading-tight truncate">
                 {title}
               </h4>
               {description && (
-                <p className="text-[11px] sm:text-xs text-slate-300 mt-1 leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed">
                   {description}
                 </p>
               )}
@@ -243,7 +234,7 @@ export const notify = {
           <button
             type="button"
             onClick={() => toast.dismiss(t)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-900 transition-colors flex-shrink-0 cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0 cursor-pointer"
             title="Fermer"
           >
             <X className="w-4 h-4" />
@@ -251,22 +242,24 @@ export const notify = {
         </div>
       ), {
         duration: options.duration || 6000,
-        id: dedupKey,
+        id: toastId,
         ...options
       });
     });
 
-    return dedupKey;
+    return toastId;
   },
 
   /**
-   * Error Notification (Neon Rose Glow)
+   * Error Notification (Rose Alert Badge)
    */
   error: (title, description, options = {}) => {
-    const dedupKey = options.id || options.dedupKey || `${title}:${description || ''}`;
-    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 3500)) {
+    const dedupKey = `error:${title}:${description || ''}`;
+    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 4500)) {
       return null;
     }
+
+    const toastId = options.id || dedupKey;
 
     enqueueToast(() => {
       if (!options.silent) {
@@ -275,23 +268,18 @@ export const notify = {
       }
 
       toast.custom((t) => (
-        <div className="w-full max-w-sm sm:max-w-md bg-slate-950/95 backdrop-blur-2xl border border-rose-500/50 rounded-2xl p-3.5 sm:p-4 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_30px_rgba(244,63,94,0.3)] flex items-start justify-between gap-3 text-slate-100 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group">
-          {/* Top accent glow bar */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent shadow-[0_0_8px_rgba(244,63,94,1)]" />
-          {/* Ambient light bubble */}
-          <div className="absolute -top-6 -right-6 w-24 h-24 bg-rose-500/20 rounded-full blur-xl pointer-events-none" />
-
+        <div className="w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-xl border border-red-200 rounded-2xl p-3.5 sm:p-4 shadow-xl flex items-start justify-between gap-3 text-slate-900 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group font-sans">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-rose-950/90 border border-rose-500/50 text-rose-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(244,63,94,0.4)] mt-0.5 group-hover:scale-105 transition-transform">
-              <AlertTriangle className="w-5 h-5 drop-shadow-[0_0_6px_rgba(244,63,94,0.9)]" />
+            <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5 group-hover:scale-105 transition-transform">
+              <AlertTriangle className="w-5 h-5" />
             </div>
 
             <div className="min-w-0 flex-1">
-              <h4 className="text-xs sm:text-sm font-black text-rose-300 leading-tight truncate">
+              <h4 className="text-xs sm:text-sm font-black text-red-900 leading-tight truncate">
                 {title}
               </h4>
               {description && (
-                <p className="text-[11px] sm:text-xs text-slate-300 mt-1 leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed">
                   {description}
                 </p>
               )}
@@ -301,105 +289,134 @@ export const notify = {
           <button
             type="button"
             onClick={() => toast.dismiss(t)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-900 transition-colors flex-shrink-0 cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0 cursor-pointer"
             title="Fermer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
       ), {
-        duration: options.duration || 7000,
-        id: dedupKey,
+        duration: options.duration || 6000,
+        id: toastId,
         ...options
       });
     });
 
-    return dedupKey;
+    return toastId;
   },
 
   /**
-   * SOS Emergency Notification (Neon Crimson Siren Glow with Fast Action)
+   * Urgent SOS Emergency Notification (Pulsing Red Card with Audio & Vibration)
    */
-  sos: (title, description, options = {}) => {
-    const dedupKey = options.id || options.dedupKey || `sos:${title}`;
-    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 3500)) {
+  emergency: (lead, onAccept, options = {}) => {
+    const dedupKey = `emergency:${lead?.id || 'live'}`;
+    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 5000)) {
       return null;
     }
+
+    const toastId = options.id || dedupKey;
 
     enqueueToast(() => {
       if (!options.silent) {
-        playNotificationSound('emergency');
-        triggerVibration([200, 100, 200, 100]);
+        playNotificationSound('sos');
+        triggerVibration([300, 150, 300, 150, 400]);
       }
 
       toast.custom((t) => (
-        <div className="w-full max-w-sm sm:max-w-md bg-slate-950/95 backdrop-blur-2xl border-2 border-red-500/60 rounded-2xl p-4 shadow-[0_15px_45px_rgba(0,0,0,0.9),0_0_30px_rgba(239,68,68,0.35)] flex items-start justify-between gap-3 text-slate-100 relative overflow-hidden animate-pulse duration-1000 group">
-          {/* Top siren glow bar */}
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-red-500 via-amber-400 to-red-500 shadow-[0_0_12px_rgba(239,68,68,1)]" />
-          <div className="absolute -top-8 -right-8 w-28 h-28 bg-red-500/25 rounded-full blur-2xl pointer-events-none" />
+        <div className="w-full max-w-sm sm:max-w-md bg-white border-2 border-red-400 rounded-3xl p-4 sm:p-5 shadow-2xl text-slate-900 relative overflow-hidden animate-pulse-subtle font-sans">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 via-amber-500 to-red-500 animate-gradient-x" />
 
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-red-950 border border-red-500/70 text-red-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_15px_rgba(239,68,68,0.5)] mt-0.5">
-              <Zap className="w-5 h-5 text-red-400 animate-bounce drop-shadow-[0_0_8px_rgba(239,68,68,0.9)]" />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                <span className="text-[10px] font-mono font-black text-red-400 uppercase tracking-wider">Alerte SOS Immédiate</span>
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-red-100 text-red-600 border border-red-200 flex items-center justify-center flex-shrink-0 animate-bounce-subtle">
+                <Zap className="w-6 h-6 fill-red-600" />
               </div>
-              <h4 className="text-sm font-black text-white leading-tight mt-0.5 truncate">
-                {title}
-              </h4>
-              {description && (
-                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                  {description}
-                </p>
-              )}
-              {options.onAction && (
-                <div className="mt-3 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      options.onAction();
-                      toast.dismiss(t);
-                    }}
-                    className="px-4 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black text-xs rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.5)] active:scale-95 transition-all cursor-pointer"
-                  >
-                    {options.actionLabel || 'Ouvrir la mission'}
-                  </button>
-                </div>
-              )}
+              <div className="min-w-0">
+                <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-[10px] font-black uppercase tracking-wider inline-block">
+                  🚨 URGENCE SOS CLIENT
+                </span>
+                <h4 className="text-sm font-black text-slate-900 truncate mt-0.5">
+                  {lead.specialty || 'Plomberie & Dépannage'}
+                </h4>
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t)}
+              className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors flex-shrink-0 cursor-pointer"
+              title="Ignorer"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => toast.dismiss(t)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-900 transition-colors flex-shrink-0 cursor-pointer"
-            title="Fermer"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 mb-3.5 space-y-1.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500 flex items-center gap-1 font-medium">
+                <MapPin className="w-3.5 h-3.5 text-blue-600" /> Quartier :
+              </span>
+              <span className="font-bold text-slate-800">
+                {lead.district || lead.city_zone || 'Casablanca'}
+              </span>
+            </div>
+            {lead.distance_km && (
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">Distance estimée :</span>
+                <span className="font-mono font-bold text-blue-600">
+                  À ~{lead.distance_km} km de vous
+                </span>
+              </div>
+            )}
+            {lead.description && (
+              <p className="text-[11px] text-slate-600 italic line-clamp-2 pt-1 border-t border-slate-200">
+                "{lead.description}"
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t)}
+              className="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+            >
+              Ignorer
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                toast.dismiss(t);
+                if (typeof onAccept === 'function') onAccept(lead);
+              }}
+              className="flex-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white text-xs font-black shadow-md shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Zap className="w-4 h-4 fill-white" />
+              <span>Accepter (-15 DH)</span>
+            </button>
+          </div>
         </div>
       ), {
         duration: options.duration || 10000,
-        id: dedupKey,
+        id: toastId,
         ...options
       });
     });
 
-    return dedupKey;
+    return toastId;
   },
 
   /**
-   * Wallet & Credit Notification (Golden Amber Glow)
+   * Wallet & Credit Notification (Golden Amber Badge)
    */
   credit: (amountDh, newBalance, reason = 'Recharge validée', options = {}) => {
-    const dedupKey = options.id || options.dedupKey || `credit:${amountDh}:${newBalance}`;
-    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 3500)) {
+    const normBal = newBalance !== null && newBalance !== undefined ? parseFloat(newBalance).toFixed(2) : '';
+    const dedupKey = `credit:${amountDh}:${normBal}`;
+    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 4500)) {
       return null;
     }
+
+    const toastId = `toast-credit-${amountDh}-${normBal}`;
 
     enqueueToast(() => {
       if (!options.silent) {
@@ -408,29 +425,25 @@ export const notify = {
       }
 
       toast.custom((t) => (
-        <div className="w-full max-w-sm sm:max-w-md bg-slate-950/95 backdrop-blur-2xl border border-amber-500/40 rounded-2xl p-3.5 sm:p-4 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_25px_rgba(251,191,36,0.3)] flex items-start justify-between gap-3 text-slate-100 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group">
-          {/* Top accent glow bar */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_8px_rgba(251,191,36,1)]" />
-          <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber-500/20 rounded-full blur-xl pointer-events-none" />
-
+        <div className="w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xl flex items-start justify-between gap-3 text-slate-900 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group font-sans">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-amber-950/90 border border-amber-500/60 text-amber-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_15px_rgba(251,191,36,0.4)] mt-0.5 group-hover:scale-105 transition-transform">
-              <Coins className="w-5 h-5 drop-shadow-[0_0_6px_rgba(251,191,36,0.9)]" />
+            <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5 group-hover:scale-105 transition-transform">
+              <Coins className="w-5 h-5" />
             </div>
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h4 className="text-xs sm:text-sm font-black text-amber-300">
+                <h4 className="text-xs sm:text-sm font-black text-amber-900">
                   {amountDh > 0 ? `+${amountDh} DH Crédités 💳` : 'Solde Mis à Jour'}
                 </h4>
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5">
                 {reason}
               </p>
               {newBalance !== null && newBalance !== undefined && (
-                <div className="mt-1.5 flex items-center gap-1 text-[11px] font-mono font-bold text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-lg border border-amber-500/30 inline-flex shadow-inner">
+                <div className="mt-1.5 flex items-center gap-1 text-[11px] font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 inline-flex shadow-xs">
                   <span>Nouveau solde :</span>
-                  <span className="text-white font-black">{parseFloat(newBalance).toFixed(2)} DH</span>
+                  <span className="text-slate-900 font-black">{parseFloat(newBalance).toFixed(2)} DH</span>
                 </div>
               )}
             </div>
@@ -439,7 +452,7 @@ export const notify = {
           <button
             type="button"
             onClick={() => toast.dismiss(t)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-900 transition-colors flex-shrink-0 cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0 cursor-pointer"
             title="Fermer"
           >
             <X className="w-4 h-4" />
@@ -447,22 +460,24 @@ export const notify = {
         </div>
       ), {
         duration: options.duration || 6000,
-        id: dedupKey,
+        id: toastId,
         ...options
       });
     });
 
-    return dedupKey;
+    return toastId;
   },
 
   /**
-   * Intervention Progress Tracker (Neon Cyan/Blue Glow)
+   * Intervention Progress Tracker (Clean Blue Badge)
    */
   progress: (step, title, description, options = {}) => {
-    const dedupKey = options.id || options.dedupKey || `progress:${step}`;
-    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 3500)) {
+    const dedupKey = `progress:${step}:${title || ''}`;
+    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 4500)) {
       return null;
     }
+
+    const toastId = options.id || dedupKey;
 
     enqueueToast(() => {
       if (!options.silent) {
@@ -470,31 +485,27 @@ export const notify = {
       }
 
       toast.custom((t) => (
-        <div className="w-full max-w-sm sm:max-w-md bg-slate-950/95 backdrop-blur-2xl border border-cyan-500/50 rounded-2xl p-3.5 sm:p-4 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_25px_rgba(6,182,212,0.3)] flex items-start justify-between gap-3 text-slate-100 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group">
-          {/* Top accent glow bar */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_8px_rgba(6,182,212,1)]" />
-          <div className="absolute -top-6 -right-6 w-24 h-24 bg-cyan-500/20 rounded-full blur-xl pointer-events-none" />
-
+        <div className="w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xl flex items-start justify-between gap-3 text-slate-900 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group font-sans">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-cyan-950/90 border border-cyan-500/60 text-cyan-400 flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.4)] mt-0.5 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5 group-hover:scale-105 transition-transform">
               {step === 'ON_THE_WAY' ? (
-                <Car className="w-5 h-5 animate-pulse text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)]" />
+                <Car className="w-5 h-5 animate-pulse text-blue-600" />
               ) : step === 'ARRIVED' ? (
-                <MapPin className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.9)]" />
+                <MapPin className="w-5 h-5 text-emerald-600" />
               ) : (
-                <Wrench className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)]" />
+                <Wrench className="w-5 h-5 text-blue-600" />
               )}
             </div>
 
             <div className="min-w-0 flex-1">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-700">
                 {step === 'ON_THE_WAY' ? '🚗 Déplacement en cours' : step === 'ARRIVED' ? '📍 Arrivé sur Place' : '🛠️ Diagnostic'}
               </span>
-              <h4 className="text-xs sm:text-sm font-black text-white leading-tight mt-0.5 truncate">
+              <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-tight mt-0.5 truncate">
                 {title}
               </h4>
               {description && (
-                <p className="text-[11px] sm:text-xs text-slate-300 mt-1 leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed">
                   {description}
                 </p>
               )}
@@ -504,7 +515,7 @@ export const notify = {
           <button
             type="button"
             onClick={() => toast.dismiss(t)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-900 transition-colors flex-shrink-0 cursor-pointer"
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0 cursor-pointer"
             title="Fermer"
           >
             <X className="w-4 h-4" />

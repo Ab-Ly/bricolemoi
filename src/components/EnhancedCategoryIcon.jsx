@@ -25,9 +25,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'بلومبي و صحي',
     iconEmoji: '💧',
     IconComponent: Drop,
-    colorClass: 'text-cyan-400',
-    glowColor: 'rgba(34,211,238,0.7)',
-    bgClass: 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+    colorClass: 'text-blue-600',
+    glowColor: 'rgba(37,99,235,0.2)',
+    bgClass: 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs',
+    activeCard: 'bg-blue-50/90 border-2 border-blue-600 ring-2 ring-blue-500/20 text-blue-950 shadow-md',
+    activeIconBox: 'bg-blue-600 text-white shadow-xs',
+    activeBadge: 'bg-blue-600 text-white'
   },
   ELECTRICIAN: {
     key: 'ELECTRICIAN',
@@ -35,9 +38,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'تريسيان و إنارة',
     iconEmoji: '⚡',
     IconComponent: Lightning,
-    colorClass: 'text-amber-400',
-    glowColor: 'rgba(251,191,36,0.7)',
-    bgClass: 'bg-amber-950/80 text-amber-300 border border-amber-500/40 shadow-[0_0_12px_rgba(251,191,36,0.25)]'
+    colorClass: 'text-amber-600',
+    glowColor: 'rgba(217,119,6,0.2)',
+    bgClass: 'bg-amber-50 text-amber-800 border border-amber-200 shadow-xs',
+    activeCard: 'bg-amber-50/90 border-2 border-amber-500 ring-2 ring-amber-500/20 text-amber-950 shadow-md',
+    activeIconBox: 'bg-amber-500 text-white shadow-xs',
+    activeBadge: 'bg-amber-500 text-white'
   },
   CLIMATISATION: {
     key: 'CLIMATISATION',
@@ -45,9 +51,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'كليماتيزور و تبريد',
     iconEmoji: '❄️',
     IconComponent: Snowflake,
-    colorClass: 'text-cyan-300',
-    glowColor: 'rgba(125,211,252,0.7)',
-    bgClass: 'bg-cyan-950/80 text-cyan-300 border border-cyan-400/40 shadow-[0_0_12px_rgba(34,211,238,0.25)]'
+    colorClass: 'text-sky-600',
+    glowColor: 'rgba(2,132,199,0.2)',
+    bgClass: 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs',
+    activeCard: 'bg-sky-50/90 border-2 border-sky-500 ring-2 ring-sky-500/20 text-sky-950 shadow-md',
+    activeIconBox: 'bg-sky-500 text-white shadow-xs',
+    activeBadge: 'bg-sky-500 text-white'
   },
   ELECTROMENAGER: {
     key: 'ELECTROMENAGER',
@@ -55,9 +64,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'الأجهزة المنزلية',
     iconEmoji: '🧺',
     IconComponent: Television,
-    colorClass: 'text-purple-400',
-    glowColor: 'rgba(192,132,252,0.7)',
-    bgClass: 'bg-purple-950/80 text-purple-300 border border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.25)]'
+    colorClass: 'text-purple-600',
+    glowColor: 'rgba(147,51,234,0.2)',
+    bgClass: 'bg-purple-50 text-purple-700 border border-purple-200 shadow-xs',
+    activeCard: 'bg-purple-50/90 border-2 border-purple-500 ring-2 ring-purple-500/20 text-purple-950 shadow-md',
+    activeIconBox: 'bg-purple-600 text-white shadow-xs',
+    activeBadge: 'bg-purple-600 text-white'
   },
   SERRURERIE: {
     key: 'SERRURERIE',
@@ -65,9 +77,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'قفلجي و حدادة',
     iconEmoji: '🔑',
     IconComponent: Key,
-    colorClass: 'text-emerald-400',
-    glowColor: 'rgba(52,211,153,0.7)',
-    bgClass: 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+    colorClass: 'text-emerald-600',
+    glowColor: 'rgba(5,150,105,0.2)',
+    bgClass: 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs',
+    activeCard: 'bg-emerald-50/90 border-2 border-emerald-600 ring-2 ring-emerald-500/20 text-emerald-950 shadow-md',
+    activeIconBox: 'bg-emerald-600 text-white shadow-xs',
+    activeBadge: 'bg-emerald-600 text-white'
   },
   PEINTURE: {
     key: 'PEINTURE',
@@ -75,9 +90,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'صباغ و جباص',
     iconEmoji: '🎨',
     IconComponent: PaintBrush,
-    colorClass: 'text-fuchsia-400',
-    glowColor: 'rgba(232,121,249,0.7)',
-    bgClass: 'bg-fuchsia-950/80 text-fuchsia-300 border border-fuchsia-500/40 shadow-[0_0_12px_rgba(217,70,239,0.25)]'
+    colorClass: 'text-rose-600',
+    glowColor: 'rgba(225,29,72,0.2)',
+    bgClass: 'bg-rose-50 text-rose-700 border border-rose-200 shadow-xs',
+    activeCard: 'bg-rose-50/90 border-2 border-rose-500 ring-2 ring-rose-500/20 text-rose-950 shadow-md',
+    activeIconBox: 'bg-rose-500 text-white shadow-xs',
+    activeBadge: 'bg-rose-500 text-white'
   },
   MENUISERIE: {
     key: 'MENUISERIE',
@@ -85,9 +103,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'نجار و ألمنيوم',
     iconEmoji: '🪚',
     IconComponent: Hammer,
-    colorClass: 'text-amber-400',
-    glowColor: 'rgba(245,158,11,0.7)',
-    bgClass: 'bg-amber-950/80 text-amber-300 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+    colorClass: 'text-orange-600',
+    glowColor: 'rgba(234,88,12,0.2)',
+    bgClass: 'bg-orange-50 text-orange-800 border border-orange-200 shadow-xs',
+    activeCard: 'bg-orange-50/90 border-2 border-orange-500 ring-2 ring-orange-500/20 text-orange-950 shadow-md',
+    activeIconBox: 'bg-orange-500 text-white shadow-xs',
+    activeBadge: 'bg-orange-500 text-white'
   },
   MACONNERIE: {
     key: 'MACONNERIE',
@@ -95,9 +116,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'زليجي و عزل السطح',
     iconEmoji: '🧱',
     IconComponent: Wall,
-    colorClass: 'text-amber-500',
-    glowColor: 'rgba(245,158,11,0.7)',
-    bgClass: 'bg-amber-950/80 text-amber-300 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+    colorClass: 'text-stone-700',
+    glowColor: 'rgba(68,64,60,0.2)',
+    bgClass: 'bg-stone-100 text-stone-800 border border-stone-200 shadow-xs',
+    activeCard: 'bg-stone-100 border-2 border-stone-600 ring-2 ring-stone-500/20 text-stone-950 shadow-md',
+    activeIconBox: 'bg-stone-700 text-white shadow-xs',
+    activeBadge: 'bg-stone-700 text-white'
   },
   NETTOYAGE: {
     key: 'NETTOYAGE',
@@ -105,9 +129,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'نظافة و تعقيم',
     iconEmoji: '🧹',
     IconComponent: Broom,
-    colorClass: 'text-sky-400',
-    glowColor: 'rgba(56,189,248,0.7)',
-    bgClass: 'bg-sky-950/80 text-sky-300 border border-sky-500/40 shadow-[0_0_12px_rgba(56,189,248,0.25)]'
+    colorClass: 'text-teal-600',
+    glowColor: 'rgba(13,148,136,0.2)',
+    bgClass: 'bg-teal-50 text-teal-700 border border-teal-200 shadow-xs',
+    activeCard: 'bg-teal-50/90 border-2 border-teal-600 ring-2 ring-teal-500/20 text-teal-950 shadow-md',
+    activeIconBox: 'bg-teal-600 text-white shadow-xs',
+    activeBadge: 'bg-teal-600 text-white'
   },
   PARABOLE: {
     key: 'PARABOLE',
@@ -115,9 +142,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'بارابول و كاميرات',
     iconEmoji: '📡',
     IconComponent: HouseLine,
-    colorClass: 'text-indigo-400',
-    glowColor: 'rgba(129,140,248,0.7)',
-    bgClass: 'bg-indigo-950/80 text-indigo-300 border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.25)]'
+    colorClass: 'text-indigo-600',
+    glowColor: 'rgba(79,70,229,0.2)',
+    bgClass: 'bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-xs',
+    activeCard: 'bg-indigo-50/90 border-2 border-indigo-600 ring-2 ring-indigo-500/20 text-indigo-950 shadow-md',
+    activeIconBox: 'bg-indigo-600 text-white shadow-xs',
+    activeBadge: 'bg-indigo-600 text-white'
   },
   JARDINAGE: {
     key: 'JARDINAGE',
@@ -125,9 +155,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'بستاني و حدائق',
     iconEmoji: '🌿',
     IconComponent: Plant,
-    colorClass: 'text-emerald-400',
-    glowColor: 'rgba(52,211,153,0.7)',
-    bgClass: 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 shadow-[0_0_12px_rgba(34,197,94,0.25)]'
+    colorClass: 'text-green-600',
+    glowColor: 'rgba(22,163,74,0.2)',
+    bgClass: 'bg-green-50 text-green-700 border border-green-200 shadow-xs',
+    activeCard: 'bg-green-50/90 border-2 border-green-600 ring-2 ring-green-500/20 text-green-950 shadow-md',
+    activeIconBox: 'bg-green-600 text-white shadow-xs',
+    activeBadge: 'bg-green-600 text-white'
   },
   AUTO_MECHANIC: {
     key: 'AUTO_MECHANIC',
@@ -135,9 +168,12 @@ export const SPECIALTY_CONFIG = {
     labelAr: 'ميكانيك و لافاج',
     iconEmoji: '🚗',
     IconComponent: Car,
-    colorClass: 'text-cyan-400',
-    glowColor: 'rgba(34,211,238,0.7)',
-    bgClass: 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+    colorClass: 'text-blue-700',
+    glowColor: 'rgba(29,78,216,0.2)',
+    bgClass: 'bg-blue-50 text-blue-800 border border-blue-200 shadow-xs',
+    activeCard: 'bg-blue-50/90 border-2 border-blue-600 ring-2 ring-blue-500/20 text-blue-950 shadow-md',
+    activeIconBox: 'bg-blue-600 text-white shadow-xs',
+    activeBadge: 'bg-blue-600 text-white'
   }
 };
 
@@ -162,9 +198,12 @@ export const getSpecialtyMeta = (type) => {
     labelAr: 'معلّم متعدد الاختصاصات',
     iconEmoji: '🛠️',
     IconComponent: Wrench,
-    colorClass: 'text-cyan-400',
-    glowColor: 'rgba(34,211,238,0.7)',
-    bgClass: 'bg-slate-900 border border-cyan-500/30 text-slate-200 shadow-sm'
+    colorClass: 'text-slate-600',
+    glowColor: 'rgba(100,116,139,0.2)',
+    bgClass: 'bg-slate-100 border border-slate-200 text-slate-700 shadow-xs',
+    activeCard: 'bg-blue-50/90 border-2 border-blue-600 ring-2 ring-blue-500/20 text-blue-950 shadow-md',
+    activeIconBox: 'bg-blue-600 text-white shadow-xs',
+    activeBadge: 'bg-blue-600 text-white'
   };
 };
 
@@ -174,34 +213,36 @@ export const getSpecialtyLabel = (type) => {
 };
 
 /**
- * EnhancedCategoryIcon - Renders Phosphor Icons Duotone with High-Contrast Dark Sci-Fi Glow
+ * EnhancedCategoryIcon - Renders Phosphor Icons Duotone in Modern Clean Trust
  */
 export const EnhancedCategoryIcon = ({ 
   type = 'PLOMBERIE', 
   className = "w-6 h-6", 
+  colorClass,
   weight = "duotone",
-  glow = true 
+  glow = false 
 }) => {
   const meta = getSpecialtyMeta(type);
   const IconComp = meta.IconComponent || Wrench;
+  const resolvedColorClass = colorClass !== undefined ? colorClass : meta.colorClass;
 
   return (
     <IconComp 
       weight={weight} 
-      className={`${className} ${meta.colorClass} transition-transform`} 
-      style={glow ? { filter: `drop-shadow(0 0 6px ${meta.glowColor})` } : undefined}
+      className={`${className} ${resolvedColorClass} transition-transform`} 
+      style={glow ? { filter: `drop-shadow(0 1px 3px ${meta.glowColor})` } : undefined}
     />
   );
 };
 
 /**
- * SpecialtyBadge - Standardized Glassmorphism pill badge for Maâlems & Categories
+ * SpecialtyBadge - Standardized Modern Clean pill badge for Maâlems & Categories
  */
 export const SpecialtyBadge = ({ type, className = "", showIcon = true }) => {
   const meta = getSpecialtyMeta(type);
 
   return (
-    <span className={`px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 backdrop-blur-md ${meta.bgClass} ${className}`}>
+    <span className={`px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 ${meta.bgClass} ${className}`}>
       {showIcon && <EnhancedCategoryIcon type={type} className="w-3.5 h-3.5 inline-block" glow={false} />}
       <span>{meta.label}</span>
     </span>

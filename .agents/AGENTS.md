@@ -1,18 +1,18 @@
-# Dark Sci-Fi Glassmorphism Engineering Guidelines
+# Modern Clean & Trust Engineering Guidelines (BricoleMoi)
 
-Apply these rules strictly to all React + Tailwind CSS code generated in this PWA (`bricolemoi`):
+Apply these rules strictly to all React + Tailwind CSS code in this PWA (`bricolemoi`):
 
-## 1. Visual Identity & Palette
-- **Background**: Deep dark futuristic page background (`bg-[#0B0F17]` / `#0B0F17`).
-- **Typography**: High-contrast, crisp slate typography (`text-slate-100`, `text-slate-300`, `font-sans` / `Inter`).
-- **Glassmorphism Cards**: Dark semi-transparent glass cards (`bg-slate-900/70 backdrop-blur-md border border-cyan-500/20 rounded-2xl shadow-lg shadow-black/50 hover:border-cyan-400/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all duration-300`).
-- **Category & Icon Badges**: Dark glass icon badges (`bg-slate-900/90 backdrop-blur-md border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.25)]`).
+## 1. Visual Identity & Palette (« Modern Clean & Trust »)
+- **Background**: Soft pearl/off-white background (`bg-slate-50` / `#F8FAFC` or `bg-white`).
+- **Typography**: High-contrast, clean slate typography (`text-slate-900` for titles, `text-slate-700` for body, `text-slate-500` for subtitles, `font-sans` / `Inter`).
+- **Cards & Containers**: Crisp white cards with soft subtle elevation (`bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300`).
+- **Category & Icon Badges**: Clean pastel badges (`bg-blue-50 text-blue-600 border border-blue-100`, `bg-amber-50 text-amber-600 border border-amber-100`, `bg-emerald-50 text-emerald-600 border border-emerald-100`).
 
 ## 2. Action Buttons & Accents
-- **Primary Action Buttons**: Glowing neon cyan/blue gradient (`bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl px-6 py-3 shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] active:scale-95 transition-all`).
-- **Secondary Action Buttons**: Dark glass buttons (`bg-slate-900/80 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 hover:bg-slate-800/80 shadow-[0_0_15px_rgba(6,182,212,0.15)] active:scale-95 transition-all`).
-- **Neon Glow Icons (`lucide-react`)**: SVG icons with glowing drop-shadow filters (`text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]`, `text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.7)]`, `text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]`).
+- **Primary Action Buttons (Client / Global)**: Royal Blue & Indigo gradient (`bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl px-6 py-3 shadow-md shadow-blue-500/20 active:scale-95 transition-all`).
+- **Secondary / Maâlem Action Buttons**: Warm Safran / Amber gradient (`bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-xl px-6 py-3 shadow-md shadow-amber-500/20 active:scale-95 transition-all`).
+- **Neutral Outlined Buttons**: Clean white buttons with subtle borders (`bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-xs active:scale-95 transition-all`).
 
 ## 3. Map & Overlay Panels
-- Floating semi-transparent glass panels (`bg-slate-900/90 backdrop-blur-xl border border-cyan-500/30 text-slate-100 shadow-[0_0_20px_rgba(6,182,212,0.2)]`).
-- CartoDB Dark Matter tiles (`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`).
+- Floating clean glass panels (`bg-white/95 backdrop-blur-xl border border-slate-200 text-slate-800 shadow-xl`).
+- CartoDB Positron / OpenStreetMap Clean Light tiles (`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png` or Positron).

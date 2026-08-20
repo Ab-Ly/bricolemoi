@@ -17,8 +17,8 @@ export default {
         }
       },
       fontFamily: {
-        arabic: ['Cairo', 'Tajawal', 'sans-serif'],
-        sans: ['Inter', 'sans-serif']
+        arabic: ['"Readex Pro"', 'Tajawal', 'Cairo', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif']
       }
     },
   },

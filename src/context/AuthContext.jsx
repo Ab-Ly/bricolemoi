@@ -161,13 +161,18 @@ export const AuthProvider = ({ children }) => {
         }
 
         if (profile) {
+          const effectiveRole = (profile.role || 'CLIENT').toUpperCase();
+          const profileCredits = profile.credits !== undefined && profile.credits !== null
+            ? Number(profile.credits)
+            : (effectiveRole === 'MAALEM' ? 15.00 : 0);
+
           userProfile = {
             ...userProfile,
             id: profile.id || uid,
-            role: (profile.role || 'CLIENT').toUpperCase(),
+            role: effectiveRole,
             full_name: profile.full_name || 'Utilisateur Maroc',
             city_zone: profile.city_zone || 'Casablanca',
-            credits: profile.credits || 0
+            credits: profileCredits
           };
         }
 
@@ -183,13 +188,20 @@ export const AuthProvider = ({ children }) => {
             maalemDetails = data;
           }
 
-          userProfile.maalem_details = maalemDetails || {
-            specialty: 'PLUMBING',
-            credit_balance: 15.00,
-            is_verified: true,
-            cin_verified: true,
-            status: 'active',
-            portfolio_urls: []
+          const currentCredits = userProfile.credits !== undefined && userProfile.credits !== null
+            ? Number(userProfile.credits)
+            : (maalemDetails?.credit_balance !== undefined && maalemDetails?.credit_balance !== null
+              ? Number(maalemDetails.credit_balance)
+              : 15.00);
+
+          userProfile.credits = currentCredits;
+          userProfile.maalem_details = {
+            specialty: maalemDetails?.specialty || 'PLUMBING',
+            credit_balance: currentCredits,
+            is_verified: maalemDetails?.is_verified ?? true,
+            cin_verified: maalemDetails?.cin_verified ?? true,
+            status: maalemDetails?.status || 'active',
+            portfolio_urls: maalemDetails?.portfolio_urls || []
           };
         }
       } catch (err) {
@@ -198,13 +210,40 @@ export const AuthProvider = ({ children }) => {
     }
 
     setUser(userProfile);
-    setCurrentRole(userProfile.role);
-    return userProfile;
+    setIsLoading(false);
   };
 
+  useEffect(() => {
+    // Initial loading logic if needed
+  }, []);
+
   // Bascule le rôle UI sans écraser l'utilisateur connecté
-  const switchRole = (role) => {
-    setCurrentRole(role);
+  const switchRole = (newRole) => {
+    const norm = (newRole || 'CLIENT').toUpperCase();
+    setUser((prev) => {
+      if (!prev) return prev;
+      const effectiveCredits = prev.credits !== undefined && prev.credits !== null
+        ? Number(prev.credits)
+        : (norm === 'MAALEM' ? 15.00 : 0);
+
+      const updated = {
+        ...prev,
+        role: norm,
+        credits: effectiveCredits,
+        maalem_details: norm === 'MAALEM' ? {
+          specialty: prev.maalem_details?.specialty || 'PLUMBING',
+          credit_balance: effectiveCredits,
+          is_verified: true,
+          cin_verified: true,
+          status: 'active',
+          portfolio_urls: prev.maalem_details?.portfolio_urls || []
+        } : prev.maalem_details
+      };
+      try {
+        sessionStorage.setItem('bricolemoi_session', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   // Vérification PIN Admin — lu depuis .env (VITE_ADMIN_PIN)
@@ -332,7 +371,8 @@ export const AuthProvider = ({ children }) => {
         phone: finalPhone,
         role: normRole,
         full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
-        city_zone: cityZone || 'Casablanca'
+        city_zone: cityZone || 'Casablanca',
+        credits: normRole === 'MAALEM' ? 15.00 : 0
       };
 
       if (isSupabaseConfigured) {
@@ -358,13 +398,17 @@ export const AuthProvider = ({ children }) => {
 
             await supabase.from('profiles').update(updateFields).eq('id', existingProfile.id);
 
+            const effectiveCredits = existingProfile.credits !== undefined && existingProfile.credits !== null
+              ? Number(existingProfile.credits)
+              : (effectiveRole === 'MAALEM' ? 15.00 : 0);
+
             authenticatedUser = {
               ...authenticatedUser,
               id: existingProfile.id || firebaseUid,
               role: effectiveRole,
               full_name: existingProfile.full_name || fullName,
               city_zone: existingProfile.city_zone || cityZone,
-              credits: existingProfile.credits || (effectiveRole === 'MAALEM' ? 15.00 : 0)
+              credits: effectiveCredits
             };
 
             if (effectiveRole === 'MAALEM') {
@@ -374,13 +418,13 @@ export const AuthProvider = ({ children }) => {
                 .eq('id', authenticatedUser.id)
                 .maybeSingle();
 
-              if (maalemDetails) {
-                authenticatedUser.maalem_details = {
-                  ...maalemDetails,
-                  is_verified: true,
-                  status: maalemDetails.status || 'active'
-                };
-              }
+              authenticatedUser.maalem_details = {
+                ...(maalemDetails || {}),
+                specialty: maalemDetails?.specialty || specialty || 'PLUMBING',
+                credit_balance: effectiveCredits,
+                is_verified: true,
+                status: maalemDetails?.status || 'active'
+              };
             }
           } else {
             const profileData = {
@@ -388,13 +432,13 @@ export const AuthProvider = ({ children }) => {
               phone: finalPhone,
               role: normRole,
               full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
-              city_zone: cityZone || 'Casablanca'
+              city_zone: cityZone || 'Casablanca',
+              credits: normRole === 'MAALEM' ? 15.00 : 0
             };
             if (pinHash) profileData.pin_hash = pinHash;
 
             let { error: pError } = await supabase.from('profiles').upsert([profileData]).select();
             if (pError) {
-              // Retry without pin_hash or credits if custom columns are not yet added
               const baseProfile = {
                 id: firebaseUid,
                 phone: finalPhone,
@@ -412,10 +456,12 @@ export const AuthProvider = ({ children }) => {
                 is_verified: true,
                 cin_verified: true,
                 status: 'active',
+                credit_balance: 15.00,
                 portfolio_urls: Array.isArray(portfolioUrls) ? portfolioUrls : []
               };
               await supabase.from('maalem_details').upsert([defaultDetails]).select().catch(() => {});
               authenticatedUser.maalem_details = defaultDetails;
+              authenticatedUser.credits = 15.00;
             }
           }
         } catch (dbErr) {
@@ -522,14 +568,16 @@ export const AuthProvider = ({ children }) => {
               ...existingProfile,
               role: existingProfile.role || preferredRole
             };
-          } else {
             const newProfile = {
               id: firebaseUid,
               full_name: fullName,
+              phone: firebaseUser.phoneNumber || 'En attente de saisie',
               role: preferredRole,
               city_zone: 'Casablanca - Centre-Ville'
             };
-            await supabase.from('profiles').upsert([newProfile]).select().catch(() => {});
+            await supabase.from('profiles').upsert([newProfile]).select().catch((err) => {
+              console.warn('[Google Auth DB Warning]:', err);
+            });
           }
         } catch (dbErr) {
           console.warn('[Google Auth DB Warning]:', dbErr);
@@ -540,6 +588,14 @@ export const AuthProvider = ({ children }) => {
       setCurrentRole(authenticatedUser.role);
       sessionStorage.setItem('bricolemoi_session', JSON.stringify(authenticatedUser));
       setAuthModalOpen(false);
+
+      // Notifier le tableau de bord admin en temps réel
+      try {
+        const bc = new BroadcastChannel('bricolemoi_intertab_sync');
+        bc.postMessage({ type: 'PROFILE_UPDATED', user: authenticatedUser });
+        bc.close();
+      } catch (e) {}
+
       switchSubdomainInDev(authenticatedUser.role);
       return authenticatedUser;
     } catch (err) {

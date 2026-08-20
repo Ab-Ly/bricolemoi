@@ -71,27 +71,23 @@ export const AdminDashboard = () => {
   const pendingRechargesCount = transactions.filter((t) => t.status === 'PENDING').length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* 1. Header Global & KPIs Haute Densité */}
-      <div className="bg-slate-900/90 backdrop-blur-2xl border border-purple-500/30 rounded-3xl p-5 sm:p-7 shadow-[0_0_35px_rgba(168,85,247,0.15)] relative overflow-hidden">
-        {/* Glow ambient background */}
-        <div className="absolute -top-12 -right-12 w-44 h-44 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
+      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-sm relative overflow-hidden text-slate-900">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-full bg-purple-950/80 border border-purple-500/40 text-[10px] font-mono font-bold text-purple-300 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+              <span className="px-2.5 py-1 rounded-full bg-purple-50 border border-purple-200 text-[10px] font-mono font-bold text-purple-700 flex items-center gap-1 shadow-xs">
+                <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
                 <span>SUPERVISION GÉNÉRALE • BRICOLEMOI MAROC</span>
               </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-white mt-2 font-sans tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2 tracking-tight">
               Tour de Contrôle &amp; Administration
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1">
+            <p className="text-xs sm:text-sm text-slate-600 mt-1">
               Supervision temps réel des clients, flux d'urgences SOS, partenaires maâlems et arbitrage des litiges.
             </p>
           </div>
@@ -102,46 +98,46 @@ export const AdminDashboard = () => {
               type="button"
               onClick={handleManualRefresh}
               disabled={isRefreshing}
-              className="px-4 py-2.5 bg-slate-950 hover:bg-slate-800 border border-purple-500/30 hover:border-purple-400 text-purple-300 hover:text-white rounded-2xl text-xs font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+              className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-2xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-purple-600 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>{isRefreshing ? 'Actualisation...' : 'Actualiser les Flux'}</span>
             </button>
           </div>
         </div>
 
         {/* 4 Compteurs KPI Essentiels & Interactifs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-slate-800/80">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-slate-100">
           {/* Card 1 : Total Clients */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab('CLIENTS')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 shadow-xs ${
               activeTab === 'CLIENTS'
-                ? 'bg-slate-950 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
-                : 'bg-slate-950/80 border-cyan-500/20 hover:border-cyan-500/40 shadow-inner'
+                ? 'bg-blue-50/70 border-blue-400 shadow-sm ring-1 ring-blue-400/50'
+                : 'bg-white border-slate-200 hover:border-blue-300'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-cyan-950 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shadow-md">
-                <Users className="w-4 h-4 text-cyan-300" />
+              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shadow-xs">
+                <Users className="w-4 h-4 text-blue-600" />
               </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                 {activeClientsCount} actifs
               </span>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block font-bold">
+              <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
                 Clients Enregistrés
               </span>
-              <p className="text-3xl font-black text-white font-mono mt-0.5">{clients.length}</p>
+              <p className="text-3xl font-black text-slate-900 font-mono mt-0.5">{clients.length}</p>
             </div>
 
-            <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-800/80 flex items-center justify-between font-mono">
+            <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
               <span>Missions totales :</span>
-              <strong className="text-cyan-300">{interventions.length}</strong>
+              <strong className="text-blue-700 font-black">{interventions.length}</strong>
             </div>
           </motion.div>
 
@@ -150,33 +146,33 @@ export const AdminDashboard = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab('MISSIONS')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 shadow-xs ${
               activeTab === 'MISSIONS'
-                ? 'bg-slate-950 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.25)]'
-                : 'bg-slate-950/80 border-amber-500/20 hover:border-amber-500/40 shadow-inner'
+                ? 'bg-amber-50/70 border-amber-400 shadow-sm ring-1 ring-amber-400/50'
+                : 'bg-white border-slate-200 hover:border-amber-300'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-amber-950 border border-amber-500/40 text-amber-400 flex items-center justify-center shadow-md">
-                <Activity className="w-4 h-4 text-amber-300" />
+              <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shadow-xs">
+                <Activity className="w-4 h-4 text-amber-600" />
               </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/30 text-amber-300 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
                 <span>En Direct</span>
               </span>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider block font-bold">
+              <span className="text-[11px] font-mono text-amber-800 uppercase tracking-wider block font-bold">
                 Urgences SOS Actives
               </span>
-              <p className="text-3xl font-black text-amber-300 font-mono mt-0.5">{activeSOSCount}</p>
+              <p className="text-3xl font-black text-slate-900 font-mono mt-0.5">{activeSOSCount}</p>
             </div>
 
-            <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-800/80 flex items-center justify-between font-mono">
+            <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
               <span>{pendingSOSCount} en attente</span>
               <span>•</span>
-              <span className="text-cyan-300 font-bold">{inProgressSOSCount} en cours</span>
+              <span className="text-blue-700 font-bold">{inProgressSOSCount} en cours</span>
             </div>
           </motion.div>
 
@@ -185,33 +181,33 @@ export const AdminDashboard = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab('MAALEMS')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 shadow-xs ${
               activeTab === 'MAALEMS'
-                ? 'bg-slate-950 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.25)]'
-                : 'bg-slate-950/80 border-emerald-500/20 hover:border-emerald-500/40 shadow-inner'
+                ? 'bg-emerald-50/70 border-emerald-400 shadow-sm ring-1 ring-emerald-400/50'
+                : 'bg-white border-slate-200 hover:border-emerald-300'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-emerald-950 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shadow-md">
-                <Wrench className="w-4 h-4 text-emerald-300" />
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shadow-xs">
+                <Wrench className="w-4 h-4 text-emerald-600" />
               </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-300">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800">
                 Ably Live 🟢
               </span>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono text-emerald-400 uppercase tracking-wider block font-bold">
+              <span className="text-[11px] font-mono text-emerald-800 uppercase tracking-wider block font-bold">
                 Maâlems en Ligne
               </span>
-              <p className="text-3xl font-black text-emerald-300 font-mono mt-0.5">
+              <p className="text-3xl font-black text-slate-900 font-mono mt-0.5">
                 {onlineMaalemsCount}
               </p>
             </div>
 
-            <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-800/80 flex items-center justify-between font-mono">
+            <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
               <span>Total réseau :</span>
-              <strong className="text-white">{maalems.length} artisans</strong>
+              <strong className="text-slate-900">{maalems.length} artisans</strong>
             </div>
           </motion.div>
 
@@ -220,49 +216,49 @@ export const AdminDashboard = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab('DISPUTES')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 shadow-xs ${
               activeTab === 'DISPUTES'
-                ? 'bg-slate-950 border-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.25)]'
-                : 'bg-slate-950/80 border-rose-500/20 hover:border-rose-500/40 shadow-inner'
+                ? 'bg-rose-50/70 border-rose-400 shadow-sm ring-1 ring-rose-400/50'
+                : 'bg-white border-slate-200 hover:border-rose-300'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-rose-950 border border-rose-500/40 text-rose-400 flex items-center justify-center shadow-md">
-                <ShieldAlert className="w-4 h-4 text-rose-300" />
+              <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shadow-xs">
+                <ShieldAlert className="w-4 h-4 text-rose-600" />
               </div>
               <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
                 pendingDisputesCount > 0
-                  ? 'bg-rose-950 border-rose-500/40 text-rose-300 animate-pulse'
-                  : 'bg-emerald-950 border-emerald-500/40 text-emerald-300'
+                  ? 'bg-rose-50 border-rose-200 text-rose-700 animate-pulse'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
               }`}>
                 {pendingDisputesCount > 0 ? 'Action Requise' : 'À jour 🟢'}
               </span>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono text-rose-400 uppercase tracking-wider block font-bold">
+              <span className="text-[11px] font-mono text-rose-700 uppercase tracking-wider block font-bold">
                 Litiges en Attente
               </span>
-              <p className="text-3xl font-black text-rose-300 font-mono mt-0.5">{pendingDisputesCount}</p>
+              <p className="text-3xl font-black text-slate-900 font-mono mt-0.5">{pendingDisputesCount}</p>
             </div>
 
-            <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-800/80 flex items-center justify-between font-mono">
+            <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
               <span>Recharges en attente :</span>
-              <strong className="text-purple-300">{pendingRechargesCount}</strong>
+              <strong className="text-purple-700 font-bold">{pendingRechargesCount}</strong>
             </div>
           </motion.div>
         </div>
       </div>
 
       {/* 2. Barre de Navigation par Onglets */}
-      <div className="flex flex-wrap items-center gap-2 bg-slate-900/80 backdrop-blur-xl border border-purple-500/20 p-2 rounded-2xl shadow-xl">
+      <div className="flex flex-wrap items-center gap-2 bg-white border border-slate-200 p-2 rounded-2xl shadow-sm">
         <button
           type="button"
           onClick={() => setActiveTab('CLIENTS')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === 'CLIENTS'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              ? 'bg-blue-600 text-white shadow-xs font-bold'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -272,10 +268,10 @@ export const AdminDashboard = () => {
         <button
           type="button"
           onClick={() => setActiveTab('MISSIONS')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === 'MISSIONS'
-              ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.4)]'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              ? 'bg-amber-500 text-white shadow-xs font-bold'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <Activity className="w-4 h-4" />
@@ -285,10 +281,10 @@ export const AdminDashboard = () => {
         <button
           type="button"
           onClick={() => setActiveTab('MAALEMS')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === 'MAALEMS'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-[0_0_15px_rgba(52,211,153,0.4)]'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              ? 'bg-emerald-600 text-white shadow-xs font-bold'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <Wrench className="w-4 h-4" />
@@ -298,16 +294,16 @@ export const AdminDashboard = () => {
         <button
           type="button"
           onClick={() => setActiveTab('DISPUTES')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer relative ${
+          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer relative ${
             activeTab === 'DISPUTES'
-              ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-[0_0_15px_rgba(244,63,94,0.4)]'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              ? 'bg-rose-600 text-white shadow-xs font-bold'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <ShieldAlert className="w-4 h-4" />
           <span>4. Litiges &amp; Remplacement Lead</span>
           {pendingDisputesCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-mono font-black ml-1 animate-bounce">
+            <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-mono font-black ml-1 animate-bounce">
               {pendingDisputesCount}
             </span>
           )}
@@ -316,16 +312,16 @@ export const AdminDashboard = () => {
         <button
           type="button"
           onClick={() => setActiveTab('RECHARGES')}
-          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === 'RECHARGES'
-              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              ? 'bg-purple-600 text-white shadow-xs font-bold'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <Receipt className="w-4 h-4" />
           <span>5. Recharges &amp; Rapprochement</span>
           {pendingRechargesCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-mono font-black ml-1 animate-pulse">
+            <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-mono font-black ml-1 animate-pulse">
               {pendingRechargesCount}
             </span>
           )}

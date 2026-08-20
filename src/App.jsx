@@ -124,7 +124,26 @@ const MainApp = () => {
   if (activeSubdomain === APP_SUBDOMAINS.CLIENT) {
     return (
       <>
-        <Toaster position="top-center" theme="dark" offset="16px" gap={10} visibleToasts={4} expand={false} />
+        <Toaster 
+          position="top-center" 
+          theme="light" 
+          offset="16px" 
+          gap={10} 
+          visibleToasts={3} 
+          expand={false} 
+          closeButton
+          toastOptions={{
+            style: {
+              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+              borderRadius: '1.25rem',
+              padding: '0.85rem 1.15rem',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              color: '#0f172a',
+              boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
+            }
+          }}
+        />
         <ClientApp initialCategory={navParams.category} initialCity={navParams.city} initialDistrict={navParams.district} />
         <AuthModal />
         <AdminAuthModal />
@@ -148,7 +167,26 @@ const MainApp = () => {
   if (activeSubdomain === APP_SUBDOMAINS.MAALEM) {
     return (
       <>
-        <Toaster position="top-center" theme="dark" offset="16px" gap={10} visibleToasts={4} expand={false} />
+        <Toaster 
+          position="top-center" 
+          theme="light" 
+          offset="16px" 
+          gap={10} 
+          visibleToasts={3} 
+          expand={false} 
+          closeButton
+          toastOptions={{
+            style: {
+              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+              borderRadius: '1.25rem',
+              padding: '0.85rem 1.15rem',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              color: '#0f172a',
+              boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
+            }
+          }}
+        />
         <MaalemApp />
         <AuthModal />
         <AdminAuthModal />
@@ -172,7 +210,26 @@ const MainApp = () => {
   if (activeSubdomain === APP_SUBDOMAINS.ADMIN) {
     return (
       <>
-        <Toaster position="top-center" theme="dark" offset="16px" gap={10} visibleToasts={4} expand={false} />
+        <Toaster 
+          position="top-center" 
+          theme="light" 
+          offset="16px" 
+          gap={10} 
+          visibleToasts={3} 
+          expand={false} 
+          closeButton
+          toastOptions={{
+            style: {
+              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+              borderRadius: '1.25rem',
+              padding: '0.85rem 1.15rem',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              color: '#0f172a',
+              boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
+            }
+          }}
+        />
         <AdminApp />
         <AuthModal />
         <AdminAuthModal />
@@ -195,8 +252,27 @@ const MainApp = () => {
 
   // Root Domain / Landing Page Layout
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden">
-      <Toaster position="top-center" theme="dark" offset="16px" gap={10} visibleToasts={4} expand={false} />
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
+      <Toaster 
+        position="top-center" 
+        theme="light" 
+        offset="16px" 
+        gap={10} 
+        visibleToasts={3} 
+        expand={false} 
+        closeButton
+        toastOptions={{
+          style: {
+            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+            borderRadius: '1.25rem',
+            padding: '0.85rem 1.15rem',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            color: '#0f172a',
+            boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
+          }
+        }}
+      />
 
       <Navbar
         appMode="LANDING"
@@ -243,15 +319,15 @@ const MainApp = () => {
         />
       )}
 
-      <footer className="hidden md:block border-t border-cyan-500/20 bg-slate-950/80 backdrop-blur-md py-8 text-center text-xs text-slate-400 mt-16">
+      <footer className="hidden md:block border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 mt-16">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-black text-cyan-400 text-sm tracking-tight drop-shadow-[0_0_8px_rgba(34,211,238,0.7)]">
+            <span className="font-black text-blue-600 text-sm tracking-tight">
               BricoleMoi 🇲🇦
             </span>
-            <span className="text-slate-400 font-medium">• Le 1er Réseau de Dépannage d'Urgence au Maroc</span>
+            <span className="text-slate-500 font-medium">• Le 1er Réseau de Dépannage d'Urgence au Maroc</span>
           </div>
-          <p className="text-slate-400">© 2026 BricoleMoi • Casablanca, Rabat, Marrakech, Tanger, Fès, Agadir • Tous droits réservés.</p>
+          <p className="text-slate-500">© 2026 BricoleMoi • Casablanca, Rabat, Marrakech, Tanger, Fès, Agadir • Tous droits réservés.</p>
         </div>
       </footer>
     </div>

@@ -177,25 +177,43 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
 
       // Sync Supabase `profiles` & `maalem_details`
       if (isSupabaseConfigured && user?.id) {
-        await supabase
+        const { error: profileErr } = await supabase
           .from('profiles')
-          .update({
+          .upsert([{
+            id: user.id,
             full_name: updatedUser.full_name,
             phone: formattedPhone,
+            role: user.role || 'CLIENT',
             city_zone: fullCityZone
-          })
-          .eq('id', user.id);
+          }])
+          .select();
+
+        if (profileErr) {
+          console.warn('[Supabase Profile Upsert Error]:', profileErr);
+        }
 
         if (isMaalem) {
           await supabase
             .from('maalem_details')
-            .update({ specialty })
-            .eq('id', user.id);
+            .upsert([{
+              id: user.id,
+              specialty: specialty
+            }])
+            .select()
+            .catch(() => {});
         }
       }
 
       setUser(updatedUser);
       sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+
+      // Broadcast temps réel vers le dashboard admin et les autres onglets
+      try {
+        const bc = new BroadcastChannel('bricolemoi_intertab_sync');
+        bc.postMessage({ type: 'PROFILE_UPDATED', user: updatedUser });
+        bc.close();
+      } catch (e) {}
+
       toast.success('✨ Vos coordonnées ont été enregistrées avec succès !');
       setActiveTab('info');
     } catch (err) {
@@ -212,18 +230,18 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs"
       >
         <motion.div
           initial={{ scale: 0.94, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 10 }}
-          className="bg-slate-950 border border-cyan-500/40 rounded-3xl max-w-md w-full p-4 sm:p-6 max-h-modal overflow-y-auto modal-scroll shadow-[0_0_40px_rgba(6,182,212,0.25)] relative text-slate-100 space-y-4 sm:space-y-5"
+          className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-4 sm:p-6 max-h-modal overflow-y-auto modal-scroll shadow-2xl relative text-slate-900 space-y-4 sm:space-y-5"
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-900 transition-colors cursor-pointer"
+            className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -235,10 +253,10 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 <img 
                   src={user.avatar_url} 
                   alt={user.full_name} 
-                  className="w-16 h-16 rounded-2xl object-cover border border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+                  className="w-16 h-16 rounded-2xl object-cover border border-slate-200 shadow-xs"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 border border-cyan-400/50 flex items-center justify-center font-black text-2xl text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 border border-blue-200 flex items-center justify-center font-black text-2xl text-white shadow-xs">
                   {isMaalem ? (
                     <EnhancedCategoryIcon type={specialty} className="w-9 h-9" />
                   ) : (
@@ -246,29 +264,29 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                   )}
                 </div>
               )}
-              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-950 rounded-full shadow-md"></span>
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full shadow-xs"></span>
             </div>
 
             <div className="flex-1 min-w-0">
-              <h3 className="text-xl font-black text-white truncate">{user.full_name || 'Utilisateur'}</h3>
+              <h3 className="text-xl font-black text-slate-900 truncate">{user.full_name || 'Utilisateur'}</h3>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border shadow-sm ${
+                <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border shadow-xs ${
                   isAdmin 
-                    ? 'bg-purple-950 text-purple-300 border-purple-500/40'
+                    ? 'bg-purple-50 text-purple-800 border-purple-200'
                     : isMaalem 
-                    ? 'bg-amber-950 text-amber-300 border-amber-500/40' 
-                    : 'bg-cyan-950 text-cyan-300 border-cyan-500/40'
+                    ? 'bg-amber-50 text-amber-900 border-amber-200' 
+                    : 'bg-blue-50 text-blue-800 border-blue-200'
                 }`}>
                   {isAdmin ? '🛡️ Administrateur' : isMaalem ? `🛠️ ${getSpecialtyLabel(specialty)}` : '👤 Client Particulier'}
                 </span>
 
                 {user.phone && user.phone.length >= 8 ? (
-                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1 shadow-sm">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" /> Téléphone Enregistré
+                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 shadow-xs">
+                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> Téléphone Enregistré
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold text-amber-400 bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1 shadow-sm">
-                    <AlertCircle className="w-2.5 h-2.5" /> Numéro requis
+                  <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 flex items-center gap-1 shadow-xs">
+                    <AlertCircle className="w-2.5 h-2.5 text-amber-600" /> Numéro requis
                   </span>
                 )}
               </div>
@@ -280,27 +298,27 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-3 bg-gradient-to-r from-cyan-950/90 to-blue-950/90 border border-cyan-400/50 rounded-2xl space-y-1 shadow-[0_0_20px_rgba(6,182,212,0.2)]"
+              className="p-3 bg-blue-50 border border-blue-200 rounded-2xl space-y-1 shadow-xs"
             >
-              <p className="text-xs font-black text-cyan-300 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-cyan-400" />
+              <p className="text-xs font-black text-blue-900 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-blue-600" />
                 <span>👋 Bienvenue {user.full_name || ''} !</span>
               </p>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
+              <p className="text-[11px] text-slate-600 leading-relaxed">
                 Votre compte Google est connecté. Veuillez renseigner votre <strong>numéro de téléphone</strong> et votre <strong>quartier</strong> pour que les artisans puissent vous joindre lors de vos demandes de dépannage !
               </p>
             </motion.div>
           )}
 
           {/* Tab Switcher */}
-          <div className="flex bg-slate-900/90 p-1 rounded-xl border border-cyan-500/20">
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
             <button
               type="button"
               onClick={() => setActiveTab('info')}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 activeTab === 'info'
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Coordonnées
@@ -310,8 +328,8 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
               onClick={() => setActiveTab('edit')}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 ${
                 activeTab === 'edit'
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Edit3 className="w-3 h-3" />
@@ -323,8 +341,8 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 onClick={() => setActiveTab('stats')}
                 className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                   activeTab === 'stats'
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Activité SOS
@@ -335,43 +353,43 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           {/* Tab 1: Informations View */}
           {activeTab === 'info' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2.5">
-              <div className="bg-slate-900/90 border border-cyan-500/20 p-3.5 rounded-2xl flex items-center justify-between">
+              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs font-bold text-slate-300">Téléphone Mobile</span>
+                  <Phone className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs font-bold text-slate-700">Téléphone Mobile</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-cyan-300 dir-ltr">
-                  {user.phone || <span className="text-amber-400 italic">Non renseigné</span>}
+                <span className="text-xs font-mono font-bold text-slate-900 dir-ltr">
+                  {user.phone || <span className="text-amber-600 italic">Non renseigné</span>}
                 </span>
               </div>
 
-              <div className="bg-slate-900/90 border border-cyan-500/20 p-3.5 rounded-2xl flex items-center justify-between">
+              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <MapPin className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs font-bold text-slate-300">Ville & Quartier</span>
+                  <MapPin className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs font-bold text-slate-700">Ville &amp; Quartier</span>
                 </div>
-                <span className="text-xs font-bold text-slate-100">{user.city_zone || 'Casablanca - Maarif'}</span>
+                <span className="text-xs font-bold text-slate-900">{user.city_zone || 'Casablanca - Maarif'}</span>
               </div>
 
               {!isMaalem && (
-                <div className="bg-slate-900/90 border border-cyan-500/20 p-3.5 rounded-2xl flex items-center justify-between">
+                <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Activity className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-slate-300">Historique d'Urgences</span>
+                    <Activity className="w-4 h-4 text-emerald-600" />
+                    <span className="text-xs font-bold text-slate-700">Historique d'Urgences</span>
                   </div>
-                  <span className="text-xs font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-mono">
+                  <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-mono">
                     {myClientInterventions.length} demande{myClientInterventions.length > 1 ? 's' : ''} SOS
                   </span>
                 </div>
               )}
 
               {isMaalem && (
-                <div className="bg-slate-900/90 border border-amber-500/30 p-3.5 rounded-2xl flex items-center justify-between">
+                <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <CreditCard className="w-4 h-4 text-amber-400" />
-                    <span className="text-xs font-bold text-slate-300">Solde de Crédits Leads</span>
+                    <CreditCard className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs font-bold text-amber-900">Solde de Crédits Leads</span>
                   </div>
-                  <span className="text-sm font-black text-amber-400 font-mono">
+                  <span className="text-sm font-black text-amber-900 font-mono">
                     {user.maalem_details?.credit_balance?.toFixed(2) || '15.00'} DH
                   </span>
                 </div>
@@ -383,37 +401,41 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           {activeTab === 'edit' && (
             <motion.form initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={handleSaveProfile} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Nom Complet :</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nom Complet :</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Votre nom complet"
-                  className="w-full p-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs font-bold focus:border-cyan-400 focus:outline-none"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:border-blue-600 focus:bg-white focus:outline-none"
                   required
                 />
               </div>
 
               {/* Téléphone Mobile avec Sélecteur d'Indicatif International */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Numéro de Téléphone :</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Numéro de Téléphone :</label>
                 <div className="relative">
                   {/* Sélecteur d'indicatif pays */}
                   <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20" ref={countryDropdownRef}>
                     <button
                       type="button"
                       onClick={() => setIsCountryOpen(!isCountryOpen)}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-950/90 hover:bg-slate-900 border border-cyan-500/40 hover:border-cyan-400 rounded-xl text-cyan-300 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs font-mono font-bold transition-all cursor-pointer shadow-xs active:scale-95"
                     >
-                      <span className="text-sm">{selectedCountry.flag}</span>
+                      <img 
+                        src={selectedCountry.flagUrl || `https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png`} 
+                        alt={selectedCountry.name} 
+                        className="w-4 h-3 object-cover rounded-xs shadow-2xs shrink-0 border border-slate-200/60" 
+                      />
                       <span>{selectedCountry.dial}</span>
-                      <ChevronDown className="w-3 h-3 text-cyan-400 opacity-70" />
+                      <ChevronDown className="w-3 h-3 text-slate-400" />
                     </button>
 
                     {isCountryOpen && (
-                      <div className="absolute left-0 top-full mt-1.5 w-60 max-h-52 overflow-y-auto bg-slate-950/95 border border-cyan-500/50 rounded-2xl shadow-2xl p-1.5 z-50 modal-scroll backdrop-blur-xl">
-                        <div className="px-2 py-1 text-[10px] font-mono text-cyan-400 font-bold uppercase border-b border-cyan-500/20 mb-1 flex items-center gap-1">
-                          <Globe className="w-3 h-3" />
+                      <div className="absolute left-0 top-full mt-1.5 w-60 max-h-52 overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-xl p-1.5 z-50 modal-scroll">
+                        <div className="px-2 py-1 text-[10px] font-mono text-slate-500 font-bold uppercase border-b border-slate-100 mb-1 flex items-center gap-1">
+                          <Globe className="w-3 h-3 text-blue-600" />
                           <span>Indicatif Pays / MRE</span>
                         </div>
                         {COUNTRY_DIAL_CODES.map((c) => (
@@ -426,15 +448,19 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                             }}
                             className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer ${
                               selectedCountry.code === c.code
-                                ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-500/30'
-                                : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                                ? 'bg-blue-50 text-blue-900 font-bold border border-blue-200'
+                                : 'text-slate-700 hover:bg-slate-50'
                             }`}
                           >
                             <div className="flex items-center gap-2">
-                              <span className="text-sm">{c.flag}</span>
-                              <span className="truncate text-left">{c.name}</span>
+                              <img 
+                                src={c.flagUrl} 
+                                alt={c.name} 
+                                className="w-5 h-3.5 object-cover rounded-xs shadow-2xs shrink-0 border border-slate-200/60" 
+                              />
+                              <span className="truncate text-left text-xs">{c.name}</span>
                             </div>
-                            <span className="font-mono text-cyan-400 text-[11px] font-bold">{c.dial}</span>
+                            <span className="font-mono text-blue-600 text-xs font-bold shrink-0">{c.dial}</span>
                           </button>
                         ))}
                       </div>
@@ -447,14 +473,14 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                     placeholder={selectedCountry.placeholder || '612345678'}
                     value={phone}
                     onChange={handlePhoneChange}
-                    className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 font-mono text-sm font-bold focus:border-cyan-400 focus:outline-none transition-colors shadow-sm dir-ltr tracking-wider"
+                    className="w-full pl-28 sm:pl-32 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono text-sm font-bold focus:border-blue-600 focus:bg-white focus:outline-none transition-colors shadow-xs dir-ltr tracking-wider"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Ville :</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Ville :</label>
                   <select
                     value={selectedCity}
                     onChange={(e) => {
@@ -462,18 +488,18 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                       const city = CITIES.find(c => c.name === e.target.value);
                       if (city && city.districts[0]) setSelectedDistrict(city.districts[0]);
                     }}
-                    className="w-full p-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs font-bold focus:border-cyan-400 focus:outline-none cursor-pointer"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:border-blue-600 focus:bg-white focus:outline-none cursor-pointer"
                   >
                     {CITIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Quartier :</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Quartier :</label>
                   <select
                     value={selectedDistrict}
                     onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="w-full p-2.5 bg-slate-900 border border-cyan-500/30 rounded-xl text-slate-100 text-xs font-bold focus:border-cyan-400 focus:outline-none cursor-pointer"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:border-blue-600 focus:bg-white focus:outline-none cursor-pointer"
                   >
                     {currentCityObj.districts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
@@ -482,7 +508,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
 
               {isMaalem && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Spécialité :</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Spécialité :</label>
                   <SpecialtySelect value={specialty} onChange={setSpecialty} />
                 </div>
               )}
@@ -491,7 +517,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 whileTap={{ scale: 0.95 }}
                 type="submit"
                 disabled={saving}
-                className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-[0_0_20px_rgba(52,211,153,0.4)] flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 mt-2"
+                className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 mt-2"
               >
                 <Save className="w-4 h-4" />
                 <span>{saving ? 'Enregistrement...' : 'Enregistrer mon Profil BricoleMoi'}</span>
@@ -503,39 +529,39 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           {activeTab === 'stats' && !isMaalem && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
               <div className="grid grid-cols-3 gap-2">
-                <div className="bg-slate-900/90 border border-cyan-500/20 p-3 rounded-2xl text-center">
-                  <div className="text-xl font-black text-cyan-300 font-mono">{myClientInterventions.length}</div>
-                  <div className="text-[10px] text-slate-400 font-bold uppercase mt-1">SOS Totaux</div>
+                <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center">
+                  <div className="text-xl font-black text-blue-600 font-mono">{myClientInterventions.length}</div>
+                  <div className="text-[10px] text-slate-500 font-bold uppercase mt-1">SOS Totaux</div>
                 </div>
-                <div className="bg-slate-900/90 border border-emerald-500/20 p-3 rounded-2xl text-center">
-                  <div className="text-xl font-black text-emerald-300 font-mono">{completedCount}</div>
-                  <div className="text-[10px] text-slate-400 font-bold uppercase mt-1">Clôturés</div>
+                <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center">
+                  <div className="text-xl font-black text-emerald-600 font-mono">{completedCount}</div>
+                  <div className="text-[10px] text-slate-500 font-bold uppercase mt-1">Clôturés</div>
                 </div>
-                <div className="bg-slate-900/90 border border-amber-500/20 p-3 rounded-2xl text-center">
-                  <div className="text-xl font-black text-amber-300 font-mono">{activeCount}</div>
-                  <div className="text-[10px] text-slate-400 font-bold uppercase mt-1">En Cours</div>
+                <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center">
+                  <div className="text-xl font-black text-amber-600 font-mono">{activeCount}</div>
+                  <div className="text-[10px] text-slate-500 font-bold uppercase mt-1">En Cours</div>
                 </div>
               </div>
 
-              <div className="bg-slate-900/70 border border-cyan-500/20 p-3 rounded-2xl flex items-center gap-3">
-                <ShieldCheck className="w-6 h-6 text-cyan-400 shrink-0" />
+              <div className="bg-blue-50/50 border border-blue-200 p-3 rounded-2xl flex items-center gap-3">
+                <ShieldCheck className="w-6 h-6 text-blue-600 shrink-0" />
                 <div className="text-xs">
-                  <p className="font-bold text-slate-200">Garantie Intervention BricoleMoi</p>
-                  <p className="text-[11px] text-slate-400">Tous vos chantiers sont protégés par notre protocole d'arbitrage et de contrôle qualité.</p>
+                  <p className="font-bold text-slate-900">Garantie Intervention BricoleMoi</p>
+                  <p className="text-[11px] text-slate-600">Tous vos chantiers sont protégés par notre protocole d'arbitrage et de contrôle qualité.</p>
                 </div>
               </div>
             </motion.div>
           )}
 
           {/* Logout Action Button */}
-          <div className="pt-2 border-t border-slate-900">
+          <div className="pt-2 border-t border-slate-100">
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={handleLogout}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-black text-xs shadow-[0_0_20px_rgba(244,63,94,0.4)] flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+              className="w-full py-3 px-4 rounded-xl bg-slate-100 hover:bg-red-50 text-red-600 hover:text-red-700 border border-slate-200 font-bold text-xs shadow-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
             >
-              <LogOut className="w-4 h-4 text-white" />
-              <span>Se Déconnecter & Revenir à l'Accueil</span>
+              <LogOut className="w-4 h-4" />
+              <span>Se Déconnecter &amp; Revenir à l'Accueil</span>
             </motion.button>
           </div>
         </motion.div>

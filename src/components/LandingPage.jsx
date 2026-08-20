@@ -33,7 +33,7 @@ import {
   Buildings,
   NavigationArrow
 } from '@phosphor-icons/react';
-import { EnhancedCategoryIcon } from './EnhancedCategoryIcon';
+import { EnhancedCategoryIcon, getSpecialtyMeta } from './EnhancedCategoryIcon';
 import { PromoVideoPlayer } from './PromoVideoPlayer';
 
 const MOROCCAN_SERVICES = [
@@ -154,13 +154,13 @@ export const LandingPage = ({ onSelectJourney }) => {
       {/* 1. HERO SECTION : Interactive Switcher (Client vs Maâlem) */}
       <section className="relative pt-4 pb-2 text-center max-w-5xl mx-auto space-y-6">
         
-        {/* Neon Badge */}
+        {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/40 text-cyan-300 text-xs font-bold shadow-[0_0_20px_rgba(6,182,212,0.25)]"
+          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold shadow-xs"
         >
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping inline-block shadow-[0_0_8px_rgba(34,211,238,0.9)]" />
+          <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping inline-block" />
           <span>Plateforme N°1 de Dépannage d'Urgence Express au Maroc 🇲🇦</span>
         </motion.div>
 
@@ -169,19 +169,19 @@ export const LandingPage = ({ onSelectJourney }) => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight"
+          className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight"
         >
           {activeTab === 'CLIENT' ? (
             <>
               Un Artisan Qualifié chez Vous <br />
-              <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(6,182,212,0.5)]">
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 bg-clip-text text-transparent">
                 en Moins de 15 Minutes
               </span>
             </>
           ) : (
             <>
               Développez vos Chantiers Pro <br />
-              <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-500 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(245,158,11,0.5)]">
+              <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent">
                 0% Commission & Leads Directs
               </span>
             </>
@@ -193,28 +193,28 @@ export const LandingPage = ({ onSelectJourney }) => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed"
+          className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed"
         >
           {activeTab === 'CLIENT' ? (
-            <>Plomberie, électricité, serrurerie ou panne auto ? Lancez votre alerte SOS et suivez votre <strong className="text-cyan-300">Maâlem vérifié</strong> en direct sur la carte radar.</>
+            <>Plomberie, électricité, serrurerie ou panne auto ? Lancez votre alerte SOS et suivez votre <strong className="text-blue-600 font-bold">Maâlem vérifié</strong> en direct sur la carte radar.</>
           ) : (
-            <>Rejoignez le réseau des artisans vérifiés au Maroc. Recevez des alertes WhatsApp instantanées dans votre quartier. <strong className="text-amber-300">+15 DH offerts à l'inscription</strong> pour votre 1er lead offert.</>
+            <>Rejoignez le réseau des artisans vérifiés au Maroc. Recevez des alertes WhatsApp instantanées dans votre quartier. <strong className="text-amber-700 font-bold">+15 DH offerts à l'inscription</strong> pour votre 1er lead offert.</>
           )}
         </motion.p>
 
         {/* 🎛️ HERO TAB SWITCHER (Client vs Artisan) */}
         <div className="pt-2 flex justify-center">
-          <div className="p-1.5 bg-slate-950/90 border border-cyan-500/30 rounded-2xl flex items-center gap-1 shadow-[0_0_25px_rgba(6,182,212,0.2)] max-w-md w-full">
+          <div className="p-1.5 bg-slate-100 border border-slate-200 rounded-2xl flex items-center gap-1 shadow-xs max-w-md w-full">
             <button
               type="button"
               onClick={() => setActiveTab('CLIENT')}
               className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'CLIENT'
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Zap className="w-4 h-4 text-cyan-200" />
+              <Zap className="w-4 h-4" />
               <span>J'ai une Urgence (Client)</span>
             </button>
 
@@ -223,8 +223,8 @@ export const LandingPage = ({ onSelectJourney }) => {
               onClick={() => setActiveTab('MAALEM')}
               className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'MAALEM'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-amber-500 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Wrench className="w-4 h-4" />
@@ -241,37 +241,36 @@ export const LandingPage = ({ onSelectJourney }) => {
           /* 🚨 PARCOURS CLIENT : SIMULATEUR D'URGENCE & TARIF INDICATIF */
           /* ============================================================== */
           <motion.section
+            id="bricolemoi-simulator"
             key="client-simulator"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25 }}
-            className="max-w-5xl mx-auto bg-slate-900/80 backdrop-blur-xl border border-cyan-500/30 rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(6,182,212,0.15)] relative overflow-hidden"
+            className="max-w-5xl mx-auto bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden"
           >
-            <div className="pointer-events-none absolute -right-16 -top-16 w-56 h-56 bg-cyan-500/10 rounded-full blur-3xl" />
-
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-cyan-500/20">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
               <div>
-                <span className="text-xs font-black text-cyan-400 tracking-wider uppercase flex items-center gap-1.5">
+                <span className="text-xs font-black text-blue-600 tracking-wider uppercase flex items-center gap-1.5">
                   <Sliders className="w-4 h-4" />
                   <span>Simulateur d'Urgence Express</span>
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
                   Quel est votre problème de dépannage ?
                 </h3>
               </div>
 
               {/* City Selector */}
-              <div className="flex items-center gap-2 bg-slate-950 border border-cyan-500/30 px-3.5 py-2 rounded-2xl shadow-inner">
-                <MapPin className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs text-slate-400 font-bold">Ville :</span>
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl shadow-xs">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                <span className="text-xs text-slate-500 font-bold">Ville :</span>
                 <select
                   value={selectedCityName}
                   onChange={(e) => setSelectedCityName(e.target.value)}
-                  className="bg-transparent text-xs font-black text-cyan-300 focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-black text-slate-800 focus:outline-none cursor-pointer"
                 >
                   {MOROCCAN_CITIES.map((city) => (
-                    <option key={city.name} value={city.name} className="bg-slate-900 text-slate-100">
+                    <option key={city.name} value={city.name} className="bg-white text-slate-800">
                       {city.name} ({city.activeMaalems} en ligne)
                     </option>
                   ))}
@@ -283,37 +282,53 @@ export const LandingPage = ({ onSelectJourney }) => {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-6">
               {MOROCCAN_SERVICES.map((srv) => {
                 const isSelected = srv.id === selectedServiceId;
+                const meta = getSpecialtyMeta(srv.iconType || srv.id);
                 return (
                   <motion.button
                     whileTap={{ scale: 0.96 }}
                     key={srv.id}
                     type="button"
-                    onClick={() => setSelectedServiceId(srv.id)}
-                    className={`p-4 rounded-2xl border transition-all text-left flex flex-col justify-between gap-3 relative cursor-pointer group ${
+                    onClick={() => {
+                      setSelectedServiceId(srv.id);
+                      try {
+                        localStorage.setItem('bricolemoi_pending_intent', JSON.stringify({ category: srv.id, city: selectedCityName }));
+                      } catch (e) {}
+                    }}
+                    className={`p-3.5 sm:p-4 rounded-2xl border transition-all text-left flex flex-col justify-between gap-3 relative cursor-pointer group ${
                       isSelected
-                        ? 'bg-slate-950 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.35)] scale-[1.02]'
-                        : 'bg-slate-950/60 border-cyan-500/20 hover:border-cyan-500/50 hover:bg-slate-950/90 text-slate-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                        ? `${meta.activeCard} scale-[1.02]`
+                        : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 shadow-xs'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                        isSelected ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]' : 'bg-slate-900 text-slate-400'
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105 ${
+                        isSelected 
+                          ? meta.activeIconBox 
+                          : 'bg-slate-50 border border-slate-200/80 shadow-2xs'
                       }`}>
-                        <EnhancedCategoryIcon type={srv.iconType} className="w-5 h-5" />
+                        <EnhancedCategoryIcon 
+                          type={srv.iconType} 
+                          className="w-5 h-5" 
+                          colorClass={isSelected ? 'text-white' : undefined} 
+                        />
                       </div>
-                      {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping shadow-[0_0_8px_rgba(34,211,238,0.9)]" />}
+                      {isSelected && (
+                        <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shadow-xs ${meta.activeBadge}`}>
+                          ✓
+                        </span>
+                      )}
                     </div>
 
                     <div>
-                      <p className={`text-xs font-black leading-tight ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                      <p className={`text-xs font-black leading-tight ${isSelected ? 'text-slate-950' : 'text-slate-900'}`}>
                         {srv.name}
                       </p>
-                      <p className="text-[10px] text-slate-400 font-medium font-arabic mt-0.5">{srv.nameAr}</p>
+                      <p className={`text-[11px] sm:text-xs font-medium font-arabic mt-0.5 leading-snug ${isSelected ? meta.colorClass : 'text-slate-500'}`}>{srv.nameAr}</p>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-900 font-mono">
-                      <span className="text-cyan-400 font-bold">{srv.minPrice}-{srv.maxPrice} DH</span>
-                      <span className="text-emerald-400 font-bold">{srv.time}</span>
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-100 font-mono">
+                      <span className={`font-bold ${isSelected ? meta.colorClass : 'text-blue-600'}`}>{srv.minPrice}-{srv.maxPrice} DH</span>
+                      <span className="text-emerald-600 font-bold">{srv.time}</span>
                     </div>
                   </motion.button>
                 );
@@ -321,32 +336,32 @@ export const LandingPage = ({ onSelectJourney }) => {
             </div>
 
             {/* Live Result Card & Action */}
-            <div className="mt-6 p-5 sm:p-6 bg-slate-950/90 border border-cyan-500/30 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div className="mt-6 p-5 sm:p-6 bg-slate-50 border border-slate-200 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               
               {/* Metric 1 : Tarif Indicatif */}
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)] flex-shrink-0">
-                  <Coins className="w-6 h-6 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-blue-600 shadow-xs flex-shrink-0">
+                  <Coins className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Tarif Indicatif Maroc</p>
-                  <p className="text-2xl font-black text-cyan-300 font-mono">
-                    {currentService.minPrice} - {currentService.maxPrice} <span className="text-sm text-amber-400 font-bold">DH</span>
+                  <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Tarif Indicatif Maroc</p>
+                  <p className="text-2xl font-black text-slate-900 font-mono">
+                    {currentService.minPrice} - {currentService.maxPrice} <span className="text-sm text-amber-600 font-bold">DH</span>
                   </p>
-                  <p className="text-[10px] text-slate-400">Devis convenu avant démarrage</p>
+                  <p className="text-[10px] text-slate-500">Devis convenu avant démarrage</p>
                 </div>
               </div>
 
               {/* Metric 2 : Disponibilité & Délai */}
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.3)] flex-shrink-0">
-                  <Clock className="w-6 h-6 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-emerald-600 shadow-xs flex-shrink-0">
+                  <Clock className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Délai d'Arrivée à {selectedCityName}</p>
-                  <p className="text-xl font-black text-emerald-400 font-mono">{currentService.time}</p>
-                  <p className="text-[10px] text-slate-400">
-                    <strong className="text-emerald-300 font-bold">{Math.round(currentCity.activeMaalems * 0.35)}</strong> artisans dispo près de chez vous
+                  <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Délai d'Arrivée à {selectedCityName}</p>
+                  <p className="text-xl font-black text-emerald-600 font-mono">{currentService.time}</p>
+                  <p className="text-[10px] text-slate-500">
+                    <strong className="text-emerald-700 font-bold">{Math.round(currentCity.activeMaalems * 0.35)}</strong> artisans dispo près de chez vous
                   </p>
                 </div>
               </div>
@@ -356,9 +371,9 @@ export const LandingPage = ({ onSelectJourney }) => {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onSelectJourney('CLIENT', { category: selectedServiceId, city: selectedCityName })}
-                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-sm shadow-[0_0_25px_rgba(6,182,212,0.5)] flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
+                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm shadow-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
                 >
-                  <Zap className="w-5 h-5 text-slate-950 fill-slate-950 group-hover:scale-110 transition-transform" />
+                  <Zap className="w-5 h-5 fill-current" />
                   <span>Demander mon Dépannage Immédiat</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
@@ -375,37 +390,35 @@ export const LandingPage = ({ onSelectJourney }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25 }}
-            className="max-w-5xl mx-auto bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(245,158,11,0.15)] relative overflow-hidden"
+            className="max-w-5xl mx-auto bg-white border border-amber-200 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden"
           >
-            <div className="pointer-events-none absolute -right-16 -top-16 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl" />
-
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-amber-500/20">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
               <div>
-                <span className="text-xs font-black text-amber-400 tracking-wider uppercase flex items-center gap-1.5">
+                <span className="text-xs font-black text-amber-600 tracking-wider uppercase flex items-center gap-1.5">
                   <TrendingUp className="w-4 h-4" />
                   <span>Calculateur de Gains Maâlem Pro</span>
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
                   Combien pouvez-vous gagner avec BricoleMoi ?
                 </h3>
               </div>
 
               {/* Bonus Callout Pill */}
-              <div className="flex items-center gap-2 bg-emerald-950/80 border border-emerald-500/40 px-3.5 py-1.5 rounded-2xl shadow-[0_0_15px_rgba(52,211,153,0.2)]">
-                <Gift className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-black text-emerald-300">+15 DH Offerts à l'Inscription !</span>
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-2xl shadow-xs">
+                <Gift className="w-4 h-4 text-amber-600" />
+                <span className="text-xs font-black text-amber-900">+15 DH Offerts à l'Inscription !</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 items-center">
               {/* Slider Control */}
-              <div className="space-y-6 bg-slate-950/80 border border-amber-500/20 p-6 rounded-2xl">
+              <div className="space-y-6 bg-slate-50 border border-slate-200 p-6 rounded-2xl">
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="text-sm font-bold text-slate-200">
+                    <label className="text-sm font-bold text-slate-800">
                       Interventions réalisées par jour :
                     </label>
-                    <span className="px-3 py-1 bg-amber-950 border border-amber-500/40 rounded-xl text-amber-300 font-mono font-black text-base">
+                    <span className="px-3 py-1 bg-amber-100 border border-amber-300 rounded-xl text-amber-900 font-mono font-black text-base">
                       {dailyJobs} chantiers / jour
                     </span>
                   </div>
@@ -417,9 +430,9 @@ export const LandingPage = ({ onSelectJourney }) => {
                     step="1"
                     value={dailyJobs}
                     onChange={(e) => setDailyJobs(parseInt(e.target.value))}
-                    className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
+                    className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-400 font-mono font-bold mt-1.5">
+                  <div className="flex justify-between text-[10px] text-slate-500 font-mono font-bold mt-1.5">
                     <span>1 job/j (Temps partiel)</span>
                     <span>4 jobs/j (Actif)</span>
                     <span>8 jobs/j (Intensif)</span>
@@ -427,16 +440,16 @@ export const LandingPage = ({ onSelectJourney }) => {
                 </div>
 
                 {/* Economic Transparency Breakdown */}
-                <div className="space-y-2 pt-2 text-xs border-t border-slate-800">
-                  <div className="flex justify-between text-slate-300">
+                <div className="space-y-2 pt-2 text-xs border-t border-slate-200">
+                  <div className="flex justify-between text-slate-600">
                     <span>Prix moyen par dépannage client :</span>
-                    <strong className="text-white font-mono font-bold">~{avgJobPrice} DH</strong>
+                    <strong className="text-slate-900 font-mono font-bold">~{avgJobPrice} DH</strong>
                   </div>
-                  <div className="flex justify-between text-slate-300">
+                  <div className="flex justify-between text-slate-600">
                     <span>Coût forfaitaire lead BricoleMoi :</span>
-                    <strong className="text-cyan-300 font-mono font-bold">-15 DH</strong>
+                    <strong className="text-blue-600 font-mono font-bold">-15 DH</strong>
                   </div>
-                  <div className="flex justify-between text-emerald-400 font-bold">
+                  <div className="flex justify-between text-emerald-700 font-bold">
                     <span>Votre gain net moyen par chantier :</span>
                     <strong className="font-mono">{netPerJob} DH (100% direct)</strong>
                   </div>
@@ -444,21 +457,21 @@ export const LandingPage = ({ onSelectJourney }) => {
               </div>
 
               {/* Calculated Net Result Card */}
-              <div className="bg-gradient-to-br from-amber-950/60 to-slate-950 border border-amber-500/40 p-6 rounded-2xl text-center space-y-4 shadow-[0_0_25px_rgba(245,158,11,0.2)]">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Revenu Net Mensuel Estimé :</p>
-                <p className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-100 to-white font-mono drop-shadow-[0_0_20px_rgba(245,158,11,0.6)]">
-                  {calculatedMonthlyRevenue.toLocaleString('fr-FR')} <span className="text-xl text-amber-400 font-bold">DH</span>
+              <div className="bg-amber-50/70 border border-amber-200 p-6 rounded-2xl text-center space-y-4 shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-amber-800">Revenu Net Mensuel Estimé :</p>
+                <p className="text-4xl sm:text-5xl font-black text-amber-950 font-mono">
+                  {calculatedMonthlyRevenue.toLocaleString('fr-FR')} <span className="text-xl text-amber-600 font-bold">DH</span>
                 </p>
-                <p className="text-xs text-slate-300 max-w-xs mx-auto">
+                <p className="text-xs text-slate-600 max-w-xs mx-auto">
                   Basé sur 26 jours de travail par mois. Aucun pourcentage prélevé sur vos devis finaux !
                 </p>
 
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onSelectJourney('MAALEM', { promo: 'BONUS15' })}
-                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-sm shadow-[0_0_20px_rgba(245,158,11,0.4)] flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
+                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
                 >
-                  <Wrench className="w-5 h-5 text-slate-950 group-hover:rotate-45 transition-transform" />
+                  <Wrench className="w-5 h-5 group-hover:rotate-45 transition-transform" />
                   <span>Rejoindre BricoleMoi &amp; Recevoir +15 DH</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
@@ -468,18 +481,18 @@ export const LandingPage = ({ onSelectJourney }) => {
         )}
       </AnimatePresence>
 
-      {/* 🎬 SPOT VIDÉO PROMO & DÉMO ANIMÉE (1 MINUTE EXPLAINER) */}
+      {/* 🎬 SPOT VIDÉO PROMO & DÉMO ANIMÉE */}
       <section className="pt-2">
         <PromoVideoPlayer onSelectJourney={onSelectJourney} />
       </section>
 
-      {/* 3. STEP-BY-STEP PROCESS FLOW ("COMMENT ÇA MARCHE ?") */}
+      {/* 3. STEP-BY-STEP PROCESS FLOW */}
       <section className="max-w-5xl mx-auto space-y-8">
         <div className="text-center space-y-2">
-          <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Comment fonctionne BricoleMoi ?
           </h3>
-          <p className="text-slate-400 text-xs sm:text-sm font-medium">
+          <p className="text-slate-500 text-xs sm:text-sm font-medium">
             Un processus fluide, transparent et 100% sécurisé pour les deux parties
           </p>
         </div>
@@ -488,151 +501,127 @@ export const LandingPage = ({ onSelectJourney }) => {
           {activeTab === 'CLIENT' ? (
             <>
               {/* Step 1 Client */}
-              <motion.div
-                whileHover={{ y: -4 }}
-                onClick={() => onSelectJourney('CLIENT', { category: selectedServiceId, city: selectedCityName })}
-                className="bg-slate-900/70 border border-cyan-500/20 rounded-3xl p-6 relative hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all shadow-lg cursor-pointer group"
-              >
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative shadow-xs">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="w-8 h-8 rounded-full bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-mono font-black text-sm flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.3)]">
+                  <span className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-sm flex items-center justify-center">
                     1
                   </span>
-                  <span className="text-[10px] text-cyan-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <span>Lancer →</span>
+                  <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                    Étape 1
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-white mb-2 group-hover:text-cyan-300 transition-colors">Lancez votre Alerte SOS</h4>
-                <p className="text-slate-300 text-xs leading-relaxed">
+                <h4 className="text-lg font-black text-slate-900 mb-2">Lancez votre Alerte SOS</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">
                   Sélectionnez votre panne et décrivez votre urgence vocalement en Darija 🇲🇦 ou avec une photo. L'IA géolocalise automatiquement votre quartier.
                 </p>
-              </motion.div>
+              </div>
 
               {/* Step 2 Client */}
-              <motion.div
-                whileHover={{ y: -4 }}
-                onClick={() => onSelectJourney('CLIENT', { category: selectedServiceId, city: selectedCityName })}
-                className="bg-slate-900/70 border border-cyan-500/20 rounded-3xl p-6 relative hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all shadow-lg cursor-pointer group"
-              >
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative shadow-xs">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="w-8 h-8 rounded-full bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-mono font-black text-sm flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.3)]">
+                  <span className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-sm flex items-center justify-center">
                     2
                   </span>
-                  <span className="text-[10px] text-cyan-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <span>Suivre →</span>
+                  <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                    Étape 2
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-white mb-2 group-hover:text-cyan-300 transition-colors">Suivez votre Maâlem en Route</h4>
-                <p className="text-slate-300 text-xs leading-relaxed">
+                <h4 className="text-lg font-black text-slate-900 mb-2">Suivez votre Maâlem en Route</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">
                   Un artisan certifié prend en charge votre SOS. Vous recevez son nom, sa photo, son contact WhatsApp direct et suivez son trajet GPS en temps réel.
                 </p>
-              </motion.div>
+              </div>
 
               {/* Step 3 Client */}
-              <motion.div
-                whileHover={{ y: -4 }}
-                onClick={() => onSelectJourney('CLIENT', { category: selectedServiceId, city: selectedCityName })}
-                className="bg-slate-900/70 border border-cyan-500/20 rounded-3xl p-6 relative hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all shadow-lg cursor-pointer group"
-              >
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative shadow-xs">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="w-8 h-8 rounded-full bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-mono font-black text-sm flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.3)]">
+                  <span className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-sm flex items-center justify-center">
                     3
                   </span>
-                  <span className="text-[10px] text-cyan-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <span>Garantie →</span>
+                  <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    Garantie
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-white mb-2 group-hover:text-cyan-300 transition-colors">Devis Convenu &amp; Notation</h4>
-                <p className="text-slate-300 text-xs leading-relaxed">
+                <h4 className="text-lg font-black text-slate-900 mb-2">Devis Convenu &amp; Notation</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">
                   Le diagnostic sur place établit un devis convenu avant toute réparation. Après accomplissement, confirmez la fin des travaux et notez votre Maâlem.
                 </p>
-              </motion.div>
+              </div>
             </>
           ) : (
             <>
               {/* Step 1 Maalem */}
-              <motion.div
-                whileHover={{ y: -4 }}
-                onClick={() => onSelectJourney('MAALEM', { promo: 'BONUS15' })}
-                className="bg-slate-900/70 border border-amber-500/20 rounded-3xl p-6 relative hover:border-amber-400/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all shadow-lg cursor-pointer group"
-              >
+              <div className="bg-white border border-amber-200 rounded-3xl p-6 relative shadow-xs">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="w-8 h-8 rounded-full bg-amber-950 border border-amber-500/40 text-amber-300 font-mono font-black text-sm flex items-center justify-center shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+                  <span className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono font-black text-sm flex items-center justify-center">
                     1
                   </span>
-                  <span className="text-[10px] text-amber-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <span>S'inscrire →</span>
+                  <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    +15 DH Offerts
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-white mb-2 group-hover:text-amber-300 transition-colors">Inscription Pro Rapide</h4>
-                <p className="text-slate-300 text-xs leading-relaxed">
+                <h4 className="text-lg font-black text-slate-900 mb-2">Inscription Pro Rapide</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">
                   Créez votre compte pro avec votre numéro de téléphone et votre métier. Votre compte est activé instantanément pour recevoir vos premiers chantiers.
                 </p>
-              </motion.div>
+              </div>
 
               {/* Step 2 Maalem */}
-              <motion.div
-                whileHover={{ y: -4 }}
-                onClick={() => onSelectJourney('MAALEM', { promo: 'BONUS15' })}
-                className="bg-slate-900/70 border border-amber-500/20 rounded-3xl p-6 relative hover:border-amber-400/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all shadow-lg cursor-pointer group"
-              >
+              <div className="bg-white border border-amber-200 rounded-3xl p-6 relative shadow-xs">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="w-8 h-8 rounded-full bg-amber-950 border border-amber-500/40 text-amber-300 font-mono font-black text-sm flex items-center justify-center shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+                  <span className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono font-black text-sm flex items-center justify-center">
                     2
                   </span>
-                  <span className="text-[10px] text-amber-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <span>Voir Radar →</span>
+                  <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    Temps Réel
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-white mb-2 group-hover:text-amber-300 transition-colors">Radar Live &amp; Déblocage à 15 DH</h4>
-                <p className="text-slate-300 text-xs leading-relaxed">
-                  Recevez des alertes sonores de chantiers dans votre ville. Écoutez le vocal client et débloquez son contact direct pour seulement 15 DH (1er lead offert avec votre bonus).
+                <h4 className="text-lg font-black text-slate-900 mb-2">Radar Live &amp; Déblocage à 15 DH</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">
+                  Recevez des alertes de chantiers dans votre ville. Écoutez le vocal client et débloquez son contact direct pour seulement 15 DH (1er lead offert avec votre bonus).
                 </p>
-              </motion.div>
+              </div>
 
               {/* Step 3 Maalem */}
-              <motion.div
-                whileHover={{ y: -4 }}
-                onClick={() => onSelectJourney('MAALEM', { promo: 'BONUS15' })}
-                className="bg-slate-900/70 border border-amber-500/20 rounded-3xl p-6 relative hover:border-amber-400/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all shadow-lg cursor-pointer group"
-              >
+              <div className="bg-white border border-amber-200 rounded-3xl p-6 relative shadow-xs">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="w-8 h-8 rounded-full bg-amber-950 border border-amber-500/40 text-amber-300 font-mono font-black text-sm flex items-center justify-center shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+                  <span className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono font-black text-sm flex items-center justify-center">
                     3
                   </span>
-                  <span className="text-[10px] text-amber-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <span>Encaisser →</span>
+                  <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    0% Commission
                   </span>
                 </div>
-                <h4 className="text-lg font-black text-white mb-2 group-hover:text-amber-300 transition-colors">Intervention &amp; Encaissement Direct</h4>
-                <p className="text-slate-300 text-xs leading-relaxed">
+                <h4 className="text-lg font-black text-slate-900 mb-2">Intervention &amp; Encaissement Direct</h4>
+                <p className="text-slate-600 text-xs leading-relaxed">
                   Appelez le client, réalisez le dépannage au tarif convenu et encaissez 100% de la prestation en direct (0% de commission sur vos travaux).
                 </p>
-              </motion.div>
+              </div>
             </>
           )}
         </div>
       </section>
 
       {/* 4. MOROCCAN CITIES COVERAGE & LIVE STATS */}
-      <section className="max-w-5xl mx-auto bg-slate-950/80 border border-cyan-500/20 rounded-3xl p-6 sm:p-8 space-y-6">
+      <section className="max-w-5xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
               <Buildings weight="duotone" className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-base font-black text-white tracking-tight">Couverture Nationale au Maroc</h4>
-              <p className="text-xs text-slate-400">Plus de 1 200 artisans opérationnels 24h/7j dans tout le Royaume</p>
+              <h4 className="text-base font-black text-slate-900 tracking-tight">Couverture Nationale au Maroc</h4>
+              <p className="text-xs text-slate-500">Sélectionnez une ville pour simuler les artisans disponibles</p>
             </div>
           </div>
 
-          <span className="px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-bold font-mono flex items-center gap-1.5 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono flex items-center gap-1.5 shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>Réseau Opérationnel 100%</span>
           </span>
         </div>
 
-        {/* Cities Grid with Click-to-Select & Launch */}
+        {/* Cities Grid with Click-to-Filter Simulator */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
           {MOROCCAN_CITIES.map((city) => (
             <motion.button
@@ -641,42 +630,42 @@ export const LandingPage = ({ onSelectJourney }) => {
               type="button"
               onClick={() => {
                 setSelectedCityName(city.name);
-                if (activeTab === 'CLIENT') {
-                  onSelectJourney('CLIENT', { category: selectedServiceId, city: city.name });
-                } else {
-                  onSelectJourney('MAALEM', { city: city.name, promo: 'BONUS15' });
-                }
+                try {
+                  localStorage.setItem('bricolemoi_pending_intent', JSON.stringify({ category: selectedServiceId, city: city.name }));
+                } catch (e) {}
+                const sim = document.getElementById('bricolemoi-simulator');
+                if (sim) sim.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }}
               className={`p-3 rounded-2xl border text-center transition-all cursor-pointer group ${
                 selectedCityName === city.name
-                  ? 'bg-slate-900 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
-                  : 'bg-slate-900/70 border-cyan-500/20 hover:border-cyan-400/50 hover:bg-slate-900'
+                  ? 'bg-blue-50 border-blue-500 shadow-xs ring-2 ring-blue-500/20'
+                  : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-white'
               }`}
             >
-              <p className="text-xs font-black text-white truncate group-hover:text-cyan-300 transition-colors">{city.name}</p>
-              <p className="text-[10px] text-cyan-400 font-mono font-bold mt-0.5">{city.activeMaalems} Pros</p>
+              <p className={`text-xs font-black truncate transition-colors ${selectedCityName === city.name ? 'text-blue-700 font-black' : 'text-slate-800 group-hover:text-blue-600'}`}>{city.name}</p>
+              <p className="text-[10px] text-blue-600 font-mono font-bold mt-0.5">{city.activeMaalems} Pros</p>
             </motion.button>
           ))}
         </div>
       </section>
 
       {/* 5. TRUST, GUARANTEES & ADMIN FOOTER LINK */}
-      <section className="max-w-5xl mx-auto bg-slate-900/60 border border-cyan-500/20 rounded-3xl p-6 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-300">
+      <section className="max-w-5xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-950 border border-cyan-500/30 flex items-center justify-center text-cyan-400 flex-shrink-0 shadow-[0_0_10px_rgba(6,182,212,0.25)]">
-            <ShieldCheck className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 flex-shrink-0">
+            <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-bold text-white text-sm">Garantie Anti-Arnaque &amp; Artisans Vérifiés</p>
-            <p className="text-slate-400">Tous les Maâlems sont vérifiés par notre équipe et évalués après chaque intervention.</p>
+            <p className="font-bold text-slate-900 text-sm">Garantie Anti-Arnaque &amp; Artisans Vérifiés</p>
+            <p className="text-slate-500">Tous les Maâlems sont vérifiés par notre équipe et évalués après chaque intervention.</p>
           </div>
         </div>
 
         <button
           onClick={() => setAdminAuthModalOpen(true)}
-          className="bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-300 px-4 py-2.5 rounded-xl border border-slate-800 flex items-center gap-2 font-bold transition-all whitespace-nowrap cursor-pointer shadow-sm active:scale-95"
+          className="bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 flex items-center gap-2 font-bold transition-all whitespace-nowrap cursor-pointer shadow-xs active:scale-95"
         >
-          <Lock className="w-3.5 h-3.5 text-cyan-400" />
+          <Lock className="w-3.5 h-3.5 text-slate-600" />
           <span>Accès Administration</span>
         </button>
       </section>
@@ -692,21 +681,21 @@ export const LandingPage = ({ onSelectJourney }) => {
               onSelectJourney('MAALEM', { promo: 'BONUS15' });
             }
           }}
-          className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-between shadow-[0_4px_25px_rgba(0,0,0,0.85)] cursor-pointer ${
+          className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-between shadow-lg cursor-pointer ${
             activeTab === 'CLIENT'
-              ? 'bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-600 text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.45)]'
-              : 'bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.45)]'
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
+              : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
           }`}
         >
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-slate-950/20 flex items-center justify-center">
-              {activeTab === 'CLIENT' ? <Zap className="w-4 h-4 fill-slate-950" /> : <Wrench className="w-4 h-4" />}
+            <div className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center">
+              {activeTab === 'CLIENT' ? <Zap className="w-4 h-4 fill-white" /> : <Wrench className="w-4 h-4" />}
             </div>
             <span className="truncate">
               {activeTab === 'CLIENT' ? `🚨 SOS Express à ${selectedCityName}` : `🛠️ Inscription Maâlem (+15 DH)`}
             </span>
           </div>
-          <div className="flex items-center gap-1 text-[11px] font-mono font-bold bg-slate-950/20 px-2.5 py-1 rounded-xl">
+          <div className="flex items-center gap-1 text-[11px] font-mono font-bold bg-white/20 px-2.5 py-1 rounded-xl">
             <span>Démarrer</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </div>

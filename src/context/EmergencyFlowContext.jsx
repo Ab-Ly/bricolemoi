@@ -6,6 +6,7 @@ import { subscribeToRealtimeChannel, publishRealtimeEvent } from '../lib/ablyRea
 import { startEmergencySiren, stopEmergencySiren, playNotificationSound, triggerVibration } from '../lib/audioNotifier';
 import { notify } from '../lib/notify';
 import { showLocalPushNotification } from '../lib/pushNotificationService';
+import { getAppSubdomain } from '../lib/subdomain';
 
 // ==========================================
 // 1. ÉTATS STRICTS DE LA MACHINE D'ÉTATS SOS
@@ -210,6 +211,12 @@ export const EmergencyFlowProvider = ({ children }) => {
             eta_minutes: payload.eta_minutes || 15
           };
 
+          const currentApp = getAppSubdomain();
+          const currentRole = (user?.role || 'CLIENT').toUpperCase();
+          if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') {
+            return;
+          }
+
           dispatch({
             type: ACTIONS.MATCH_SOS,
             payload: {
@@ -225,11 +232,19 @@ export const EmergencyFlowProvider = ({ children }) => {
             { id: `job-accepted-${payload.intervention_id || 'active'}`, badge: 'Match Confirmé' }
           );
         } else if (event === 'job:progress') {
+          const currentApp = getAppSubdomain();
+          const currentRole = (user?.role || 'CLIENT').toUpperCase();
+          if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') return;
+
           dispatch({
             type: ACTIONS.UPDATE_PROGRESS,
             payload: { step: payload.progress_step }
           });
         } else if (event === 'work:completion_requested') {
+          const currentApp = getAppSubdomain();
+          const currentRole = (user?.role || 'CLIENT').toUpperCase();
+          if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') return;
+
           dispatch({
             type: ACTIONS.COMPLETE_MISSION,
             payload: { finalPrice: payload.final_agreed_price }

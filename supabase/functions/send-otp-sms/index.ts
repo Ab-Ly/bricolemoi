@@ -11,7 +11,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Formateur et nettoyeur de numéro international
+/**
+ * Nettoyage et formatage du numéro de téléphone :
+ * - Retire le '+' et tous les espaces / séparateurs
+ * - Exemples : '+33 7 71 93 77 68' -> '33771937768'
+ *              '+212 6 12 34 56 78' -> '212612345678'
+ *              '0612345678' (Maroc par défaut) -> '212612345678'
+ */
 function cleanPhoneNumber(rawPhone: string): { cleanNumber: string; formatted: string; isValid: boolean } {
   const input = String(rawPhone || "").trim();
   let digits = input.replace(/\D/g, "");
@@ -51,13 +57,13 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: "Format de numéro invalide (ex: +2126XXXXXXXX ou +33XXXXXXXXX)." 
+          error: "Format de numéro invalide. Veuillez entrer un numéro valide (ex: +2126XXXXXXXX ou +33XXXXXXXXX)." 
         }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Détection des numéros de test / dev sandbox
+    // Détection numéros de test
     const isTestNumber = 
       cleanNumber.endsWith("000000") || 
       cleanNumber.includes("661001122") || 
@@ -66,9 +72,10 @@ serve(async (req) => {
 
     // Génération du code OTP à 6 chiffres
     const otpCode = isTestNumber ? "123456" : String(Math.floor(100000 + Math.random() * 900000));
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 minutes
+    // Expiration stricte de 5 minutes (300 secondes)
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-    // 1. Sauvegarde dans Supabase (table otp_verifications)
+    // 1. Sauvegarde sécurisée dans Supabase (table otp_verifications)
     if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
       try {
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -84,13 +91,14 @@ serve(async (req) => {
             updated_at: new Date().toISOString()
           }, { onConflict: "phone" });
       } catch (dbErr) {
-        console.warn("[send-infobip-otp] Supabase DB write notice:", dbErr);
+        console.warn("[send-otp-sms] Supabase DB write notice:", dbErr);
       }
     }
 
     let infobipResponse: unknown = null;
+    let infobipSuccess = false;
 
-    // 2. Envoi SMS standard Infobip
+    // 2. Envoi SMS standard Infobip avec Sender ID direct "BricoleMoi"
     if (!isTestNumber && INFOBIP_API_KEY) {
       const authHeader = INFOBIP_API_KEY.startsWith("App ") ? INFOBIP_API_KEY : `App ${INFOBIP_API_KEY}`;
       const messageText = `BricoleMoi : Votre code de verification est ${otpCode}. Valable 5 minutes.`;
@@ -118,18 +126,30 @@ serve(async (req) => {
 
         const smsData = await smsRes.json().catch(() => ({}));
         infobipResponse = smsData;
+
+        if (smsRes.ok) {
+          const statusGroup = smsData?.messages?.[0]?.status?.groupName;
+          if (statusGroup !== "REJECTED") {
+            infobipSuccess = true;
+          } else {
+            console.error("[Infobip] SMS rejected:", smsData);
+          }
+        } else {
+          console.error("[Infobip] SMS error response:", smsData);
+        }
       } catch (smsErr) {
         console.error("[Infobip] SMS fetch exception:", smsErr);
       }
+    } else {
+      infobipSuccess = true;
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Code OTP envoyé avec succès via SMS.",
+        message: "Code OTP envoyé par SMS avec succès.",
         phone: formatted,
         cleanPhoneNumber: cleanNumber,
-        channel: "sms",
         expires_in: 300,
         is_test: isTestNumber,
         dev_code: isTestNumber ? otpCode : undefined,
@@ -138,10 +158,10 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err: any) {
+    console.error("[send-otp-sms] Exception:", err);
     return new Response(
-      JSON.stringify({ success: false, error: err?.message || "Erreur interne du serveur." }),
+      JSON.stringify({ success: false, error: err?.message || "Erreur interne du serveur lors de l'envoi du SMS." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
-

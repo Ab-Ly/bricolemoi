@@ -117,17 +117,17 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
   };
 
   return (
-    <div className="bg-slate-950/85 border border-cyan-500/30 rounded-2xl p-4 sm:p-5 shadow-inner text-slate-100 space-y-3">
+    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs text-slate-900 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-          <Microphone weight="duotone" className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+          <Microphone weight="duotone" className="w-4 h-4 text-blue-600" />
           <span>Message Vocal / تسجيل صوتي (Darija / FR)</span>
         </label>
         
         {isRecording && (
-          <span className="flex items-center gap-1.5 text-xs text-red-400 font-mono font-black animate-pulse bg-red-950/80 px-2.5 py-0.5 rounded-full border border-red-500/40">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+          <span className="flex items-center gap-1.5 text-xs text-red-600 font-mono font-bold animate-pulse bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200">
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
             REC {formatTime(recordingTime)} / 01:00
           </span>
         )}
@@ -135,20 +135,20 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
 
       {/* État 1 : Bouton Micro Tactile Style WhatsApp */}
       {!audioUrl && !isRecording && (
-        <div className="flex flex-col sm:flex-row items-center gap-3 p-3 bg-slate-900/60 rounded-xl border border-cyan-500/20">
+        <div className="flex flex-col sm:flex-row items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 shadow-xs">
           <motion.button
             whileTap={{ scale: 0.92 }}
             type="button"
             onClick={startRecording}
-            className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.45)] active:scale-90 transition-all cursor-pointer flex-shrink-0"
+            className="w-14 h-14 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center justify-center shadow-sm active:scale-90 transition-all cursor-pointer flex-shrink-0"
             title="Appuyer pour enregistrer votre explication en Darija ou Français"
           >
             <Microphone weight="fill" className="w-7 h-7 animate-pulse" />
           </motion.button>
 
           <div className="text-center sm:text-left">
-            <p className="text-xs font-extrabold text-white">Appuyez sur le micro pour enregistrer</p>
-            <p className="text-[11px] text-slate-400 mt-0.5" dir="rtl">
+            <p className="text-xs font-extrabold text-slate-900">Appuyez sur le micro pour enregistrer</p>
+            <p className="text-[11px] text-slate-500 mt-0.5" dir="rtl">
               سجل رسالة صوتية بالدارجة كتشرح فيها المشكل ديالك بكل وضوح
             </p>
           </div>
@@ -157,9 +157,9 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
 
       {/* État 2 : Enregistrement En Cours avec Ondes Sonores */}
       {isRecording && (
-        <div className="flex items-center justify-between gap-3 p-3.5 bg-red-950/40 border border-red-500/50 rounded-xl shadow-lg">
+        <div className="flex items-center justify-between gap-3 p-3.5 bg-red-50 border border-red-200 rounded-xl shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.7)] animate-pulse">
+            <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-xs animate-pulse">
               <Microphone weight="fill" className="w-5 h-5" />
             </div>
             
@@ -170,7 +170,7 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
                   key={i}
                   animate={{ height: ['20%', `${h}%`, '30%'] }}
                   transition={{ repeat: Infinity, duration: 0.5 + (i % 3) * 0.2, ease: 'easeInOut' }}
-                  className="w-1 bg-red-400 rounded-full"
+                  className="w-1 bg-red-500 rounded-full"
                 />
               ))}
             </div>
@@ -180,7 +180,7 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
             whileTap={{ scale: 0.92 }}
             type="button"
             onClick={stopRecording}
-            className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl font-black text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(239,68,68,0.5)] active:scale-95 cursor-pointer"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
           >
             <Square className="w-4 h-4 fill-current" />
             <span>Terminer</span>
@@ -190,7 +190,7 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
 
       {/* État 3 : Lecteur Audio Réel avec Réécoute & Supprimer */}
       {audioUrl && !isRecording && (
-        <div className="bg-slate-900 border border-cyan-500/30 p-3.5 rounded-xl flex items-center justify-between gap-3 shadow-inner">
+        <div className="bg-white border border-slate-200 p-3.5 rounded-xl flex items-center justify-between gap-3 shadow-xs">
           <audio
             ref={audioRef}
             src={audioUrl}
@@ -204,7 +204,7 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
               whileTap={{ scale: 0.9 }}
               type="button"
               onClick={togglePlayAudio}
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-[0_0_12px_rgba(6,182,212,0.4)] flex-shrink-0 cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs flex-shrink-0 cursor-pointer"
               title={isPlaying ? 'Pause' : 'Écouter'}
             >
               {isPlaying ? (
@@ -215,15 +215,15 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
             </motion.button>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between text-xs font-mono font-bold text-cyan-300 mb-1">
+              <div className="flex items-center justify-between text-xs font-mono font-bold text-blue-700 mb-1">
                 <span>{isPlaying ? 'Lecture en cours...' : 'Note Vocale Prête'}</span>
                 <span>{formatTime(playbackTime || recordingTime || duration)} / {formatTime(duration || recordingTime || 6)}</span>
               </div>
               
               {/* Progress bar */}
-              <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-cyan-500/20">
+              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                 <div
-                  className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-100"
+                  className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-100"
                   style={{ width: `${duration > 0 ? (playbackTime / duration) * 100 : 100}%` }}
                 />
               </div>
@@ -243,7 +243,7 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
                 setPlaybackTime(0);
                 onClearAudio();
               }}
-              className="p-2 rounded-xl bg-slate-950 text-slate-400 hover:text-red-400 hover:bg-slate-800 border border-slate-800 transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-slate-100 text-slate-500 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition-colors cursor-pointer"
               title="Supprimer la note vocale"
             >
               <Trash className="w-4 h-4" />

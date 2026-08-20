@@ -809,8 +809,8 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
   };
 
   return (
-    <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.3)] bg-slate-950">
-      {/* MapLibre WebGL Canvas Container with Dynamic Road Color Grading Theme */}
+    <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200 shadow-md bg-white">
+      {/* MapLibre WebGL Canvas Container */}
       <div 
         ref={mapContainerRef} 
         className={`w-full h-[320px] xs:h-[370px] sm:h-[440px] md:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden map-theme-${mapTheme.toLowerCase().replace('_', '-')}`} 
@@ -822,10 +822,10 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
           type="button"
           onClick={handleGeolocateUser}
           disabled={isLocating}
-          className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-slate-950/90 backdrop-blur-md border border-cyan-500/50 text-cyan-300 hover:text-white shadow-xl hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all active:scale-90 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold flex-shrink-0"
+          className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm hover:border-slate-300 transition-all active:scale-90 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold flex-shrink-0 cursor-pointer"
           title="Centrer sur ma position GPS"
         >
-          <Crosshair className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${isLocating ? 'animate-spin text-amber-400' : 'text-cyan-400'}`} />
+          <Crosshair className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${isLocating ? 'animate-spin text-amber-500' : 'text-blue-600'}`} />
           <span className="hidden xs:inline">{isLocating ? 'GPS...' : 'GPS'}</span>
         </button>
 
@@ -837,16 +837,16 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
               setShowThemeMenu(!showThemeMenu);
               setShowLayerMenu(false);
             }}
-            className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-slate-950/90 backdrop-blur-md border border-cyan-500/50 text-cyan-300 hover:text-white shadow-xl hover:border-cyan-400 transition-all active:scale-90 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold flex-shrink-0"
+            className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm hover:border-slate-300 transition-all active:scale-90 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold flex-shrink-0 cursor-pointer"
             title="Personnaliser la couleur des rues et routes"
           >
-            <Palette className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 flex-shrink-0" />
+            <Palette className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
             <span className="hidden sm:inline">Couleur Rues</span>
           </button>
 
           {showThemeMenu && (
-            <div className="absolute top-full left-0 mt-1.5 w-60 sm:w-64 max-w-[calc(100vw-2rem)] bg-slate-950/95 backdrop-blur-xl border border-cyan-500/40 rounded-2xl p-2 shadow-2xl z-30 space-y-1.5 font-sans">
-              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-2 py-1">Palette des Routes :</p>
+            <div className="absolute top-full left-0 mt-1.5 w-60 sm:w-64 max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl p-2 shadow-xl z-30 space-y-1.5 font-sans">
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 px-2 py-1">Palette des Routes :</p>
               {ROAD_COLOR_THEMES.map((theme) => (
                 <button
                   key={theme.id}
@@ -855,16 +855,16 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
                     setMapTheme(theme.id);
                     setShowThemeMenu(false);
                   }}
-                  className={`w-full text-left p-2 rounded-xl text-xs font-bold transition-all flex items-start gap-2.5 ${
+                  className={`w-full text-left p-2 rounded-xl text-xs font-bold transition-all flex items-start gap-2.5 cursor-pointer ${
                     mapTheme === theme.id
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
-                      : 'text-slate-200 hover:bg-slate-900 hover:text-white'
+                      ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                      : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <span className={`w-3.5 h-3.5 rounded-full ${theme.iconColor} shadow-sm mt-0.5 flex-shrink-0`} />
+                  <span className={`w-3.5 h-3.5 rounded-full ${theme.iconColor} shadow-xs mt-0.5 flex-shrink-0`} />
                   <div>
                     <span className="block font-black leading-tight">{theme.label}</span>
-                    <span className="text-[10px] font-normal text-slate-300 block">{theme.desc}</span>
+                    <span className="text-[10px] font-normal text-slate-500 block">{theme.desc}</span>
                   </div>
                 </button>
               ))}
@@ -880,16 +880,16 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
               setShowLayerMenu(!showLayerMenu);
               setShowThemeMenu(false);
             }}
-            className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-slate-950/90 backdrop-blur-md border border-cyan-500/50 text-cyan-300 hover:text-white shadow-xl hover:border-cyan-400 transition-all active:scale-90 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold flex-shrink-0"
+            className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm hover:border-slate-300 transition-all active:scale-90 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold flex-shrink-0 cursor-pointer"
             title="Changer la source de la carte"
           >
-            <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 flex-shrink-0" />
+            <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
             <span className="hidden xs:inline">{MAP_STYLES[activeStyleKey]?.name.split(' ')[0]}</span>
           </button>
 
           {showLayerMenu && (
-            <div className="absolute top-full left-0 mt-1.5 w-60 sm:w-64 max-w-[calc(100vw-2rem)] bg-slate-950/95 backdrop-blur-xl border border-cyan-500/40 rounded-2xl p-1.5 shadow-2xl z-30 space-y-1 font-sans">
-              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-2 py-1">Source Cartographique :</p>
+            <div className="absolute top-full left-0 mt-1.5 w-60 sm:w-64 max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl p-1.5 shadow-xl z-30 space-y-1 font-sans">
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 px-2 py-1">Source Cartographique :</p>
               {Object.entries(MAP_STYLES).map(([key, item]) => (
                 <button
                   key={key}
@@ -898,14 +898,14 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
                     setActiveStyleKey(key);
                     setShowLayerMenu(false);
                   }}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
                     activeStyleKey === key
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md'
-                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                      ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                      : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   <span className="truncate pr-2">{item.name}</span>
-                  {activeStyleKey === key && <Sparkles className="w-3.5 h-3.5 text-cyan-200 flex-shrink-0" />}
+                  {activeStyleKey === key && <Sparkles className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />}
                 </button>
               ))}
             </div>
@@ -913,17 +913,17 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
         </div>
       </div>
 
-      {/* High-Contrast Glass Footer Bar with Role-Based Controls (Client vs Maâlem/Admin) */}
-      <div className="bg-slate-950/95 backdrop-blur-xl border-t border-cyan-500/30 p-2 sm:p-3 px-2.5 sm:px-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 text-xs text-slate-200 shadow-2xl font-sans">
+      {/* Modern Clean Footer Bar */}
+      <div className="bg-white/95 backdrop-blur-xl border-t border-slate-200 p-2 sm:p-3 px-2.5 sm:px-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 text-xs text-slate-700 shadow-sm font-sans">
         {isMaalemOrAdmin ? (
           /* --- PRO & ADMIN CONTROLS --- */
           <>
-            {/* Zone Gauche Pro : Statut GPS & Cadrages Chantiers/Maâlems */}
+            {/* Zone Gauche Pro */}
             <div className="grid grid-cols-3 sm:flex items-center gap-1 sm:gap-2">
-              <div className="h-8 sm:h-9 flex items-center justify-center gap-1 font-bold text-cyan-300 bg-slate-900/90 border border-cyan-500/30 px-2 rounded-xl shadow-[0_0_10px_rgba(6,182,212,0.2)] text-[10px] sm:text-xs whitespace-nowrap">
+              <div className="h-8 sm:h-9 flex items-center justify-center gap-1 font-bold text-blue-800 bg-blue-50 border border-blue-200 px-2 rounded-xl shadow-xs text-[10px] sm:text-xs whitespace-nowrap">
                 <span className="relative flex h-2 w-2 flex-shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.9)]"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
                 </span>
                 <span className="truncate">GPS Pro</span>
               </div>
@@ -932,10 +932,10 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
                 whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={handleFitAllLeads}
-                className="h-8 sm:h-9 flex items-center justify-center gap-1 font-bold text-red-300 hover:text-white transition-all cursor-pointer bg-red-950/70 hover:bg-red-900/80 px-2 rounded-xl border border-red-500/40 hover:border-red-400 shadow-[0_0_12px_rgba(239,68,68,0.25)] hover:shadow-[0_0_18px_rgba(239,68,68,0.4)] text-[10px] sm:text-xs whitespace-nowrap"
+                className="h-8 sm:h-9 flex items-center justify-center gap-1 font-bold text-red-800 hover:text-red-900 transition-all cursor-pointer bg-red-50 hover:bg-red-100 px-2 rounded-xl border border-red-200 shadow-xs text-[10px] sm:text-xs whitespace-nowrap"
                 title="Cadrer sur toutes les urgences SOS ouvertes dans la zone"
               >
-                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 inline-block animate-ping shadow-[0_0_8px_rgba(239,68,68,0.9)] flex-shrink-0" />
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-600 inline-block animate-ping flex-shrink-0" />
                 <span className="truncate">SOS ({interventions.filter((i) => i.status === 'PENDING').length})</span>
               </motion.button>
 
@@ -943,27 +943,27 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
                 whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={handleFitAllMaalems}
-                className="h-8 sm:h-9 flex items-center justify-center gap-1 font-bold text-emerald-300 hover:text-white transition-all cursor-pointer bg-emerald-950/70 hover:bg-emerald-900/80 px-2 rounded-xl border border-emerald-500/40 hover:border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.25)] hover:shadow-[0_0_18px_rgba(52,211,153,0.4)] text-[10px] sm:text-xs whitespace-nowrap"
+                className="h-8 sm:h-9 flex items-center justify-center gap-1 font-bold text-emerald-800 hover:text-emerald-900 transition-all cursor-pointer bg-emerald-50 hover:bg-emerald-100 px-2 rounded-xl border border-emerald-200 shadow-xs text-[10px] sm:text-xs whitespace-nowrap"
                 title="Cadrer sur les Maâlems disponibles sur la carte"
               >
                 <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 flex-shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.9)]"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-600"></span>
                 </span>
                 <span className="truncate">Maâlems ({activeMaalemsCount})</span>
               </motion.button>
             </div>
 
-            {/* Zone Droite Pro : Tous les Chantiers & Recadrage GPS */}
+            {/* Zone Droite Pro */}
             <div className="grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={handleFitAllLeads}
-                className="h-8 sm:h-9 bg-slate-900/90 hover:bg-slate-850 text-cyan-300 hover:text-white px-2.5 sm:px-3 rounded-xl border border-cyan-500/30 hover:border-cyan-400 font-bold shadow-[0_0_12px_rgba(6,182,212,0.15)] flex items-center justify-center gap-1.5 transition-all text-[11px] sm:text-xs whitespace-nowrap"
+                className="h-8 sm:h-9 bg-slate-50 hover:bg-slate-100 text-slate-800 px-2.5 sm:px-3 rounded-xl border border-slate-200 font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all text-[11px] sm:text-xs whitespace-nowrap cursor-pointer"
                 title="Cadrer l'ensemble de la zone active"
               >
-                <Layers className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                <Layers className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
                 <span className="truncate">Chantiers</span>
               </motion.button>
 
@@ -972,7 +972,7 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
                 type="button"
                 onClick={handleGeolocateUser}
                 disabled={isLocating}
-                className="h-8 sm:h-9 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black px-3 sm:px-3.5 rounded-xl border border-cyan-300/40 shadow-[0_0_18px_rgba(6,182,212,0.45)] hover:shadow-[0_0_25px_rgba(6,182,212,0.65)] flex items-center justify-center gap-1.5 transition-all text-[11px] sm:text-xs whitespace-nowrap"
+                className="h-8 sm:h-9 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-3 sm:px-3.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition-all text-[11px] sm:text-xs whitespace-nowrap cursor-pointer"
                 title="Centrer la carte sur votre position GPS exacte"
               >
                 <Navigation className={`w-3.5 h-3.5 text-white flex-shrink-0 ${isLocating ? 'animate-spin' : ''}`} />
@@ -981,14 +981,14 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
             </div>
           </>
         ) : (
-          /* --- CLIENT CONTROLS (CONFIDENTIALITÉ STRICTE) --- */
+          /* --- CLIENT CONTROLS --- */
           <>
-            {/* Zone Gauche Client : Position & Artisans disponibles uniquement */}
+            {/* Zone Gauche Client */}
             <div className="grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2">
-              <div className="h-8 sm:h-9 flex items-center justify-center gap-1.5 font-bold text-blue-300 bg-slate-900/90 border border-blue-500/30 px-2.5 sm:px-3 rounded-xl shadow-[0_0_10px_rgba(59,130,246,0.2)] text-[11px] sm:text-xs whitespace-nowrap">
+              <div className="h-8 sm:h-9 flex items-center justify-center gap-1.5 font-bold text-blue-800 bg-blue-50 border border-blue-200 px-2.5 sm:px-3 rounded-xl shadow-xs text-[11px] sm:text-xs whitespace-nowrap">
                 <span className="relative flex h-2 w-2 flex-shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.9)]"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
                 </span>
                 <span className="truncate">Votre Position</span>
               </div>
@@ -997,18 +997,18 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
                 whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={handleFitAllMaalems}
-                className="h-8 sm:h-9 flex items-center justify-center gap-1.5 font-bold text-emerald-300 hover:text-white transition-all cursor-pointer bg-emerald-950/70 hover:bg-emerald-900/80 px-2.5 sm:px-3 rounded-xl border border-emerald-500/40 hover:border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.25)] hover:shadow-[0_0_18px_rgba(52,211,153,0.4)] text-[11px] sm:text-xs whitespace-nowrap"
+                className="h-8 sm:h-9 flex items-center justify-center gap-1.5 font-bold text-emerald-800 hover:text-emerald-900 transition-all cursor-pointer bg-emerald-50 hover:bg-emerald-100 px-2.5 sm:px-3 rounded-xl border border-emerald-200 shadow-xs text-[11px] sm:text-xs whitespace-nowrap"
                 title="Cadrer sur les Maâlems disponibles autour de vous"
               >
                 <span className="relative flex h-2 w-2 flex-shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.9)]"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
                 </span>
                 <span className="truncate">Artisans ({activeMaalemsCount}) 🟢</span>
               </motion.button>
             </div>
 
-            {/* Zone Droite Client : Cadrage Adresse & GPS */}
+            {/* Zone Droite Client */}
             <div className="grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
               {mode === 'CLIENT_PICKER' && selectedLat && selectedLng && (
                 <motion.button
@@ -1019,10 +1019,10 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
                       mapRef.current.flyTo({ center: [parseFloat(selectedLng), parseFloat(selectedLat)], zoom: 15.5, speed: 1.3 });
                     }
                   }}
-                  className="h-8 sm:h-9 bg-slate-900/90 hover:bg-slate-800 text-cyan-300 hover:text-white px-2.5 sm:px-3 rounded-xl border border-cyan-500/30 hover:border-cyan-400 font-bold shadow-[0_0_10px_rgba(6,182,212,0.15)] flex items-center justify-center gap-1.5 transition-all text-[11px] sm:text-xs whitespace-nowrap"
+                  className="h-8 sm:h-9 bg-slate-50 hover:bg-slate-100 text-slate-800 px-2.5 sm:px-3 rounded-xl border border-slate-200 font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all text-[11px] sm:text-xs whitespace-nowrap cursor-pointer"
                   title="Recadrer sur l'adresse sélectionnée"
                 >
-                  <MapPin className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                  <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
                   <span className="truncate">Point SOS</span>
                 </motion.button>
               )}
@@ -1032,7 +1032,7 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
                 type="button"
                 onClick={handleGeolocateUser}
                 disabled={isLocating}
-                className="h-8 sm:h-9 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black px-3 sm:px-3.5 rounded-xl border border-cyan-300/40 shadow-[0_0_18px_rgba(6,182,212,0.45)] hover:shadow-[0_0_25px_rgba(6,182,212,0.65)] flex items-center justify-center gap-1.5 transition-all text-[11px] sm:text-xs whitespace-nowrap"
+                className="h-8 sm:h-9 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-3 sm:px-3.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition-all text-[11px] sm:text-xs whitespace-nowrap cursor-pointer"
                 title="Centrer la carte sur votre position GPS"
               >
                 <Navigation className={`w-3.5 h-3.5 text-white flex-shrink-0 ${isLocating ? 'animate-spin' : ''}`} />
