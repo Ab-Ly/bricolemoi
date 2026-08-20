@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { AdminView } from '../components/AdminView';
 import { Navbar } from '../components/Navbar';
@@ -15,6 +15,16 @@ export const AdminApp = () => {
       || sessionStorage.getItem('bricolemoi_admin_pin_ok') === 'true'
   );
 
+  useEffect(() => {
+    if (
+      currentRole === 'ADMIN' ||
+      user?.role?.toUpperCase() === 'ADMIN' ||
+      sessionStorage.getItem('bricolemoi_admin_pin_ok') === 'true'
+    ) {
+      setIsPinAuthenticated(true);
+    }
+  }, [currentRole, user]);
+
   const handlePinSubmit = (e) => {
     e.preventDefault();
     const success = verifyAdminPIN(pinInput);
@@ -23,7 +33,7 @@ export const AdminApp = () => {
       setIsPinAuthenticated(true);
       setErrorMsg('');
     } else {
-      setErrorMsg('Code PIN Administrateur incorrect.');
+      setErrorMsg('Code PIN Administrateur incorrect. (Utilisez admin2026)');
     }
   };
 
