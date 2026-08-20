@@ -572,7 +572,11 @@ export const AuthModal = () => {
       }
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-        setErrorBanner(err.message || 'Impossible de se connecter avec Google.');
+        if (err.code === 'auth/unauthorized-domain' || String(err.message).includes('unauthorized-domain')) {
+          setErrorBanner('Domaine non autorisé : veuillez ajouter ce domaine (bricolemoi.vercel.app) dans la console Firebase (Authentication > Paramètres > Domaines autorisés).');
+        } else {
+          setErrorBanner(err.message || 'Impossible de se connecter avec Google.');
+        }
       }
     } finally {
       setLoading(false);
