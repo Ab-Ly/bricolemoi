@@ -741,17 +741,28 @@ export const AppProvider = ({ children }) => {
       );
 
       if (lowRatingItems.length > 0) {
+        let resolvedMap = {};
+        try {
+          resolvedMap = JSON.parse(localStorage.getItem('bricolemoi_resolved_disputes') || '{}');
+        } catch (e) {}
+
         setAdminAlerts((prev) => {
           let hasChange = false;
-          const existingIds = new Set(prev.map((a) => String(a.intervention_id || a.id).trim()));
+          const existingMap = new Map(prev.map((a) => [String(a.intervention_id || a.id).trim(), a]));
           const merged = [...prev];
 
           lowRatingItems.forEach((item) => {
             const cleanId = String(item.id).trim();
-            if (!existingIds.has(cleanId)) {
+            const alertKey = `alert-review-${cleanId}`;
+            const existingAlert = existingMap.get(cleanId) || existingMap.get(alertKey);
+
+            // Statut persistant si déjà arbitré / résolu / rejeté
+            const persistentStatus = resolvedMap[cleanId] || resolvedMap[alertKey] || item.dispute_status;
+
+            if (!existingAlert) {
               hasChange = true;
               merged.unshift({
-                id: `alert-review-${cleanId}`,
+                id: alertKey,
                 intervention_id: cleanId,
                 maalem_id: item.maalem_id || '22222222-2222-2222-2222-222222222222',
                 maalem_name: item.maalem_name || 'Artisan Maâlem',
@@ -762,9 +773,12 @@ export const AppProvider = ({ children }) => {
                 rating: Number(item.rating),
                 comment: item.comment || `Avis ${item.rating}★ laissé par le client.`,
                 reason_label: `Avis Insatisfaisant (${item.rating}⭐)`,
-                status: 'PENDING',
+                status: persistentStatus || 'PENDING',
                 created_at: item.created_at || new Date().toISOString()
               });
+            } else if (persistentStatus && existingAlert.status !== persistentStatus) {
+              existingAlert.status = persistentStatus;
+              hasChange = true;
             }
           });
 
@@ -1005,6 +1019,17 @@ export const AppProvider = ({ children }) => {
               alert.reason_label || `Alerte transmise pour l'intervention de ${alert.client_name || 'Client'}`
             );
           }
+        } else if (data.type === 'DISPUTE_RESOLVED') {
+          const { alertId, interventionId, status } = data;
+          setAdminAlerts((prev) => {
+            const next = prev.map((a) =>
+              (String(a.id).trim() === String(alertId).trim() || String(a.intervention_id).trim() === String(interventionId).trim())
+                ? { ...a, status, resolved_at: new Date().toISOString() }
+                : a
+            );
+            try { localStorage.setItem('bricolemoi_admin_alerts', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
         } else if (data.type === 'MAALEM_HEARTBEAT' && data.maalem_id) {
           updateOnlineMaalemInStorage(data.maalem_id, true, {
             full_name: data.full_name,
@@ -2274,13 +2299,77 @@ export const AppProvider = ({ children }) => {
     const reportUnreachableClient = (interventionId, reason) =>
       reportDisputeIssue({ interventionId, reason: 'CLIENT_UNREACHABLE', notes: reason });
 
-    // Résolution d'un litige côté Admin
+    // Résolution d'un litige côté Admin (Rejet ou Accord de crédit de remplacement)
     const resolveDisputeAndRefund = async ({ alertId, maalemId, amount = 15, shouldRefund = true }) => {
+      const statusToSet = shouldRefund ? 'REFUNDED_RESOLVED' : 'REJECTED';
+      const cleanAlertId = String(alertId || '').trim();
+
+      // 1. Si crédit accordé, créditer le Maâlem (+15 DH)
       if (shouldRefund && maalemId) {
         await quickCreditMaalem(maalemId, amount);
       }
-      setAdminAlerts((prev) => prev.filter((a) => a.id !== alertId));
-      showToast('✅ Dossier de litige traité et archivé !', 'success');
+
+      // 2. Mettre à jour et persister le statut de l'alerte
+      let targetInterventionId = null;
+      setAdminAlerts((prev) => {
+        const next = prev.map((a) => {
+          if (String(a.id).trim() === cleanAlertId || String(a.intervention_id).trim() === cleanAlertId) {
+            targetInterventionId = a.intervention_id || a.id;
+            return {
+              ...a,
+              status: statusToSet,
+              resolved_at: new Date().toISOString(),
+              resolution_type: statusToSet
+            };
+          }
+          return a;
+        });
+        try {
+          localStorage.setItem('bricolemoi_admin_alerts', JSON.stringify(next));
+        } catch (e) {}
+        return next;
+      });
+
+      // 3. Enregistrer l'arbitrage dans les litiges résolus permanents (évite réapparition au refresh)
+      try {
+        const resolvedMap = JSON.parse(localStorage.getItem('bricolemoi_resolved_disputes') || '{}');
+        resolvedMap[cleanAlertId] = statusToSet;
+        if (targetInterventionId) {
+          resolvedMap[String(targetInterventionId).trim()] = statusToSet;
+        }
+        localStorage.setItem('bricolemoi_resolved_disputes', JSON.stringify(resolvedMap));
+      } catch (e) {}
+
+      // 4. Mettre à jour l'intervention associée
+      if (targetInterventionId) {
+        setInterventions((prev) => {
+          const next = prev.map((item) =>
+            String(item.id).trim() === String(targetInterventionId).trim()
+              ? { ...item, dispute_status: statusToSet, dispute_resolved_at: new Date().toISOString() }
+              : item
+          );
+          try {
+            localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+          } catch (e) {}
+          return next;
+        });
+      }
+
+      // 5. Broadcast sync multi-onglets
+      broadcastSync({
+        type: 'DISPUTE_RESOLVED',
+        alertId: cleanAlertId,
+        interventionId: targetInterventionId,
+        status: statusToSet,
+        _ts: Date.now()
+      });
+
+      showToast(
+        shouldRefund
+          ? '✅ Crédit de remplacement (+15 DH) accordé et dossier clôturé !'
+          : '❌ Réclamation de litige rejetée et dossier clôturé !',
+        'success'
+      );
     };
 
     // Annuler / Supprimer une intervention par le client
