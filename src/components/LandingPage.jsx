@@ -14,7 +14,11 @@ import {
   MapPin,
   TrendingUp,
   Sliders,
-  Building2
+  Building2,
+  Star,
+  CheckCircle2,
+  Sparkles,
+  PhoneCall
 } from 'lucide-react';
 import { EnhancedCategoryIcon, getSpecialtyMeta } from './EnhancedCategoryIcon';
 import { PromoVideoPlayer } from './PromoVideoPlayer';
@@ -24,6 +28,8 @@ const MOROCCAN_SERVICES = [
     id: 'PLUMBING', 
     name: 'Plomberie & Fuites', 
     nameAr: 'سباكة وترصيص',
+    desc: 'Fuites d\'eau, canalisations, chauffe-eau',
+    descAr: 'تسرب المياه، قوادس، سخانات الماء',
     iconType: 'PLUMBING',
     minPrice: 80, 
     maxPrice: 200, 
@@ -36,6 +42,8 @@ const MOROCCAN_SERVICES = [
     id: 'ELECTRICIAN', 
     name: 'Électricité & Court-Circuit', 
     nameAr: 'كهرباء وإصلاحات',
+    desc: 'Pannes, disjoncteurs, prises, tableaux',
+    descAr: 'انقطاع الضوء، ديجونكتور، بريزات',
     iconType: 'ELECTRICIAN',
     minPrice: 100, 
     maxPrice: 250, 
@@ -48,6 +56,8 @@ const MOROCCAN_SERVICES = [
     id: 'SERRURERIE', 
     name: 'Serrurerie & Porte Claquée', 
     nameAr: 'أقفال ومفاتيح',
+    desc: 'Portes bloquées, serrures blindées, clés',
+    descAr: 'أبواب مغلقة، كوالين، تبديل السواريت',
     iconType: 'SERRURERIE',
     minPrice: 100, 
     maxPrice: 300, 
@@ -60,6 +70,8 @@ const MOROCCAN_SERVICES = [
     id: 'AUTO_MECHANIC', 
     name: 'Dépannage Auto & Batterie', 
     nameAr: 'ميكانيك وبطاريات',
+    desc: 'Batterie à plat, démarrage, crevaison',
+    descAr: 'باتري طايح، رويدة، ديباناج سريع',
     iconType: 'AUTO_MECHANIC',
     minPrice: 120, 
     maxPrice: 350, 
@@ -72,6 +84,8 @@ const MOROCCAN_SERVICES = [
     id: 'CLIMATISATION', 
     name: 'Climatisation & Froid', 
     nameAr: 'تكييف وتبريد',
+    desc: 'Recharge gaz, nettoyage, filtres',
+    descAr: 'شحن الغاز، صيانة وتنظيف المكيفات',
     iconType: 'CLIMATISATION',
     minPrice: 150, 
     maxPrice: 400, 
@@ -84,6 +98,8 @@ const MOROCCAN_SERVICES = [
     id: 'APPLIANCE', 
     name: 'Électroménager & Chauffe-eau', 
     nameAr: 'أجهزة منزلية وسخانات',
+    desc: 'Machine à laver, frigo, fours, plaques',
+    descAr: 'ماكينة الصابون، ثلاجة، أفران',
     iconType: 'APPLIANCE',
     minPrice: 100, 
     maxPrice: 280, 
@@ -117,7 +133,7 @@ export const LandingPage = ({ onSelectJourney }) => {
   const [selectedCityName, setSelectedCityName] = useState('Casablanca');
 
   // Maalem Revenue Calculator State
-  const [dailyJobs, setDailyJobs] = useState(3);
+  const [dailyJobs, setDailyJobs] = useState(4);
   const avgJobPrice = 140; // DH moyen
   const monthlyWorkingDays = 26;
   const leadCost = 15; // 15 DH par lead
@@ -128,18 +144,25 @@ export const LandingPage = ({ onSelectJourney }) => {
   const currentCity = MOROCCAN_CITIES.find((c) => c.name === selectedCityName) || MOROCCAN_CITIES[0];
 
   return (
-    <div className={`space-y-16 pb-12 ${isAr ? 'font-arabic' : 'font-sans'}`}>
+    <div className={`space-y-16 pb-16 relative overflow-hidden ${isAr ? 'font-arabic' : 'font-sans'}`}>
       
+      {/* Ambient Decorative Lighting Background */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute -top-32 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute -top-20 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-40 left-1/3 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl" />
+      </div>
+
       {/* 1. HERO SECTION : Interactive Switcher (Client vs Maâlem) */}
-      <section className="relative pt-4 pb-2 text-center max-w-5xl mx-auto space-y-6">
+      <section className="relative pt-6 pb-2 text-center max-w-5xl mx-auto space-y-6">
         
         {/* Badge Live Status */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold shadow-xs"
+          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white border border-blue-200/80 text-blue-800 text-xs font-bold shadow-xs hover:border-blue-300 transition-colors"
         >
-          <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping inline-block" />
+          <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping inline-block" />
           <span>{t.hero_badge_live}</span>
         </motion.div>
 
@@ -148,7 +171,7 @@ export const LandingPage = ({ onSelectJourney }) => {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight"
+          className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.15]"
         >
           {activeTab === 'CLIENT' ? (
             <>
@@ -177,16 +200,42 @@ export const LandingPage = ({ onSelectJourney }) => {
           {activeTab === 'CLIENT' ? t.hero_client_sub : t.hero_maalem_sub}
         </motion.p>
 
+        {/* Floating Trust Metrics Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-1"
+        >
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-xs">
+            <Clock className="w-4 h-4 text-emerald-600" />
+            <span className="font-bold text-slate-800">~12 min</span>
+            <span className="text-slate-500 text-[11px]">{isAr ? 'متوسط وقت الوصول' : 'Arrivée Moyenne'}</span>
+          </div>
+
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-xs">
+            <ShieldCheck className="w-4 h-4 text-blue-600" />
+            <span className="font-bold text-slate-800">100%</span>
+            <span className="text-slate-500 text-[11px]">{isAr ? 'معلم موثق بالبطاقة الوطنية' : 'Artisans Vérifiés CIN'}</span>
+          </div>
+
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-xs">
+            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+            <span className="font-bold text-slate-800">4.9 / 5.0</span>
+            <span className="text-slate-500 text-[11px]">{isAr ? 'أكثر من 1250 تقييم' : '+1 250 Avis'}</span>
+          </div>
+        </motion.div>
+
         {/* HERO TAB SWITCHER (Client vs Artisan) */}
-        <div className="pt-2 flex justify-center">
-          <div className="p-1.5 bg-slate-100 border border-slate-200 rounded-2xl flex items-center gap-1 shadow-xs max-w-md w-full">
+        <div className="pt-3 flex justify-center">
+          <div className="p-1.5 bg-slate-200/70 backdrop-blur-md border border-slate-200 rounded-2xl flex items-center gap-1 shadow-inner max-w-md w-full">
             <button
               type="button"
               onClick={() => setActiveTab('CLIENT')}
               className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'CLIENT'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
               <Zap className="w-4 h-4" />
@@ -198,8 +247,8 @@ export const LandingPage = ({ onSelectJourney }) => {
               onClick={() => setActiveTab('MAALEM')}
               className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'MAALEM'
-                  ? 'bg-amber-500 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/20'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
               <Wrench className="w-4 h-4" />
@@ -222,7 +271,7 @@ export const LandingPage = ({ onSelectJourney }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25 }}
-            className="max-w-5xl mx-auto bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden"
+            className="max-w-5xl mx-auto bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden"
           >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
               <div>
@@ -230,7 +279,7 @@ export const LandingPage = ({ onSelectJourney }) => {
                   <Sliders className="w-4 h-4" />
                   <span>{t.selector_badge}</span>
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mt-1">
                   {t.selector_title}
                 </h3>
               </div>
@@ -242,10 +291,10 @@ export const LandingPage = ({ onSelectJourney }) => {
                 <select
                   value={selectedCityName}
                   onChange={(e) => setSelectedCityName(e.target.value)}
-                  className="bg-transparent text-xs font-black text-slate-800 focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-black text-slate-900 focus:outline-none cursor-pointer"
                 >
                   {MOROCCAN_CITIES.map((city) => (
-                    <option key={city.name} value={city.name} className="bg-white text-slate-800">
+                    <option key={city.name} value={city.name} className="bg-white text-slate-900">
                       {isAr ? city.nameAr : city.name} ({city.activeMaalems} {t.online_count})
                     </option>
                   ))}
@@ -253,7 +302,7 @@ export const LandingPage = ({ onSelectJourney }) => {
               </div>
             </div>
 
-            {/* Service Chips Grid */}
+            {/* Service Cards Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-6">
               {MOROCCAN_SERVICES.map((srv) => {
                 const isSelected = srv.id === selectedServiceId;
@@ -271,8 +320,8 @@ export const LandingPage = ({ onSelectJourney }) => {
                     }}
                     className={`p-3.5 sm:p-4 rounded-2xl border transition-all text-left flex flex-col justify-between gap-3 relative cursor-pointer group ${
                       isSelected
-                        ? `${meta.activeCard} scale-[1.02]`
-                        : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 shadow-xs'
+                        ? `${meta.activeCard} scale-[1.02] shadow-sm ring-2 ring-blue-500/20`
+                        : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50 text-slate-700 shadow-2xs hover:shadow-sm'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -303,7 +352,7 @@ export const LandingPage = ({ onSelectJourney }) => {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-100 font-mono">
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-100 font-mono">
                       <span className={`font-bold ${isSelected ? meta.colorClass : 'text-blue-600'}`}>{srv.minPrice}-{srv.maxPrice} {t.dh}</span>
                       <span className="text-emerald-600 font-bold">{isAr ? srv.timeAr : srv.time}</span>
                     </div>
@@ -313,7 +362,7 @@ export const LandingPage = ({ onSelectJourney }) => {
             </div>
 
             {/* Live Result Card & Direct Action */}
-            <div className="mt-6 p-5 sm:p-6 bg-slate-50 border border-slate-200 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div className="mt-6 p-5 sm:p-6 bg-slate-50/80 border border-slate-200/90 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               
               {/* Metric 1 : Tarif Garanti */}
               <div className="flex items-center gap-3.5">
@@ -348,7 +397,7 @@ export const LandingPage = ({ onSelectJourney }) => {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onSelectJourney('CLIENT', { category: selectedServiceId, city: selectedCityName })}
-                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm shadow-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
+                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black text-sm shadow-md shadow-blue-500/20 flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
                 >
                   <Zap className="w-5 h-5 fill-current" />
                   <span>{t.btn_request_now}</span>
@@ -367,7 +416,7 @@ export const LandingPage = ({ onSelectJourney }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25 }}
-            className="max-w-5xl mx-auto bg-white border border-amber-200 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden"
+            className="max-w-5xl mx-auto bg-white/95 backdrop-blur-xl border border-amber-200/90 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden"
           >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
               <div>
@@ -375,7 +424,7 @@ export const LandingPage = ({ onSelectJourney }) => {
                   <TrendingUp className="w-4 h-4" />
                   <span>{t.calc_badge}</span>
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mt-1">
                   {t.calc_title}
                 </h3>
               </div>
@@ -446,7 +495,7 @@ export const LandingPage = ({ onSelectJourney }) => {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onSelectJourney('MAALEM', { promo: 'BONUS15' })}
-                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
+                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-md shadow-amber-500/20 flex items-center justify-center gap-2.5 transition-all cursor-pointer group"
                 >
                   <Wrench className="w-5 h-5 group-hover:rotate-45 transition-transform" />
                   <span>{t.btn_join_maalem}</span>
@@ -466,7 +515,7 @@ export const LandingPage = ({ onSelectJourney }) => {
       {/* 3. STEP-BY-STEP PROCESS FLOW */}
       <section className="max-w-5xl mx-auto space-y-8">
         <div className="text-center space-y-2">
-          <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
             {t.steps_title}
           </h3>
           <p className="text-slate-500 text-xs sm:text-sm font-medium">
@@ -478,7 +527,7 @@ export const LandingPage = ({ onSelectJourney }) => {
           {activeTab === 'CLIENT' ? (
             <>
               {/* Step 1 Client */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative shadow-xs">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative shadow-2xs hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-4">
                   <span className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-sm flex items-center justify-center">
                     1
@@ -492,7 +541,7 @@ export const LandingPage = ({ onSelectJourney }) => {
               </div>
 
               {/* Step 2 Client */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative shadow-xs">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative shadow-2xs hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-4">
                   <span className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-sm flex items-center justify-center">
                     2
@@ -506,7 +555,7 @@ export const LandingPage = ({ onSelectJourney }) => {
               </div>
 
               {/* Step 3 Client */}
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative shadow-xs">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 relative shadow-2xs hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-4">
                   <span className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-sm flex items-center justify-center">
                     3
@@ -522,7 +571,7 @@ export const LandingPage = ({ onSelectJourney }) => {
           ) : (
             <>
               {/* Step 1 Maalem */}
-              <div className="bg-white border border-amber-200 rounded-3xl p-6 relative shadow-xs">
+              <div className="bg-white border border-amber-200 rounded-3xl p-6 relative shadow-2xs hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-4">
                   <span className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono font-black text-sm flex items-center justify-center">
                     1
@@ -536,7 +585,7 @@ export const LandingPage = ({ onSelectJourney }) => {
               </div>
 
               {/* Step 2 Maalem */}
-              <div className="bg-white border border-amber-200 rounded-3xl p-6 relative shadow-xs">
+              <div className="bg-white border border-amber-200 rounded-3xl p-6 relative shadow-2xs hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-4">
                   <span className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono font-black text-sm flex items-center justify-center">
                     2
@@ -550,7 +599,7 @@ export const LandingPage = ({ onSelectJourney }) => {
               </div>
 
               {/* Step 3 Maalem */}
-              <div className="bg-white border border-amber-200 rounded-3xl p-6 relative shadow-xs">
+              <div className="bg-white border border-amber-200 rounded-3xl p-6 relative shadow-2xs hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-4">
                   <span className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-mono font-black text-sm flex items-center justify-center">
                     3
@@ -571,7 +620,7 @@ export const LandingPage = ({ onSelectJourney }) => {
       <section className="max-w-5xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
               <Building2 className="w-5 h-5" />
             </div>
             <div>
@@ -580,7 +629,7 @@ export const LandingPage = ({ onSelectJourney }) => {
             </div>
           </div>
 
-          <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono flex items-center gap-1.5 shadow-xs">
+          <span className="px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold font-mono flex items-center gap-2 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>{t.network_status}</span>
           </span>
@@ -619,7 +668,7 @@ export const LandingPage = ({ onSelectJourney }) => {
       {/* 5. TRUST, GUARANTEES & ADMIN FOOTER LINK */}
       <section className="max-w-5xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 flex-shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 flex-shrink-0">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
