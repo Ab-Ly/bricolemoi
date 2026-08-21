@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BricoleMoi - Architecture Visuelle & Modèle de Données</title>
+  <script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    #network-canvas { width: 100%; height: 100%; }
+    .glass-panel { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px); }
+    .badge-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+    /* Vis Network Custom Tooltip */
+    div.vis-tooltip {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 12px !important;
+      padding: 8px 12px !important;
+      border-radius: 8px !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+      border: 1px solid #334155 !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen w-screen overflow-hidden flex flex-col select-none">
+
+  <!-- TOPBAR HEADER -->
+  <header class="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-6 flex items-center justify-between z-20 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 font-black text-white text-lg">
+        B
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-white flex items-center gap-2">
+          BricoleMoi 🇲🇦 <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30">Architecture Graph</span>
+        </h1>
+        <p class="text-xs text-slate-400">Cartographie interactive : Composants React ➔ Contextes ➔ APIs ➔ Supabase DB</p>
+      </div>
+    </div>
+
+    <!-- CONTROLS & SWITCHES -->
+    <div class="flex items-center gap-3">
+      <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+        <button id="btn-view-all" onclick="switchView('all')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition-all">
+          <i class="fa-solid fa-diagram-project mr-1.5"></i>Vue Globale
+        </button>
+        <button id="btn-view-db" onclick="switchView('db')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition-all">
+          <i class="fa-solid fa-database mr-1.5"></i>Schéma Base de Données
+        </button>
+        <button id="btn-view-flow" onclick="switchView('flow')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition-all">
+          <i class="fa-solid fa-bolt mr-1.5"></i>Flux SOS Temps Réel
+        </button>
+      </div>
+
+      <div class="h-6 w-[1px] bg-slate-700"></div>
+
+      <button onclick="resetZoom()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs flex items-center gap-1.5" title="Recentrer la vue">
+        <i class="fa-solid fa-compress"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- GRAPH CANVAS -->
+    <div class="flex-1 h-full relative" id="canvas-container">
+      <div id="network-canvas"></div>
+
+      <!-- FLOATING SEARCH & FILTER BAR -->
+      <div class="absolute top-4 left-6 z-10 flex items-center gap-3">
+        <div class="relative w-72">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="Rechercher un composant, table, API..." 
+            class="w-full pl-9 pr-4 py-2 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-xl transition-all">
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-700/80 text-xs shadow-xl">
+          <button onclick="filterGroup('all')" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-800 text-white">Tous</button>
+          <button onclick="filterGroup('ui')" class="px-2.5 py-1 rounded-lg text-[11px] font-medium text-sky-400 hover:bg-slate-800">UI</button>
+          <button onclick="filterGroup('context')" class="px-2.5 py-1 rounded-lg text-[11px] font-medium text-emerald-400 hover:bg-slate-800">Contexts</button>
+          <button onclick="filterGroup('api')" class="px-2.5 py-1 rounded-lg text-[11px] font-medium text-amber-400 hover:bg-slate-800">API/Realtime</button>
+          <button onclick="filterGroup('db')" class="px-2.5 py-1 rounded-lg text-[11px] font-medium text-violet-400 hover:bg-slate-800">Tables DB</button>
+        </div>
+      </div>
+
+      <!-- FLOATING QUICK LEGEND -->
+      <div class="absolute bottom-6 left-6 z-10 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl p-3 shadow-2xl flex flex-wrap items-center gap-4 text-xs">
+        <div class="flex items-center gap-2">
+          <div class="w-3.5 h-3.5 rounded-md bg-sky-500 shadow-sm shadow-sky-500/50"></div>
+          <span class="text-slate-300 font-medium text-[11px]">Composants UI / Layouts</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-3.5 h-3.5 rounded-md bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
+          <span class="text-slate-300 font-medium text-[11px]">React Contexts (État)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-3.5 h-3.5 rounded-md bg-amber-500 shadow-sm shadow-amber-500/50"></div>
+          <span class="text-slate-300 font-medium text-[11px]">APIs & Ably Realtime</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-3.5 h-3.5 rounded-md bg-violet-600 shadow-sm shadow-violet-500/50"></div>
+          <span class="text-slate-300 font-medium text-[11px]">Tables PostgreSQL Supabase</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-3.5 h-3.5 rounded-md bg-pink-500 shadow-sm shadow-pink-500/50"></div>
+          <span class="text-slate-300 font-medium text-[11px]">Storage Buckets</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR: NODE INSPECTOR & DETAILS -->
+    <aside class="w-96 border-l border-slate-800 bg-slate-900/95 backdrop-blur-md flex flex-col z-20 shrink-0 shadow-2xl">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-blue-400 text-sm"></i>
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Inspecteur de Nœud</h2>
+        </div>
+        <span id="inspector-badge" class="badge-pill bg-blue-500/10 text-blue-400 border border-blue-500/20">Sélectionnez un nœud</span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-5 space-y-5" id="inspector-body">
+        <div class="text-center py-12 text-slate-500 space-y-3">
+          <i class="fa-solid fa-hand-pointer text-3xl animate-bounce text-slate-600"></i>
+          <p class="text-xs font-medium">Cliquez sur un élément du graphique pour explorer son rôle, ses dépendances et ses liens avec la base de données.</p>
+        </div>
+      </div>
+
+      <!-- FOOTER STATS -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950/60 text-[11px] text-slate-400 flex items-center justify-between">
+        <span>BricoleMoi v2.0</span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Graph Actif & Synchronisé
+        </span>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    // --- GRAPH DATA DEFINITION ---
+    const nodesData = [
+      // 1. UI & LAYOUTS (sky)
+      { id: 'app_jsx', label: 'App.jsx\n(Routeur SPA)', group: 'ui', color: '#0284c7', shape: 'box', font: { color: '#fff', bold: true }, title: 'Point d\'entrée principal & basculement des sous-domaines' },
+      { id: 'client_app', label: 'ClientApp.jsx\n(Espace Client)', group: 'ui', color: '#0ea5e9', shape: 'box', font: { color: '#fff' }, title: 'Interface Client, demande SOS & suivi' },
+      { id: 'maalem_app', label: 'MaalemApp.jsx\n(Dashboard Artisan)', group: 'ui', color: '#0ea5e9', shape: 'box', font: { color: '#fff' }, title: 'Dashboard Artisan, réception leads & solde' },
+      { id: 'admin_app', label: 'AdminApp.jsx\n(Backoffice)', group: 'ui', color: '#0ea5e9', shape: 'box', font: { color: '#fff' }, title: 'Administration, validation KYC & modération' },
+      { id: 'landing_page', label: 'LandingPage.jsx\n(Vitrine)', group: 'ui', color: '#38bdf8', shape: 'box', font: { color: '#0f172a' }, title: 'Page d\'accueil et choix de métier' },
+      { id: 'auth_modal', label: 'AuthModal.jsx\n(Modal OTP)', group: 'ui', color: '#38bdf8', shape: 'box', font: { color: '#0f172a' }, title: 'Modale de connexion par SMS OTP' },
+      { id: 'sos_modal', label: 'EmergencySOSModal.jsx\n(Alerte Flash)', group: 'ui', color: '#ef4444', shape: 'box', font: { color: '#fff', bold: true }, title: 'Popup d\'alerte sonore et visuelle pour les Maâlems' },
+      { id: 'map_view', label: 'InteractiveMap.jsx\n(Carte Géoloc)', group: 'ui', color: '#38bdf8', shape: 'box', font: { color: '#0f172a' }, title: 'Carte interactive MapLibre & tuiles CartoDB' },
+      { id: 'voice_rec', label: 'VoiceRecorder.jsx\n(Enregistreur)', group: 'ui', color: '#38bdf8', shape: 'box', font: { color: '#0f172a' }, title: 'Enregistrement audio du problème' },
+      { id: 'user_profile', label: 'UserProfileModal.jsx', group: 'ui', color: '#38bdf8', shape: 'box', font: { color: '#0f172a' }, title: 'Gestion du profil & téléchargement de reçus' },
+
+      // 2. CONTEXTS (emerald)
+      { id: 'auth_ctx', label: 'AuthContext.jsx\n[useAuth]', group: 'context', color: '#10b981', shape: 'ellipse', font: { color: '#fff', bold: true }, title: 'Authentification globale, session & KYC' },
+      { id: 'app_ctx', label: 'AppContext.jsx\n[useApp]', group: 'context', color: '#059669', shape: 'ellipse', font: { color: '#fff', bold: true }, title: 'Gestion des interventions, crédits & recharges' },
+      { id: 'emergency_ctx', label: 'EmergencyFlowContext.jsx\n[useEmergencyFlow]', group: 'context', color: '#059669', shape: 'ellipse', font: { color: '#fff', bold: true }, title: 'Machine d\'état SOS, upload média & matching' },
+      { id: 'ably_hook', label: 'useAblyNotifications.js', group: 'context', color: '#34d399', shape: 'ellipse', font: { color: '#0f172a' }, title: 'Hook d\'écoute WebSockets Ably pour notifications live' },
+
+      // 3. API & CLOUD SERVICES (amber)
+      { id: 'vercel_send_otp', label: '/api/send-otp.js\n(Vercel Serverless)', group: 'api', color: '#d97706', shape: 'diamond', font: { color: '#fff' }, title: 'Endpoint sécurisé d\'envoi OTP sans CORS' },
+      { id: 'vercel_verify_otp', label: '/api/verify-otp.js\n(Vercel Serverless)', group: 'api', color: '#d97706', shape: 'diamond', font: { color: '#fff' }, title: 'Endpoint sécurisé de validation OTP Prelude' },
+      { id: 'prelude_api', label: 'Prelude / Infobip API\n(SMS Gateway)', group: 'api', color: '#f59e0b', shape: 'hexagon', font: { color: '#0f172a', bold: true }, title: 'Passerelle SMS & Vérification biométrique/numéro' },
+      { id: 'ably_service', label: 'Ably Realtime Cloud\n(WebSockets)', group: 'api', color: '#f59e0b', shape: 'hexagon', font: { color: '#0f172a', bold: true }, title: 'Broker MQTT/WebSocket temps réel ultra-faible latence' },
+      { id: 'edge_kyc', label: 'verify-maalem-cin\n(Edge Function)', group: 'api', color: '#d97706', shape: 'diamond', font: { color: '#fff' }, title: 'Edge Function de vérification OCR & KYC' },
+
+      // 4. STORAGE BUCKETS (pink)
+      { id: 'bucket_voice', label: 'Storage: voice_notes\n(Audio .webm/.mp3)', group: 'storage', color: '#ec4899', shape: 'cylinder', font: { color: '#fff' }, title: 'Stockage des enregistrements vocaux' },
+      { id: 'bucket_cin', label: 'Storage: cin_documents\n(Photos CIN Recto/Verso)', group: 'storage', color: '#ec4899', shape: 'cylinder', font: { color: '#fff' }, title: 'Stockage sécurisé des pièces d\'identité' },
+
+      // 5. DATABASE TABLES (violet)
+      { id: 't_profiles', label: 'TABLE: public.profiles\n(id, phone, role, full_name, credits)', group: 'db', color: '#7c3aed', shape: 'database', font: { color: '#fff', bold: true }, title: 'Table centrale des utilisateurs' },
+      { id: 't_maalem', label: 'TABLE: public.maalem_details\n(id, specialty, cin_number, rating_avg, credit_balance)', group: 'db', color: '#8b5cf6', shape: 'database', font: { color: '#fff' }, title: 'Extension 1:1 pour les artisans Maâlems' },
+      { id: 't_interventions', label: 'TABLE: public.interventions\n(id, client_id, maalem_id, service_type, district, status)', group: 'db', color: '#7c3aed', shape: 'database', font: { color: '#fff', bold: true }, title: 'Missions d\'urgences et demandes de dépannage' },
+      { id: 't_transactions', label: 'TABLE: public.transactions\n(id, maalem_id, amount_dh, type, status)', group: 'db', color: '#8b5cf6', shape: 'database', font: { color: '#fff' }, title: 'Historique des recharges et déductions de leads' },
+      { id: 't_reviews', label: 'TABLE: public.reviews\n(id, intervention_id, maalem_id, client_id, rating)', group: 'db', color: '#8b5cf6', shape: 'database', font: { color: '#fff' }, title: 'Évaluations et avis clients' },
+      { id: 't_admin_notifs', label: 'TABLE: public.admin_notifications\n(id, type, title, message, is_read)', group: 'db', color: '#8b5cf6', shape: 'database', font: { color: '#fff' }, title: 'Alertes backoffice admin' }
+    ];
+
+    const edgesData = [
+      // UI to Router & Contexts
+      { from: 'app_jsx', to: 'client_app', label: 'subdomain: client', color: { color: '#38bdf8' } },
+      { from: 'app_jsx', to: 'maalem_app', label: 'subdomain: maalem', color: { color: '#38bdf8' } },
+      { from: 'app_jsx', to: 'admin_app', label: 'subdomain: admin', color: { color: '#38bdf8' } },
+      { from: 'app_jsx', to: 'auth_ctx', label: 'AuthProvider', color: { color: '#10b981' } },
+      { from: 'app_jsx', to: 'app_ctx', label: 'AppProvider', color: { color: '#10b981' } },
+      { from: 'app_jsx', to: 'emergency_ctx', label: 'EmergencyProvider', color: { color: '#10b981' } },
+
+      // Client Components
+      { from: 'client_app', to: 'emergency_ctx', label: 'createSOS()', color: { color: '#0ea5e9' }, arrows: 'to' },
+      { from: 'client_app', to: 'map_view', label: 'afficheur géoloc' },
+      { from: 'client_app', to: 'voice_rec', label: 'enregistre audio' },
+      { from: 'voice_rec', to: 'emergency_ctx', label: 'blob audio' },
+      { from: 'landing_page', to: 'auth_modal', label: 'openModal()' },
+      { from: 'client_app', to: 'user_profile', label: 'openProfile()' },
+
+      // Maalem Components
+      { from: 'maalem_app', to: 'app_ctx', label: 'acceptLead(), recharge()', color: { color: '#059669' }, arrows: 'to' },
+      { from: 'maalem_app', to: 'sos_modal', label: 'déclenche popup' },
+      { from: 'ably_hook', to: 'sos_modal', label: 'on(emergency-alert)', color: { color: '#f59e0b' }, dashes: true, arrows: 'to' },
+
+      // Auth & API Links
+      { from: 'auth_modal', to: 'auth_ctx', label: 'sendOTP() / verifyOTP()' },
+      { from: 'auth_ctx', to: 'vercel_send_otp', label: 'POST /api/send-otp', color: { color: '#d97706' }, arrows: 'to' },
+      { from: 'auth_ctx', to: 'vercel_verify_otp', label: 'POST /api/verify-otp', color: { color: '#d97706' }, arrows: 'to' },
+      { from: 'vercel_send_otp', to: 'prelude_api', label: 'Prelude SMS SDK', color: { color: '#f59e0b' }, arrows: 'to' },
+      { from: 'vercel_verify_otp', to: 'prelude_api', label: 'Prelude Verify API', color: { color: '#f59e0b' }, arrows: 'to' },
+      { from: 'auth_ctx', to: 'edge_kyc', label: 'upload CIN KYC' },
+
+      // Emergency Realtime flow
+      { from: 'emergency_ctx', to: 'ably_service', label: 'publish(emergency-alerts)', color: { color: '#ef4444' }, arrows: 'to', width: 2 },
+      { from: 'ably_service', to: 'ably_hook', label: 'subscribe()', color: { color: '#ef4444' }, dashes: true, arrows: 'to', width: 2 },
+      { from: 'emergency_ctx', to: 'bucket_voice', label: 'Upload audio note', color: { color: '#ec4899' }, arrows: 'to' },
+      { from: 'auth_ctx', to: 'bucket_cin', label: 'Upload CIN Recto/Verso', color: { color: '#ec4899' }, arrows: 'to' },
+
+      // State to Database Tables
+      { from: 'auth_ctx', to: 't_profiles', label: 'upsert profile', color: { color: '#7c3aed' }, arrows: 'to' },
+      { from: 'auth_ctx', to: 't_maalem', label: 'sync details', color: { color: '#7c3aed' }, arrows: 'to' },
+      { from: 'emergency_ctx', to: 't_interventions', label: 'INSERT (status: PENDING)', color: { color: '#7c3aed' }, arrows: 'to', width: 2 },
+      { from: 'app_ctx', to: 't_interventions', label: 'UPDATE (status: ACCEPTED)', color: { color: '#7c3aed' }, arrows: 'to' },
+      { from: 'app_ctx', to: 't_transactions', label: 'INSERT (LEAD_DEDUCTION / RECHARGE)', color: { color: '#7c3aed' }, arrows: 'to' },
+      { from: 'app_ctx', to: 't_reviews', label: 'INSERT review', color: { color: '#7c3aed' }, arrows: 'to' },
+      { from: 'admin_app', to: 't_admin_notifs', label: 'Lecture alertes', color: { color: '#7c3aed' } },
+
+      // DB Relational Foreign Keys
+      { from: 't_maalem', to: 't_profiles', label: '1:1 (id = profile.id)', color: { color: '#94a3b8' }, dashes: true },
+      { from: 't_interventions', to: 't_profiles', label: 'client_id / maalem_id', color: { color: '#94a3b8' }, dashes: true },
+      { from: 't_transactions', to: 't_profiles', label: 'maalem_id FK', color: { color: '#94a3b8' }, dashes: true },
+      { from: 't_reviews', to: 't_interventions', label: 'intervention_id FK', color: { color: '#94a3b8' }, dashes: true }
+    ];
+
+    // --- NODE DETAILS DICTIONARY FOR INSPECTOR ---
+    const nodeDetails = {
+      app_jsx: {
+        title: 'App.jsx - Point d\'Entrée & Routeur',
+        type: 'Composant Racine React',
+        badge: 'UI & Routing',
+        desc: 'Gère le découpage de l\'application via les sous-domaines (client.bricolemoi.ma, maalem.bricolemoi.ma, admin.bricolemoi.ma) et enrobe toute l\'application avec les fournisseurs de contexte (AuthProvider, AppProvider, EmergencyFlowProvider).',
+        relations: ['ClientApp.jsx', 'MaalemApp.jsx', 'AdminApp.jsx', 'AuthContext', 'AppContext', 'EmergencyFlowContext']
+      },
+      client_app: {
+        title: 'ClientApp.jsx - Espace Client',
+        type: 'Layout Client',
+        badge: 'UI Layer',
+        desc: 'Permet au client de déclarer une urgence de dépannage (Plomberie ou Mécanique), d\'enregistrer une note vocale, de préciser son quartier et de suivre la réponse du Maâlem en direct.',
+        relations: ['EmergencyFlowContext', 'InteractiveMap.jsx', 'VoiceRecorder.jsx']
+      },
+      maalem_app: {
+        title: 'MaalemApp.jsx - Espace Artisan Maâlem',
+        type: 'Layout Maâlem',
+        badge: 'UI Layer',
+        desc: 'Tableau de bord de l\'artisan affichant son solde de recharge en DH, son statut de vérification CIN KYC, le flux des interventions disponibles dans son périmètre et l\'historique de ses gains.',
+        relations: ['AppContext', 'EmergencySOSModal.jsx', 'AuthContext']
+      },
+      emergency_ctx: {
+        title: 'EmergencyFlowContext.jsx',
+        type: 'React Context (Nervous System SOS)',
+        badge: 'State Management',
+        desc: 'Orchestre la création d\'une urgence : envoi du fichier audio sur le bucket Supabase `voice_notes`, insertion dans la table `interventions` et diffusion de l\'alerte en WebSocket via le canal Ably.',
+        relations: ['Ably Realtime Cloud', 'Storage: voice_notes', 'Table: public.interventions']
+      },
+      ably_service: {
+        title: 'Ably Realtime Cloud Service',
+        type: 'Service WebSocket Externe',
+        badge: 'Realtime Infrastructure',
+        desc: 'Canal de diffusion instantané (latence < 50ms) alertant les artisans dès qu\'un client valide une urgence dans leur ville ou quartier.',
+        relations: ['EmergencyFlowContext', 'useAblyNotifications.js', 'EmergencySOSModal.jsx']
+      },
+      t_interventions: {
+        title: 'Table PostgreSQL : public.interventions',
+        type: 'Table de Données Supabase',
+        badge: 'Database Core Table',
+        desc: 'Stocke chaque mission d\'urgence : client_id, maalem_id, service_type (PLUMBING/AUTO_MECHANIC), district, audio_note_url, statut (PENDING/ACCEPTED/COMPLETED) et coût du lead (15 DH).',
+        relations: ['public.profiles', 'public.reviews', 'EmergencyFlowContext', 'AppContext']
+      },
+      t_profiles: {
+        title: 'Table PostgreSQL : public.profiles',
+        type: 'Table Utilisateurs Supabase',
+        badge: 'Database Auth Table',
+        desc: 'Table centrale des comptes utilisateurs contenant le numéro de téléphone, le rôle (CLIENT, MAALEM, ADMIN), la zone géographique et le nom complet.',
+        relations: ['public.maalem_details', 'public.interventions', 'public.transactions', 'AuthContext']
+      },
+      t_maalem: {
+        title: 'Table PostgreSQL : public.maalem_details',
+        type: 'Extension Profil Artisan',
+        badge: 'Database KYC & Wallet',
+        desc: 'Contient les informations spécifiques au Maâlem : spécialités, CIN recto/verso, statut KYC, note moyenne (`rating_avg`), et solde de recharge (`credit_balance`).',
+        relations: ['public.profiles', 'AuthContext', 'AppContext']
+      }
+    };
+
+    // --- VIS.JS INITIALIZATION ---
+    const container = document.getElementById('network-canvas');
+    const nodes = new vis.DataSet(nodesData);
+    const edges = new vis.DataSet(edgesData);
+
+    const options = {
+      nodes: {
+        shape: 'box',
+        margin: 12,
+        shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10, x: 5, y: 5 },
+        borderWidth: 2,
+        font: { face: 'Inter', size: 13 }
+      },
+      edges: {
+        arrows: { to: { enabled: true, scaleFactor: 0.8 } },
+        color: { color: '#64748b', highlight: '#38bdf8' },
+        font: { face: 'Inter', size: 10, color: '#94a3b8', strokeWidth: 0, align: 'horizontal' },
+        smooth: { type: 'cubicBezier', forceDirection: 'none', roundness: 0.4 }
+      },
+      physics: {
+        solver: 'forceAtlas2Based',
+        forceAtlas2Based: {
+          gravitationalConstant: -70,
+          centralGravity: 0.01,
+          springLength: 140,
+          springConstant: 0.08,
+          damping: 0.4
+        },
+        stabilization: { iterations: 150 }
+      },
+      interaction: {
+        hover: true,
+        tooltipDelay: 100,
+        zoomView: true,
+        dragView: true
+      }
+    };
+
+    const network = new vis.Network(container, { nodes, edges }, options);
+
+    // --- INTERACTION & CLICK HANDLER ---
+    network.on('click', function(params) {
+      if (params.nodes.length > 0) {
+        const nodeId = params.nodes[0];
+        displayNodeDetails(nodeId);
+      }
+    });
+
+    function displayNodeDetails(nodeId) {
+      const details = nodeDetails[nodeId] || {
+        title: nodeId,
+        type: 'Composant / Élément du système',
+        badge: 'Système',
+        desc: 'Élément connecté dans le flux global de BricoleMoi.',
+        relations: []
+      };
+
+      const body = document.getElementById('inspector-body');
+      const badge = document.getElementById('inspector-badge');
+      badge.textContent = details.badge;
+
+      let relationsHtml = details.relations && details.relations.length > 0 ? `
+        <div class="pt-3 border-t border-slate-800">
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Liaisons Directes :</p>
+          <div class="flex flex-wrap gap-1.5">
+            ${details.relations.map(r => `<span class="px-2 py-1 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-xs font-mono">${r}</span>`).join('')}
+          </div>
+        </div>
+      ` : '';
+
+      body.innerHTML = `
+        <div class="space-y-4">
+          <div>
+            <span class="text-[11px] text-blue-400 font-semibold uppercase tracking-wider">${details.type}</span>
+            <h3 class="text-base font-bold text-white mt-0.5">${details.title}</h3>
+          </div>
+          <div class="p-3.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-300 leading-relaxed">
+            ${details.desc}
+          </div>
+          ${relationsHtml}
+        </div>
+      `;
+    }
+
+    // --- SEARCH FILTER ---
+    function handleSearch(query) {
+      if (!query.trim()) {
+        nodes.forEach(n => nodes.update({ id: n.id, hidden: false }));
+        return;
+      }
+      const q = query.toLowerCase();
+      nodes.forEach(n => {
+        const match = (n.label && n.label.toLowerCase().includes(q)) || (n.title && n.title.toLowerCase().includes(q)) || n.id.toLowerCase().includes(q);
+        nodes.update({ id: n.id, hidden: !match });
+      });
+    }
+
+    // --- GROUP FILTER ---
+    function filterGroup(group) {
+      if (group === 'all') {
+        nodes.forEach(n => nodes.update({ id: n.id, hidden: false }));
+      } else {
+        nodes.forEach(n => nodes.update({ id: n.id, hidden: n.group !== group }));
+      }
+    }
+
+    // --- VIEW SWITCHER ---
+    function switchView(view) {
+      document.querySelectorAll('#btn-view-all, #btn-view-db, #btn-view-flow').forEach(btn => {
+        btn.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition-all";
+      });
+
+      if (view === 'all') {
+        document.getElementById('btn-view-all').className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition-all";
+        nodes.forEach(n => nodes.update({ id: n.id, hidden: false }));
+        network.fit();
+      } else if (view === 'db') {
+        document.getElementById('btn-view-db').className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 text-white transition-all";
+        nodes.forEach(n => nodes.update({ id: n.id, hidden: n.group !== 'db' && n.group !== 'storage' }));
+        network.fit();
+      } else if (view === 'flow') {
+        document.getElementById('btn-view-flow').className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600 text-white transition-all";
+        const flowNodeIds = ['client_app', 'voice_rec', 'emergency_ctx', 'bucket_voice', 't_interventions', 'ably_service', 'ably_hook', 'sos_modal', 'maalem_app', 'app_ctx', 't_transactions'];
+        nodes.forEach(n => nodes.update({ id: n.id, hidden: !flowNodeIds.includes(n.id) }));
+        network.fit();
+      }
+    }
+
+    function resetZoom() {
+      network.fit({ animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
+    }
+  </script>
+</body>
+</html>

@@ -3,6 +3,10 @@ const PRELUDE_API_KEY = process.env.PRELUDE_API_KEY || "sk_72Xju0Hj6c3evZiDyrQJ0
 const INFOBIP_API_KEY = process.env.INFOBIP_API_KEY || "6609e87c2786b4aa487b954b47f223ee-25c768b1-ab2b-4ca1-a75b-7fe84af955d8";
 const INFOBIP_BASE_URL = "https://k95d1n.api.infobip.com";
 
+// Rate limiter in-memory pour prévenir le spam & toll fraud
+const recentRequests = new Map();
+const RATE_LIMIT_WINDOW_MS = 20 * 1000; // 20 secondes minimum entre deux envois
+
 function cleanPhoneNumber(rawPhone) {
   const input = String(rawPhone || "").trim();
   let digits = input.replace(/\D/g, "");
@@ -13,11 +17,50 @@ function cleanPhoneNumber(rawPhone) {
     digits = "212" + digits;
   }
 
-  const isValid = digits.length >= 8 && digits.length <= 15;
+  // Vérification de base de la longueur
+  const isValidLength = digits.length >= 8 && digits.length <= 15;
+  if (!isValidLength) {
+    return { cleanNumber: digits, formatted: `+${digits}`, isValid: false, error: "Longueur de numéro invalide." };
+  }
+
+  // Filtrage strict Maroc : Rejeter les lignes fixes (05 / +2125)
+  if (digits.startsWith("212")) {
+    const nationalPart = digits.slice(3);
+    if (nationalPart.startsWith("5")) {
+      return { 
+        cleanNumber: digits, 
+        formatted: `+${digits}`, 
+        isValid: false, 
+        error: "Les numéros fixes (05...) ne peuvent pas recevoir de SMS. Veuillez entrer un numéro mobile (06 ou 07)." 
+      };
+    }
+    if (!nationalPart.startsWith("6") && !nationalPart.startsWith("7") && !digits.endsWith("000000")) {
+      return { 
+        cleanNumber: digits, 
+        formatted: `+${digits}`, 
+        isValid: false, 
+        error: "Numéro marocain non mobile. Seuls les numéros 06 et 07 sont acceptés." 
+      };
+    }
+  }
+
+  // Filtrage strict France : Rejeter les lignes fixes (01, 02, 03, 04, 05, 08, 09)
+  if (digits.startsWith("33")) {
+    const nationalPart = digits.slice(2);
+    if (!nationalPart.startsWith("6") && !nationalPart.startsWith("7") && !digits.endsWith("000000")) {
+      return { 
+        cleanNumber: digits, 
+        formatted: `+${digits}`, 
+        isValid: false, 
+        error: "Numéro français non mobile. Seuls les numéros 06 et 07 sont acceptés." 
+      };
+    }
+  }
+
   return {
     cleanNumber: digits,
     formatted: `+${digits}`,
-    isValid
+    isValid: true
   };
 }
 
@@ -42,10 +85,22 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: "Numéro de téléphone requis." });
     }
 
-    const { cleanNumber, formatted, isValid } = cleanPhoneNumber(phone);
+    const { cleanNumber, formatted, isValid, error } = cleanPhoneNumber(phone);
     if (!isValid) {
-      return res.status(400).json({ success: false, error: "Numéro de téléphone invalide." });
+      return res.status(400).json({ success: false, error: error || "Numéro de téléphone invalide." });
     }
+
+    // Rate Limiting anti-gaspillage par numéro
+    const now = Date.now();
+    const lastRequest = recentRequests.get(cleanNumber);
+    if (lastRequest && (now - lastRequest) < RATE_LIMIT_WINDOW_MS) {
+      const waitSec = Math.ceil((RATE_LIMIT_WINDOW_MS - (now - lastRequest)) / 1000);
+      return res.status(429).json({ 
+        success: false, 
+        error: `Veuillez patienter ${waitSec}s avant de renvoyer un code.` 
+      });
+    }
+    recentRequests.set(cleanNumber, now);
 
     const isTestNumber = 
       cleanNumber.endsWith("000000") || 

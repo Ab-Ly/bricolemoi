@@ -201,11 +201,84 @@ export const AuthModal = () => {
     return () => clearTimeout(timer);
   }, [resendCountdown]);
 
+  // WebOTP API : Lecture et validation automatique du code SMS à son arrivée (Android / Chrome)
+  useEffect(() => {
+    if (step !== 'OTP_VERIFY') return;
+    if (typeof window === 'undefined' || !('OTPCredential' in window)) return;
+
+    const ac = new AbortController();
+    navigator.credentials
+      .get({
+        otp: { transport: ['sms'] },
+        signal: ac.signal
+      })
+      .then((otp) => {
+        if (otp && otp.code) {
+          const digits = String(otp.code).replace(/\D/g, '').slice(0, 6).split('');
+          if (digits.length === 6) {
+            setOtpDigits(digits);
+            handleOtpProceed(digits.join(''));
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback silencieux sur la saisie manuelle sans interruption
+      });
+
+    return () => {
+      try {
+        ac.abort();
+      } catch (e) {}
+    };
+  }, [step]);
+
   // Construction du numéro international complet
   const getFullInternationalNumber = () => {
     const { formatted } = formatInternationalPhone(phone, selectedCountry.dial);
     return formatted;
   };
+
+  // Validation intelligente et stricte du format mobile selon le pays sélectionné
+  const getPhoneValidation = () => {
+    const raw = phone.replace(/[\s\-\.\(\)]/g, '');
+    if (!raw) return { isValid: false, isLandline: false, message: '' };
+
+    // Si Maroc (+212)
+    if (selectedCountry.dial === '+212') {
+      if (raw.startsWith('5')) {
+        return { 
+          isValid: false, 
+          isLandline: true, 
+          message: 'Les numéros fixes (05...) ne peuvent pas recevoir de SMS. Veuillez saisir un numéro mobile (06 ou 07).' 
+        };
+      }
+      const isMobile = (raw.startsWith('6') || raw.startsWith('7')) && raw.length === 9;
+      return { 
+        isValid: isMobile, 
+        isLandline: false,
+        message: !isMobile && raw.length >= 2 && !raw.startsWith('6') && !raw.startsWith('7')
+          ? 'Seuls les numéros mobiles marocains (06 ou 07) sont acceptés.'
+          : ''
+      };
+    }
+
+    // Si France (+33)
+    if (selectedCountry.dial === '+33') {
+      if (raw.length >= 2 && !raw.startsWith('6') && !raw.startsWith('7')) {
+        return { 
+          isValid: false, 
+          isLandline: true, 
+          message: 'Veuillez saisir un numéro mobile français (06 ou 07).' 
+        };
+      }
+      return { isValid: raw.length === 9, isLandline: false, message: '' };
+    }
+
+    return { isValid: raw.length >= 8 && raw.length <= 13, isLandline: false, message: '' };
+  };
+
+  const phoneValidation = getPhoneValidation();
+  const isPhoneValid = phoneValidation.isValid;
 
   // Formatage d'affichage du téléphone (retire intelligemment le 0 initial si indicatif présent)
   const handlePhoneChange = (e) => {
@@ -654,8 +727,6 @@ export const AuthModal = () => {
     );
   };
 
-  const isPhoneValid = phone.replace(/[\s\-\.\(\)]/g, '').length >= 6;
-
   return (
     <AnimatePresence>
       {authModalOpen && (
@@ -901,7 +972,13 @@ export const AuthModal = () => {
                       {renderCountryCodeSelector()}
 
                       <input
+                        id="auth-phone-input"
+                        name="tel"
                         type="tel"
+                        autoComplete="tel"
+                        autoCapitalize="off"
+                        autoCorrect="off"
+                        inputMode="tel"
                         required
                         placeholder={selectedCountry.placeholder || '06 12 34 56 78'}
                         value={phone}
@@ -921,6 +998,18 @@ export const AuthModal = () => {
                         </div>
                       )}
                     </div>
+
+                    {/* Alerte explicative immédiate si numéro fixe ou non mobile */}
+                    {phoneValidation.message && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] font-semibold flex items-center gap-2 shadow-2xs"
+                      >
+                        <span className="text-amber-600 text-xs">⚠️</span>
+                        <span>{phoneValidation.message}</span>
+                      </motion.div>
+                    )}
                   </div>
 
                   {/* Gros Bouton Continuer */}
@@ -1208,6 +1297,7 @@ export const AuthModal = () => {
                       ref={(el) => (otpInputRefs.current[idx] = el)}
                       type="text"
                       inputMode="numeric"
+                      autoComplete={idx === 0 ? "one-time-code" : "off"}
                       pattern="[0-9]*"
                       maxLength={6}
                       value={digit}
