@@ -108,7 +108,7 @@ const mapCategoryToSlug = (cat) => {
 
 export const ClientView = ({ initialCategory, initialCity, initialDistrict }) => {
   const { t, user, setUser, setAuthModalOpen } = useAuth();
-  const { interventions, maalems, createIntervention, confirmFinalDevis, completeIntervention, submitReview, cancelIntervention } = useApp();
+  const { interventions, maalems, createIntervention, confirmFinalDevis, completeIntervention, submitReview, cancelIntervention, relaunchEmergencyRequest } = useApp();
   const {
     state: emergencyState,
     isIdle,
@@ -1269,6 +1269,8 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
                         ? 'bg-purple-50 text-purple-900 border border-purple-200 animate-pulse'
                         : item.status === 'COMPLETED'
                         ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+                        : item.status === 'UNFEASIBLE'
+                        ? 'bg-rose-50 text-rose-900 border border-rose-200'
                         : 'bg-slate-100 text-slate-600'
                     }`}>
                       <span className="w-1.5 h-1.5 rounded-full bg-current" />
@@ -1283,6 +1285,7 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
                         )}
                         {item.status === 'PENDING_COMPLETION' && 'Clôture en attente'}
                         {item.status === 'COMPLETED' && 'Terminé & Validé'}
+                        {item.status === 'UNFEASIBLE' && '❌ Mission Non Réalisable'}
                         {item.status === 'CANCELLED' && 'Annulé'}
                       </span>
                     </span>
@@ -1310,6 +1313,33 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
                       <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-2 mt-2 shadow-xs">
                         <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse flex-shrink-0" />
                         <span>🚗 Le Maâlem est actuellement en route vers votre adresse.</span>
+                      </div>
+                    )}
+
+                    {item.status === 'UNFEASIBLE' && (
+                      <div className="p-3.5 bg-amber-50/90 rounded-2xl border border-amber-200 space-y-2.5 mt-2 shadow-xs text-xs">
+                        <div className="flex items-center gap-1.5 font-bold text-amber-950">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                          <span>Artisan indisponible pour cette intervention</span>
+                        </div>
+                        <p className="text-slate-600 text-[11px] leading-relaxed">
+                          Motif signalé : <strong>{
+                            item.unfeasible_reason === 'CLIENT_UNREACHABLE' ? 'Client injoignable par téléphone' :
+                            item.unfeasible_reason === 'PARTS_UNAVAILABLE' ? 'Pièce de rechange indisponible sur le marché' :
+                            item.unfeasible_reason === 'CLIENT_CANCELLED' ? 'Demande annulée' :
+                            item.unfeasible_reason === 'PRICE_DISAGREEMENT' ? 'Périmètre ou devis hors portée' :
+                            item.unfeasible_reason === 'WRONG_LOCATION' ? 'Hors secteur géographique' :
+                            (item.unfeasible_reason || 'Impossibilité technique ou imprévu')
+                          }</strong>.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => relaunchEmergencyRequest(item.id)}
+                          className="w-full py-2.5 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+                          <span>⚡ Relancer immédiatement la recherche d'un autre Maâlem</span>
+                        </button>
                       </div>
                     )}
 

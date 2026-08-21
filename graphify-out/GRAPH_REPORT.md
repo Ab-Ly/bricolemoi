@@ -1,29 +1,29 @@
-# Graph Report - bricolemoi  (2026-08-20)
+# Graph Report - bricolemoi  (2026-08-21)
 
 ## Corpus Check
-- 88 files · ~213,612 words
+- 94 files · ~221,394 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 331 nodes · 671 edges · 61 communities (28 shown, 33 thin omitted)
+- 354 nodes · 709 edges · 69 communities (34 shown, 35 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `793e9147`
+- Built from commit: `64225f78`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - AppContext.jsx
 - App.jsx
-- getSpecialtyMeta
+- MaalemView.jsx
 - ClientView.jsx
 - dependencies
 - devDependencies
 - AuthContext.jsx
 - manifest.json
-- LandingPage.jsx
+- 📝 Notes de Relais pour la Prochaine Session (BricoleMoi)
 - verify-otp-sms/index.ts
 - send-otp-sms/index.ts
 - send-infobip-otp/index.ts
@@ -60,6 +60,11 @@
 - inspect_prelude.js
 - send-otp.js
 - verify-otp.js
+- public.push_subscriptions
+- pushNotificationService.js
+- LandingPage.jsx
+- public.interventions
+- public.transactions
 
 ## God Nodes (most connected - your core abstractions)
 1. `useAuth()` - 39 edges
@@ -74,6 +79,8 @@
 10. `AppProvider()` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `MainApp()` --calls--> `useApp()`  [EXTRACTED]
+  src/App.jsx → src/context/AppContext.jsx
 - `MainApp()` --calls--> `useEmergencyFlow()`  [EXTRACTED]
   src/App.jsx → src/context/EmergencyFlowContext.jsx
 - `MainApp()` --calls--> `useAblyNotifications()`  [EXTRACTED]
@@ -82,29 +89,27 @@
   src/App.jsx → src/lib/subdomain.js
 - `AuthModal()` --calls--> `useAuth()`  [EXTRACTED]
   src/components/AuthModal.jsx → src/context/AuthContext.jsx
-- `ClientView()` --calls--> `useApp()`  [EXTRACTED]
-  src/components/ClientView.jsx → src/context/AppContext.jsx
 
 ## Import Cycles
 - None detected.
 
-## Communities (61 total, 33 thin omitted)
+## Communities (69 total, 35 thin omitted)
 
 ### Community 0 - "AppContext.jsx"
-Cohesion: 0.12
-Nodes (33): EmergencySOSModal(), AppContext, AppProvider(), ACTIONS, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer(), initialState (+25 more)
+Cohesion: 0.14
+Nodes (30): EmergencySOSModal(), AppContext, AppProvider(), calculateDistanceInKm(), ACTIONS, EmergencyFlowContext, EmergencyFlowProvider(), emergencyFlowReducer() (+22 more)
 
 ### Community 1 - "App.jsx"
-Cohesion: 0.15
-Nodes (22): AdminApp, App(), ClientApp, MaalemApp, MainApp(), AdminDashboard(), AdminAuthModal(), AdminView() (+14 more)
-
-### Community 2 - "getSpecialtyMeta"
 Cohesion: 0.16
-Nodes (21): AdminClientsView(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), CATEGORIES_TAXONOMY, CategorySelector(), EnhancedCategoryIcon() (+13 more)
+Nodes (19): AdminApp, App(), ClientApp, MaalemApp, MainApp(), AdminDashboard(), AdminAuthModal(), AdminView() (+11 more)
+
+### Community 2 - "MaalemView.jsx"
+Cohesion: 0.15
+Nodes (24): AdminClientsView(), AdminDisputesView(), AdminLiveMissions(), AdminMaalemsView(), AdminRechargesView(), CATEGORIES_TAXONOMY, CategorySelector(), EnhancedCategoryIcon() (+16 more)
 
 ### Community 3 - "ClientView.jsx"
-Cohesion: 0.16
-Nodes (17): CGUModal(), ClientView(), getServiceDisplay(), mapCategoryToSlug(), SERVICE_TYPE_MAP, CustomDropdown(), getSafeLabel(), CITIES (+9 more)
+Cohesion: 0.17
+Nodes (14): CGUModal(), ClientView(), getServiceDisplay(), mapCategoryToSlug(), SERVICE_TYPE_MAP, CustomDropdown(), getSafeLabel(), generateFallbackAudioDataUrl() (+6 more)
 
 ### Community 4 - "dependencies"
 Cohesion: 0.10
@@ -115,16 +120,16 @@ Cohesion: 0.08
 Nodes (24): autoprefixer, devDependencies, autoprefixer, postcss, tailwindcss, @types/react, @types/react-dom, vite (+16 more)
 
 ### Community 6 - "AuthContext.jsx"
-Cohesion: 0.19
-Nodes (22): AuthModal(), AuthContext, AuthProvider(), app, auth, firebaseConfig, googleProvider, checkPhoneProfile() (+14 more)
+Cohesion: 0.17
+Nodes (24): AuthModal(), AuthContext, AuthProvider(), app, auth, firebaseConfig, googleProvider, checkPhoneProfile() (+16 more)
 
 ### Community 7 - "manifest.json"
 Cohesion: 0.20
 Nodes (9): background_color, description, display, icons, name, orientation, short_name, start_url (+1 more)
 
-### Community 8 - "LandingPage.jsx"
-Cohesion: 0.28
-Nodes (6): MOROCCAN_CITIES, MOROCCAN_SERVICES, CLIENT_SCENES, MAALEM_SCENES, PromoVideoPlayer(), translations
+### Community 8 - "📝 Notes de Relais pour la Prochaine Session (BricoleMoi)"
+Cohesion: 0.33
+Nodes (5): 📦 Ce qui a été Réalisé et Poussé lors de cette Session, 📌 Concept & Spécification Validée, 📝 Notes de Relais pour la Prochaine Session (BricoleMoi), 🛠️ Plan d'Implémentation Technique pour l'autre PC, 🎯 Prochaine Tâche Prioritaire : Système de Lead en Instance (Lead Escrow)
 
 ### Community 13 - "schema.sql"
 Cohesion: 0.47
@@ -138,22 +143,34 @@ Nodes (3): public.reconcile_transaction(), public.transactions, public.profiles
 Cohesion: 0.40
 Nodes (4): 1. Visual Identity & Palette (« Modern Clean & Trust »), 2. Action Buttons & Accents, 3. Map & Overlay Panels, Modern Clean & Trust Engineering Guidelines (BricoleMoi)
 
+### Community 59 - "send-otp.js"
+Cohesion: 0.67
+Nodes (3): cleanPhoneNumber(), handler(), recentRequests
+
+### Community 63 - "pushNotificationService.js"
+Cohesion: 0.44
+Nodes (9): PushNotificationBanner(), getNotificationPermissionState(), isPushSupported(), showLocalPushNotification(), subscribeUserToPush(), testPushNotification(), unsubscribeUserFromPush(), urlBase64ToUint8Array() (+1 more)
+
+### Community 64 - "LandingPage.jsx"
+Cohesion: 0.28
+Nodes (6): MOROCCAN_CITIES, MOROCCAN_SERVICES, CLIENT_SCENES, MAALEM_SCENES, PromoVideoPlayer(), translations
+
 ## Knowledge Gaps
-- **70 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+65 more)
+- **75 isolated node(s):** `recentRequests`, `name`, `private`, `version`, `type` (+70 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **33 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **35 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `useAuth()` connect `App.jsx` to `AppContext.jsx`, `getSpecialtyMeta`, `ClientView.jsx`, `AuthContext.jsx`, `LandingPage.jsx`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+- **Why does `useAuth()` connect `App.jsx` to `LandingPage.jsx`, `AppContext.jsx`, `MaalemView.jsx`, `ClientView.jsx`, `AuthContext.jsx`?**
+  _High betweenness centrality (0.039) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `devDependencies`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **What connects `name`, `private`, `version` to the rest of the system?**
-  _70 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **What connects `recentRequests`, `name`, `private` to the rest of the system?**
+  _75 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AppContext.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12367149758454106 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.13588850174216027 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**

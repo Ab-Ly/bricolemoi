@@ -28,6 +28,18 @@
       "source_location": "L31"
     },
     {
+      "id": "src_context_appcontext_calculatedistanceinkm",
+      "label": "calculateDistanceInKm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "calculatedistanceinkm()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L16"
+    },
+    {
       "id": "src_context_emergencyflowcontext_emergencyflowprovider",
       "label": "EmergencyFlowProvider()",
       "_callable": true,
@@ -244,54 +256,6 @@
       "source_location": "L5"
     },
     {
-      "id": "src_lib_pushnotificationservice_getnotificationpermissionstate",
-      "label": "getNotificationPermissionState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "AppContext.jsx",
-      "file_type": "code",
-      "norm_label": "getnotificationpermissionstate()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_ispushsupported",
-      "label": "isPushSupported()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "AppContext.jsx",
-      "file_type": "code",
-      "norm_label": "ispushsupported()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L8"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_requestpushpermission",
-      "label": "requestPushPermission()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "AppContext.jsx",
-      "file_type": "code",
-      "norm_label": "requestpushpermission()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L23"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_showlocalpushnotification",
-      "label": "showLocalPushNotification()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "AppContext.jsx",
-      "file_type": "code",
-      "norm_label": "showlocalpushnotification()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L40"
-    },
-    {
       "id": "src_lib_subdomain_getappsubdomain",
       "label": "getAppSubdomain()",
       "_callable": true,
@@ -400,18 +364,6 @@
       "source_location": "L179"
     },
     {
-      "id": "src_components_maalemview_maalemview",
-      "label": "MaalemView()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "maalemview()",
-      "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L64"
-    },
-    {
       "id": "src_components_navbar_navbar",
       "label": "Navbar()",
       "_callable": true,
@@ -448,30 +400,6 @@
       "source_location": "L6"
     },
     {
-      "id": "src_components_userprofilemodal_userprofilemodal",
-      "label": "UserProfileModal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "userprofilemodal()",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L43"
-    },
-    {
-      "id": "src_context_appcontext_useapp",
-      "label": "useApp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "App.jsx",
-      "file_type": "code",
-      "norm_label": "useapp()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3329"
-    },
-    {
       "id": "src_context_authcontext_useauth",
       "label": "useAuth()",
       "_callable": true,
@@ -481,7 +409,7 @@
       "file_type": "code",
       "norm_label": "useauth()",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L660"
+      "source_location": "L702"
     },
     {
       "id": "src_layouts_adminapp_adminapp",
@@ -609,7 +537,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminclientsview()",
       "source_file": "src/components/admin/AdminClientsView.jsx",
@@ -621,7 +549,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "admindisputesview()",
       "source_file": "src/components/admin/AdminDisputesView.jsx",
@@ -633,7 +561,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminlivemissions()",
       "source_file": "src/components/admin/AdminLiveMissions.jsx",
@@ -645,7 +573,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminmaalemsview()",
       "source_file": "src/components/admin/AdminMaalemsView.jsx",
@@ -657,7 +585,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminrechargesview()",
       "source_file": "src/components/admin/AdminRechargesView.jsx",
@@ -669,7 +597,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "categoryselector()",
       "source_file": "src/components/CategorySelector.jsx",
@@ -681,7 +609,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "enhancedcategoryicon()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -693,7 +621,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "getspecialtylabel()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -705,7 +633,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "getspecialtymeta()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -717,7 +645,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "specialtybadge()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -729,7 +657,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "getmapiconsvg()",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -741,7 +669,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "getmapstylejson()",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -753,7 +681,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "interactivemap()",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -765,11 +693,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "maalemselect()",
       "source_file": "src/components/MaalemSelect.jsx",
       "source_location": "L6"
+    },
+    {
+      "id": "src_components_maalemview_maalemview",
+      "label": "MaalemView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "MaalemView.jsx",
+      "file_type": "code",
+      "norm_label": "maalemview()",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L65"
     },
     {
       "id": "src_components_specialtyselect_specialtyselect",
@@ -777,23 +717,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "specialtyselect()",
       "source_file": "src/components/SpecialtySelect.jsx",
       "source_location": "L6"
     },
     {
-      "id": "src_context_appcontext_calculatedistanceinkm",
-      "label": "calculateDistanceInKm()",
+      "id": "src_components_userprofilemodal_userprofilemodal",
+      "label": "UserProfileModal()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
-      "norm_label": "calculatedistanceinkm()",
+      "norm_label": "userprofilemodal()",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_context_appcontext_useapp",
+      "label": "useApp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "MaalemView.jsx",
+      "file_type": "code",
+      "norm_label": "useapp()",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L16"
+      "source_location": "L3666"
     },
     {
       "id": "src_components_cgumodal_cgumodal",
@@ -913,7 +865,7 @@
       "file_type": "code",
       "norm_label": "useemergencyflow()",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L465"
+      "source_location": "L505"
     },
     {
       "id": "scratch_test_prelude_otp_testpreludeotp",
@@ -973,7 +925,7 @@
       "file_type": "code",
       "norm_label": "cleanphonenumber()",
       "source_file": "api/send-otp.js",
-      "source_location": "L6"
+      "source_location": "L10"
     },
     {
       "id": "api_send_otp_handler",
@@ -985,7 +937,7 @@
       "file_type": "code",
       "norm_label": "handler()",
       "source_file": "api/send-otp.js",
-      "source_location": "L24"
+      "source_location": "L67"
     },
     {
       "id": "src_components_authmodal_authmodal",
@@ -1228,11 +1180,119 @@
       "source_location": "L22"
     },
     {
+      "id": "api_send_push_handler",
+      "label": "handler()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "send-push.js",
+      "file_type": "code",
+      "norm_label": "handler()",
+      "source_file": "api/send-push.js",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_components_maalem_pushnotificationbanner_pushnotificationbanner",
+      "label": "PushNotificationBanner()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "pushnotificationbanner()",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_getnotificationpermissionstate",
+      "label": "getNotificationPermissionState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "getnotificationpermissionstate()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L45"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_ispushsupported",
+      "label": "isPushSupported()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "ispushsupported()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L33"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_showlocalpushnotification",
+      "label": "showLocalPushNotification()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "showlocalpushnotification()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L167"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_subscribeusertopush",
+      "label": "subscribeUserToPush()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "subscribeusertopush()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L54"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_testpushnotification",
+      "label": "testPushNotification()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "testpushnotification()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L197"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_unsubscribeuserfrompush",
+      "label": "unsubscribeUserFromPush()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "unsubscribeuserfrompush()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L137"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_urlbase64touint8array",
+      "label": "urlBase64ToUint8Array()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "urlbase64touint8array()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L15"
+    },
+    {
       "id": "src_components_promovideoplayer_promovideoplayer",
       "label": "PromoVideoPlayer()",
       "_callable": true,
       "_origin": "ast",
-      "community": 8,
+      "community": 64,
       "community_name": "LandingPage.jsx",
       "file_type": "code",
       "norm_label": "promovideoplayer()",
@@ -1481,17 +1541,6 @@
       "file_type": "code",
       "norm_label": "pdfreceiptgenerator.js",
       "source_file": "src/lib/pdfReceiptGenerator.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_pushnotificationservice",
-      "label": "pushNotificationService.js",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "AppContext.jsx",
-      "file_type": "code",
-      "norm_label": "pushnotificationservice.js",
-      "source_file": "src/lib/pushNotificationService.js",
       "source_location": "L1"
     },
     {
@@ -1961,7 +2010,7 @@
       "label": "AdminClientsView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminclientsview.jsx",
       "source_file": "src/components/admin/AdminClientsView.jsx",
@@ -1972,7 +2021,7 @@
       "label": "AdminDashboard.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "admindashboard.jsx",
       "source_file": "src/components/admin/AdminDashboard.jsx",
@@ -1983,7 +2032,7 @@
       "label": "AdminDisputesView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "admindisputesview.jsx",
       "source_file": "src/components/admin/AdminDisputesView.jsx",
@@ -1994,7 +2043,7 @@
       "label": "AdminLiveMissions.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminlivemissions.jsx",
       "source_file": "src/components/admin/AdminLiveMissions.jsx",
@@ -2005,7 +2054,7 @@
       "label": "AdminMaalemsView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminmaalemsview.jsx",
       "source_file": "src/components/admin/AdminMaalemsView.jsx",
@@ -2016,7 +2065,7 @@
       "label": "AdminRechargesView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "adminrechargesview.jsx",
       "source_file": "src/components/admin/AdminRechargesView.jsx",
@@ -2027,7 +2076,7 @@
       "label": "CategorySelector.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "categoryselector.jsx",
       "source_file": "src/components/CategorySelector.jsx",
@@ -2038,7 +2087,7 @@
       "label": "CATEGORIES_TAXONOMY",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "categories_taxonomy",
       "source_file": "src/components/CategorySelector.jsx",
@@ -2049,7 +2098,7 @@
       "label": "EnhancedCategoryIcon.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "enhancedcategoryicon.jsx",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -2060,7 +2109,7 @@
       "label": "SPECIALTY_CONFIG",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "specialty_config",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -2071,7 +2120,7 @@
       "label": "InteractiveMap.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "interactivemap.jsx",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -2082,7 +2131,7 @@
       "label": "MAP_STYLES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "map_styles",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -2093,7 +2142,7 @@
       "label": "ROAD_COLOR_THEMES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "road_color_themes",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -2104,7 +2153,7 @@
       "label": "SVG_ICONS",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "svg_icons",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -2115,10 +2164,21 @@
       "label": "MaalemSelect.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "maalemselect.jsx",
       "source_file": "src/components/MaalemSelect.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_maalemview",
+      "label": "MaalemView.jsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "MaalemView.jsx",
+      "file_type": "code",
+      "norm_label": "maalemview.jsx",
+      "source_file": "src/components/MaalemView.jsx",
       "source_location": "L1"
     },
     {
@@ -2126,11 +2186,33 @@
       "label": "SpecialtySelect.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "getSpecialtyMeta",
+      "community_name": "MaalemView.jsx",
       "file_type": "code",
       "norm_label": "specialtyselect.jsx",
       "source_file": "src/components/SpecialtySelect.jsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_userprofilemodal",
+      "label": "UserProfileModal.jsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "MaalemView.jsx",
+      "file_type": "code",
+      "norm_label": "userprofilemodal.jsx",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_userprofilemodal_cities",
+      "label": "CITIES",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "MaalemView.jsx",
+      "file_type": "code",
+      "norm_label": "cities",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L34"
     },
     {
       "id": "supabase_services_seed",
@@ -2331,39 +2413,6 @@
       "source_location": "L1"
     },
     {
-      "id": "src_components_maalemview",
-      "label": "MaalemView.jsx",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "maalemview.jsx",
-      "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_userprofilemodal",
-      "label": "UserProfileModal.jsx",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "userprofilemodal.jsx",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_userprofilemodal_cities",
-      "label": "CITIES",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "cities",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L34"
-    },
-    {
       "id": "src_components_voicerecorder",
       "label": "VoiceRecorder.jsx",
       "_origin": "ast",
@@ -2428,39 +2477,6 @@
       "norm_label": "moroccan_cities",
       "source_file": "src/constants/geo.js",
       "source_location": "L19"
-    },
-    {
-      "id": "src_lib_supabaseclient",
-      "label": "supabaseClient.js",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "supabaseclient.js",
-      "source_file": "src/lib/supabaseClient.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_supabaseclient_issupabaseconfigured",
-      "label": "isSupabaseConfigured",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "issupabaseconfigured",
-      "source_file": "src/lib/supabaseClient.js",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_lib_supabaseclient_supabase",
-      "label": "supabase",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ClientView.jsx",
-      "file_type": "code",
-      "norm_label": "supabase",
-      "source_file": "src/lib/supabaseClient.js",
-      "source_location": "L10"
     },
     {
       "id": "supabase_create_storage_bucket",
@@ -3437,6 +3453,17 @@
       "source_location": "L1"
     },
     {
+      "id": "api_send_otp_recentrequests",
+      "label": "recentRequests",
+      "_origin": "ast",
+      "community": 59,
+      "community_name": "send-otp.js",
+      "file_type": "code",
+      "norm_label": "recentrequests",
+      "source_file": "api/send-otp.js",
+      "source_location": "L7"
+    },
+    {
       "id": "src_context_authcontext",
       "label": "AuthContext.jsx",
       "_origin": "ast",
@@ -3536,6 +3563,39 @@
       "source_location": "L5"
     },
     {
+      "id": "src_lib_supabaseclient",
+      "label": "supabaseClient.js",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "AuthContext.jsx",
+      "file_type": "code",
+      "norm_label": "supabaseclient.js",
+      "source_file": "src/lib/supabaseClient.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_supabaseclient_issupabaseconfigured",
+      "label": "isSupabaseConfigured",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "AuthContext.jsx",
+      "file_type": "code",
+      "norm_label": "issupabaseconfigured",
+      "source_file": "src/lib/supabaseClient.js",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_lib_supabaseclient_supabase",
+      "label": "supabase",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "AuthContext.jsx",
+      "file_type": "code",
+      "norm_label": "supabase",
+      "source_file": "src/lib/supabaseClient.js",
+      "source_location": "L10"
+    },
+    {
       "id": "api_verify_otp",
       "label": "verify-otp.js",
       "_origin": "ast",
@@ -3545,6 +3605,226 @@
       "norm_label": "verify-otp.js",
       "source_file": "api/verify-otp.js",
       "source_location": "L1"
+    },
+    {
+      "id": "supabase_push_subscriptions",
+      "label": "push_subscriptions.sql",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "public.push_subscriptions",
+      "file_type": "code",
+      "norm_label": "push_subscriptions.sql",
+      "source_file": "supabase/push_subscriptions.sql",
+      "source_location": null
+    },
+    {
+      "id": "supabase_push_subscriptions_public_push_subscriptions",
+      "label": "public.push_subscriptions",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "public.push_subscriptions",
+      "file_type": "code",
+      "norm_label": "public.push_subscriptions",
+      "source_file": "supabase/push_subscriptions.sql",
+      "source_location": "L5"
+    },
+    {
+      "id": "supabase_push_subscriptions_sql_public_profiles",
+      "label": "public.profiles",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "public.push_subscriptions",
+      "file_type": "code",
+      "norm_label": "public.profiles",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "api_send_push",
+      "label": "send-push.js",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "send-push.js",
+      "file_type": "code",
+      "norm_label": "send-push.js",
+      "source_file": "api/send-push.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_maalem_pushnotificationbanner",
+      "label": "PushNotificationBanner.jsx",
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "pushnotificationbanner.jsx",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_pushnotificationservice",
+      "label": "pushNotificationService.js",
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "pushnotificationservice.js",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_vapid_public_key",
+      "label": "VAPID_PUBLIC_KEY",
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "pushNotificationService.js",
+      "file_type": "code",
+      "norm_label": "vapid_public_key",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L8"
+    },
+    {
+      "id": "src_components_landingpage",
+      "label": "LandingPage.jsx",
+      "_origin": "ast",
+      "community": 64,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "landingpage.jsx",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_landingpage_moroccan_cities",
+      "label": "MOROCCAN_CITIES",
+      "_origin": "ast",
+      "community": 64,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "moroccan_cities",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L169"
+    },
+    {
+      "id": "src_components_landingpage_moroccan_services",
+      "label": "MOROCCAN_SERVICES",
+      "_origin": "ast",
+      "community": 64,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "moroccan_services",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L26"
+    },
+    {
+      "id": "src_components_promovideoplayer",
+      "label": "PromoVideoPlayer.jsx",
+      "_origin": "ast",
+      "community": 64,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "promovideoplayer.jsx",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_promovideoplayer_client_scenes",
+      "label": "CLIENT_SCENES",
+      "_origin": "ast",
+      "community": 64,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "client_scenes",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L32"
+    },
+    {
+      "id": "src_components_promovideoplayer_maalem_scenes",
+      "label": "MAALEM_SCENES",
+      "_origin": "ast",
+      "community": 64,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "maalem_scenes",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L117"
+    },
+    {
+      "id": "src_lib_i18n",
+      "label": "i18n.js",
+      "_origin": "ast",
+      "community": 64,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "i18n.js",
+      "source_file": "src/lib/i18n.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_i18n_translations",
+      "label": "translations",
+      "_origin": "ast",
+      "community": 64,
+      "community_name": "LandingPage.jsx",
+      "file_type": "code",
+      "norm_label": "translations",
+      "source_file": "src/lib/i18n.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "supabase_lead_escrow_system",
+      "label": "lead_escrow_system.sql",
+      "_origin": "ast",
+      "community": 65,
+      "community_name": "lead_escrow_system.sql",
+      "file_type": "code",
+      "norm_label": "lead_escrow_system.sql",
+      "source_file": "supabase/lead_escrow_system.sql",
+      "source_location": null
+    },
+    {
+      "id": "supabase_lead_escrow_system_public_manage_lead_escrow",
+      "label": "public.manage_lead_escrow()",
+      "_origin": "ast",
+      "community": 65,
+      "community_name": "lead_escrow_system.sql",
+      "file_type": "code",
+      "norm_label": "public.manage_lead_escrow()",
+      "source_file": "supabase/lead_escrow_system.sql",
+      "source_location": "L23"
+    },
+    {
+      "id": "supabase_lead_escrow_system_sql_public_interventions",
+      "label": "public.interventions",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "public.interventions",
+      "file_type": "code",
+      "norm_label": "public.interventions",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "supabase_lead_escrow_system_sql_public_transactions",
+      "label": "public.transactions",
+      "_origin": "ast",
+      "community": 67,
+      "community_name": "public.transactions",
+      "file_type": "code",
+      "norm_label": "public.transactions",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "supabase_optimize_egress_cleanup",
+      "label": "optimize_egress_cleanup.sql",
+      "_origin": "ast",
+      "community": 68,
+      "community_name": "optimize_egress_cleanup.sql",
+      "file_type": "code",
+      "norm_label": "optimize_egress_cleanup.sql",
+      "source_file": "supabase/optimize_egress_cleanup.sql",
+      "source_location": null
     },
     {
       "id": "public_manifest",
@@ -3657,92 +3937,76 @@
       "source_location": "L8"
     },
     {
-      "id": "src_components_landingpage",
-      "label": "LandingPage.jsx",
+      "id": "notes_next_session",
+      "label": "NOTES_NEXT_SESSION.md",
       "_origin": "ast",
       "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "landingpage.jsx",
-      "source_file": "src/components/LandingPage.jsx",
+      "community_name": "\ud83d\udcdd Notes de Relais pour la Prochaine Session (BricoleMoi)",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "notes_next_session.md",
+      "source_file": "NOTES_NEXT_SESSION.md",
       "source_location": "L1"
     },
     {
-      "id": "src_components_landingpage_moroccan_cities",
-      "label": "MOROCCAN_CITIES",
+      "id": "notes_next_session_ce_qui_a_\u00e9t\u00e9_r\u00e9alis\u00e9_et_pouss\u00e9_lors_de_cette_session",
+      "label": "\ud83d\udce6 Ce qui a \u00e9t\u00e9 R\u00e9alis\u00e9 et Pouss\u00e9 lors de cette Session",
       "_origin": "ast",
       "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "moroccan_cities",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L169"
+      "community_name": "\ud83d\udcdd Notes de Relais pour la Prochaine Session (BricoleMoi)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "\ud83d\udce6 ce qui a ete realise et pousse lors de cette session",
+      "source_file": "NOTES_NEXT_SESSION.md",
+      "source_location": "L44"
     },
     {
-      "id": "src_components_landingpage_moroccan_services",
-      "label": "MOROCCAN_SERVICES",
+      "id": "notes_next_session_concept_sp\u00e9cification_valid\u00e9e",
+      "label": "\ud83d\udccc Concept & Sp\u00e9cification Valid\u00e9e",
       "_origin": "ast",
       "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "moroccan_services",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L26"
+      "community_name": "\ud83d\udcdd Notes de Relais pour la Prochaine Session (BricoleMoi)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "\ud83d\udccc concept & specification validee",
+      "source_file": "NOTES_NEXT_SESSION.md",
+      "source_location": "L10"
     },
     {
-      "id": "src_components_promovideoplayer",
-      "label": "PromoVideoPlayer.jsx",
+      "id": "notes_next_session_notes_de_relais_pour_la_prochaine_session_bricolemoi",
+      "label": "\ud83d\udcdd Notes de Relais pour la Prochaine Session (BricoleMoi)",
       "_origin": "ast",
       "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "promovideoplayer.jsx",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "community_name": "\ud83d\udcdd Notes de Relais pour la Prochaine Session (BricoleMoi)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "\ud83d\udcdd notes de relais pour la prochaine session (bricolemoi)",
+      "source_file": "NOTES_NEXT_SESSION.md",
       "source_location": "L1"
     },
     {
-      "id": "src_components_promovideoplayer_client_scenes",
-      "label": "CLIENT_SCENES",
+      "id": "notes_next_session_plan_d_impl\u00e9mentation_technique_pour_l_autre_pc",
+      "label": "\ud83d\udee0\ufe0f Plan d'Impl\u00e9mentation Technique pour l'autre PC",
       "_origin": "ast",
       "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "client_scenes",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L32"
+      "community_name": "\ud83d\udcdd Notes de Relais pour la Prochaine Session (BricoleMoi)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "\ud83d\udee0\ufe0f plan d'implementation technique pour l'autre pc",
+      "source_file": "NOTES_NEXT_SESSION.md",
+      "source_location": "L31"
     },
     {
-      "id": "src_components_promovideoplayer_maalem_scenes",
-      "label": "MAALEM_SCENES",
+      "id": "notes_next_session_prochaine_t\u00e2che_prioritaire_syst\u00e8me_de_lead_en_instance_lead_escrow",
+      "label": "\ud83c\udfaf Prochaine T\u00e2che Prioritaire : Syst\u00e8me de Lead en Instance (Lead Escrow)",
       "_origin": "ast",
       "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "maalem_scenes",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L117"
-    },
-    {
-      "id": "src_lib_i18n",
-      "label": "i18n.js",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "i18n.js",
-      "source_file": "src/lib/i18n.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_i18n_translations",
-      "label": "translations",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "translations",
-      "source_file": "src/lib/i18n.js",
-      "source_location": "L3"
+      "community_name": "\ud83d\udcdd Notes de Relais pour la Prochaine Session (BricoleMoi)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "\ud83c\udfaf prochaine tache prioritaire : systeme de lead en instance (lead escrow)",
+      "source_file": "NOTES_NEXT_SESSION.md",
+      "source_location": "L8"
     },
     {
       "id": "supabase_functions_verify_otp_sms_index",
@@ -3777,7 +4041,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/send-otp.js",
-      "source_location": "L45",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -3969,7 +4233,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L206",
+      "source_location": "L237",
       "weight": 1.0
     },
     {
@@ -3981,7 +4245,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L430",
+      "source_location": "L503",
       "weight": 1.0
     },
     {
@@ -3993,7 +4257,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/AuthModal.jsx",
-      "source_location": "L477",
+      "source_location": "L550",
       "weight": 1.0
     },
     {
@@ -4249,6 +4513,54 @@
       "weight": 1.0
     },
     {
+      "source": "src_components_maalem_pushnotificationbanner_pushnotificationbanner",
+      "target": "src_lib_pushnotificationservice_ispushsupported",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalem_pushnotificationbanner_pushnotificationbanner",
+      "target": "src_lib_pushnotificationservice_getnotificationpermissionstate",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalem_pushnotificationbanner_pushnotificationbanner",
+      "target": "src_lib_pushnotificationservice_subscribeusertopush",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalem_pushnotificationbanner_pushnotificationbanner",
+      "target": "src_lib_pushnotificationservice_testpushnotification",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
       "source": "src_components_maalemselect_maalemselect",
       "target": "src_components_enhancedcategoryicon_getspecialtylabel",
       "relation": "calls",
@@ -4262,6 +4574,18 @@
     },
     {
       "source": "src_components_maalemview_maalemview",
+      "target": "src_components_enhancedcategoryicon_getspecialtymeta",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L1023",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalemview_maalemview",
       "target": "src_context_appcontext_calculatedistanceinkm",
       "relation": "calls",
       "_origin": "ast",
@@ -4269,7 +4593,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L369",
+      "source_location": "L383",
       "weight": 1.0
     },
     {
@@ -4281,7 +4605,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L595",
+      "source_location": "L612",
       "weight": 1.0
     },
     {
@@ -4293,7 +4617,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -4305,7 +4629,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L82",
+      "source_location": "L85",
       "weight": 1.0
     },
     {
@@ -4317,19 +4641,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L91",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_maalemview_maalemview",
-      "target": "src_components_enhancedcategoryicon_getspecialtymeta",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L998",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -4485,7 +4797,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L1119",
+      "source_location": "L1154",
       "weight": 1.0
     },
     {
@@ -4497,19 +4809,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L1131",
-      "weight": 1.0
-    },
-    {
-      "source": "src_context_appcontext_appprovider",
-      "target": "src_lib_pdfreceiptgenerator_generatereceiptpdf",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3198",
+      "source_location": "L1166",
       "weight": 1.0
     },
     {
@@ -4522,6 +4822,18 @@
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
       "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "src_context_appcontext_appprovider",
+      "target": "src_lib_pdfreceiptgenerator_generatereceiptpdf",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L3530",
       "weight": 1.0
     },
     {
@@ -4569,7 +4881,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L294",
+      "source_location": "L336",
       "weight": 1.0
     },
     {
@@ -4581,7 +4893,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L312",
+      "source_location": "L354",
       "weight": 1.0
     },
     {
@@ -4593,7 +4905,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L317",
+      "source_location": "L359",
       "weight": 1.0
     },
     {
@@ -4605,7 +4917,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L348",
+      "source_location": "L390",
       "weight": 1.0
     },
     {
@@ -4617,7 +4929,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L352",
+      "source_location": "L394",
       "weight": 1.0
     },
     {
@@ -4629,7 +4941,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L364",
+      "source_location": "L406",
       "weight": 1.0
     },
     {
@@ -4641,7 +4953,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L526",
+      "source_location": "L568",
       "weight": 1.0
     },
     {
@@ -4653,7 +4965,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L530",
+      "source_location": "L572",
       "weight": 1.0
     },
     {
@@ -4665,7 +4977,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L531",
+      "source_location": "L573",
       "weight": 1.0
     },
     {
@@ -4689,7 +5001,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L114",
+      "source_location": "L115",
       "weight": 1.0
     },
     {
@@ -4701,7 +5013,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L187",
+      "source_location": "L188",
       "weight": 1.0
     },
     {
@@ -4713,7 +5025,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L205",
+      "source_location": "L206",
       "weight": 1.0
     },
     {
@@ -4725,7 +5037,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L271",
+      "source_location": "L283",
       "weight": 1.0
     },
     {
@@ -4737,7 +5049,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L272",
+      "source_location": "L284",
       "weight": 1.0
     },
     {
@@ -4749,7 +5061,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L279",
+      "source_location": "L291",
       "weight": 1.0
     },
     {
@@ -4761,7 +5073,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L288",
+      "source_location": "L300",
       "weight": 1.0
     },
     {
@@ -4773,7 +5085,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L344",
+      "source_location": "L372",
       "weight": 1.0
     },
     {
@@ -5253,19 +5565,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "src_lib_pushnotificationservice_requestpushpermission",
-      "target": "src_lib_pushnotificationservice_ispushsupported",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L24",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -5277,7 +5577,79 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L41",
+      "source_location": "L168",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice_subscribeusertopush",
+      "target": "src_lib_pushnotificationservice_ispushsupported",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice_subscribeusertopush",
+      "target": "src_lib_pushnotificationservice_urlbase64touint8array",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice_testpushnotification",
+      "target": "src_lib_audionotifier_playnotificationsound",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L198",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice_testpushnotification",
+      "target": "src_lib_audionotifier_triggervibration",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L199",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice_testpushnotification",
+      "target": "src_lib_pushnotificationservice_showlocalpushnotification",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L201",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice_unsubscribeuserfrompush",
+      "target": "src_lib_pushnotificationservice_ispushsupported",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L138",
       "weight": 1.0
     },
     {
@@ -6400,6 +6772,66 @@
       "weight": 1.0
     },
     {
+      "source": "src_components_maalem_pushnotificationbanner",
+      "target": "src_lib_notify_notify",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalem_pushnotificationbanner",
+      "target": "src_lib_pushnotificationservice_getnotificationpermissionstate",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalem_pushnotificationbanner",
+      "target": "src_lib_pushnotificationservice_ispushsupported",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalem_pushnotificationbanner",
+      "target": "src_lib_pushnotificationservice_subscribeusertopush",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalem_pushnotificationbanner",
+      "target": "src_lib_pushnotificationservice_testpushnotification",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
       "source": "src_components_maalemselect",
       "target": "src_components_enhancedcategoryicon_enhancedcategoryicon",
       "relation": "imports",
@@ -6517,6 +6949,18 @@
       "context": "import",
       "source_file": "src/components/MaalemView.jsx",
       "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalemview",
+      "target": "src_components_maalem_pushnotificationbanner_pushnotificationbanner",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -7672,6 +8116,42 @@
       "weight": 1.0
     },
     {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_supabaseclient_supabase",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_audionotifier_playnotificationsound",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_audionotifier_triggervibration",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "src_main",
       "target": "src_app_app",
       "relation": "imports",
@@ -8320,6 +8800,30 @@
       "weight": 1.0
     },
     {
+      "source": "src_components_maalem_pushnotificationbanner",
+      "target": "src_lib_notify",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalem_pushnotificationbanner",
+      "target": "src_lib_pushnotificationservice",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
       "source": "src_components_maalemselect",
       "target": "src_components_enhancedcategoryicon",
       "relation": "imports_from",
@@ -8401,6 +8905,18 @@
       "context": "import",
       "source_file": "src/components/MaalemView.jsx",
       "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalemview",
+      "target": "src_components_maalem_pushnotificationbanner",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -9160,6 +9676,30 @@
       "weight": 1.0
     },
     {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_supabaseclient",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_audionotifier",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "src_main",
       "target": "src_app",
       "relation": "imports_from",
@@ -9239,24 +9779,46 @@
     },
     {
       "source": "api_send_otp",
-      "target": "api_send_otp_handler",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/send-otp.js",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "api_send_otp",
       "target": "api_send_otp_cleanphonenumber",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/send-otp.js",
-      "source_location": "L6",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "api_send_otp",
+      "target": "api_send_otp_handler",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/send-otp.js",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "api_send_otp",
+      "target": "api_send_otp_recentrequests",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/send-otp.js",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "api_send_push",
+      "target": "api_send_push_handler",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/send-push.js",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -9279,6 +9841,61 @@
       "confidence_score": 1.0,
       "source_file": "api/verify-otp.js",
       "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "notes_next_session",
+      "target": "notes_next_session_notes_de_relais_pour_la_prochaine_session_bricolemoi",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "NOTES_NEXT_SESSION.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "notes_next_session_notes_de_relais_pour_la_prochaine_session_bricolemoi",
+      "target": "notes_next_session_plan_d_impl\u00e9mentation_technique_pour_l_autre_pc",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "NOTES_NEXT_SESSION.md",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "notes_next_session_notes_de_relais_pour_la_prochaine_session_bricolemoi",
+      "target": "notes_next_session_ce_qui_a_\u00e9t\u00e9_r\u00e9alis\u00e9_et_pouss\u00e9_lors_de_cette_session",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "NOTES_NEXT_SESSION.md",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "notes_next_session_notes_de_relais_pour_la_prochaine_session_bricolemoi",
+      "target": "notes_next_session_prochaine_t\u00e2che_prioritaire_syst\u00e8me_de_lead_en_instance_lead_escrow",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "NOTES_NEXT_SESSION.md",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "notes_next_session_prochaine_t\u00e2che_prioritaire_syst\u00e8me_de_lead_en_instance_lead_escrow",
+      "target": "notes_next_session_concept_sp\u00e9cification_valid\u00e9e",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "NOTES_NEXT_SESSION.md",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -10206,6 +10823,17 @@
       "weight": 1.0
     },
     {
+      "source": "src_components_maalem_pushnotificationbanner",
+      "target": "src_components_maalem_pushnotificationbanner_pushnotificationbanner",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
       "source": "src_components_maalemselect",
       "target": "src_components_maalemselect_maalemselect",
       "relation": "contains",
@@ -10224,7 +10852,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L64",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -10433,7 +11061,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3329",
+      "source_location": "L3666",
       "weight": 1.0
     },
     {
@@ -10488,7 +11116,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AuthContext.jsx",
-      "source_location": "L660",
+      "source_location": "L702",
       "weight": 1.0
     },
     {
@@ -10554,7 +11182,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L465",
+      "source_location": "L505",
       "weight": 1.0
     },
     {
@@ -11054,7 +11682,18 @@
     },
     {
       "source": "src_lib_pushnotificationservice",
-      "target": "src_lib_pushnotificationservice_getnotificationpermissionstate",
+      "target": "src_lib_pushnotificationservice_unsubscribeuserfrompush",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L137",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_pushnotificationservice_urlbase64touint8array",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -11065,29 +11704,62 @@
     },
     {
       "source": "src_lib_pushnotificationservice",
-      "target": "src_lib_pushnotificationservice_requestpushpermission",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L23",
-      "weight": 1.0
-    },
-    {
-      "source": "src_lib_pushnotificationservice",
       "target": "src_lib_pushnotificationservice_showlocalpushnotification",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L40",
+      "source_location": "L167",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_pushnotificationservice_testpushnotification",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L197",
       "weight": 1.0
     },
     {
       "source": "src_lib_pushnotificationservice",
       "target": "src_lib_pushnotificationservice_ispushsupported",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_pushnotificationservice_getnotificationpermissionstate",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_pushnotificationservice_subscribeusertopush",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_pushnotificationservice",
+      "target": "src_lib_pushnotificationservice_vapid_public_key",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -11361,6 +12033,28 @@
       "weight": 1.0
     },
     {
+      "source": "supabase_lead_escrow_system",
+      "target": "supabase_lead_escrow_system_public_manage_lead_escrow",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/lead_escrow_system.sql",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "supabase_push_subscriptions",
+      "target": "supabase_push_subscriptions_public_push_subscriptions",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/push_subscriptions.sql",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "supabase_schema",
       "target": "supabase_schema_public_deduct_lead_cost",
       "relation": "contains",
@@ -11520,6 +12214,17 @@
       "weight": 1.0
     },
     {
+      "source": "supabase_push_subscriptions_public_push_subscriptions",
+      "target": "supabase_push_subscriptions_sql_public_profiles",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "supabase/push_subscriptions.sql",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "supabase_schema_public_interventions",
       "target": "supabase_schema_public_profiles",
       "relation": "references",
@@ -11561,7 +12266,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L116",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -11573,7 +12278,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3307",
+      "source_location": "L3639",
       "weight": 1.0
     },
     {
@@ -11602,5 +12307,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "793e91472ae60335b4742dad803a981f89535060"
+  "built_at_commit": "64225f7855f9e3255e067b1b92c26e6f82fab574"
 }

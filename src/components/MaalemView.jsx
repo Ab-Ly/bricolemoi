@@ -73,6 +73,8 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     requestWorkCompletion,
     updateInterventionProgress,
     reportUnreachableClient,
+    declareMissionUnfeasible,
+    releaseLeadCredit,
     submitRechargeRequest, 
     calculateDistanceInKm,
     verifyMaalemCINWithGemini,
@@ -88,7 +90,8 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     activeEmergency,
     progressStep: flowProgressStep,
     setProgressStep: flowSetProgressStep,
-    finishMission: flowFinishMission
+    finishMission: flowFinishMission,
+    abandonActiveMission
   } = useEmergencyFlow();
 
   const currentLiveMaalem = maalems?.find((m) => m.id === user?.id) || user?.maalem_details || user;
@@ -112,7 +115,7 @@ export const MaalemView = ({ onOpenCINVerification }) => {
 
   const isLeadTx = (t) => {
     const typeUpper = String(t.type || '').toUpperCase();
-    return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
+    return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'LEAD_ESCROW' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
   };
 
   const isRealRechargeTx = (t) => {
@@ -124,17 +127,21 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
     .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
 
-  const totalLeadsSpent = myTransactions
-    .filter((t) => isLeadTx(t))
+  const totalValidatedLeadsSpent = myTransactions
+    .filter((t) => t.status === 'VALIDATED' && isLeadTx(t))
+    .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
+
+  const totalReservedEscrow = myTransactions
+    .filter((t) => t.status === 'RESERVED' && isLeadTx(t))
     .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
 
   const totalBonusSum = myTransactions
     .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
     .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
 
-  // Solde en direct dérivé infailliblement du grand livre comptable (Recharges validées + Bonus validés - Leads SOS débloqués)
-  const liveCreditBalance = myTransactions.length > 0
-    ? Math.max(0, totalRechargedSum + totalBonusSum - totalLeadsSpent)
+  // Solde Total Comptable (Recharges validées + Bonus - Leads définitivement consommés)
+  const liveTotalBalance = myTransactions.length > 0
+    ? Math.max(0, totalRechargedSum + totalBonusSum - totalValidatedLeadsSpent)
     : parseFloat(
         user?.credits !== undefined && user?.credits !== null
           ? user.credits
@@ -145,9 +152,15 @@ export const MaalemView = ({ onOpenCINVerification }) => {
               : 15.00))
       );
 
+  // Solde Disponible Réel pour débloquer (Solde Total - Escrow Réservé)
+  const liveAvailableBalance = Math.max(0, liveTotalBalance - totalReservedEscrow);
+  const liveCreditBalance = liveAvailableBalance; // Rétrocompatibilité
+
   const maalemDetails = user?.maalem_details || {
     specialty: currentLiveMaalem?.specialty || 'PLUMBING',
-    credit_balance: liveCreditBalance,
+    credit_balance: liveAvailableBalance,
+    total_balance: liveTotalBalance,
+    reserved_escrow: totalReservedEscrow,
     is_verified: currentLiveMaalem?.is_verified ?? true,
     rating_avg: currentLiveMaalem?.rating_avg || 4.80,
     consecutive_five_stars: 3,
@@ -374,7 +387,7 @@ export const MaalemView = ({ onOpenCINVerification }) => {
 
   // 2. Chantiers Débloqués (Exclusivité Stricte : Attribués uniquement à l'artisan connecté)
   const unlockedLeads = interventions.filter((item) => {
-    if (item.status === 'PENDING') return false;
+    if (item.status === 'PENDING' || item.status === 'UNFEASIBLE' || item.status === 'CANCELLED') return false;
     const isOwner = user?.id && String(item.maalem_id || '').trim() === String(user.id).trim();
     const isFallbackOwner = (!user?.id || user.id === 'maalem-1' || user.id === '22222222-2222-2222-2222-222222222222') && (!item.maalem_id || item.maalem_id === 'maalem-1' || item.maalem_id === '22222222-2222-2222-2222-222222222222');
     return isOwner || isFallbackOwner;
@@ -637,19 +650,27 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
             </div>
 
             {/* Main Balance Display */}
-            <div className="relative z-10 my-0.5">
+            <div className="relative z-10 my-0.5 space-y-1">
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl sm:text-4xl font-black text-slate-900 font-mono tracking-tight">
-                  {liveCreditBalance.toFixed(2)}
+                  {liveAvailableBalance.toFixed(2)}
                 </span>
-                <span className="text-sm font-black font-mono text-amber-600">
-                  DH
+                <span className="text-sm font-black font-mono text-emerald-600">
+                  DH Dispo
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-600" />
-                <span>Coût : <strong className="text-slate-800 font-mono font-bold">15.00 DH</strong> / déblocage lead client</span>
-              </p>
+
+              {totalReservedEscrow > 0 ? (
+                <div className="flex items-center gap-1.5 text-[11px] bg-amber-50 border border-amber-200 text-amber-900 px-2.5 py-1 rounded-xl font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                  <span><strong>{totalReservedEscrow.toFixed(2)} DH</strong> en garantie (Total : {liveTotalBalance.toFixed(2)} DH)</span>
+                </div>
+              ) : (
+                <p className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                  <span>Total compte : <strong className="text-slate-800 font-mono font-bold">{liveTotalBalance.toFixed(2)} DH</strong> • Zéro risque (Escrow)</span>
+                </p>
+              )}
             </div>
 
             {/* Action Buttons: Historique + Recharger */}
@@ -1387,35 +1408,19 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                       </div>
                     )}
 
-                    {/* Bouton Litige & Règles Anti-Abus */}
-                    {lead.status !== 'COMPLETED' && lead.status !== 'UNREACHABLE_REFUNDED' && (() => {
-                      const acceptedTime = lead.accepted_at
-                        ? new Date(lead.accepted_at).getTime()
-                        : (lead.created_at ? new Date(lead.created_at).getTime() : Date.now());
-                      const elapsedMin = Math.floor((Date.now() - acceptedTime) / 60000);
-                      const remainingMin = Math.max(0, 30 - elapsedMin);
-
-                      return remainingMin > 0 ? (
-                        <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200 mt-2">
-                          <button
-                            type="button"
-                            onClick={() => setUnreachableModalLead(lead)}
-                            className="font-bold text-amber-700 hover:text-amber-800 transition-colors underline cursor-pointer flex items-center gap-1"
-                          >
-                            <span>⚠️ Signaler faux numéro / client injoignable</span>
-                          </button>
-                          <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 shadow-xs">
-                            ⏳ {remainingMin} min
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="text-center pt-1 mt-2 border-t border-slate-200">
-                          <span className="text-[10px] text-slate-500 font-mono italic">
-                            🔒 Délai de signalement anti-abus expiré (&gt; 30 min après acceptation)
-                          </span>
-                        </div>
-                      );
-                    })()}
+                    {/* Bouton Abandon / Mission Non Réalisable — Escrow libéré à 0 DH */}
+                    {lead.status !== 'COMPLETED' && (
+                      <div className="pt-2 border-t border-slate-200 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => setUnreachableModalLead(lead)}
+                          className="w-full py-2.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-amber-600" />
+                          <span>❌ Mission Non Réalisable / Abandonner (Restitution 15 DH)</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -1922,7 +1927,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
           </motion.div>
         )}
 
-        {/* Modal Litige & Garantie Anti-Abus */}
+        {/* Modal Litige & Libération Garantie Escrow */}
         {unreachableModalLead && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -1939,12 +1944,12 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
               <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2 text-amber-700">
                   <ShieldCheck className="w-5 h-5" />
-                  <h3 className="font-extrabold text-sm text-slate-900">Garantie Anti-Abus &amp; Crédit de Remplacement</h3>
+                  <h3 className="font-extrabold text-sm text-slate-900">Garantie Escrow &amp; Clôture Sans Frais</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setUnreachableModalLead(null)}
-                  className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"
+                  className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1952,29 +1957,30 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
 
               <div className="space-y-2 text-xs text-slate-600">
                 <p>
-                  Vous avez tenté de joindre <strong className="text-slate-900">{unreachableModalLead.client_name || 'le Client'}</strong> et le numéro est faux, injoignable ou la demande est annulée ?
+                  Vous ne pouvez pas réaliser la mission pour <strong className="text-slate-900">{unreachableModalLead.client_name || 'le Client'}</strong> ?
                 </p>
-                <div className="text-[11px] text-amber-900 bg-amber-50 p-3.5 rounded-2xl border border-amber-200 space-y-1">
-                  <p className="font-bold flex items-center gap-1 text-amber-800">
-                    <span>🛡️ Règles Métier Anti-Abus BricoleMoi :</span>
+                <div className="text-[11px] text-emerald-900 bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 space-y-1">
+                  <p className="font-bold flex items-center gap-1 text-emerald-800">
+                    <span>🛡️ Garantie Zéro Risque BricoleMoi :</span>
                   </p>
-                  <p>• Signalement autorisé sous <strong>30 minutes maximum</strong> après déblocage.</p>
-                  <p>• Compensation exclusive : <strong>1 Crédit de Remplacement (+15.00 DH)</strong> ajouté sur votre solde (aucun remboursement cash).</p>
-                  <p>• Aucune compensation accordée si le chantier a déjà été validé/réalisé.</p>
+                  <p>• Les <strong>15.00 DH</strong> placés en garantie sont <strong>restitués immédiatement</strong> sur votre solde disponible.</p>
+                  <p>• Aucun frais n'est prélevé. Vous pouvez accepter une autre mission immédiatement.</p>
+                  <p>• Le client sera notifié pour pouvoir relancer sa recherche sans délai.</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-slate-700">Motif précis du signalement :</label>
+                <label className="text-[11px] font-bold text-slate-700">Motif de non-réalisation :</label>
                 <select
                   value={unreachableReason}
                   onChange={(e) => setUnreachableReason(e.target.value)}
                   className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-amber-500 font-medium"
                 >
                   <option value="CLIENT_UNREACHABLE">📵 Client Injoignable (Ne décroche pas / Téléphone éteint)</option>
+                  <option value="PARTS_UNAVAILABLE">🔧 Pièce de Rechange Indisponible / Travaux non réalisables</option>
                   <option value="CLIENT_CANCELLED">❌ Client a Déjà Trouvé / Annulé son besoin</option>
-                  <option value="WRONG_NUMBER">📍 Faux Numéro / Adresse Introuvable</option>
-                  <option value="PRICE_DISAGREEMENT">💸 Désaccord Devis / Refus de Déplacement</option>
+                  <option value="PRICE_DISAGREEMENT">💸 Désaccord sur le Devis / Périmètre hors portée</option>
+                  <option value="WRONG_LOCATION">📍 Adresse Erronée / Hors Secteur</option>
                 </select>
               </div>
 
@@ -1984,17 +1990,17 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   onClick={() => setUnreachableModalLead(null)}
                   className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
                 >
-                  Annuler
+                  Retour
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    reportUnreachableClient(unreachableModalLead.id, unreachableReason);
+                  onClick={async () => {
+                    await declareMissionUnfeasible(unreachableModalLead.id, unreachableReason);
                     setUnreachableModalLead(null);
                   }}
                   className="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all cursor-pointer"
                 >
-                  🛡️ Crédit de Remplacement (+15 DH)
+                  🛡️ Confirmer &amp; Restituer 15 DH
                 </button>
               </div>
             </motion.div>

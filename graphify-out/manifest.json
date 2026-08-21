@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "src/components/AuthModal.jsx": {
-    "mtime": 1787254813.550148,
-    "seen": 1787254922.13217,
-    "ast_hash": "951ef7e361da9633f8ca68d19c269b98",
+    "mtime": 1787330629.4117827,
+    "seen": 1787330650.8213382,
+    "ast_hash": "fcb83de5fca87904debc400b6aa996a2",
     "semantic_hash": ""
   },
   "src/components/BottomNav.jsx": {
@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "src/components/ClientView.jsx": {
-    "mtime": 1787251808.831464,
-    "seen": 1787252012.939132,
-    "ast_hash": "f897e588ee066a223ded8b45f2c73387",
+    "mtime": 1787334990.2479844,
+    "seen": 1787335465.8725178,
+    "ast_hash": "d78bcf838134dbb9f2212537a461446b",
     "semantic_hash": ""
   },
   "src/components/CustomDropdown.jsx": {
@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "src/components/MaalemView.jsx": {
-    "mtime": 1787239571.890634,
-    "seen": 1787239588.163656,
-    "ast_hash": "b0a18c241f003d8dd089f7d7ac3e9b49",
+    "mtime": 1787334521.4428132,
+    "seen": 1787334728.093892,
+    "ast_hash": "64c2083e1b49afe39975f9385c5ec23a",
     "semantic_hash": ""
   },
   "src/components/Navbar.jsx": {
@@ -192,21 +192,21 @@
     "semantic_hash": ""
   },
   "src/context/AppContext.jsx": {
-    "mtime": 1787243664.620797,
-    "seen": 1787243747.470347,
-    "ast_hash": "dab44d37defea2bbc0a05fb51e2973f8",
+    "mtime": 1787334509.8292232,
+    "seen": 1787334728.095819,
+    "ast_hash": "3b0f75c7ab61aac79f99b5e54ba0c740",
     "semantic_hash": ""
   },
   "src/context/AuthContext.jsx": {
-    "mtime": 1787259477.9849586,
-    "seen": 1787259642.489158,
-    "ast_hash": "e145f3254d9f4fcb877299b2e25ed9e4",
+    "mtime": 1787333768.5101242,
+    "seen": 1787333903.3497431,
+    "ast_hash": "947bfb7122f4cb0ce00d688b98a64849",
     "semantic_hash": ""
   },
   "src/context/EmergencyFlowContext.jsx": {
-    "mtime": 1787239571.914396,
-    "seen": 1787239588.163703,
-    "ast_hash": "11655111a8b0284000a5ec1123b131c2",
+    "mtime": 1787331131.0954542,
+    "seen": 1787331320.899128,
+    "ast_hash": "9f9b5890f35dd6565fc65cf285ddf7f5",
     "semantic_hash": ""
   },
   "src/hooks/useAblyNotifications.js": {
@@ -282,9 +282,9 @@
     "semantic_hash": ""
   },
   "src/lib/pushNotificationService.js": {
-    "mtime": 1786993021.4224505,
-    "seen": 1787239588.1637492,
-    "ast_hash": "a87a4725489c061373d327b405d4a756",
+    "mtime": 1787330629.4210556,
+    "seen": 1787330650.823976,
+    "ast_hash": "98d965972f87e69868bc98fe631ce0cc",
     "semantic_hash": ""
   },
   "src/lib/subdomain.js": {
@@ -546,15 +546,57 @@
     "semantic_hash": ""
   },
   "api/send-otp.js": {
-    "mtime": 1787259067.2013915,
-    "seen": 1787259161.188511,
-    "ast_hash": "d8c13c1d9384c3f77f2987d240a64d27",
+    "mtime": 1787330629.3837407,
+    "seen": 1787330650.82038,
+    "ast_hash": "e206fb6d6b21b54cd770fd29dcb5b6ce",
     "semantic_hash": ""
   },
   "api/verify-otp.js": {
     "mtime": 1787259075.5607922,
     "seen": 1787259161.1885178,
     "ast_hash": "1472ae5d2050fd15936702aac66eb930",
+    "semantic_hash": ""
+  },
+  "api/send-push.js": {
+    "mtime": 1787330629.3847241,
+    "seen": 1787330650.820388,
+    "ast_hash": "2bc5b6654eeb68767f5bb1f52ce2e2e0",
+    "semantic_hash": ""
+  },
+  "src/components/maalem/PushNotificationBanner.jsx": {
+    "mtime": 1787330629.4154925,
+    "seen": 1787330650.8229172,
+    "ast_hash": "aff4e8252bb9eb4b4cd6df9c4238be18",
+    "semantic_hash": ""
+  },
+  "supabase/push_subscriptions.sql": {
+    "mtime": 1787330629.4283679,
+    "seen": 1787330650.825153,
+    "ast_hash": "445c942b08cd7b90531e72035441b7b2",
+    "semantic_hash": ""
+  },
+  "NOTES_NEXT_SESSION.md": {
+    "mtime": 1787330629.3824277,
+    "seen": 1787330650.825804,
+    "ast_hash": "162289e7f30d7724d7c006a2784704f6",
+    "semantic_hash": ""
+  },
+  "architecture-graph.html": {
+    "mtime": 1787330629.385998,
+    "seen": 1787330650.825807,
+    "ast_hash": "6dd7a0207e2a4388fba7d3ecec8ef249",
+    "semantic_hash": ""
+  },
+  "supabase/lead_escrow_system.sql": {
+    "mtime": 1787330963.2504706,
+    "seen": 1787331320.903444,
+    "ast_hash": "a918c0256e1cdb39b2a6194dc378e664",
+    "semantic_hash": ""
+  },
+  "supabase/optimize_egress_cleanup.sql": {
+    "mtime": 1787332697.6063294,
+    "seen": 1787333187.228559,
+    "ast_hash": "5de337e44086d80d207c336360bdb36a",
     "semantic_hash": ""
   }
 }

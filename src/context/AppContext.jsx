@@ -540,6 +540,7 @@ export const AppProvider = ({ children }) => {
         if (rawProfiles) {
           const detailsMap = new Map((rawDetails || []).map(d => [d.id, d]));
           const onlineMapFromStorage = getOnlineMaalemsFromStorage();
+          const profilesMap = new Map(rawProfiles.map(p => [p.id, p]));
 
           const maalemProfiles = rawProfiles.filter(m => {
             const r = String(m.role || '').toLowerCase();
@@ -635,93 +636,92 @@ export const AppProvider = ({ children }) => {
           }
 
           setClients(clientProfiles);
+
+          // 2. Reviews (limitées aux 100 dernières)
+          let reviewsMap = new Map();
+          try {
+            const { data: realReviews } = await supabase
+              .from('reviews')
+              .select('*')
+              .order('created_at', { ascending: false })
+              .limit(100);
+            if (realReviews) {
+              setReviews(realReviews);
+              reviewsMap = new Map(realReviews.map((r) => [String(r.intervention_id).trim(), r]));
+            }
+          } catch (e) { }
+
+          // 3. Interventions (limitées aux 100 dernières, sans doublon d'appel profiles)
+          try {
+            const { data: realInterventions } = await supabase
+              .from('interventions')
+              .select('*')
+              .order('created_at', { ascending: false })
+              .limit(100);
+
+            if (realInterventions) {
+              const enrichedInterventions = realInterventions.map((intv) => {
+                const clientProf = profilesMap.get(intv.client_id);
+                const maalemProf = profilesMap.get(intv.maalem_id);
+                const rev = reviewsMap.get(String(intv.id).trim());
+
+                return {
+                  ...intv,
+                  rating: intv.rating ?? rev?.rating ?? null,
+                  comment: intv.comment || rev?.comment || null,
+                  client_name: clientProf?.full_name || intv.client_name || 'Client BricoleMoi',
+                  client_phone: clientProf?.phone || intv.client_phone || '0661-234567',
+                  maalem_name: maalemProf?.full_name || intv.maalem_name || (intv.maalem_id ? 'Artisan Maalem' : null),
+                  maalem_phone: maalemProf?.phone || intv.maalem_phone || ''
+                };
+              });
+              setInterventions(enrichedInterventions);
+            }
+          } catch (e) { }
+
+          // 4. Transactions (limitées aux 150 dernières, sans doublon d'appel profiles)
+          try {
+            const { data: realTransactions } = await supabase
+              .from('transactions')
+              .select('*')
+              .order('created_at', { ascending: false })
+              .limit(150);
+
+            if (realTransactions) {
+              let cachedMap = new Map();
+              try {
+                const cachedRaw = localStorage.getItem('bricolemoi_transactions_cache');
+                if (cachedRaw) {
+                  const parsed = JSON.parse(cachedRaw);
+                  (parsed || []).forEach((c) => {
+                    if (c.id) cachedMap.set(String(c.id).trim(), c);
+                    if (c.reference_ref) cachedMap.set(String(c.reference_ref).trim().toLowerCase(), c);
+                  });
+                }
+              } catch (e) { }
+
+              const enrichedTx = realTransactions.map((tx) => {
+                const p = profilesMap.get(tx.maalem_id);
+                const cachedMatch = cachedMap.get(String(tx.id).trim()) || (tx.reference_ref && cachedMap.get(String(tx.reference_ref).trim().toLowerCase()));
+                const effectiveStatus = (cachedMatch && cachedMatch.status !== 'PENDING') ? cachedMatch.status : tx.status;
+                const effectiveNotes = cachedMatch?.admin_notes || tx.admin_notes;
+
+                return {
+                  ...tx,
+                  status: effectiveStatus,
+                  admin_notes: effectiveNotes,
+                  maalem_name: p?.full_name || tx.maalem_name || (user?.id === tx.maalem_id ? user?.full_name : 'Artisan Maalem'),
+                  maalem_phone: p?.phone || tx.maalem_phone || (user?.id === tx.maalem_id ? user?.phone : '')
+                };
+              });
+              setTransactions(enrichedTx);
+              try { localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(enrichedTx)); } catch (e) { }
+            }
+          } catch (e) { }
         }
       } catch (err) {
         console.warn('[Supabase] Exception chargement profils:', err.message);
       }
-
-      // 2. Reviews
-      let reviewsMap = new Map();
-      try {
-        const { data: realReviews } = await supabase
-          .from('reviews')
-          .select('*')
-          .order('created_at', { ascending: false });
-        if (realReviews) {
-          setReviews(realReviews);
-          reviewsMap = new Map(realReviews.map((r) => [String(r.intervention_id).trim(), r]));
-        }
-      } catch (e) { }
-
-      // 3. Interventions
-      try {
-        const { data: realInterventions } = await supabase
-          .from('interventions')
-          .select('*')
-          .order('created_at', { ascending: false });
-        if (realInterventions) {
-          const { data: profilesList } = await supabase.from('profiles').select('id, full_name, phone');
-          const profilesMap = new Map((profilesList || []).map((p) => [p.id, p]));
-
-          const enrichedInterventions = realInterventions.map((intv) => {
-            const clientProf = profilesMap.get(intv.client_id);
-            const maalemProf = profilesMap.get(intv.maalem_id);
-            const rev = reviewsMap.get(String(intv.id).trim());
-
-            return {
-              ...intv,
-              rating: intv.rating ?? rev?.rating ?? null,
-              comment: intv.comment || rev?.comment || null,
-              client_name: clientProf?.full_name || intv.client_name || 'Client BricoleMoi',
-              client_phone: clientProf?.phone || intv.client_phone || '0661-234567',
-              maalem_name: maalemProf?.full_name || intv.maalem_name || (intv.maalem_id ? 'Artisan Maalem' : null),
-              maalem_phone: maalemProf?.phone || intv.maalem_phone || ''
-            };
-          });
-          setInterventions(enrichedInterventions);
-        }
-      } catch (e) { }
-
-      // 4. Transactions
-      try {
-        const { data: realTransactions } = await supabase
-          .from('transactions')
-          .select('*')
-          .order('created_at', { ascending: false });
-        if (realTransactions) {
-          const { data: profilesList } = await supabase.from('profiles').select('id, full_name, phone');
-          const profilesMap = new Map((profilesList || []).map((p) => [p.id, p]));
-
-          let cachedMap = new Map();
-          try {
-            const cachedRaw = localStorage.getItem('bricolemoi_transactions_cache');
-            if (cachedRaw) {
-              const parsed = JSON.parse(cachedRaw);
-              (parsed || []).forEach((c) => {
-                if (c.id) cachedMap.set(String(c.id).trim(), c);
-                if (c.reference_ref) cachedMap.set(String(c.reference_ref).trim().toLowerCase(), c);
-              });
-            }
-          } catch (e) { }
-
-          const enrichedTx = realTransactions.map((tx) => {
-            const p = profilesMap.get(tx.maalem_id);
-            const cachedMatch = cachedMap.get(String(tx.id).trim()) || (tx.reference_ref && cachedMap.get(String(tx.reference_ref).trim().toLowerCase()));
-            const effectiveStatus = (cachedMatch && cachedMatch.status !== 'PENDING') ? cachedMatch.status : tx.status;
-            const effectiveNotes = cachedMatch?.admin_notes || tx.admin_notes;
-
-            return {
-              ...tx,
-              status: effectiveStatus,
-              admin_notes: effectiveNotes,
-              maalem_name: p?.full_name || tx.maalem_name || (user?.id === tx.maalem_id ? user?.full_name : 'Artisan Maalem'),
-              maalem_phone: p?.phone || tx.maalem_phone || (user?.id === tx.maalem_id ? user?.phone : '')
-            };
-          });
-          setTransactions(enrichedTx);
-          try { localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(enrichedTx)); } catch (e) { }
-        }
-      } catch (e) { }
     };
 
     // Mount initial + auto-refresh au focus de l'onglet
@@ -904,6 +904,41 @@ export const AppProvider = ({ children }) => {
               `Avis ${rScore}★ Client Reçu ${emoji}`,
               `Le client a validé les travaux et laissé une note de ${rScore} étoile${rScore > 1 ? 's' : ''} !`,
               { badge: `+1 Job (${rScore}/5 ⭐)` }
+            );
+          }
+        } else if (data.type === 'INTERVENTION_UNFEASIBLE') {
+          const { intervention_id, reason, notes, client_id } = data;
+          let targetIntv = null;
+          setInterventions((prev) => {
+            const updated = prev.map((i) => {
+              if (String(i.id).trim() === String(intervention_id).trim()) {
+                targetIntv = { ...i, status: 'UNFEASIBLE', unfeasible_reason: reason, unfeasible_notes: notes, escrow_status: 'RELEASED' };
+                return targetIntv;
+              }
+              return i;
+            });
+            try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated)); } catch (e) { }
+            return updated;
+          });
+          if (isCurrentUserClientOf(targetIntv || { id: intervention_id, client_id })) {
+            notify.warning(
+              'Mission Non Réalisée ℹ️',
+              `L'artisan a signalé une impossibilité (${reason || 'imprévu'}). Vous pouvez relancer un SOS immédiatement.`,
+              { id: `job-unfeasible-${intervention_id}`, duration: 7000 }
+            );
+          }
+        } else if (data.type === 'INTERVENTION_RELAUNCHED' && data.intervention) {
+          const item = data.intervention;
+          setInterventions((prev) => {
+            const updated = prev.map((i) => (String(i.id).trim() === String(item.id).trim() ? { ...i, ...item } : i));
+            try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated)); } catch (e) { }
+            return updated;
+          });
+          if (isCurrentUserEligibleMaalemForNewJob(item)) {
+            notify.sos(
+              `🚨 URGENCE SOS RELANCÉE : ${item.subcategory || item.service_type}`,
+              `Nouvelle demande disponible à ${item.district || 'Proximité'}. Touchez pour consulter le chantier.`,
+              { id: `sos-${item.id}` }
             );
           }
         } else if (data.type === 'RECHARGE_SUBMITTED') {
@@ -1919,14 +1954,298 @@ export const AppProvider = ({ children }) => {
       }
     };
 
-    // Maalem accepte un lead — déblocage 15 DH, diffusion Ably (<50ms) pour fermeture aux autres artisans
-    const acceptLead = async (interventionId) => {
-      const currentBalance = user?.maalem_details?.credit_balance ?? user?.credits ?? 0;
+    // ==============================================================================
+    // SYSTÈME DE LEAD EN INSTANCE (LEAD ESCROW) — ZÉRO RISQUE ARTISANS
+    // ==============================================================================
 
-      if (currentBalance < 15) {
+    // 1. Réserver 15 DH en Escrow pour un Lead (statut RESERVED)
+    const reserveLeadCredit = async (interventionId, customMaalemId = null, amount = 15.00) => {
+      const maalemId = customMaalemId || user?.id;
+      const maalemName = user?.full_name || 'Artisan Maalem';
+      const cleanIntId = String(interventionId).trim();
+      const ref = `ESCROW_INT_${cleanIntId}`;
+
+      const newTx = {
+        id: `tx-escrow-${cleanIntId}-${Date.now()}`,
+        maalem_id: maalemId,
+        maalem_name: maalemName,
+        maalem_phone: user?.phone || '',
+        amount_dh: -Math.abs(amount),
+        type: 'LEAD_ESCROW',
+        payment_method: 'SYSTEM_ESCROW',
+        reference_ref: ref,
+        status: 'RESERVED',
+        admin_notes: `Garantie 15 DH en attente pour mission #${cleanIntId}`,
+        created_at: new Date().toISOString()
+      };
+
+      setTransactions((prev) => [newTx, ...prev.filter((t) => t.reference_ref !== ref)]);
+
+      if (isSupabaseConfigured && maalemId) {
+        try {
+          await supabase.from('transactions').upsert([{
+            maalem_id: maalemId,
+            amount_dh: -Math.abs(amount),
+            type: 'LEAD_ESCROW',
+            payment_method: 'SYSTEM_ESCROW',
+            reference_ref: ref,
+            status: 'RESERVED',
+            admin_notes: `Garantie 15 DH en attente pour mission #${cleanIntId}`
+          }], { onConflict: 'reference_ref' });
+        } catch (e) {
+          console.warn('[Supabase] reserveLeadCredit warning:', e?.message);
+        }
+      }
+    };
+
+    // 2. Confirmer le débit définitif de 15 DH (sur fin de travaux / review validée)
+    const confirmLeadDebit = async (interventionId, customMaalemId = null, amount = 15.00) => {
+      const cleanIntId = String(interventionId).trim();
+      const ref = `ESCROW_INT_${cleanIntId}`;
+
+      setTransactions((prev) =>
+        prev.map((t) => {
+          if (t.reference_ref === ref || (t.type === 'LEAD_ESCROW' && t.reference_ref?.includes(cleanIntId))) {
+            return {
+              ...t,
+              status: 'VALIDATED',
+              type: 'LEAD_DEDUCTION',
+              admin_notes: `Débit confirmé après réalisation des travaux #${cleanIntId}`
+            };
+          }
+          return t;
+        })
+      );
+
+      // Mettre à jour credit_balance du Maâlem en local si connecté
+      if (user?.role === 'MAALEM' && user?.maalem_details) {
+        const currentBal = Number(user.maalem_details.credit_balance || user.credits || 0);
+        const newBal = Math.max(0, currentBal - amount);
+        setUser({
+          ...user,
+          credits: newBal,
+          maalem_details: {
+            ...user.maalem_details,
+            credit_balance: newBal
+          }
+        });
+      }
+
+      if (isSupabaseConfigured) {
+        try {
+          await supabase
+            .from('transactions')
+            .update({
+              status: 'VALIDATED',
+              type: 'LEAD_DEDUCTION',
+              admin_notes: `Débit confirmé après réalisation des travaux #${cleanIntId}`
+            })
+            .ilike('reference_ref', ref);
+        } catch (e) {
+          console.warn('[Supabase] confirmLeadDebit warning:', e?.message);
+        }
+      }
+    };
+
+    // 3. Libérer la réservation Escrow (0.00 DH débité, transaction passe à CANCELLED)
+    const releaseLeadCredit = async (interventionId, reason = 'Mission non réalisable') => {
+      const cleanIntId = String(interventionId).trim();
+      const ref = `ESCROW_INT_${cleanIntId}`;
+
+      setTransactions((prev) =>
+        prev.map((t) => {
+          if (t.reference_ref === ref || (t.type === 'LEAD_ESCROW' && t.reference_ref?.includes(cleanIntId))) {
+            return {
+              ...t,
+              status: 'CANCELLED',
+              admin_notes: `Garantie libérée (0 DH débité) - Motif: ${reason}`
+            };
+          }
+          return t;
+        })
+      );
+
+      if (isSupabaseConfigured) {
+        try {
+          await supabase
+            .from('transactions')
+            .update({
+              status: 'CANCELLED',
+              admin_notes: `Garantie libérée (0 DH débité) - Motif: ${reason}`
+            })
+            .ilike('reference_ref', ref);
+        } catch (e) {
+          console.warn('[Supabase] releaseLeadCredit warning:', e?.message);
+        }
+      }
+    };
+
+    // 4. Déclarer une mission non réalisable / abandonner (Escrow libéré immédiatement)
+    const declareMissionUnfeasible = async (interventionId, reason = 'Mission non réalisable', notes = '') => {
+      const cleanIntId = String(interventionId).trim();
+      const targetIntv = interventions.find((i) => String(i.id).trim() === cleanIntId);
+      const nowIso = new Date().toISOString();
+
+      // 1. Libérer l'escrow (15 DH retournent dans le solde disponible)
+      await releaseLeadCredit(cleanIntId, reason);
+
+      // 2. Mettre à jour l'intervention
+      const updatedIntv = {
+        status: 'UNFEASIBLE',
+        unfeasible_reason: reason,
+        unfeasible_notes: notes,
+        unfeasible_reported_at: nowIso,
+        escrow_status: 'RELEASED'
+      };
+
+      setInterventions((prev) => {
+        const updated = prev.map((item) =>
+          String(item.id).trim() === cleanIntId
+            ? { ...item, ...updatedIntv }
+            : item
+        );
+        try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated)); } catch (e) { }
+        return updated;
+      });
+
+      // 3. Notifier en temps réel via BroadcastChannel & Ably
+      publishIntertabSync('INTERVENTION_UNFEASIBLE', {
+        intervention_id: cleanIntId,
+        reason,
+        notes,
+        client_id: targetIntv?.client_id
+      });
+
+      publishRealtimeEvent('job_unfeasible', {
+        intervention_id: cleanIntId,
+        reason,
+        notes,
+        timestamp: Date.now()
+      });
+
+      if (targetIntv?.client_id) {
+        publishRealtimeEvent('job:unfeasible', {
+          intervention_id: cleanIntId,
+          reason,
+          notes,
+          timestamp: Date.now()
+        }, ABLY_CHANNELS.getUserChannel(targetIntv.client_id));
+      }
+
+      // 4. Persistance Supabase
+      if (isSupabaseConfigured) {
+        try {
+          await supabase
+            .from('interventions')
+            .update({
+              status: 'UNFEASIBLE',
+              unfeasible_reason: reason,
+              unfeasible_reported_at: nowIso,
+              escrow_status: 'RELEASED'
+            })
+            .eq('id', cleanIntId);
+        } catch (e) {
+          console.warn('[Supabase] declareMissionUnfeasible warning:', e?.message);
+        }
+      }
+
+      showToast('🛡️ Mission clôturée sans frais. Vos 15 DH de garantie ont été restitués immédiatement sur votre solde disponible !', 'success');
+      return true;
+    };
+
+    // 5. Client relance la recherche SOS d'un autre Maâlem en 1 clic
+    const relaunchEmergencyRequest = async (interventionId) => {
+      const cleanIntId = String(interventionId).trim();
+      const targetIntv = interventions.find((i) => String(i.id).trim() === cleanIntId);
+
+      const resetFields = {
+        status: 'PENDING',
+        maalem_id: null,
+        maalem_name: null,
+        maalem_phone: null,
+        accepted_at: null,
+        progress_step: 'SEARCHING',
+        escrow_status: null,
+        unfeasible_reason: null,
+        unfeasible_notes: null
+      };
+
+      let updatedJob = null;
+      setInterventions((prev) => {
+        const updated = prev.map((item) => {
+          if (String(item.id).trim() === cleanIntId) {
+            updatedJob = { ...item, ...resetFields };
+            return updatedJob;
+          }
+          return item;
+        });
+        try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated)); } catch (e) { }
+        return updated;
+      });
+
+      const finalJob = updatedJob || { ...targetIntv, ...resetFields };
+      const cityName = String(finalJob?.district || user?.city_zone || 'Casablanca').split('-')[0]?.trim() || 'Casablanca';
+      const serviceType = finalJob?.service_type || 'all';
+
+      publishRealtimeEvent('new_emergency_job', {
+        ...finalJob,
+        timestamp: Date.now()
+      }, ABLY_CHANNELS.getCityChannel(cityName, serviceType));
+
+      publishIntertabSync('INTERVENTION_RELAUNCHED', {
+        intervention: finalJob
+      });
+
+      if (isSupabaseConfigured) {
+        try {
+          await supabase
+            .from('interventions')
+            .update(resetFields)
+            .eq('id', cleanIntId);
+        } catch (e) {
+          console.warn('[Supabase] relaunchEmergencyRequest warning:', e?.message);
+        }
+      }
+
+      showToast('🚀 Alerte SOS relancée ! Recherche active des artisans disponibles en cours...', 'success');
+      return true;
+    };
+
+    // Maalem accepte un lead — déblocage 15 DH en Escrow, diffusion Ably (<50ms)
+    const acceptLead = async (interventionId) => {
+      // 1. Règle anti-accumulation : 1 seule mission active en cours autorisée à la fois
+      const activeMissions = interventions.filter((i) => {
+        const isMine = user?.id && String(i.maalem_id || '').trim() === String(user.id).trim();
+        const isFallbackMine = (!user?.id || user.id === 'maalem-1' || user.id === '22222222-2222-2222-2222-222222222222') && 
+                               (i.maalem_id === 'maalem-1' || i.maalem_id === '22222222-2222-2222-2222-222222222222');
+        const isActiveStatus = ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status);
+        return (isMine || isFallbackMine) && isActiveStatus && String(i.id).trim() !== String(interventionId).trim();
+      });
+
+      if (activeMissions.length >= 1) {
+        notify.warning(
+          'Mission Déjà en Cours ⚠️',
+          'Vous avez déjà 1 mission active en cours d\'exécution. Terminez-la ou clôturez-la avant de pouvoir accepter une nouvelle mission.',
+          { id: `active-mission-limit-${interventionId}`, duration: 6000 }
+        );
+        return false;
+      }
+
+      // 2. Calcul du solde disponible (Solde total - Escrow réservé)
+      const reservedEscrow = (transactions || [])
+        .filter((t) => {
+          const isMine = user?.id && String(t.maalem_id || '').trim() === String(user.id).trim();
+          return (isMine || !user?.id) && t.status === 'RESERVED';
+        })
+        .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
+
+      const totalBalance = Number(user?.maalem_details?.credit_balance ?? user?.credits ?? 0);
+      const availableBalance = Math.max(0, totalBalance - reservedEscrow);
+
+      if (availableBalance < 15) {
         notify.error(
-          'Solde Crédits Insuffisant 💳',
-          'Vous devez disposer d\'au moins 15.00 DH de crédits pour débloquer cette mission. Veuillez recharger votre compte.',
+          'Solde Disponible Insuffisant 💳',
+          `Votre solde disponible est de ${availableBalance.toFixed(2)} DH (15.00 DH requis en garantie temporaire). Veuillez recharger votre compte.`,
           { id: `insufficient-credit-${interventionId}` }
         );
         return false;
@@ -1980,12 +2299,16 @@ export const AppProvider = ({ children }) => {
       const acceptedItem = {
         id: interventionId,
         status: 'ACCEPTED',
+        escrow_status: 'RESERVED',
         maalem_id: user?.id,
         maalem_name: user?.full_name,
         maalem_phone: user?.phone,
         accepted_at: nowIso,
         progress_step: 'ON_THE_WAY'
       };
+
+      // Réservation de l'Escrow 15 DH en transaction temporaire
+      await reserveLeadCredit(interventionId, user?.id, 15.00);
 
       // 1. Mise à jour optimiste du statut intervention (retire le lead des flux ouverts)
       setInterventions((prev) => {
@@ -1999,7 +2322,6 @@ export const AppProvider = ({ children }) => {
       });
 
       // 2. Publication Ably Realtime immédiate (<50ms) :
-      // - JOBS_STREAM (ferme l'alerte pour les autres artisans)
       publishRealtimeEvent('job_accepted', {
         intervention_id: interventionId,
         maalem_id: user?.id,
@@ -2037,17 +2359,17 @@ export const AppProvider = ({ children }) => {
         bc.postMessage(payload);
       } catch (e) { }
 
-      // 3. Sync Supabase — le trigger PostgreSQL ou update déduit 15 DH
+      // 3. Sync Supabase
       if (isSupabaseConfigured && user?.id) {
         try {
           let { error } = await supabase.from('interventions').update({
             status: 'ACCEPTED',
+            escrow_status: 'RESERVED',
             maalem_id: user.id,
             maalem_name: user.full_name,
             maalem_phone: user.phone
           }).eq('id', interventionId);
 
-          // Fallback si maalem_name ou maalem_phone n'est pas encore dans la table
           if (error && (error.message?.includes('maalem_name') || error.message?.includes('column'))) {
             const fb = await supabase.from('interventions').update({
               status: 'ACCEPTED',
@@ -2060,6 +2382,7 @@ export const AppProvider = ({ children }) => {
             console.warn('[Supabase] acceptLead error:', error.message);
             showToast(`⚠️ ${error.message || 'Solde insuffisant en base de données.'}`, 'error');
             // Rollback optimiste
+            await releaseLeadCredit(interventionId, 'Erreur base de données');
             setInterventions((prev) =>
               prev.map((item) =>
                 item.id === interventionId ? { ...item, status: 'PENDING', maalem_id: null, maalem_name: null, maalem_phone: null, accepted_at: null } : item
@@ -2072,7 +2395,7 @@ export const AppProvider = ({ children }) => {
         }
       }
 
-      showToast('✅ Lead débloqué (-15 DH) ! Itinéraire GPS et bouton WhatsApp client activés.', 'success');
+      showToast('🛡️ Mission acceptée ! 15 DH placés en garantie (débités uniquement une fois validé).', 'success');
       return true;
     };
 
@@ -2376,6 +2699,9 @@ export const AppProvider = ({ children }) => {
     const cancelIntervention = async (interventionId) => {
       const cleanId = String(interventionId).trim();
 
+      // Libérer l'escrow de l'artisan si un lead était en réserve
+      await releaseLeadCredit(cleanId, 'Annulation par le client');
+
       // 1. Mise à jour instantanée de l'état local React
       setInterventions((prev) =>
         prev.filter((item) => String(item.id).trim() !== cleanId)
@@ -2426,14 +2752,17 @@ export const AppProvider = ({ children }) => {
       }
     };
 
-    // Marquer une intervention comme terminée
+    // Marquer une intervention comme terminée (Déclenche la validation définitive de l'escrow -15 DH)
     const completeIntervention = async (interventionId, finalPrice) => {
       const cleanId = String(interventionId).trim();
+
+      // Confirmer le débit définitif de 15 DH sur l'escrow
+      await confirmLeadDebit(cleanId);
 
       setInterventions((prev) => {
         const updated = prev.map((item) =>
           String(item.id).trim() === cleanId
-            ? { ...item, status: 'COMPLETED', final_agreed_price: finalPrice || item.final_agreed_price || item.estimated_price_min }
+            ? { ...item, status: 'COMPLETED', escrow_status: 'DEBITED', final_agreed_price: finalPrice || item.final_agreed_price || item.estimated_price_min }
             : item
         );
         try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated)); } catch (e) { }
@@ -2457,7 +2786,7 @@ export const AppProvider = ({ children }) => {
           publishRealtimeEvent('job_completed', { intervention_id: cleanId });
           await supabase
             .from('interventions')
-            .update({ status: 'COMPLETED' })
+            .update({ status: 'COMPLETED', escrow_status: 'DEBITED' })
             .eq('id', cleanId);
         } catch (e) {
           console.warn('[Supabase] completeIntervention warning:', e.message);
@@ -2474,6 +2803,9 @@ export const AppProvider = ({ children }) => {
       const currentInt = interventions.find((i) => i.id === intervention_id);
       const targetMaalemId = maalem_id || currentInt?.maalem_id || '22222222-2222-2222-2222-222222222222';
       const targetMaalemName = currentInt?.maalem_name || 'Maalem';
+
+      // S'assurer que le débit de 15 DH est bien confirmé lors de la notation
+      await confirmLeadDebit(intervention_id, targetMaalemId);
 
       const fullComment = badges && badges.length > 0
         ? (comment ? `"${comment}" [Badges: ${badges.join(', ')}]` : `[Badges: ${badges.join(', ')}]`)
@@ -3318,7 +3650,12 @@ export const AppProvider = ({ children }) => {
           updateInterventionProgress,
           reportUnreachableClient,
           reportDisputeIssue,
-          resolveDisputeAndRefund
+          resolveDisputeAndRefund,
+          reserveLeadCredit,
+          confirmLeadDebit,
+          releaseLeadCredit,
+          declareMissionUnfeasible,
+          relaunchEmergencyRequest
         }}
       >
         {children}

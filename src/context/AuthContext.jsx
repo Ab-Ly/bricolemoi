@@ -55,18 +55,17 @@ export const AuthProvider = ({ children }) => {
   // Language & RTL State (seule donnée persistée en localStorage)
   const [lang, setLang] = useState(() => localStorage.getItem('bricolemoi_lang') || 'fr');
 
-  // Auth State — initialisé depuis sessionStorage si dispo (évite le flash au refresh)
-  // sessionStorage est scoped à l'onglet et effacé à la fermeture du navigateur
+  // Auth State — initialisé depuis sessionStorage / localStorage
   const [user, setUser] = useState(() => {
     try {
-      const saved = sessionStorage.getItem('bricolemoi_session');
+      const saved = sessionStorage.getItem('bricolemoi_session') || localStorage.getItem('bricolemoi_session');
       return saved ? JSON.parse(saved) : null;
     } catch (e) { return null; }
   });
   const [isLoading, setIsLoading] = useState(false);
   const [currentRole, setCurrentRole] = useState(() => {
     try {
-      const saved = sessionStorage.getItem('bricolemoi_session');
+      const saved = sessionStorage.getItem('bricolemoi_session') || localStorage.getItem('bricolemoi_session');
       if (saved) return JSON.parse(saved)?.role || 'CLIENT';
     } catch (e) {}
     return 'CLIENT';
@@ -76,11 +75,11 @@ export const AuthProvider = ({ children }) => {
   const [adminAuthModalOpen, setAdminAuthModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
-  // Persistance sessionStorage — sync à chaque changement du user
+  // Persistance double (sessionStorage + localStorage) — sync à chaque changement du user
   useEffect(() => {
     try {
       if (user) {
-        // Filtrer les base64 volumineux pour éviter le dépassement de quota sessionStorage
+        // Filtrer les base64 volumineux pour éviter le dépassement de quota storage
         const cleanUser = { ...user };
         const base64Fields = ['cin_photo_url', 'cin_photo_recto_url', 'cin_photo_verso_url'];
         base64Fields.forEach(f => {
@@ -97,8 +96,10 @@ export const AuthProvider = ({ children }) => {
           cleanUser.maalem_details = md;
         }
         sessionStorage.setItem('bricolemoi_session', JSON.stringify(cleanUser));
+        localStorage.setItem('bricolemoi_session', JSON.stringify(cleanUser));
       } else {
         sessionStorage.removeItem('bricolemoi_session');
+        localStorage.removeItem('bricolemoi_session');
       }
     } catch (e) {}
   }, [user]);
@@ -134,17 +135,25 @@ export const AuthProvider = ({ children }) => {
 
   // Récupère le profil Supabase à partir de l'UID Firebase ou du numéro de téléphone
   const fetchSupabaseProfile = async (uid, phone = '') => {
-    let userProfile = {
+    // Récupérer la session existante en cache s'il y en a une
+    let savedSession = null;
+    try {
+      savedSession = JSON.parse(sessionStorage.getItem('bricolemoi_session') || localStorage.getItem('bricolemoi_session') || 'null');
+    } catch (e) {}
+
+    let userProfile = savedSession ? { ...savedSession } : {
       id: uid,
       phone: phone,
       role: 'CLIENT',
-      full_name: 'Utilisateur Maroc',
+      full_name: 'Client BricoleMoi',
       city_zone: 'Casablanca'
     };
 
     if (isSupabaseConfigured) {
       try {
         let profile = null;
+
+        // 1. Recherche par UUID si l'UID est un UUID PostgreSQL valide
         if (isValidUUID(uid)) {
           const { data } = await supabase
             .from('profiles')
@@ -152,29 +161,58 @@ export const AuthProvider = ({ children }) => {
             .eq('id', uid)
             .maybeSingle();
           profile = data;
-        } else if (phone) {
-          const cleanPhone = String(phone).replace(/\D/g, '');
+        }
+
+        // 2. Recherche multi-formats par numéro de téléphone (gère 06..., +212..., 212...)
+        const searchPhone = phone || savedSession?.phone;
+        if (!profile && searchPhone) {
+          const cleanDigits = String(searchPhone).replace(/\D/g, '');
+          const last9 = cleanDigits.slice(-9);
+          const candidateFormats = [
+            searchPhone,
+            cleanDigits,
+            '0' + last9,
+            '212' + last9,
+            '+212' + last9
+          ];
+
           const { data } = await supabase
             .from('profiles')
             .select('*')
-            .eq('phone', cleanPhone)
+            .in('phone', candidateFormats)
             .maybeSingle();
           profile = data;
+
+          if (!profile && last9.length >= 8) {
+            const { data: ilikeProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .ilike('phone', `%${last9}%`)
+              .maybeSingle();
+            profile = ilikeProfile;
+          }
         }
 
         if (profile) {
-          const effectiveRole = (profile.role || 'CLIENT').toUpperCase();
+          const effectiveRole = (profile.role || savedSession?.role || 'CLIENT').toUpperCase();
           const profileCredits = profile.credits !== undefined && profile.credits !== null
             ? Number(profile.credits)
             : (effectiveRole === 'MAALEM' ? 15.00 : 0);
 
           userProfile = {
             ...userProfile,
-            id: profile.id || uid,
+            id: profile.id || userProfile.id || uid,
             role: effectiveRole,
-            full_name: profile.full_name || 'Utilisateur Maroc',
-            city_zone: profile.city_zone || 'Casablanca',
+            full_name: profile.full_name || savedSession?.full_name || 'Client BricoleMoi',
+            city_zone: profile.city_zone || savedSession?.city_zone || 'Casablanca',
+            phone: profile.phone || searchPhone,
             credits: profileCredits
+          };
+        } else if (savedSession && savedSession.full_name && savedSession.full_name !== 'Utilisateur Maroc') {
+          // Conserver impérativement le nom et les infos authentiques saisis par l'utilisateur
+          userProfile = {
+            ...userProfile,
+            ...savedSession
           };
         }
 
@@ -198,12 +236,11 @@ export const AuthProvider = ({ children }) => {
 
           userProfile.credits = currentCredits;
           userProfile.maalem_details = {
-            specialty: maalemDetails?.specialty || 'PLUMBING',
+            specialty: maalemDetails?.specialty || savedSession?.maalem_details?.specialty || 'PLUMBING',
             credit_balance: currentCredits,
-            is_verified: maalemDetails?.is_verified ?? true,
-            cin_verified: maalemDetails?.cin_verified ?? true,
-            status: maalemDetails?.status || 'active',
-            portfolio_urls: maalemDetails?.portfolio_urls || []
+            is_verified: maalemDetails?.is_verified ?? savedSession?.maalem_details?.is_verified ?? true,
+            status: maalemDetails?.status || savedSession?.maalem_details?.status || 'active',
+            portfolio_urls: maalemDetails?.portfolio_urls || savedSession?.maalem_details?.portfolio_urls || []
           };
         }
       } catch (err) {
@@ -212,6 +249,11 @@ export const AuthProvider = ({ children }) => {
     }
 
     setUser(userProfile);
+    setCurrentRole(userProfile.role || 'CLIENT');
+    try {
+      sessionStorage.setItem('bricolemoi_session', JSON.stringify(userProfile));
+      localStorage.setItem('bricolemoi_session', JSON.stringify(userProfile));
+    } catch (e) {}
     setIsLoading(false);
   };
 

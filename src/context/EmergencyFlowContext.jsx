@@ -110,7 +110,8 @@ export const EmergencyFlowProvider = ({ children }) => {
     acceptLead, 
     requestWorkCompletion, 
     updateInterventionProgress, 
-    submitReview 
+    submitReview,
+    declareMissionUnfeasible 
   } = useApp();
 
   const [flowState, dispatch] = useReducer(emergencyFlowReducer, initialState);
@@ -240,6 +241,17 @@ export const EmergencyFlowProvider = ({ children }) => {
             type: ACTIONS.COMPLETE_MISSION,
             payload: { finalPrice: payload.final_agreed_price }
           });
+        } else if (event === 'job:unfeasible' || event === 'job:cancelled') {
+          const currentApp = getAppSubdomain();
+          const currentRole = (user?.role || 'CLIENT').toUpperCase();
+          if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') return;
+
+          dispatch({ type: ACTIONS.RESET_TO_IDLE });
+          notify.warning(
+            'Mission Non Réalisée ℹ️',
+            `L'artisan a signalé une impossibilité (${payload.reason || 'imprévu'}). Vous pouvez relancer un SOS immédiatement.`,
+            { id: `job-unfeasible-${payload.intervention_id || 'done'}`, duration: 7000 }
+          );
         }
       },
       user.id
@@ -446,6 +458,17 @@ export const EmergencyFlowProvider = ({ children }) => {
     dispatch({ type: ACTIONS.DISMISS_ALERT });
   }, []);
 
+  /**
+   * Abandonner / Déclarer la mission active non réalisable (Maâlem) — Restitution 15 DH garantie
+   */
+  const abandonActiveMission = useCallback(async (reason, notes) => {
+    const intvId = flowState.activeEmergency?.id;
+    if (intvId) {
+      await declareMissionUnfeasible(intvId, reason, notes);
+    }
+    dispatch({ type: ACTIONS.RESET_TO_IDLE });
+  }, [flowState.activeEmergency?.id, declareMissionUnfeasible]);
+
   return (
     <EmergencyFlowContext.Provider
       value={{
@@ -468,6 +491,7 @@ export const EmergencyFlowProvider = ({ children }) => {
         acceptSOS,
         setProgressStep,
         finishMission,
+        abandonActiveMission,
         submitClientFeedback,
         cancelSOS,
         dismissAlert
