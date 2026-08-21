@@ -505,7 +505,7 @@
       "file_type": "code",
       "norm_label": "useapp()",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3666"
+      "source_location": "L3670"
     },
     {
       "id": "src_context_authcontext_useauth",
@@ -4651,7 +4651,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L1025",
+      "source_location": "L1027",
       "weight": 1.0
     },
     {
@@ -4663,7 +4663,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L385",
+      "source_location": "L387",
       "weight": 1.0
     },
     {
@@ -4675,7 +4675,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L614",
+      "source_location": "L616",
       "weight": 1.0
     },
     {
@@ -4903,7 +4903,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3530",
+      "source_location": "L3534",
       "weight": 1.0
     },
     {
@@ -11227,7 +11227,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3666",
+      "source_location": "L3670",
       "weight": 1.0
     },
     {
@@ -12477,7 +12477,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3639",
+      "source_location": "L3643",
       "weight": 1.0
     },
     {
@@ -12506,5 +12506,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4e2659d5cf7cd604a9072c6d08ab28cfbd49a83c"
+  "built_at_commit": "7078934a5fd0cf15a2f29af45ed4801f636d9762"
 }

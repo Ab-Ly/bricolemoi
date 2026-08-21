@@ -136,6 +136,8 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     .filter((t) => t.status === 'RESERVED' && isLeadTx(t))
     .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
 
+  const totalLeadsSpent = totalValidatedLeadsSpent + totalReservedEscrow;
+
   const totalBonusSum = myTransactions
     .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
     .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);

@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "src/components/MaalemView.jsx": {
-    "mtime": 1787337368.258891,
-    "seen": 1787337516.774192,
-    "ast_hash": "d599d49eaa513b8ff1e00d6ea10ae228",
+    "mtime": 1787346783.6018698,
+    "seen": 1787347546.8599691,
+    "ast_hash": "d8b08dddcb512e44bc5f27893ced46f5",
     "semantic_hash": ""
   },
   "src/components/Navbar.jsx": {
@@ -192,9 +192,9 @@
     "semantic_hash": ""
   },
   "src/context/AppContext.jsx": {
-    "mtime": 1787334509.8292232,
-    "seen": 1787334728.095819,
-    "ast_hash": "3b0f75c7ab61aac79f99b5e54ba0c740",
+    "mtime": 1787347367.4942036,
+    "seen": 1787347546.860978,
+    "ast_hash": "1e35a378e164f6050b706524e60bc522",
     "semantic_hash": ""
   },
   "src/context/AuthContext.jsx": {
@@ -336,9 +336,9 @@
     "semantic_hash": ""
   },
   "vite.config.js": {
-    "mtime": 1787241736.3946662,
-    "seen": 1787241846.7531168,
-    "ast_hash": "83f7cf56a289fbb1afc1bd0d68509766",
+    "mtime": 1787346805.1729076,
+    "seen": 1787347546.863738,
+    "ast_hash": "628e0d66927b28e3b3407f99b0477e61",
     "semantic_hash": ""
   },
   "supabase/add_missing_columns.sql": {

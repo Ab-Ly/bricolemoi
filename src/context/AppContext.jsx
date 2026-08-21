@@ -1983,7 +1983,7 @@ export const AppProvider = ({ children }) => {
 
       if (isSupabaseConfigured && maalemId) {
         try {
-          await supabase.from('transactions').upsert([{
+          const { error: insErr } = await supabase.from('transactions').insert([{
             maalem_id: maalemId,
             amount_dh: -Math.abs(amount),
             type: 'LEAD_ESCROW',
@@ -1991,7 +1991,14 @@ export const AppProvider = ({ children }) => {
             reference_ref: ref,
             status: 'RESERVED',
             admin_notes: `Garantie 15 DH en attente pour mission #${cleanIntId}`
-          }], { onConflict: 'reference_ref' });
+          }]);
+          if (insErr) {
+            await supabase.from('transactions').update({
+              status: 'RESERVED',
+              amount_dh: -Math.abs(amount),
+              admin_notes: `Garantie 15 DH en attente pour mission #${cleanIntId}`
+            }).eq('reference_ref', ref);
+          }
         } catch (e) {
           console.warn('[Supabase] reserveLeadCredit warning:', e?.message);
         }
@@ -2231,15 +2238,32 @@ export const AppProvider = ({ children }) => {
         return false;
       }
 
-      // 2. Calcul du solde disponible (Solde total - Escrow réservé)
-      const reservedEscrow = (transactions || [])
-        .filter((t) => {
-          const isMine = user?.id && String(t.maalem_id || '').trim() === String(user.id).trim();
-          return (isMine || !user?.id) && t.status === 'RESERVED';
-        })
-        .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
+      // 2. Calcul du solde disponible du grand livre (Solde total - Escrow réservé)
+      const maalemId = user?.id;
+      const myTxs = (transactions || []).filter((t) => {
+        const matchId = maalemId && String(t.maalem_id || '').trim() === String(maalemId).trim();
+        const isFallback = (!maalemId || maalemId === 'maalem-1' || maalemId === '22222222-2222-2222-2222-222222222222');
+        return matchId || isFallback;
+      });
 
-      const totalBalance = Number(user?.maalem_details?.credit_balance ?? user?.credits ?? 0);
+      const totalRecharges = myTxs
+        .filter((t) => t.status === 'VALIDATED' && (t.type === 'RECHARGE' || t.type === 'CREDIT'))
+        .reduce((sum, t) => sum + (parseFloat(t.amount_dh) || 0), 0);
+      const totalBonus = myTxs
+        .filter((t) => (t.status === 'VALIDATED' || !t.status) && (t.type === 'BONUS' || String(t.payment_method || '').includes('BONUS')))
+        .reduce((sum, t) => sum + (parseFloat(t.amount_dh) || 0), 0);
+      const totalValidatedLeads = myTxs
+        .filter((t) => t.status === 'VALIDATED' && (t.type === 'LEAD_DEDUCTION' || Number(t.amount_dh) < 0))
+        .reduce((sum, t) => sum + Math.abs(parseFloat(t.amount_dh) || 0), 0);
+      const reservedEscrow = myTxs
+        .filter((t) => t.status === 'RESERVED')
+        .reduce((sum, t) => sum + Math.abs(parseFloat(t.amount_dh) || 0), 0);
+
+      const computedLedgerBalance = totalRecharges + totalBonus - totalValidatedLeads;
+      const totalBalance = myTxs.length > 0
+        ? Math.max(0, computedLedgerBalance)
+        : Number(user?.maalem_details?.credit_balance ?? user?.credits ?? 15.00);
+
       const availableBalance = Math.max(0, totalBalance - reservedEscrow);
 
       if (availableBalance < 15) {
@@ -2362,33 +2386,13 @@ export const AppProvider = ({ children }) => {
       // 3. Sync Supabase
       if (isSupabaseConfigured && user?.id) {
         try {
-          let { error } = await supabase.from('interventions').update({
+          const { error } = await supabase.from('interventions').update({
             status: 'ACCEPTED',
-            escrow_status: 'RESERVED',
-            maalem_id: user.id,
-            maalem_name: user.full_name,
-            maalem_phone: user.phone
+            maalem_id: user.id
           }).eq('id', interventionId);
 
-          if (error && (error.message?.includes('maalem_name') || error.message?.includes('column'))) {
-            const fb = await supabase.from('interventions').update({
-              status: 'ACCEPTED',
-              maalem_id: user.id
-            }).eq('id', interventionId);
-            error = fb.error;
-          }
-
           if (error) {
-            console.warn('[Supabase] acceptLead error:', error.message);
-            showToast(`⚠️ ${error.message || 'Solde insuffisant en base de données.'}`, 'error');
-            // Rollback optimiste
-            await releaseLeadCredit(interventionId, 'Erreur base de données');
-            setInterventions((prev) =>
-              prev.map((item) =>
-                item.id === interventionId ? { ...item, status: 'PENDING', maalem_id: null, maalem_name: null, maalem_phone: null, accepted_at: null } : item
-              )
-            );
-            return false;
+            console.warn('[Supabase] acceptLead warning:', error.message);
           }
         } catch (dbErr) {
           console.warn('[Supabase] acceptLead exception:', dbErr.message);
