@@ -60,6 +60,7 @@ import {
   MinusCircle,
   Wrench as PhosphorWrench
 } from '@phosphor-icons/react';
+import { PushNotificationBanner } from './maalem/PushNotificationBanner';
 
 export const MaalemView = ({ onOpenCINVerification }) => {
   const { t, user, setUser } = useAuth();
@@ -526,6 +527,9 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
           </div>
         </motion.div>
       )}
+
+      {/* Bannière de Permission Web Push Notification pour Réveil d'Urgence */}
+      <PushNotificationBanner user={user} />
 
       {/* 1. Tableau de Bord : Header Solde, Statut EN LIGNE, Note Globale (Modern Clean & Trust) */}
       <motion.div 

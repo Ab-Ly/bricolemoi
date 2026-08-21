@@ -315,6 +315,22 @@ export const EmergencyFlowProvider = ({ children }) => {
       payload: { emergency: emergencyData }
     });
     notify.sos('🚨 Radar SOS Activé', 'Diffusion en direct aux artisans disponibles...', { id: `sos-active-${emergencyData.id || Date.now()}` });
+
+    // Envoi de la notification Web Push d'urgence en arrière-plan vers tous les artisans
+    try {
+      fetch('/api/send-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `🚨 URGENCE SOS : ${emergencyData.subcategory || emergencyData.service_type || 'Dépannage'}`,
+          body: `Nouvelle mission urgente à ${emergencyData.district || 'votre secteur'} !`,
+          city: emergencyData.city || 'Casablanca',
+          specialty: emergencyData.service_type || 'PLUMBING',
+          district: emergencyData.district || 'Centre',
+          intervention_id: emergencyData.id || null
+        })
+      }).catch((err) => console.warn('[Push Dispatch Non-blocking Error]:', err));
+    } catch (e) {}
   }, []);
 
   /**
