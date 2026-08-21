@@ -61,6 +61,7 @@ import {
   Wrench as PhosphorWrench
 } from '@phosphor-icons/react';
 import { PushNotificationBanner } from './maalem/PushNotificationBanner';
+import { MOROCCAN_CITIES } from '../constants/geo';
 
 export const MaalemView = ({ onOpenCINVerification }) => {
   const { t, user, setUser } = useAuth();
@@ -356,16 +357,17 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     if (!isNaN(lat) && !isNaN(lng) && lng < 0 && lat >= 20 && lat <= 38) {
       return [lat, lng];
     }
-    const district = (item?.district || '').toLowerCase();
-    if (district.includes('fès') || district.includes('fes') || district.includes('imouzzer') || district.includes('narjiss')) return [34.0331, -5.0003];
-    if (district.includes('rabat') || district.includes('salé') || district.includes('agdal') || district.includes('hay riad')) return [34.0209, -6.8416];
-    if (district.includes('marrakech') || district.includes('gueliz') || district.includes('hivernage')) return [31.6295, -7.9811];
-    if (district.includes('tanger') || district.includes('malabata') || district.includes('boukhalef')) return [35.7595, -5.8340];
-    if (district.includes('agadir') || district.includes('talborjt')) return [30.4278, -9.5981];
-    if (district.includes('meknès') || district.includes('meknes')) return [33.8938, -5.5513];
-    if (district.includes('oujda')) return [34.6814, -1.9086];
-    if (district.includes('tétouan') || district.includes('tetouan')) return [35.5889, -5.3626];
-    if (district.includes('kénitra') || district.includes('kenitra')) return [34.2610, -6.5802];
+    const loc = (item?.district || '').toLowerCase();
+    for (const city of MOROCCAN_CITIES) {
+      if (loc.includes(city.name.toLowerCase())) {
+        for (const dist of (city.districts || [])) {
+          if (loc.includes(dist.name.toLowerCase())) {
+            return [dist.lat, dist.lng];
+          }
+        }
+        return [city.lat, city.lng];
+      }
+    }
     return [33.5883, -7.6328];
   };
 

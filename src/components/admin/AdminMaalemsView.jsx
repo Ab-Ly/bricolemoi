@@ -204,7 +204,7 @@ export const AdminMaalemsView = ({
             <span>Ville :</span>
           </div>
 
-          {['ALL', 'Casablanca', 'Fès', 'Rabat', 'Marrakech', 'Tanger', 'Agadir'].map((city) => (
+          {['ALL', 'Casablanca', 'Rabat', 'Fès', 'Meknès', 'El Hajeb', 'Marrakech', 'Tanger', 'Agadir', 'Kénitra', 'Mohammedia'].map((city) => (
             <button
               key={city}
               type="button"

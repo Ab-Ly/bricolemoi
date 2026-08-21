@@ -37,6 +37,7 @@ import {
 import { toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { COUNTRY_DIAL_CODES, MOROCCAN_CITIES } from '../constants/geo';
+import { reverseGeocodeMorocco, findNearestCatalogCity } from '../lib/geoService';
 import { CustomDropdown } from './CustomDropdown';
 import { 
   Buildings, 
@@ -315,46 +316,31 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     }
   };
 
-  // Trouver la ville & quartier les plus proches par calcul de distance Haversine
-  const updateCityAndDistrictFromGPS = (lat, lng) => {
-    let closestCity = MOROCCAN_CITIES[0];
-    let minCityDist = Infinity;
+  // Trouver la ville & quartier réels par reverse geocoding intelligent + fallback instantané
+  const updateCityAndDistrictFromGPS = async (lat, lng) => {
+    // 1. Résolution immédiate catalogue (0ms)
+    const instantFallback = findNearestCatalogCity(lat, lng);
+    setSelectedCity(instantFallback.city);
+    setSelectedDistrict(instantFallback.district);
 
-    MOROCCAN_CITIES.forEach((city) => {
-      const dLat = (city.lat - lat) * 111;
-      const dLng = (city.lng - lng) * 111 * Math.cos(lat * (Math.PI / 180));
-      const dist = Math.sqrt(dLat * dLat + dLng * dLng);
-      if (dist < minCityDist) {
-        minCityDist = dist;
-        closestCity = city;
-      }
-    });
-
-    setSelectedCity(closestCity.name);
-
-    // Trouver le quartier le plus proche dans cette ville
-    let closestDistrict = closestCity.districts[0];
-    let minDistDist = Infinity;
-    (closestCity.districts || []).forEach((d) => {
-      const dLat = (d.lat - lat) * 111;
-      const dLng = (d.lng - lng) * 111 * Math.cos(lat * (Math.PI / 180));
-      const dist = Math.sqrt(dLat * dLat + dLng * dLng);
-      if (dist < minDistDist) {
-        minDistDist = dist;
-        closestDistrict = d;
-      }
-    });
-
-    setSelectedDistrict(closestDistrict.name);
-
+    // 2. Résolution satellite précise (OpenStreetMap / Cache local)
     try {
-      localStorage.setItem('bricolemoi_client_gps', JSON.stringify({
-        lat,
-        lng,
-        city: closestCity.name,
-        district: closestDistrict.name,
-        updated_at: Date.now()
-      }));
+      const geoResult = await reverseGeocodeMorocco(lat, lng);
+      if (geoResult && geoResult.city) {
+        setSelectedCity(geoResult.city);
+        setSelectedDistrict(geoResult.district || geoResult.city);
+
+        try {
+          localStorage.setItem('bricolemoi_client_gps', JSON.stringify({
+            lat,
+            lng,
+            city: geoResult.city,
+            district: geoResult.district || geoResult.city,
+            fullLabel: geoResult.fullLabel,
+            updated_at: Date.now()
+          }));
+        } catch (e) {}
+      }
     } catch (e) {}
   };
 

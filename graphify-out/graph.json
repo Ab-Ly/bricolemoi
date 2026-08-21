@@ -16,6 +16,18 @@
       "source_location": "L26"
     },
     {
+      "id": "src_components_maalem_pushnotificationbanner_pushnotificationbanner",
+      "label": "PushNotificationBanner()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "pushnotificationbanner()",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
+      "source_location": "L12"
+    },
+    {
       "id": "src_context_appcontext_appprovider",
       "label": "AppProvider()",
       "_callable": true,
@@ -26,18 +38,6 @@
       "norm_label": "appprovider()",
       "source_file": "src/context/AppContext.jsx",
       "source_location": "L31"
-    },
-    {
-      "id": "src_context_appcontext_calculatedistanceinkm",
-      "label": "calculateDistanceInKm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "AppContext.jsx",
-      "file_type": "code",
-      "norm_label": "calculatedistanceinkm()",
-      "source_file": "src/context/AppContext.jsx",
-      "source_location": "L16"
     },
     {
       "id": "src_context_emergencyflowcontext_emergencyflowprovider",
@@ -256,6 +256,90 @@
       "source_location": "L5"
     },
     {
+      "id": "src_lib_pushnotificationservice_getnotificationpermissionstate",
+      "label": "getNotificationPermissionState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "getnotificationpermissionstate()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L45"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_ispushsupported",
+      "label": "isPushSupported()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "ispushsupported()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L33"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_showlocalpushnotification",
+      "label": "showLocalPushNotification()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "showlocalpushnotification()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L167"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_subscribeusertopush",
+      "label": "subscribeUserToPush()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "subscribeusertopush()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L54"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_testpushnotification",
+      "label": "testPushNotification()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "testpushnotification()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L197"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_unsubscribeuserfrompush",
+      "label": "unsubscribeUserFromPush()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "unsubscribeuserfrompush()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L137"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_urlbase64touint8array",
+      "label": "urlBase64ToUint8Array()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "urlbase64touint8array()",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L15"
+    },
+    {
       "id": "src_lib_subdomain_getappsubdomain",
       "label": "getAppSubdomain()",
       "_callable": true,
@@ -352,16 +436,16 @@
       "source_location": "L13"
     },
     {
-      "id": "src_components_landingpage_landingpage",
-      "label": "LandingPage()",
+      "id": "src_components_maalemview_maalemview",
+      "label": "MaalemView()",
       "_callable": true,
       "_origin": "ast",
       "community": 1,
       "community_name": "App.jsx",
       "file_type": "code",
-      "norm_label": "landingpage()",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L179"
+      "norm_label": "maalemview()",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L66"
     },
     {
       "id": "src_components_navbar_navbar",
@@ -400,6 +484,30 @@
       "source_location": "L6"
     },
     {
+      "id": "src_components_userprofilemodal_userprofilemodal",
+      "label": "UserProfileModal()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "userprofilemodal()",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_context_appcontext_useapp",
+      "label": "useApp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "useapp()",
+      "source_file": "src/context/AppContext.jsx",
+      "source_location": "L3666"
+    },
+    {
       "id": "src_context_authcontext_useauth",
       "label": "useAuth()",
       "_callable": true,
@@ -410,6 +518,18 @@
       "norm_label": "useauth()",
       "source_file": "src/context/AuthContext.jsx",
       "source_location": "L702"
+    },
+    {
+      "id": "src_context_emergencyflowcontext_useemergencyflow",
+      "label": "useEmergencyFlow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "App.jsx",
+      "file_type": "code",
+      "norm_label": "useemergencyflow()",
+      "source_file": "src/context/EmergencyFlowContext.jsx",
+      "source_location": "L505"
     },
     {
       "id": "src_layouts_adminapp_adminapp",
@@ -537,7 +657,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminclientsview()",
       "source_file": "src/components/admin/AdminClientsView.jsx",
@@ -549,7 +669,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "admindisputesview()",
       "source_file": "src/components/admin/AdminDisputesView.jsx",
@@ -561,7 +681,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminlivemissions()",
       "source_file": "src/components/admin/AdminLiveMissions.jsx",
@@ -573,7 +693,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminmaalemsview()",
       "source_file": "src/components/admin/AdminMaalemsView.jsx",
@@ -585,7 +705,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminrechargesview()",
       "source_file": "src/components/admin/AdminRechargesView.jsx",
@@ -597,7 +717,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "categoryselector()",
       "source_file": "src/components/CategorySelector.jsx",
@@ -609,7 +729,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "enhancedcategoryicon()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -621,7 +741,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "getspecialtylabel()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -633,7 +753,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "getspecialtymeta()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -645,7 +765,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "specialtybadge()",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
@@ -657,7 +777,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "getmapiconsvg()",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -669,7 +789,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "getmapstylejson()",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -681,11 +801,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "interactivemap()",
       "source_file": "src/components/InteractiveMap.jsx",
       "source_location": "L252"
+    },
+    {
+      "id": "src_components_landingpage_landingpage",
+      "label": "LandingPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "landingpage()",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L179"
     },
     {
       "id": "src_components_maalemselect_maalemselect",
@@ -693,59 +825,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "maalemselect()",
       "source_file": "src/components/MaalemSelect.jsx",
       "source_location": "L6"
     },
     {
-      "id": "src_components_maalemview_maalemview",
-      "label": "MaalemView()",
+      "id": "src_components_promovideoplayer_promovideoplayer",
+      "label": "PromoVideoPlayer()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "maalemview()",
-      "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L65"
+      "norm_label": "promovideoplayer()",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L200"
     },
     {
-      "id": "src_components_specialtyselect_specialtyselect",
-      "label": "SpecialtySelect()",
+      "id": "src_context_appcontext_calculatedistanceinkm",
+      "label": "calculateDistanceInKm()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "specialtyselect()",
-      "source_file": "src/components/SpecialtySelect.jsx",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_components_userprofilemodal_userprofilemodal",
-      "label": "UserProfileModal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "userprofilemodal()",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L43"
-    },
-    {
-      "id": "src_context_appcontext_useapp",
-      "label": "useApp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "useapp()",
+      "norm_label": "calculatedistanceinkm()",
       "source_file": "src/context/AppContext.jsx",
-      "source_location": "L3666"
+      "source_location": "L16"
     },
     {
       "id": "src_components_cgumodal_cgumodal",
@@ -769,7 +877,7 @@
       "file_type": "code",
       "norm_label": "clientview()",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L109"
+      "source_location": "L110"
     },
     {
       "id": "src_components_clientview_getservicedisplay",
@@ -781,7 +889,7 @@
       "file_type": "code",
       "norm_label": "getservicedisplay()",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L74"
+      "source_location": "L75"
     },
     {
       "id": "src_components_clientview_mapcategorytoslug",
@@ -793,7 +901,7 @@
       "file_type": "code",
       "norm_label": "mapcategorytoslug()",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L93"
+      "source_location": "L94"
     },
     {
       "id": "src_components_customdropdown_customdropdown",
@@ -817,6 +925,18 @@
       "file_type": "code",
       "norm_label": "getsafelabel()",
       "source_file": "src/components/CustomDropdown.jsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_components_specialtyselect_specialtyselect",
+      "label": "SpecialtySelect()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "specialtyselect()",
+      "source_file": "src/components/SpecialtySelect.jsx",
       "source_location": "L6"
     },
     {
@@ -856,16 +976,28 @@
       "source_location": "L45"
     },
     {
-      "id": "src_context_emergencyflowcontext_useemergencyflow",
-      "label": "useEmergencyFlow()",
+      "id": "src_lib_geoservice_findnearestcatalogcity",
+      "label": "findNearestCatalogCity()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "ClientView.jsx",
       "file_type": "code",
-      "norm_label": "useemergencyflow()",
-      "source_file": "src/context/EmergencyFlowContext.jsx",
-      "source_location": "L505"
+      "norm_label": "findnearestcatalogcity()",
+      "source_file": "src/lib/geoService.js",
+      "source_location": "L10"
+    },
+    {
+      "id": "src_lib_geoservice_reversegeocodemorocco",
+      "label": "reverseGeocodeMorocco()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "reversegeocodemorocco()",
+      "source_file": "src/lib/geoService.js",
+      "source_location": "L63"
     },
     {
       "id": "scratch_test_prelude_otp_testpreludeotp",
@@ -1192,114 +1324,6 @@
       "source_location": "L5"
     },
     {
-      "id": "src_components_maalem_pushnotificationbanner_pushnotificationbanner",
-      "label": "PushNotificationBanner()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "pushnotificationbanner()",
-      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
-      "source_location": "L12"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_getnotificationpermissionstate",
-      "label": "getNotificationPermissionState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "getnotificationpermissionstate()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L45"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_ispushsupported",
-      "label": "isPushSupported()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "ispushsupported()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L33"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_showlocalpushnotification",
-      "label": "showLocalPushNotification()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "showlocalpushnotification()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L167"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_subscribeusertopush",
-      "label": "subscribeUserToPush()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "subscribeusertopush()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L54"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_testpushnotification",
-      "label": "testPushNotification()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "testpushnotification()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L197"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_unsubscribeuserfrompush",
-      "label": "unsubscribeUserFromPush()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "unsubscribeuserfrompush()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L137"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_urlbase64touint8array",
-      "label": "urlBase64ToUint8Array()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "urlbase64touint8array()",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_components_promovideoplayer_promovideoplayer",
-      "label": "PromoVideoPlayer()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "promovideoplayer()",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L200"
-    },
-    {
       "id": "supabase_functions_verify_otp_sms_index_cleanphonenumber",
       "label": "cleanPhoneNumber()",
       "_callable": true,
@@ -1332,6 +1356,17 @@
       "file_type": "code",
       "norm_label": "emergencysosmodal.jsx",
       "source_file": "src/components/EmergencySOSModal.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_maalem_pushnotificationbanner",
+      "label": "PushNotificationBanner.jsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "pushnotificationbanner.jsx",
+      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
       "source_location": "L1"
     },
     {
@@ -1542,6 +1577,28 @@
       "norm_label": "pdfreceiptgenerator.js",
       "source_file": "src/lib/pdfReceiptGenerator.js",
       "source_location": "L1"
+    },
+    {
+      "id": "src_lib_pushnotificationservice",
+      "label": "pushNotificationService.js",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "pushnotificationservice.js",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_pushnotificationservice_vapid_public_key",
+      "label": "VAPID_PUBLIC_KEY",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "AppContext.jsx",
+      "file_type": "code",
+      "norm_label": "vapid_public_key",
+      "source_file": "src/lib/pushNotificationService.js",
+      "source_location": "L8"
     },
     {
       "id": "src_app",
@@ -2010,7 +2067,7 @@
       "label": "AdminClientsView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminclientsview.jsx",
       "source_file": "src/components/admin/AdminClientsView.jsx",
@@ -2021,7 +2078,7 @@
       "label": "AdminDashboard.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "admindashboard.jsx",
       "source_file": "src/components/admin/AdminDashboard.jsx",
@@ -2032,7 +2089,7 @@
       "label": "AdminDisputesView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "admindisputesview.jsx",
       "source_file": "src/components/admin/AdminDisputesView.jsx",
@@ -2043,7 +2100,7 @@
       "label": "AdminLiveMissions.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminlivemissions.jsx",
       "source_file": "src/components/admin/AdminLiveMissions.jsx",
@@ -2054,7 +2111,7 @@
       "label": "AdminMaalemsView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminmaalemsview.jsx",
       "source_file": "src/components/admin/AdminMaalemsView.jsx",
@@ -2065,7 +2122,7 @@
       "label": "AdminRechargesView.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "adminrechargesview.jsx",
       "source_file": "src/components/admin/AdminRechargesView.jsx",
@@ -2076,7 +2133,7 @@
       "label": "CategorySelector.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "categoryselector.jsx",
       "source_file": "src/components/CategorySelector.jsx",
@@ -2087,7 +2144,7 @@
       "label": "CATEGORIES_TAXONOMY",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "categories_taxonomy",
       "source_file": "src/components/CategorySelector.jsx",
@@ -2098,29 +2155,18 @@
       "label": "EnhancedCategoryIcon.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "enhancedcategoryicon.jsx",
       "source_file": "src/components/EnhancedCategoryIcon.jsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_enhancedcategoryicon_specialty_config",
-      "label": "SPECIALTY_CONFIG",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "specialty_config",
-      "source_file": "src/components/EnhancedCategoryIcon.jsx",
-      "source_location": "L25"
-    },
-    {
       "id": "src_components_interactivemap",
       "label": "InteractiveMap.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "interactivemap.jsx",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -2131,7 +2177,7 @@
       "label": "MAP_STYLES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "map_styles",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -2142,7 +2188,7 @@
       "label": "ROAD_COLOR_THEMES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "road_color_themes",
       "source_file": "src/components/InteractiveMap.jsx",
@@ -2153,66 +2199,88 @@
       "label": "SVG_ICONS",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "svg_icons",
       "source_file": "src/components/InteractiveMap.jsx",
       "source_location": "L84"
     },
     {
+      "id": "src_components_landingpage",
+      "label": "LandingPage.jsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "landingpage.jsx",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_landingpage_moroccan_cities",
+      "label": "MOROCCAN_CITIES",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "moroccan_cities",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L169"
+    },
+    {
+      "id": "src_components_landingpage_moroccan_services",
+      "label": "MOROCCAN_SERVICES",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "getSpecialtyMeta",
+      "file_type": "code",
+      "norm_label": "moroccan_services",
+      "source_file": "src/components/LandingPage.jsx",
+      "source_location": "L26"
+    },
+    {
       "id": "src_components_maalemselect",
       "label": "MaalemSelect.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
       "norm_label": "maalemselect.jsx",
       "source_file": "src/components/MaalemSelect.jsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_maalemview",
-      "label": "MaalemView.jsx",
+      "id": "src_components_promovideoplayer",
+      "label": "PromoVideoPlayer.jsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "maalemview.jsx",
-      "source_file": "src/components/MaalemView.jsx",
+      "norm_label": "promovideoplayer.jsx",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_specialtyselect",
-      "label": "SpecialtySelect.jsx",
+      "id": "src_components_promovideoplayer_client_scenes",
+      "label": "CLIENT_SCENES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "specialtyselect.jsx",
-      "source_file": "src/components/SpecialtySelect.jsx",
-      "source_location": "L1"
+      "norm_label": "client_scenes",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L32"
     },
     {
-      "id": "src_components_userprofilemodal",
-      "label": "UserProfileModal.jsx",
+      "id": "src_components_promovideoplayer_maalem_scenes",
+      "label": "MAALEM_SCENES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "MaalemView.jsx",
+      "community_name": "getSpecialtyMeta",
       "file_type": "code",
-      "norm_label": "userprofilemodal.jsx",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_userprofilemodal_cities",
-      "label": "CITIES",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "MaalemView.jsx",
-      "file_type": "code",
-      "norm_label": "cities",
-      "source_file": "src/components/UserProfileModal.jsx",
-      "source_location": "L34"
+      "norm_label": "maalem_scenes",
+      "source_file": "src/components/PromoVideoPlayer.jsx",
+      "source_location": "L117"
     },
     {
       "id": "supabase_services_seed",
@@ -2399,7 +2467,7 @@
       "file_type": "code",
       "norm_label": "service_type_map",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L54"
+      "source_location": "L55"
     },
     {
       "id": "src_components_customdropdown",
@@ -2411,6 +2479,61 @@
       "norm_label": "customdropdown.jsx",
       "source_file": "src/components/CustomDropdown.jsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_enhancedcategoryicon_specialty_config",
+      "label": "SPECIALTY_CONFIG",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "specialty_config",
+      "source_file": "src/components/EnhancedCategoryIcon.jsx",
+      "source_location": "L25"
+    },
+    {
+      "id": "src_components_maalemview",
+      "label": "MaalemView.jsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "maalemview.jsx",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_specialtyselect",
+      "label": "SpecialtySelect.jsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "specialtyselect.jsx",
+      "source_file": "src/components/SpecialtySelect.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_userprofilemodal",
+      "label": "UserProfileModal.jsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "userprofilemodal.jsx",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_userprofilemodal_cities",
+      "label": "CITIES",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "cities",
+      "source_file": "src/components/UserProfileModal.jsx",
+      "source_location": "L34"
     },
     {
       "id": "src_components_voicerecorder",
@@ -2477,6 +2600,61 @@
       "norm_label": "moroccan_cities",
       "source_file": "src/constants/geo.js",
       "source_location": "L19"
+    },
+    {
+      "id": "src_lib_geoservice",
+      "label": "geoService.js",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "geoservice.js",
+      "source_file": "src/lib/geoService.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_geoservice_geocodememorycache",
+      "label": "geocodeMemoryCache",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "geocodememorycache",
+      "source_file": "src/lib/geoService.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_lib_supabaseclient",
+      "label": "supabaseClient.js",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "supabaseclient.js",
+      "source_file": "src/lib/supabaseClient.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_supabaseclient_issupabaseconfigured",
+      "label": "isSupabaseConfigured",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "issupabaseconfigured",
+      "source_file": "src/lib/supabaseClient.js",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_lib_supabaseclient_supabase",
+      "label": "supabase",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "ClientView.jsx",
+      "file_type": "code",
+      "norm_label": "supabase",
+      "source_file": "src/lib/supabaseClient.js",
+      "source_location": "L10"
     },
     {
       "id": "supabase_create_storage_bucket",
@@ -3541,6 +3719,28 @@
       "source_location": "L24"
     },
     {
+      "id": "src_lib_i18n",
+      "label": "i18n.js",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "AuthContext.jsx",
+      "file_type": "code",
+      "norm_label": "i18n.js",
+      "source_file": "src/lib/i18n.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_i18n_translations",
+      "label": "translations",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "AuthContext.jsx",
+      "file_type": "code",
+      "norm_label": "translations",
+      "source_file": "src/lib/i18n.js",
+      "source_location": "L3"
+    },
+    {
       "id": "src_lib_infobipauthservice",
       "label": "infobipAuthService.js",
       "_origin": "ast",
@@ -3561,39 +3761,6 @@
       "norm_label": "infobip_base_url",
       "source_file": "src/lib/infobipAuthService.js",
       "source_location": "L5"
-    },
-    {
-      "id": "src_lib_supabaseclient",
-      "label": "supabaseClient.js",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "AuthContext.jsx",
-      "file_type": "code",
-      "norm_label": "supabaseclient.js",
-      "source_file": "src/lib/supabaseClient.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_supabaseclient_issupabaseconfigured",
-      "label": "isSupabaseConfigured",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "AuthContext.jsx",
-      "file_type": "code",
-      "norm_label": "issupabaseconfigured",
-      "source_file": "src/lib/supabaseClient.js",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_lib_supabaseclient_supabase",
-      "label": "supabase",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "AuthContext.jsx",
-      "file_type": "code",
-      "norm_label": "supabase",
-      "source_file": "src/lib/supabaseClient.js",
-      "source_location": "L10"
     },
     {
       "id": "api_verify_otp",
@@ -3649,127 +3816,6 @@
       "norm_label": "send-push.js",
       "source_file": "api/send-push.js",
       "source_location": "L1"
-    },
-    {
-      "id": "src_components_maalem_pushnotificationbanner",
-      "label": "PushNotificationBanner.jsx",
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "pushnotificationbanner.jsx",
-      "source_file": "src/components/maalem/PushNotificationBanner.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_pushnotificationservice",
-      "label": "pushNotificationService.js",
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "pushnotificationservice.js",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_pushnotificationservice_vapid_public_key",
-      "label": "VAPID_PUBLIC_KEY",
-      "_origin": "ast",
-      "community": 63,
-      "community_name": "pushNotificationService.js",
-      "file_type": "code",
-      "norm_label": "vapid_public_key",
-      "source_file": "src/lib/pushNotificationService.js",
-      "source_location": "L8"
-    },
-    {
-      "id": "src_components_landingpage",
-      "label": "LandingPage.jsx",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "landingpage.jsx",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_landingpage_moroccan_cities",
-      "label": "MOROCCAN_CITIES",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "moroccan_cities",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L169"
-    },
-    {
-      "id": "src_components_landingpage_moroccan_services",
-      "label": "MOROCCAN_SERVICES",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "moroccan_services",
-      "source_file": "src/components/LandingPage.jsx",
-      "source_location": "L26"
-    },
-    {
-      "id": "src_components_promovideoplayer",
-      "label": "PromoVideoPlayer.jsx",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "promovideoplayer.jsx",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_promovideoplayer_client_scenes",
-      "label": "CLIENT_SCENES",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "client_scenes",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L32"
-    },
-    {
-      "id": "src_components_promovideoplayer_maalem_scenes",
-      "label": "MAALEM_SCENES",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "maalem_scenes",
-      "source_file": "src/components/PromoVideoPlayer.jsx",
-      "source_location": "L117"
-    },
-    {
-      "id": "src_lib_i18n",
-      "label": "i18n.js",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "i18n.js",
-      "source_file": "src/lib/i18n.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_i18n_translations",
-      "label": "translations",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "LandingPage.jsx",
-      "file_type": "code",
-      "norm_label": "translations",
-      "source_file": "src/lib/i18n.js",
-      "source_location": "L3"
     },
     {
       "id": "supabase_lead_escrow_system",
@@ -4305,7 +4351,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L110",
+      "source_location": "L111",
       "weight": 1.0
     },
     {
@@ -4317,7 +4363,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L111",
+      "source_location": "L112",
       "weight": 1.0
     },
     {
@@ -4329,7 +4375,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L124",
+      "source_location": "L125",
       "weight": 1.0
     },
     {
@@ -4341,7 +4387,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L149",
+      "source_location": "L150",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_clientview_clientview",
+      "target": "src_lib_geoservice_findnearestcatalogcity",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/ClientView.jsx",
+      "source_location": "L322",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_clientview_clientview",
+      "target": "src_lib_geoservice_reversegeocodemorocco",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/ClientView.jsx",
+      "source_location": "L328",
       "weight": 1.0
     },
     {
@@ -4353,7 +4423,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L635",
+      "source_location": "L621",
       "weight": 1.0
     },
     {
@@ -4581,7 +4651,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L1023",
+      "source_location": "L1025",
       "weight": 1.0
     },
     {
@@ -4593,7 +4663,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L383",
+      "source_location": "L385",
       "weight": 1.0
     },
     {
@@ -4605,7 +4675,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L612",
+      "source_location": "L614",
       "weight": 1.0
     },
     {
@@ -4617,7 +4687,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L66",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -4629,7 +4699,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L85",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -4641,7 +4711,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L95",
+      "source_location": "L96",
       "weight": 1.0
     },
     {
@@ -5314,6 +5384,18 @@
       "context": "call",
       "source_file": "src/lib/audioNotifier.js",
       "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_geoservice_reversegeocodemorocco",
+      "target": "src_lib_geoservice_findnearestcatalogcity",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/geoService.js",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -6593,7 +6675,7 @@
     },
     {
       "source": "src_components_clientview",
-      "target": "src_components_customdropdown_customdropdown",
+      "target": "src_lib_geoservice_findnearestcatalogcity",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -6601,6 +6683,30 @@
       "context": "import",
       "source_file": "src/components/ClientView.jsx",
       "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_clientview",
+      "target": "src_lib_geoservice_reversegeocodemorocco",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/ClientView.jsx",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_clientview",
+      "target": "src_components_customdropdown_customdropdown",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/ClientView.jsx",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -6961,6 +7067,18 @@
       "context": "import",
       "source_file": "src/components/MaalemView.jsx",
       "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalemview",
+      "target": "src_constants_geo_moroccan_cities",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -8068,6 +8186,18 @@
       "weight": 1.0
     },
     {
+      "source": "src_lib_geoservice",
+      "target": "src_constants_geo_moroccan_cities",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/geoService.js",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
       "source": "src_lib_infobipauthservice",
       "target": "src_lib_supabaseclient_issupabaseconfigured",
       "relation": "imports",
@@ -8633,7 +8763,7 @@
     },
     {
       "source": "src_components_clientview",
-      "target": "src_components_customdropdown",
+      "target": "src_lib_geoservice",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -8641,6 +8771,18 @@
       "context": "import",
       "source_file": "src/components/ClientView.jsx",
       "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_clientview",
+      "target": "src_components_customdropdown",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/ClientView.jsx",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -8917,6 +9059,18 @@
       "context": "import",
       "source_file": "src/components/MaalemView.jsx",
       "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_maalemview",
+      "target": "src_constants_geo",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/MaalemView.jsx",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -9648,6 +9802,18 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/lib/ablyRealtimeService.js",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_geoservice",
+      "target": "src_constants_geo",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/geoService.js",
       "source_location": "L1",
       "weight": 1.0
     },
@@ -10599,7 +10765,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L109",
+      "source_location": "L110",
       "weight": 1.0
     },
     {
@@ -10610,7 +10776,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -10621,7 +10787,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L74",
+      "source_location": "L75",
       "weight": 1.0
     },
     {
@@ -10632,7 +10798,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ClientView.jsx",
-      "source_location": "L93",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -10852,7 +11018,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/MaalemView.jsx",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -11425,6 +11591,39 @@
       "confidence_score": 1.0,
       "source_file": "src/lib/firebaseClient.js",
       "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_geoservice",
+      "target": "src_lib_geoservice_findnearestcatalogcity",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/geoService.js",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_geoservice",
+      "target": "src_lib_geoservice_geocodememorycache",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/geoService.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_geoservice",
+      "target": "src_lib_geoservice_reversegeocodemorocco",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/geoService.js",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -12307,5 +12506,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "64225f7855f9e3255e067b1b92c26e6f82fab574"
+  "built_at_commit": "4e2659d5cf7cd604a9072c6d08ab28cfbd49a83c"
 }
