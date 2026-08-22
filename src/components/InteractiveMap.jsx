@@ -537,7 +537,7 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
               <div class="flex items-center justify-between gap-2">
                 <span class="text-[11px] text-slate-600 font-semibold truncate">${getSpecialtyLabel(m.specialty)}</span>
                 <span class="text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 font-mono text-[11px] whitespace-nowrap shrink-0">
-                  ⭐ ${(m.rating_avg || 5.0).toFixed(1)} / 5.0
+                  ⭐ ${(m.rating_avg || 5.0).toFixed(1)} / 5.0${m.reviews_count ? ` (${m.reviews_count})` : ''}
                 </span>
               </div>
               <div class="flex items-center justify-between text-[11px] text-slate-600 font-mono pt-2 border-t border-slate-100 whitespace-nowrap">

@@ -9,6 +9,8 @@ import { publishRealtimeEvent, subscribeToRealtimeChannel } from '../lib/ablyRea
 import { useAblyPresence } from '../hooks/useAblyPresence';
 import { getAppSubdomain } from '../lib/subdomain';
 import { generateReceiptPDF } from '../lib/pdfReceiptGenerator';
+import { calculateMaalemRating } from '../utils/ratingUtils';
+import { calculateMaalemBalance } from '../utils/balanceUtils';
 
 const AppContext = createContext();
 
@@ -42,11 +44,18 @@ export const AppProvider = ({ children }) => {
     try {
       const cached = localStorage.getItem('bricolemoi_interventions_cache');
       return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [maalems, setMaalems] = useState(() => {
+    try {
+      const cached = localStorage.getItem('bricolemoi_maalems_cache');
+      return cached ? JSON.parse(cached) : [];
     } catch {
       return [];
     }
   });
-  const [maalems, setMaalems] = useState([]);
   const [clients, setClients] = useState([]);
   const [transactions, setTransactions] = useState(() => {
     try {
@@ -56,7 +65,14 @@ export const AppProvider = ({ children }) => {
       return [];
     }
   });
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState(() => {
+    try {
+      const cached = localStorage.getItem('bricolemoi_reviews_cache');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [adminNotifications, setAdminNotifications] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
   const [whatsappMsg, setWhatsappMsg] = useState(null);
@@ -647,6 +663,7 @@ export const AppProvider = ({ children }) => {
               .limit(100);
             if (realReviews) {
               setReviews(realReviews);
+              try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(realReviews)); } catch (e) { }
               reviewsMap = new Map(realReviews.map((r) => [String(r.intervention_id).trim(), r]));
             }
           } catch (e) { }
@@ -1679,10 +1696,89 @@ export const AppProvider = ({ children }) => {
         )
         .subscribe();
 
+      // 4. Reviews (sync temps réel des notes, avis clients et alertes admin)
+      const reviewsChannel = supabase
+        .channel('public:reviews')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'reviews' },
+          (payload) => {
+            if (payload.eventType === 'INSERT' && payload.new) {
+              setReviews((prev) => {
+                const next = [payload.new, ...prev.filter((r) => String(r.id).trim() !== String(payload.new.id).trim())];
+                try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(next)); } catch (e) { }
+                return next;
+              });
+
+              // Mettre à jour l'artisan concerné
+              setMaalems((prev) =>
+                prev.map((m) => {
+                  if (String(m.id).trim() === String(payload.new.maalem_id).trim()) {
+                    const ratingInfo = calculateMaalemRating(m, [payload.new, ...reviews], interventions);
+                    return {
+                      ...m,
+                      rating_avg: ratingInfo.averageRating,
+                      reviews_count: ratingInfo.totalReviews,
+                      last_review_comment: payload.new.comment,
+                      last_review_rating: payload.new.rating
+                    };
+                  }
+                  return m;
+                })
+              );
+
+              // Si note basse (<= 3), créer alerte admin
+              if (Number(payload.new.rating) <= 3) {
+                const alertItem = {
+                  id: 'alert-' + payload.new.id,
+                  intervention_id: payload.new.intervention_id,
+                  maalem_id: payload.new.maalem_id,
+                  client_name: payload.new.client_name || 'Client BricoleMoi',
+                  rating: Number(payload.new.rating),
+                  comment: payload.new.comment,
+                  reason_label: `Avis Insatisfaisant (${payload.new.rating}⭐)`,
+                  status: 'PENDING',
+                  created_at: payload.new.created_at || new Date().toISOString()
+                };
+                setAdminAlerts((prev) => {
+                  const next = [alertItem, ...prev.filter((a) => a.intervention_id !== payload.new.intervention_id)];
+                  try { localStorage.setItem('bricolemoi_admin_alerts', JSON.stringify(next)); } catch (e) {}
+                  return next;
+                });
+              }
+
+              // Notifier l'artisan connecté s'il est concerné
+              const currUser = userRef.current;
+              if (currUser && String(currUser.id).trim() === String(payload.new.maalem_id).trim()) {
+                const rScore = Number(payload.new.rating) || 5;
+                notify.success(
+                  `Nouvel Avis Client (${rScore}⭐)`,
+                  payload.new.comment || 'Un client a évalué votre travail.',
+                  { id: `new-rev-${payload.new.id}` }
+                );
+              }
+            } else if (payload.eventType === 'UPDATE' && payload.new) {
+              setReviews((prev) => {
+                const next = prev.map((r) => String(r.id).trim() === String(payload.new.id).trim() ? payload.new : r);
+                try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(next)); } catch (e) { }
+                return next;
+              });
+            } else if (payload.eventType === 'DELETE' && payload.old) {
+              setReviews((prev) => {
+                const next = prev.filter((r) => String(r.id).trim() !== String(payload.old.id).trim());
+                try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(next)); } catch (e) { }
+                return next;
+              });
+            }
+          }
+        )
+        .subscribe();
+
       return () => {
         supabase.removeChannel(jobsChannel);
         supabase.removeChannel(profilesChannel);
         supabase.removeChannel(transactionsChannel);
+        supabase.removeChannel(reviewsChannel);
       };
     }, []);
 
@@ -2870,43 +2966,73 @@ export const AppProvider = ({ children }) => {
         created_at: new Date().toISOString()
       };
 
-      setReviews((prev) => [newReview, ...prev.filter((r) => r.intervention_id !== intervention_id)]);
+      const nextReviews = [newReview, ...reviews.filter((r) => r.intervention_id !== intervention_id)];
+      setReviews(nextReviews);
+      try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(nextReviews)); } catch (e) { }
 
       // Marquer l'intervention comme terminée avec sa note & commentaire
-      setInterventions((prev) =>
-        prev.map((item) =>
-          item.id === intervention_id
-            ? { ...item, status: 'COMPLETED', rating: Number(rating), comment: fullComment }
-            : item
-        )
+      const updatedInterventions = interventions.map((item) =>
+        item.id === intervention_id
+          ? { ...item, status: 'COMPLETED', rating: Number(rating), comment: fullComment, badges: badges || item.badges }
+          : item
       );
+      setInterventions(updatedInterventions);
+      try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updatedInterventions)); } catch (e) { }
 
-      // Mettre à jour l'artisan Maalem dans l'état local
+      // Calcul dynamique et exact de la note du Maâlem
+      const ratingInfo = calculateMaalemRating({ id: targetMaalemId }, nextReviews, updatedInterventions);
+
+      // Mettre à jour l'artisan Maalem dans l'état global
       setMaalems((prev) =>
         prev.map((m) => {
-          if (m.id === targetMaalemId) {
-            const newAvg = m.rating_avg ? Number(((m.rating_avg + rating) / 2).toFixed(1)) : rating;
+          if (String(m.id).trim() === String(targetMaalemId).trim()) {
             return {
               ...m,
-              rating_avg: newAvg,
+              rating_avg: ratingInfo.averageRating,
+              reviews_count: ratingInfo.totalReviews,
               last_review_comment: fullComment,
-              last_review_rating: rating
+              last_review_rating: Number(rating)
             };
           }
           return m;
         })
       );
 
-      // Sync BroadcastChannel
+      // Si l'utilisateur connecté est l'artisan noté, mettre à jour son state utilisateur
+      if (userRef.current && String(userRef.current.id).trim() === String(targetMaalemId).trim()) {
+        setUser((prev) => ({
+          ...prev,
+          maalem_details: {
+            ...(prev?.maalem_details || {}),
+            rating_avg: ratingInfo.averageRating,
+            consecutive_five_stars: ratingInfo.consecutiveFiveStars
+          }
+        }));
+      }
+
+      // Sync BroadcastChannel & Ably
       try {
         const bc = new BroadcastChannel('bricolemoi_intertab_sync');
         bc.postMessage({
           type: 'INTERVENTION_COMPLETED_WITH_REVIEW',
           intervention_id,
           rating: Number(rating),
-          comment: fullComment
+          comment: fullComment,
+          maalem_id: targetMaalemId,
+          badges: badges || [],
+          client_name: user?.full_name || currentInt?.client_name
         });
       } catch (e) { }
+
+      broadcastSync({
+        type: 'INTERVENTION_COMPLETED_WITH_REVIEW',
+        intervention_id,
+        rating: Number(rating),
+        comment: fullComment,
+        maalem_id: targetMaalemId,
+        badges: badges || [],
+        client_name: user?.full_name || currentInt?.client_name
+      });
 
       // BDD Supabase
       if (isSupabaseConfigured) {

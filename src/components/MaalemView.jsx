@@ -63,6 +63,7 @@ import {
 import { PushNotificationBanner } from './maalem/PushNotificationBanner';
 import { MOROCCAN_CITIES } from '../constants/geo';
 import { calculateMaalemBalance, isBonusTx, isLeadTx, isRealRechargeTx } from '../utils/balanceUtils';
+import { calculateMaalemRating } from '../utils/ratingUtils';
 
 export const MaalemView = ({ onOpenCINVerification }) => {
   const { t, user, setUser } = useAuth();
@@ -70,6 +71,7 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     interventions, 
     maalems,
     transactions,
+    reviews = [],
     generateReceiptPDF,
     acceptLead, 
     requestWorkCompletion,
@@ -99,6 +101,7 @@ export const MaalemView = ({ onOpenCINVerification }) => {
   const currentLiveMaalem = maalems?.find((m) => m.id === user?.id) || user?.maalem_details || user;
 
   const balanceInfo = calculateMaalemBalance(user, transactions, maalems);
+  const ratingInfo = calculateMaalemRating(user, reviews, interventions);
   const myTransactions = balanceInfo.myTransactions;
   const totalRechargedSum = balanceInfo.totalRechargedSum;
   const totalValidatedLeadsSpent = balanceInfo.totalValidatedLeadsSpent;
@@ -115,8 +118,8 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     total_balance: liveTotalBalance,
     reserved_escrow: totalReservedEscrow,
     is_verified: currentLiveMaalem?.is_verified ?? true,
-    rating_avg: currentLiveMaalem?.rating_avg || 4.80,
-    consecutive_five_stars: 3,
+    rating_avg: ratingInfo.averageRating,
+    consecutive_five_stars: ratingInfo.consecutiveFiveStars,
     hundred_dh_recharges_count: 2
   };
 
@@ -585,7 +588,10 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                 
                 <span className="flex items-center text-amber-800 font-mono font-black bg-amber-50 px-3 py-1 rounded-xl border border-amber-200 shadow-xs">
                   <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 mr-1" />
-                  <span>{(maalemDetails.rating_avg || 4.9).toFixed(1)} / 5.0</span>
+                  <span>{ratingInfo.averageRating.toFixed(1)} / 5.0</span>
+                  {ratingInfo.totalReviews > 0 && (
+                    <span className="ml-1 text-[10px] text-amber-600 font-bold">({ratingInfo.totalReviews} avis)</span>
+                  )}
                 </span>
               </div>
             </div>

@@ -28,6 +28,7 @@ import {
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
 import { calculateMaalemBalance } from '../../utils/balanceUtils';
+import { calculateMaalemRating } from '../../utils/ratingUtils';
 
 export const AdminMaalemsView = ({ 
   maalems = [], 
@@ -50,6 +51,12 @@ export const AdminMaalemsView = ({
   const getMaalemCreditBalance = (m) => {
     if (!m) return 0;
     return calculateMaalemBalance(m, transactions, maalems).liveAvailableBalance;
+  };
+
+  // Calcul dynamique de la note et des avis pour chaque Maâlem
+  const getMaalemRating = (m) => {
+    if (!m) return { averageRating: 5.0, totalReviews: 0, maalemReviews: [] };
+    return calculateMaalemRating(m, reviews, interventions);
   };
 
   // Filtrage des artisans
@@ -268,10 +275,18 @@ export const AdminMaalemsView = ({
                       <span className="truncate">{m.district || m.city_zone || 'Casablanca'}</span>
                     </p>
                     <div className="flex items-center gap-2 pt-1 text-xs">
-                      <span className="flex items-center text-amber-800 font-mono font-bold bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 shadow-xs">
-                        <Star className="w-3 h-3 text-amber-500 fill-amber-500 mr-1" />
-                        <span>{(m.rating_avg || 4.9).toFixed(1)}</span>
-                      </span>
+                      {(() => {
+                        const rInfo = getMaalemRating(m);
+                        return (
+                          <span className="flex items-center text-amber-800 font-mono font-bold bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 shadow-xs">
+                            <Star className="w-3 h-3 text-amber-500 fill-amber-500 mr-1" />
+                            <span>{rInfo.averageRating.toFixed(1)}</span>
+                            {rInfo.totalReviews > 0 && (
+                              <span className="ml-1 text-[9px] text-amber-600">({rInfo.totalReviews})</span>
+                            )}
+                          </span>
+                        );
+                      })()}
                       <a href={`tel:${m.phone}`} className="text-slate-700 font-mono text-[11px] hover:text-blue-600 flex items-center gap-1 font-bold">
                         <Phone className="w-3 h-3 text-emerald-600" />
                         <span>{m.phone || 'Non renseigné'}</span>
@@ -476,7 +491,7 @@ export const AdminMaalemsView = ({
                     <div className="bg-amber-50 border border-amber-200 rounded-2xl p-2.5 text-center shadow-xs">
                       <span className="text-[9px] font-mono text-amber-800 uppercase block font-bold">Note ★</span>
                       <p className="text-base font-black text-amber-800 font-mono mt-0.5">
-                        {(selectedMaalem.rating_avg || 4.9).toFixed(1)} / 5
+                        {getMaalemRating(selectedMaalem).averageRating.toFixed(1)} / 5
                       </p>
                     </div>
 
@@ -541,6 +556,63 @@ export const AdminMaalemsView = ({
                         +100 DH
                       </button>
                     </div>
+                  </div>
+
+                  {/* Avis & Commentaires Clients */}
+                  <div>
+                    {(() => {
+                      const selRating = getMaalemRating(selectedMaalem);
+                      return (
+                        <>
+                          <h4 className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+                            <span className="flex items-center gap-1.5">
+                              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                              <span>Avis &amp; Commentaires Clients ({selRating.totalReviews})</span>
+                            </span>
+                            <span className="text-amber-800 font-mono font-bold text-xs bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
+                              Moyenne : {selRating.averageRating.toFixed(1)} / 5.0
+                            </span>
+                          </h4>
+
+                          {selRating.maalemReviews.length === 0 ? (
+                            <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                              Aucun avis client enregistré pour cet artisan.
+                            </p>
+                          ) : (
+                            <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                              {selRating.maalemReviews.map((rev) => (
+                                <div key={rev.id || rev.intervention_id} className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs space-y-1.5 shadow-xs">
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-bold text-slate-900">{rev.client_name || 'Client BricoleMoi'}</span>
+                                    <span className="flex items-center gap-0.5 text-amber-600 font-mono font-bold">
+                                      <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                                      <span>{Number(rev.rating || 5).toFixed(1)}★</span>
+                                    </span>
+                                  </div>
+                                  {rev.comment && (
+                                    <p className="text-slate-700 italic bg-white p-2 rounded-xl border border-slate-100">
+                                      « {rev.comment} »
+                                    </p>
+                                  )}
+                                  {Array.isArray(rev.badges) && rev.badges.length > 0 && (
+                                    <div className="flex flex-wrap gap-1">
+                                      {rev.badges.map((b, i) => (
+                                        <span key={i} className="text-[9px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-100 font-bold">
+                                          🏷️ {b}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <span className="text-[9px] text-slate-400 font-mono block">
+                                    {rev.created_at ? new Date(rev.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Récemment'}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
 
                   {/* Portfolio Photos de Réalisations */}

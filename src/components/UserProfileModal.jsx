@@ -41,12 +41,14 @@ const CITIES = [
 ];
 
 import { calculateMaalemBalance } from '../utils/balanceUtils';
+import { calculateMaalemRating } from '../utils/ratingUtils';
 
 export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfile }) => {
   const { user, setUser, logout } = useAuth();
-  const { interventions = [], transactions = [], maalems = [] } = useApp();
+  const { interventions = [], transactions = [], maalems = [], reviews = [] } = useApp();
 
   const balanceInfo = calculateMaalemBalance(user, transactions, maalems);
+  const ratingInfo = calculateMaalemRating(user, reviews, interventions);
 
   const isMissingPhone = !user?.phone || user.phone.length < 8;
   const [activeTab, setActiveTab] = useState(isMissingPhone ? 'edit' : 'info');
@@ -315,7 +317,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           )}
 
           {/* Tab Switcher */}
-          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1">
             <button
               type="button"
               onClick={() => setActiveTab('info')}
@@ -327,6 +329,20 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             >
               Coordonnées
             </button>
+            {isMaalem && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('reviews')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  activeTab === 'reviews'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                <span>Avis ({ratingInfo.totalReviews})</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setActiveTab('edit')}
@@ -356,7 +372,15 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
 
           {/* Tab 1: Informations View */}
           {activeTab === 'info' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2.5">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs font-bold text-slate-700">Nom &amp; Prénom</span>
+                </div>
+                <span className="text-xs font-bold text-slate-900">{user.full_name || 'Non renseigné'}</span>
+              </div>
+
               <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Phone className="w-4 h-4 text-blue-600" />
@@ -375,6 +399,49 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 <span className="text-xs font-bold text-slate-900">{user.city_zone || 'Casablanca - Maarif'}</span>
               </div>
 
+              {isMaalem && (
+                <>
+                  {/* Note & Avis Rating Card */}
+                  <div className="bg-amber-50/70 border border-amber-200/80 p-3.5 rounded-2xl flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold">
+                        <Star className="w-4 h-4 fill-white text-white" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-amber-950 block">Évaluation &amp; Avis Clients</span>
+                        <span className="text-[10px] text-amber-800 font-medium">
+                          {ratingInfo.totalReviews} avis vérifié{ratingInfo.totalReviews > 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-base font-black text-amber-900 font-mono flex items-center gap-1 justify-end">
+                        <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                        <span>{ratingInfo.averageRating.toFixed(1)} / 5.0</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Portefeuille Solde */}
+                  <div className="bg-emerald-50/70 border border-emerald-200/80 p-3.5 rounded-2xl flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="w-4 h-4 text-emerald-600" />
+                      <div>
+                        <span className="text-xs font-bold text-emerald-950 block">Solde de Crédits Leads</span>
+                        {balanceInfo.totalReservedEscrow > 0 && (
+                          <span className="text-[10px] text-emerald-800 font-medium">
+                            {balanceInfo.totalReservedEscrow.toFixed(2)} DH en garantie (Total : {balanceInfo.liveTotalBalance.toFixed(2)} DH)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-sm font-black text-emerald-900 font-mono">
+                      {balanceInfo.liveAvailableBalance.toFixed(2)} DH
+                    </span>
+                  </div>
+                </>
+              )}
+
               {!isMaalem && (
                 <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -386,25 +453,90 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                   </span>
                 </div>
               )}
+            </motion.div>
+          )}
 
-              {isMaalem && (
-                <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="w-4 h-4 text-amber-600" />
-                    <div>
-                      <span className="text-xs font-bold text-amber-900 block">Solde de Crédits Leads</span>
-                      {balanceInfo.totalReservedEscrow > 0 && (
-                        <span className="text-[10px] text-amber-700 font-medium">
-                          {balanceInfo.totalReservedEscrow.toFixed(2)} DH en garantie (Total : {balanceInfo.liveTotalBalance.toFixed(2)} DH)
-                        </span>
-                      )}
-                    </div>
+          {/* Tab: Reviews List (Maâlem) */}
+          {activeTab === 'reviews' && isMaalem && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+              {/* Synthèse globale des avis */}
+              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl font-black text-slate-900 font-mono">
+                    {ratingInfo.averageRating.toFixed(1)}
                   </div>
-                  <span className="text-sm font-black text-amber-900 font-mono">
-                    {balanceInfo.liveAvailableBalance.toFixed(2)} DH
-                  </span>
+                  <div>
+                    <div className="flex items-center gap-0.5 text-amber-500">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star 
+                          key={s} 
+                          className={`w-3.5 h-3.5 ${s <= Math.round(ratingInfo.averageRating) ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`} 
+                        />
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-bold mt-0.5">
+                      Basé sur {ratingInfo.totalReviews} avis client{ratingInfo.totalReviews > 1 ? 's' : ''}
+                    </p>
+                  </div>
                 </div>
-              )}
+
+                {ratingInfo.badgesSummary.length > 0 && (
+                  <div className="flex flex-wrap gap-1 max-w-[160px] justify-end">
+                    {ratingInfo.badgesSummary.slice(0, 3).map((b) => (
+                      <span key={b.name} className="text-[9px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-200">
+                        {b.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Liste des avis clients */}
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {ratingInfo.maalemReviews.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500 space-y-1">
+                    <p className="text-xs font-bold">Aucun avis client pour le moment.</p>
+                    <p className="text-[11px] text-slate-400">Vos évaluations apparaîtront ici après chaque intervention SOS confirmée.</p>
+                  </div>
+                ) : (
+                  ratingInfo.maalemReviews.map((rev) => (
+                    <div key={rev.id || rev.intervention_id} className="p-3 bg-white border border-slate-200 rounded-2xl space-y-1.5 shadow-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-[10px] font-black">
+                            {rev.client_name?.charAt(0) || 'C'}
+                          </div>
+                          <span className="text-xs font-bold text-slate-900">{rev.client_name || 'Client BricoleMoi'}</span>
+                        </div>
+                        <div className="flex items-center gap-0.5 text-amber-500 font-mono text-xs font-black">
+                          <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                          <span>{Number(rev.rating || 5).toFixed(1)}</span>
+                        </div>
+                      </div>
+
+                      {rev.comment && (
+                        <p className="text-xs text-slate-700 italic bg-slate-50 p-2 rounded-xl border border-slate-100">
+                          « {rev.comment} »
+                        </p>
+                      )}
+
+                      {Array.isArray(rev.badges) && rev.badges.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-0.5">
+                          {rev.badges.map((badge, idx) => (
+                            <span key={idx} className="text-[9px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-100">
+                              🏷️ {badge}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="text-[9px] text-slate-400 font-mono">
+                        {rev.created_at ? new Date(rev.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Récemment'}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
             </motion.div>
           )}
 
