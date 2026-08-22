@@ -369,8 +369,8 @@ export const EmergencyFlowProvider = ({ children }) => {
         timestamp: Date.now()
       };
 
-      publishRealtimeEvent(ABLY_CHANNELS.getSosChannel(userCity, userSpecialty), 'sos:claimed', claimPayload);
-      publishRealtimeEvent(ABLY_CHANNELS.getSosCityChannel(userCity), 'sos:claimed', claimPayload);
+      publishRealtimeEvent('sos:claimed', claimPayload, ABLY_CHANNELS.getSosChannel(userCity, userSpecialty));
+      publishRealtimeEvent('sos:claimed', claimPayload, ABLY_CHANNELS.getSosCityChannel(userCity));
 
       dispatch({
         type: ACTIONS.MATCH_SOS,
