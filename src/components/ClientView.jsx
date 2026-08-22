@@ -578,116 +578,18 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     setTipAmount(0);
   };
 
-  const activePendingSOS = myClientInterventions.find((i) => i.status === 'PENDING') || (isSearching ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null);
-
   const activeOngoingSOS = myClientInterventions.find(
     (i) => i.status === 'ACCEPTED' || i.status === 'PENDING_COMPLETION'
   ) || (isMatched && activeEmergency ? activeEmergency : null);
 
+  const activePendingSOS = !activeOngoingSOS
+    ? (myClientInterventions.find((i) => i.status === 'PENDING') || (isSearching ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null))
+    : null;
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-24 md:pb-12 font-sans">
-      {/* 1. ECRAN RADAR DE RECHERCHE (SI SOS EN ATTENTE D'UN ARTISAN) */}
-      {activePendingSOS ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden space-y-6 text-slate-900"
-        >
-          {/* Top Radar Status Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-            <div className="flex items-center gap-3.5">
-              {/* Pulsing Radar Icon Container */}
-              <div className="relative flex items-center justify-center w-14 h-14 flex-shrink-0">
-                <div className="absolute inset-0 rounded-2xl bg-blue-100 animate-ping" />
-                <div className="w-14 h-14 rounded-2xl bg-blue-50 border-2 border-blue-500 text-blue-600 flex items-center justify-center shadow-xs">
-                  <Siren className="w-7 h-7 animate-bounce text-blue-600" />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-600 animate-ping" />
-                  <span className="text-xs font-black uppercase tracking-wider text-emerald-700 font-mono">Radar SOS Actif • Diffusion Live</span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                  Recherche d'un Maâlem en cours...
-                </h2>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 self-start sm:self-center">
-              <span className="px-3.5 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-xs shadow-xs">
-                {getServiceDisplay(activePendingSOS.service_type).label}
-              </span>
-            </div>
-          </div>
-
-          {/* Radar Scanner Widget */}
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs relative overflow-hidden">
-            <div className="flex items-center gap-4">
-              {/* Concentric Radar Circles with Rotating Scanner */}
-              <div className="relative w-20 h-20 rounded-full border border-blue-300 bg-white flex items-center justify-center flex-shrink-0 shadow-xs">
-                <div className="absolute inset-2 rounded-full border border-dashed border-blue-200" />
-                <div className="absolute inset-4 rounded-full border border-blue-100" />
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/20 to-transparent animate-spin" style={{ animationDuration: '3s' }} />
-                <MapPin className="w-6 h-6 text-blue-600 z-10" />
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-slate-900">
-                  Diffusion transmise aux artisans disponibles à <span className="text-blue-600 font-black">{activePendingSOS.district || selectedDistrict}</span>
-                </p>
-                <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Dès qu'un Maâlem accepte l'intervention, votre écran se synchronise automatiquement avec son contact et son suivi GPS.
-                </p>
-                <div className="flex items-center gap-2 pt-1">
-                  <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                    🟢 {onlineMaalemsCount} Maâlem(s) notifié(s)
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-mono">
-                    Temps d'attente estimé : &lt; 3 min
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Cancel SOS Button */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              type="button"
-              onClick={() => {
-                if (window.confirm('Voulez-vous vraiment annuler votre demande SOS en cours ?')) {
-                  cancelIntervention(activePendingSOS.id);
-                }
-              }}
-              className="w-full md:w-auto px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border border-red-200 rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 flex items-center justify-center gap-2 flex-shrink-0 cursor-pointer"
-            >
-              <Trash2 className="w-4 h-4 text-red-600" />
-              <span>Annuler la demande SOS</span>
-            </motion.button>
-          </div>
-
-          {/* Carte interactive en direct pour le Client */}
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-blue-600" />
-                <span>Radar des Artisans en direct autour de vous</span>
-              </span>
-              <span className="text-[11px] text-blue-600 font-mono font-bold">100% Live Stream</span>
-            </label>
-            
-            <InteractiveMap
-              mode="CLIENT_PICKER"
-              selectedLat={parseFloat(activePendingSOS.lat || selectedLat)}
-              selectedLng={parseFloat(activePendingSOS.lng || selectedLng)}
-              filterCategory={activePendingSOS.service_type || serviceType}
-            />
-          </div>
-        </motion.div>
-      ) : activeOngoingSOS && !showNewSOSForm ? (
-        /* 1b. INTERVENTION EN COURS (PRISE EN CHARGE CONFIRMÉE PAR LE MAÂLEM) */
+      {/* 1. INTERVENTION EN COURS (PRISE EN CHARGE CONFIRMÉE PAR LE MAÂLEM) */}
+      {activeOngoingSOS && !showNewSOSForm ? (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -867,6 +769,106 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
             >
               <span>+ Besoin d'un autre dépannage en parallèle ?</span>
             </button>
+          </div>
+        </motion.div>
+      ) : activePendingSOS ? (
+        /* 2. ECRAN RADAR DE RECHERCHE (SI SOS EN ATTENTE D'UN ARTISAN) */
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+          className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden space-y-6 text-slate-900"
+        >
+          {/* Top Radar Status Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+            <div className="flex items-center gap-3.5">
+              {/* Pulsing Radar Icon Container */}
+              <div className="relative flex items-center justify-center w-14 h-14 flex-shrink-0">
+                <div className="absolute inset-0 rounded-2xl bg-blue-100 animate-ping" />
+                <div className="w-14 h-14 rounded-2xl bg-blue-50 border-2 border-blue-500 text-blue-600 flex items-center justify-center shadow-xs">
+                  <Siren className="w-7 h-7 animate-bounce text-blue-600" />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-600 animate-ping" />
+                  <span className="text-xs font-black uppercase tracking-wider text-emerald-700 font-mono">Radar SOS Actif • Diffusion Live</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Recherche d'un Maâlem en cours...
+                </h2>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-center">
+              <span className="px-3.5 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-xs shadow-xs">
+                {getServiceDisplay(activePendingSOS.service_type).label}
+              </span>
+            </div>
+          </div>
+
+          {/* Radar Scanner Widget */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs relative overflow-hidden">
+            <div className="flex items-center gap-4">
+              {/* Concentric Radar Circles with Rotating Scanner */}
+              <div className="relative w-20 h-20 rounded-full border border-blue-300 bg-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                <div className="absolute inset-2 rounded-full border border-dashed border-blue-200" />
+                <div className="absolute inset-4 rounded-full border border-blue-100" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/20 to-transparent animate-spin" style={{ animationDuration: '3s' }} />
+                <MapPin className="w-6 h-6 text-blue-600 z-10" />
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-slate-900">
+                  Diffusion transmise aux artisans disponibles à <span className="text-blue-600 font-black">{activePendingSOS.district || selectedDistrict}</span>
+                </p>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Dès qu'un Maâlem accepte l'intervention, votre écran se synchronise automatiquement avec son contact et son suivi GPS.
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                    🟢 {onlineMaalemsCount} Maâlem(s) notifié(s)
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    Temps d'attente estimé : &lt; 3 min
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Cancel SOS Button */}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={() => {
+                if (window.confirm('Voulez-vous vraiment annuler votre demande SOS en cours ?')) {
+                  cancelIntervention(activePendingSOS.id);
+                }
+              }}
+              className="w-full md:w-auto px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border border-red-200 rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 flex items-center justify-center gap-2 flex-shrink-0 cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4 text-red-600" />
+              <span>Annuler la demande SOS</span>
+            </motion.button>
+          </div>
+
+          {/* Carte interactive en direct pour le Client */}
+          <div className="space-y-2">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                <span>Radar des Artisans en direct autour de vous</span>
+              </span>
+              <span className="text-[11px] text-blue-600 font-mono font-bold">100% Live Stream</span>
+            </label>
+            
+            <InteractiveMap
+              mode="CLIENT_PICKER"
+              selectedLat={parseFloat(activePendingSOS.lat || selectedLat)}
+              selectedLng={parseFloat(activePendingSOS.lng || selectedLng)}
+              filterCategory={activePendingSOS.service_type || serviceType}
+            />
           </div>
         </motion.div>
       ) : (
