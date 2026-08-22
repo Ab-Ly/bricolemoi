@@ -389,9 +389,17 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     })
     .sort((a, b) => (a.calculatedDistance || 0) - (b.calculatedDistance || 0));
 
-  // 2. Chantiers Débloqués (Exclusivité Stricte : Attribués uniquement à l'artisan connecté)
-  const unlockedLeads = interventions.filter((item) => {
-    if (item.status === 'PENDING' || item.status === 'UNFEASIBLE' || item.status === 'CANCELLED') return false;
+  // 2. Chantiers Actifs Débloqués (Missions en cours: En route, Sur place, Attente validation)
+  const activeUnlockedLeads = interventions.filter((item) => {
+    if (item.status !== 'ACCEPTED' && item.status !== 'PENDING_COMPLETION') return false;
+    const isOwner = user?.id && String(item.maalem_id || '').trim() === String(user.id).trim();
+    const isFallbackOwner = (!user?.id || user.id === 'maalem-1' || user.id === '22222222-2222-2222-2222-222222222222') && (!item.maalem_id || item.maalem_id === 'maalem-1' || item.maalem_id === '22222222-2222-2222-2222-222222222222');
+    return isOwner || isFallbackOwner;
+  });
+
+  // 3. Chantiers Clôturés & Évalués (Historique de l'artisan)
+  const completedLeads = interventions.filter((item) => {
+    if (item.status !== 'COMPLETED') return false;
     const isOwner = user?.id && String(item.maalem_id || '').trim() === String(user.id).trim();
     const isFallbackOwner = (!user?.id || user.id === 'maalem-1' || user.id === '22222222-2222-2222-2222-222222222222') && (!item.maalem_id || item.maalem_id === 'maalem-1' || item.maalem_id === '22222222-2222-2222-2222-222222222222');
     return isOwner || isFallbackOwner;
@@ -946,16 +954,16 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
         </div>
       </div>
 
-      {/* 3. SECTION LEADS DÉBLOQUÉS (Contact Direct WhatsApp + Itinéraire GPS + Audio + Photos HD) */}
-      {unlockedLeads.length > 0 && (
+      {/* 3. SECTION LEADS DÉBLOQUÉS ACTIFS (Contact Direct WhatsApp + Itinéraire GPS + Audio + Photos HD) */}
+      {activeUnlockedLeads.length > 0 && (
         <div className="space-y-4 pt-4 border-t border-slate-200">
           <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 font-sans">
             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-            Leads Débloqués - Direct Client ({unlockedLeads.length})
+            Missions Actives en Cours ({activeUnlockedLeads.length})
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {unlockedLeads.map((lead) => {
+            {activeUnlockedLeads.map((lead) => {
               const rawPhone = lead.client_phone || lead.phone || '+212661001122';
               const cleanDigits = String(rawPhone).replace(/\D/g, '');
               const formattedWaDigits = cleanDigits.startsWith('212')
@@ -1240,6 +1248,36 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* 5. Historique des Chantiers Clôturés */}
+      {completedLeads.length > 0 && (
+        <div className="space-y-4 pt-4 border-t border-slate-200">
+          <h3 className="text-lg font-black text-slate-800 flex items-center gap-2 font-sans">
+            <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+            Chantiers Clôturés & Avis Clients ({completedLeads.length})
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {completedLeads.map((lead) => (
+              <div key={lead.id} className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-2 text-xs">
+                <div className="flex items-center justify-between font-bold">
+                  <span className="text-emerald-900 font-black">{lead.client_name || 'Client BricoleMoi'} • {lead.subcategory || 'Dépannage'}</span>
+                  <span className="px-2.5 py-0.5 rounded-full font-mono font-black text-amber-900 bg-amber-100 flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                    <span>{lead.rating ? `${lead.rating} / 5` : '5 / 5'}</span>
+                  </span>
+                </div>
+                <p className="text-slate-600 font-mono text-[11px]">📍 {lead.district || 'Casablanca'} • Rémunération : <strong className="text-slate-900">{lead.final_agreed_price || 150} DH</strong></p>
+                {lead.comment && (
+                  <p className="text-slate-700 italic bg-white p-2.5 rounded-xl border border-emerald-100 font-medium">
+                    "{lead.comment}"
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}

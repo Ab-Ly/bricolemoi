@@ -578,13 +578,22 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     setTipAmount(0);
   };
 
-  const activeOngoingSOS = myClientInterventions.find(
-    (i) => i.status === 'ACCEPTED' || i.status === 'PENDING_COMPLETION'
-  ) || (isMatched && activeEmergency ? activeEmergency : null);
+  // L'intervention la plus récente de l'utilisateur
+  const latestClientIntv = myClientInterventions[0] || null;
 
-  const activePendingSOS = !activeOngoingSOS
-    ? (myClientInterventions.find((i) => i.status === 'PENDING') || (isSearching ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null))
-    : null;
+  // L'intervention active en cours (si la plus récente est ACCEPTED ou PENDING_COMPLETION)
+  const isLatestActiveOngoing = Boolean(
+    latestClientIntv && (latestClientIntv.status === 'ACCEPTED' || latestClientIntv.status === 'PENDING_COMPLETION')
+  );
+  const activeOngoingSOS = isLatestActiveOngoing 
+    ? latestClientIntv 
+    : (!latestClientIntv && isMatched && activeEmergency && !isCompleted ? activeEmergency : null);
+
+  // L'intervention en recherche (si la plus récente est PENDING)
+  const isLatestPending = Boolean(!activeOngoingSOS && latestClientIntv && latestClientIntv.status === 'PENDING');
+  const activePendingSOS = isLatestPending
+    ? latestClientIntv
+    : (!activeOngoingSOS && !latestClientIntv && isSearching ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null);
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-24 md:pb-12 font-sans">

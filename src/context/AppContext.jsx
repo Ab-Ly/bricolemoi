@@ -2789,6 +2789,10 @@ export const AppProvider = ({ children }) => {
       if (isSupabaseConfigured) {
         try {
           publishRealtimeEvent('job_completed', { intervention_id: cleanId });
+          const targetIntv = interventions.find((i) => String(i.id).trim() === cleanId);
+          if (targetIntv?.client_id) {
+            publishRealtimeEvent('job:completed', { intervention_id: cleanId }, ABLY_CHANNELS.getUserChannel(targetIntv.client_id));
+          }
           await supabase
             .from('interventions')
             .update({ status: 'COMPLETED', escrow_status: 'DEBITED' })

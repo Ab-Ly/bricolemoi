@@ -241,6 +241,12 @@ export const EmergencyFlowProvider = ({ children }) => {
             type: ACTIONS.COMPLETE_MISSION,
             payload: { finalPrice: payload.final_agreed_price }
           });
+        } else if (event === 'job:completed') {
+          const currentApp = getAppSubdomain();
+          const currentRole = (user?.role || 'CLIENT').toUpperCase();
+          if (currentApp === 'CLIENT' && currentRole !== 'ADMIN' && currentRole !== 'MAALEM') {
+            dispatch({ type: ACTIONS.RESET_TO_IDLE });
+          }
         } else if (event === 'job:unfeasible' || event === 'job:cancelled') {
           const currentApp = getAppSubdomain();
           const currentRole = (user?.role || 'CLIENT').toUpperCase();
