@@ -961,7 +961,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                 </span>
               </h3>
               <p className="text-[11px] text-slate-500 font-medium">
-                Directement depuis Supabase Realtime • Coût déblocage : 15 DH
+                Flux instantané Ably Realtime (&lt; 50ms) • Coût déblocage : 15 DH
               </p>
             </div>
           </div>
