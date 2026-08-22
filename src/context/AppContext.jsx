@@ -1870,9 +1870,10 @@ export const AppProvider = ({ children }) => {
         created_at: new Date().toISOString()
       };
 
-      // Mise à jour optimiste immédiate de l'état local + cache
+      // Mise à jour optimiste immédiate de l'état local + cache (remplace tout ancien SOS en attente de ce client)
       setInterventions((prev) => {
-        const updated = [newIntervention, ...prev.filter((i) => String(i.id).trim() !== String(newIntervention.id).trim())];
+        const filtered = prev.filter((i) => !(String(i.client_id || '').trim() === String(validClientId).trim() && i.status === 'PENDING'));
+        const updated = [newIntervention, ...filtered.filter((i) => String(i.id).trim() !== String(newIntervention.id).trim())];
         try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated)); } catch (e) { }
         return updated;
       });
