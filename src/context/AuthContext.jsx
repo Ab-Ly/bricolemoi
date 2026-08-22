@@ -470,8 +470,12 @@ export const AuthProvider = ({ children }) => {
               };
             }
           } else {
+            const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+            const validProfileId = isUuid(firebaseUid) ? firebaseUid : (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : (normRole === 'MAALEM' ? '22222222-2222-2222-2222-222222222222' : '11111111-1111-1111-1111-111111111111'));
+            authenticatedUser.id = validProfileId;
+
             const profileData = {
-              id: firebaseUid,
+              id: validProfileId,
               phone: finalPhone,
               role: normRole,
               full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
@@ -483,7 +487,7 @@ export const AuthProvider = ({ children }) => {
             let { error: pError } = await supabase.from('profiles').upsert([profileData]).select();
             if (pError) {
               const baseProfile = {
-                id: firebaseUid,
+                id: validProfileId,
                 phone: finalPhone,
                 role: normRole,
                 full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
@@ -494,7 +498,7 @@ export const AuthProvider = ({ children }) => {
 
             if (normRole === 'MAALEM') {
               const defaultDetails = {
-                id: firebaseUid,
+                id: validProfileId,
                 specialty: specialty || 'PLUMBING',
                 is_verified: true,
                 cin_verified: true,

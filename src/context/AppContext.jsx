@@ -1274,6 +1274,23 @@ export const AppProvider = ({ children }) => {
                   : m
               )
             );
+          } else if (event === 'user:balance_updated' && payload) {
+            const newCredits = Number(payload.credits);
+            if (!isNaN(newCredits)) {
+              setUser((prev) => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  credits: newCredits,
+                  maalem_details: prev.maalem_details ? { ...prev.maalem_details, credit_balance: newCredits } : prev.maalem_details
+                };
+              });
+              setMaalemDetails((prev) => prev ? { ...prev, credit_balance: newCredits } : prev);
+            }
+          } else if (event === 'admin:financial_update' || event === 'admin:transaction_created') {
+            if (payload.transaction) {
+              setTransactions((prev) => [payload.transaction, ...prev.filter(t => t.id !== payload.transaction.id)]);
+            }
           }
         },
         user?.id
