@@ -660,13 +660,19 @@ export const AppProvider = ({ children }) => {
               .limit(100);
 
             if (realInterventions) {
+              let myUnlocked = [];
+              try { myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]'); } catch (e) {}
+
               const enrichedInterventions = realInterventions.map((intv) => {
                 const clientProf = profilesMap.get(intv.client_id);
                 const maalemProf = profilesMap.get(intv.maalem_id);
                 const rev = reviewsMap.get(String(intv.id).trim());
+                const isLocallyUnlocked = myUnlocked.includes(String(intv.id).trim());
 
                 return {
                   ...intv,
+                  status: isLocallyUnlocked && intv.status === 'PENDING' ? 'ACCEPTED' : intv.status,
+                  maalem_id: isLocallyUnlocked && !intv.maalem_id ? (user?.id || '22222222-2222-2222-2222-222222222222') : intv.maalem_id,
                   rating: intv.rating ?? rev?.rating ?? null,
                   comment: intv.comment || rev?.comment || null,
                   client_name: clientProf?.full_name || intv.client_name || 'Client BricoleMoi',
@@ -2384,16 +2390,31 @@ export const AppProvider = ({ children }) => {
         bc.postMessage(payload);
       } catch (e) { }
 
+      // Mémoriser que cet appareil a débloqué ce lead
+      try {
+        const myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
+        if (!myUnlocked.includes(String(interventionId).trim())) {
+          myUnlocked.push(String(interventionId).trim());
+          localStorage.setItem('bricolemoi_my_unlocked_leads', JSON.stringify(myUnlocked));
+        }
+      } catch (e) { }
+
       // 3. Sync Supabase
-      if (isSupabaseConfigured && user?.id) {
+      if (isSupabaseConfigured) {
         try {
+          const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+          const validMaalemUuid = user?.id && isUuid(user.id) ? user.id : '22222222-2222-2222-2222-222222222222';
+
           const { error } = await supabase.from('interventions').update({
             status: 'ACCEPTED',
-            maalem_id: user.id
+            maalem_id: validMaalemUuid
           }).eq('id', interventionId);
 
           if (error) {
-            console.warn('[Supabase] acceptLead warning:', error.message);
+            console.warn('[Supabase] acceptLead warning with maalem_id, retrying status only:', error.message);
+            await supabase.from('interventions').update({
+              status: 'ACCEPTED'
+            }).eq('id', interventionId);
           }
         } catch (dbErr) {
           console.warn('[Supabase] acceptLead exception:', dbErr.message);

@@ -378,6 +378,9 @@ export const MaalemView = ({ onOpenCINVerification }) => {
   // 1. Leads Disponibles (Radar Public des SOS en attente de prise en charge)
   const availableLeads = interventions
     .filter((item) => {
+      let myUnlocked = [];
+      try { myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]'); } catch (e) {}
+      if (myUnlocked.includes(String(item.id).trim())) return false; // Déjà débloqué sur cet appareil => ne plus afficher ici
       if (item.status !== 'PENDING') return false; // Disparaît immédiatement dès déblocage
       if (!filterBySpecialtyOnly || maalemSpecialty === 'BOTH' || maalemSpecialty === 'ALL') return true;
       return String(item.service_type || '').toUpperCase() === String(maalemSpecialty || '').toUpperCase();
@@ -392,17 +395,23 @@ export const MaalemView = ({ onOpenCINVerification }) => {
   // 2. Chantiers Actifs Débloqués (Missions en cours: En route, Sur place, Attente validation)
   const activeUnlockedLeads = interventions.filter((item) => {
     if (item.status !== 'ACCEPTED' && item.status !== 'PENDING_COMPLETION') return false;
+    let myUnlocked = [];
+    try { myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]'); } catch (e) {}
+    const isLocalUnlocked = myUnlocked.includes(String(item.id).trim());
     const isOwner = user?.id && String(item.maalem_id || '').trim() === String(user.id).trim();
     const isFallbackOwner = (!user?.id || user.id === 'maalem-1' || user.id === '22222222-2222-2222-2222-222222222222') && (!item.maalem_id || item.maalem_id === 'maalem-1' || item.maalem_id === '22222222-2222-2222-2222-222222222222');
-    return isOwner || isFallbackOwner;
+    return isOwner || isFallbackOwner || isLocalUnlocked;
   });
 
   // 3. Chantiers Clôturés & Évalués (Historique de l'artisan)
   const completedLeads = interventions.filter((item) => {
     if (item.status !== 'COMPLETED') return false;
+    let myUnlocked = [];
+    try { myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]'); } catch (e) {}
+    const isLocalUnlocked = myUnlocked.includes(String(item.id).trim());
     const isOwner = user?.id && String(item.maalem_id || '').trim() === String(user.id).trim();
     const isFallbackOwner = (!user?.id || user.id === 'maalem-1' || user.id === '22222222-2222-2222-2222-222222222222') && (!item.maalem_id || item.maalem_id === 'maalem-1' || item.maalem_id === '22222222-2222-2222-2222-222222222222');
-    return isOwner || isFallbackOwner;
+    return isOwner || isFallbackOwner || isLocalUnlocked;
   });
 
   const maalemName = user?.full_name || currentLiveMaalem?.full_name || 'Artisan Maalem';
