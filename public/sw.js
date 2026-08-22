@@ -3,7 +3,7 @@
  * Système de mise en cache résilient et réveil haptique d'urgence pour Artisans Maâlems au Maroc
  */
 
-const CACHE_NAME = 'bricolemoi-v3';
+const CACHE_NAME = 'bricolemoi-v4';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -40,7 +40,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// 3. Fetch Strategy: Stale-While-Revalidate for Vite Assets & Cache-First for Fonts/Static
+// 3. Fetch Strategy: Network-First for HTML/Navigation, Cache-First for Fonts, SWR for Assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
@@ -48,7 +48,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // Ignorer les requêtes vers les backends API temps-réel (Supabase, Ably, Infobip)
+  // Ignorer les requêtes vers les backends API temps-réel (Supabase, Ably, Infobip, Google)
   if (
     url.hostname.includes('supabase.co') ||
     url.hostname.includes('ably.io') ||
@@ -75,7 +75,35 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigation HTML et Assets SPA : Stale-While-Revalidate avec Offline Fallback
+  // Navigation HTML (SPA) : NETWORK-FIRST absolu pour toujours charger les derniers hashes JS Vite
+  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          const fallback = (await caches.match('/index.html')) || (await caches.match('/'));
+          if (fallback) return fallback;
+          return new Response('Mode hors-ligne BricoleMoi actif.', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+          });
+        })
+    );
+    return;
+  }
+
+  // Assets JS / CSS / Images statiques : Stale-While-Revalidate
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       const fetchPromise = fetch(request)
@@ -88,18 +116,7 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(async () => {
-          if (cachedResponse) return cachedResponse;
-          if (request.mode === 'navigate') {
-            const fallback = (await caches.match('/index.html')) || (await caches.match('/'));
-            if (fallback) return fallback;
-          }
-          return new Response('Mode hors-ligne BricoleMoi actif.', {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-          });
-        });
+        .catch(() => cachedResponse);
 
       return cachedResponse || fetchPromise;
     })
