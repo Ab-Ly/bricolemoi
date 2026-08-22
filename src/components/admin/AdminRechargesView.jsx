@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
+import { calculateMaalemBalance } from '../../utils/balanceUtils';
 
 export const AdminRechargesView = ({ 
   transactions = [], 
@@ -460,7 +461,7 @@ export const AdminRechargesView = ({
                 <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1">
                   <span className="text-[10px] font-mono text-slate-500 uppercase">Solde Actuel :</span>
                   <p className="text-lg font-black text-emerald-800 font-mono">
-                    {parseFloat(selectedMaalemProfile.credit_balance || 0).toFixed(2)} DH
+                    {calculateMaalemBalance(selectedMaalemProfile, transactions, maalems).liveAvailableBalance.toFixed(2)} DH
                   </p>
                 </div>
 

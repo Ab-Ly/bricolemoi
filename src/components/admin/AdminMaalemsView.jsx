@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
+import { calculateMaalemBalance } from '../../utils/balanceUtils';
 
 export const AdminMaalemsView = ({ 
   maalems = [], 
@@ -48,50 +49,7 @@ export const AdminMaalemsView = ({
   // Calcul infaillible du solde pour chaque Maâlem basé sur le grand livre des transactions
   const getMaalemCreditBalance = (m) => {
     if (!m) return 0;
-    const mId = String(m.id || '').trim();
-    const mPhone = String(m.phone || '').replace(/\D/g, '');
-
-    const maalemTxs = (transactions || []).filter((t) => {
-      const matchId = mId && String(t.maalem_id || '').trim() === mId;
-      const matchPhone = mPhone && mPhone.length > 7 && String(t.maalem_phone || '').replace(/\D/g, '') === mPhone;
-      const isFallback = (mId === 'maalem-1' || !t.maalem_id) && m.role?.toUpperCase() === 'MAALEM';
-      return matchId || matchPhone || isFallback;
-    });
-
-    if (maalemTxs.length > 0) {
-      const isBonusTx = (t) => {
-        const typeUpper = String(t.type || '').toUpperCase();
-        const methodUpper = String(t.payment_method || '').toUpperCase();
-        const refUpper = String(t.reference_ref || '').toUpperCase();
-        return typeUpper === 'BONUS' || methodUpper.includes('OFFERT') || methodUpper.includes('BONUS') || refUpper.includes('BONUS');
-      };
-
-      const isLeadTx = (t) => {
-        const typeUpper = String(t.type || '').toUpperCase();
-        return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
-      };
-
-      const isRealRechargeTx = (t) => {
-        const typeUpper = String(t.type || '').toUpperCase();
-        return (typeUpper === 'RECHARGE' || typeUpper === 'CREDIT') && !isBonusTx(t) && !isLeadTx(t);
-      };
-
-      const totalRecharges = maalemTxs
-        .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
-        .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
-
-      const totalBonuses = maalemTxs
-        .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
-        .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
-
-      const totalLeads = maalemTxs
-        .filter((t) => isLeadTx(t))
-        .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
-
-      return Math.max(0, totalRecharges + totalBonuses - totalLeads);
-    }
-
-    return parseFloat(m.credit_balance ?? m.credits ?? m.maalem_details?.credit_balance ?? 15.0) || 15.0;
+    return calculateMaalemBalance(m, transactions, maalems).liveAvailableBalance;
   };
 
   // Filtrage des artisans

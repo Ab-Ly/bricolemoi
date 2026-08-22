@@ -22,6 +22,8 @@ import {
   WhatsappLogo
 } from '@phosphor-icons/react';
 
+import { calculateMaalemBalance } from '../utils/balanceUtils';
+
 export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appMode = 'CLIENT' }) => {
   const { 
     lang, 
@@ -32,19 +34,11 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
     setProfileModalOpen, 
     logout 
   } = useAuth();
-  const { refreshData, maalems, isAblyConnected, isAblyConfigured } = useApp();
+  const { refreshData, maalems, transactions, isAblyConnected, isAblyConfigured } = useApp();
   const [refreshing, setRefreshing] = useState(false);
 
-  const currentLiveMaalem = maalems?.find((m) => m.id === user?.id) || user?.maalem_details || user;
-  const liveCreditBalance = parseFloat(
-    user?.credits !== undefined && user?.credits !== null
-      ? user.credits
-      : (user?.maalem_details?.credit_balance !== undefined && user?.maalem_details?.credit_balance !== null
-        ? user.maalem_details.credit_balance
-        : (currentLiveMaalem?.credit_balance !== undefined && currentLiveMaalem?.credit_balance !== null
-          ? currentLiveMaalem.credit_balance
-          : (user?.role?.toUpperCase() === 'MAALEM' ? 15.00 : 0)))
-  );
+  const balanceInfo = calculateMaalemBalance(user, transactions, maalems);
+  const liveCreditBalance = balanceInfo.liveAvailableBalance;
 
   const handleRefresh = async () => {
     setRefreshing(true);

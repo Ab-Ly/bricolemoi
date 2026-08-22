@@ -40,9 +40,13 @@ const CITIES = [
   { name: 'Agadir', districts: ['Sonaba', 'Haut Founty', 'Talborjt', 'Dakhla', 'Bensergao'] }
 ];
 
+import { calculateMaalemBalance } from '../utils/balanceUtils';
+
 export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfile }) => {
   const { user, setUser, logout } = useAuth();
-  const { interventions = [] } = useApp();
+  const { interventions = [], transactions = [], maalems = [] } = useApp();
+
+  const balanceInfo = calculateMaalemBalance(user, transactions, maalems);
 
   const isMissingPhone = !user?.phone || user.phone.length < 8;
   const [activeTab, setActiveTab] = useState(isMissingPhone ? 'edit' : 'info');
@@ -387,10 +391,17 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <CreditCard className="w-4 h-4 text-amber-600" />
-                    <span className="text-xs font-bold text-amber-900">Solde de Crédits Leads</span>
+                    <div>
+                      <span className="text-xs font-bold text-amber-900 block">Solde de Crédits Leads</span>
+                      {balanceInfo.totalReservedEscrow > 0 && (
+                        <span className="text-[10px] text-amber-700 font-medium">
+                          {balanceInfo.totalReservedEscrow.toFixed(2)} DH en garantie (Total : {balanceInfo.liveTotalBalance.toFixed(2)} DH)
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <span className="text-sm font-black text-amber-900 font-mono">
-                    {user.maalem_details?.credit_balance?.toFixed(2) || '15.00'} DH
+                    {balanceInfo.liveAvailableBalance.toFixed(2)} DH
                   </span>
                 </div>
               )}

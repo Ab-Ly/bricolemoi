@@ -62,6 +62,7 @@ import {
 } from '@phosphor-icons/react';
 import { PushNotificationBanner } from './maalem/PushNotificationBanner';
 import { MOROCCAN_CITIES } from '../constants/geo';
+import { calculateMaalemBalance, isBonusTx, isLeadTx, isRealRechargeTx } from '../utils/balanceUtils';
 
 export const MaalemView = ({ onOpenCINVerification }) => {
   const { t, user, setUser } = useAuth();
@@ -97,66 +98,15 @@ export const MaalemView = ({ onOpenCINVerification }) => {
 
   const currentLiveMaalem = maalems?.find((m) => m.id === user?.id) || user?.maalem_details || user;
 
-  // Transactions spécifiques à l'artisan connecté
-  const myTransactions = (transactions || []).filter((t) => {
-    if (!user) return true;
-    const isExactId = user.id && String(t.maalem_id || '').trim() === String(user.id).trim();
-    const isPhoneMatch = user.phone && t.maalem_phone && String(t.maalem_phone).trim() === String(user.phone).trim();
-    const isMaalemRole = user.role?.toUpperCase() === 'MAALEM' && (!t.maalem_id || t.maalem_id === 'maalem-1' || String(t.maalem_id).trim() === String(user.id).trim());
-    return isExactId || isPhoneMatch || isMaalemRole;
-  });
-
-  // Identification précise des types de transactions (évite de confondre les bonus avec les recharges réelles)
-  const isBonusTx = (t) => {
-    const typeUpper = String(t.type || '').toUpperCase();
-    const methodUpper = String(t.payment_method || '').toUpperCase();
-    const refUpper = String(t.reference_ref || '').toUpperCase();
-    return typeUpper === 'BONUS' || methodUpper.includes('OFFERT') || methodUpper.includes('BONUS') || refUpper.includes('BONUS');
-  };
-
-  const isLeadTx = (t) => {
-    const typeUpper = String(t.type || '').toUpperCase();
-    return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'LEAD_ESCROW' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
-  };
-
-  const isRealRechargeTx = (t) => {
-    const typeUpper = String(t.type || '').toUpperCase();
-    return (typeUpper === 'RECHARGE' || typeUpper === 'CREDIT') && !isBonusTx(t) && !isLeadTx(t);
-  };
-
-  const totalRechargedSum = myTransactions
-    .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
-    .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
-
-  const totalValidatedLeadsSpent = myTransactions
-    .filter((t) => t.status === 'VALIDATED' && isLeadTx(t))
-    .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
-
-  const totalReservedEscrow = myTransactions
-    .filter((t) => t.status === 'RESERVED' && isLeadTx(t))
-    .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
-
+  const balanceInfo = calculateMaalemBalance(user, transactions, maalems);
+  const myTransactions = balanceInfo.myTransactions;
+  const totalRechargedSum = balanceInfo.totalRechargedSum;
+  const totalValidatedLeadsSpent = balanceInfo.totalValidatedLeadsSpent;
+  const totalReservedEscrow = balanceInfo.totalReservedEscrow;
   const totalLeadsSpent = totalValidatedLeadsSpent + totalReservedEscrow;
-
-  const totalBonusSum = myTransactions
-    .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
-    .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
-
-  // Solde Total Comptable (Recharges validées + Bonus - Leads définitivement consommés)
-  const liveTotalBalance = myTransactions.length > 0
-    ? Math.max(0, totalRechargedSum + totalBonusSum - totalValidatedLeadsSpent)
-    : parseFloat(
-        user?.credits !== undefined && user?.credits !== null
-          ? user.credits
-          : (user?.maalem_details?.credit_balance !== undefined && user?.maalem_details?.credit_balance !== null
-            ? user.maalem_details.credit_balance
-            : (currentLiveMaalem?.credit_balance !== undefined && currentLiveMaalem?.credit_balance !== null
-              ? currentLiveMaalem.credit_balance
-              : 15.00))
-      );
-
-  // Solde Disponible Réel pour débloquer (Solde Total - Escrow Réservé)
-  const liveAvailableBalance = Math.max(0, liveTotalBalance - totalReservedEscrow);
+  const totalBonusSum = balanceInfo.totalBonusSum;
+  const liveTotalBalance = balanceInfo.liveTotalBalance;
+  const liveAvailableBalance = balanceInfo.liveAvailableBalance;
   const liveCreditBalance = liveAvailableBalance; // Rétrocompatibilité
 
   const maalemDetails = user?.maalem_details || {
