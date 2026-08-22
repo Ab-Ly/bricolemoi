@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+// Configuration du Worker MapLibre GL pour éviter les erreurs MIME Type en production (Vite / Vercel)
+if (typeof window !== 'undefined' && maplibregl?.config) {
+  maplibregl.config.WORKER_URL = '/assets/maplibre-gl-worker.mjs';
+}
 import { motion } from 'framer-motion';
 import { Navigation, Compass, Layers, Crosshair, MapPin, Star, Sparkles, Palette } from 'lucide-react';
 import { useApp } from '../context/AppContext';
