@@ -334,62 +334,53 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Code PIN de session 2FA incorrect.');
     }
 
-    let authenticatedAdmin = null;
-
-    // 3. Authentification Supabase Auth si configuré et si mot de passe renseigné
-    if (isSupabaseConfigured && cleanEmail && cleanPass) {
-      try {
-        const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password: cleanPass
-        });
-
-        if (authErr) {
-          throw new Error(authErr.message || 'Identifiants administrateur incorrects.');
-        }
-
-        if (authData?.user) {
-          // Vérifier si le profil a bien le rôle ADMIN dans la base Supabase
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', authData.user.id)
-            .single();
-
-          const role = profileData?.role?.toUpperCase() || '';
-          if (role !== 'ADMIN') {
-            await supabase.auth.signOut();
-            throw new Error('Ce compte utilisateur n\'a pas les privilèges Administrateur requis.');
-          }
-
-          authenticatedAdmin = {
-            id: authData.user.id,
-            email: authData.user.email,
-            role: 'ADMIN',
-            full_name: profileData?.full_name || 'Super Administrateur',
-            city_zone: profileData?.city_zone || 'Casablanca (Siège)'
-          };
-        }
-      } catch (dbErr) {
-        if (dbErr.message?.includes('privilèges') || dbErr.message?.includes('incorrects') || dbErr.message?.includes('Invalid login credentials')) {
-          throw dbErr;
-        }
-        console.warn('[Supabase Admin Auth Notice]:', dbErr.message);
-      }
+    // 3. Authentification Supabase Auth 100% RÉELLE (Obligatoire)
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase n\'est pas configuré sur cette instance.');
     }
 
-    // 4. Fallback compte admin par défaut si pas de Supabase en mode dev
-    if (!authenticatedAdmin) {
-      authenticatedAdmin = {
-        id: 'admin-master',
-        email: cleanEmail || 'admin@bricolemoi.ma',
-        role: 'ADMIN',
-        full_name: 'Super Administrateur',
-        city_zone: 'Casablanca (Siège)'
-      };
+    if (!cleanEmail || !cleanPass) {
+      throw new Error('Veuillez renseigner votre email administrateur et votre mot de passe.');
     }
 
-    // Réinitialiser les compteurs de tentatives
+    const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({
+      email: cleanEmail,
+      password: cleanPass
+    });
+
+    if (authErr) {
+      const msg = authErr.message?.toLowerCase().includes('invalid login credentials')
+        ? 'Email ou mot de passe administrateur incorrect.'
+        : authErr.message;
+      throw new Error(msg || 'Identifiants administrateur incorrects.');
+    }
+
+    if (!authData?.user) {
+      throw new Error('Échec d\'authentification auprès du serveur Supabase.');
+    }
+
+    // 4. Vérification stricte du rôle ADMIN en base de données PostgreSQL
+    const { data: profileData, error: profileErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    const role = profileData?.role?.toUpperCase() || '';
+    if (role !== 'ADMIN') {
+      await supabase.auth.signOut();
+      throw new Error('Accès refusé : Ce compte ne possède pas les droits Administrateur (rôle = ADMIN).');
+    }
+
+    const authenticatedAdmin = {
+      id: authData.user.id,
+      email: authData.user.email,
+      role: 'ADMIN',
+      full_name: profileData?.full_name || 'Super Administrateur',
+      city_zone: profileData?.city_zone || 'Casablanca (Siège)'
+    };
+
+    // 5. Enregistrement de la session chiffrée
     sessionStorage.removeItem(attemptsKey);
     sessionStorage.removeItem(lockKey);
     sessionStorage.setItem('bricolemoi_admin_pin_ok', 'true');
