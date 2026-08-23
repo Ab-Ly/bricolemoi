@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "src/context/AuthContext.jsx": {
-    "mtime": 1787481092.838902,
-    "seen": 1787481243.498365,
-    "ast_hash": "6a6e95c52c1b67f4c87eb41416d4667f",
+    "mtime": 1787482182.7138658,
+    "seen": 1787482289.232182,
+    "ast_hash": "64998f878eb93020cfc9b4cfddd9f930",
     "semantic_hash": ""
   },
   "src/context/EmergencyFlowContext.jsx": {
