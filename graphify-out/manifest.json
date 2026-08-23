@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "src/components/ClientView.jsx": {
-    "mtime": 1787397179.419897,
-    "seen": 1787399303.6964061,
-    "ast_hash": "52a623f6ece1ece983a6ef1648a6205d",
+    "mtime": 1787478407.3129432,
+    "seen": 1787478520.1036,
+    "ast_hash": "880c8433f1ce7abc34ebbb1acf166ddb",
     "semantic_hash": ""
   },
   "src/components/CustomDropdown.jsx": {
@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "src/components/MaalemView.jsx": {
-    "mtime": 1787411084.855335,
-    "seen": 1787411872.891924,
-    "ast_hash": "0b377821303a21349a957cbe387cb01b",
+    "mtime": 1787478345.440426,
+    "seen": 1787478520.104049,
+    "ast_hash": "87cf57f0d2218dbce0a6d3279e2f03c3",
     "semantic_hash": ""
   },
   "src/components/Navbar.jsx": {
