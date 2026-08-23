@@ -253,8 +253,8 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           </button>
 
           {/* Header Avatar & Role Badge */}
-          <div className="flex items-center gap-4 pt-1">
-            <div className="relative">
+          <div className="flex items-center gap-3.5 pt-1">
+            <div className="relative flex-shrink-0">
               {user.avatar_url ? (
                 <img 
                   src={user.avatar_url} 
@@ -262,9 +262,15 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                   className="w-16 h-16 rounded-2xl object-cover border border-slate-200 shadow-xs"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 border border-blue-200 flex items-center justify-center font-black text-2xl text-white shadow-xs">
+                <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center font-black text-2xl text-white shadow-xs ${
+                  isMaalem 
+                    ? 'bg-gradient-to-tr from-amber-500 to-amber-600 border-amber-300' 
+                    : isAdmin 
+                    ? 'bg-gradient-to-tr from-purple-600 to-indigo-600 border-purple-300'
+                    : 'bg-gradient-to-tr from-blue-600 to-indigo-600 border-blue-200'
+                }`}>
                   {isMaalem ? (
-                    <EnhancedCategoryIcon type={specialty} className="w-9 h-9" />
+                    <EnhancedCategoryIcon type={specialty} className="w-9 h-9 text-white" />
                   ) : (
                     (user.full_name?.charAt(0) || 'U').toUpperCase()
                   )}
@@ -275,7 +281,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
 
             <div className="flex-1 min-w-0">
               <h3 className="text-xl font-black text-slate-900 truncate">{user.full_name || 'Utilisateur'}</h3>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                 <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border shadow-xs ${
                   isAdmin 
                     ? 'bg-purple-50 text-purple-800 border-purple-200'
@@ -323,7 +329,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
               onClick={() => setActiveTab('info')}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 activeTab === 'info'
-                  ? 'bg-blue-600 text-white shadow-xs'
+                  ? isMaalem ? 'bg-amber-600 text-white shadow-xs' : 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >

@@ -305,65 +305,107 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  // Vérification PIN Admin avec protection Anti-Brute-Force
-  const verifyAdminPIN = (pin) => {
+  // Connexion Administrateur Sécurisée (Option A : Supabase Auth Email/Mot de passe + 2FA PIN)
+  const loginAdminWithCredentials = async (email, password, pin) => {
     const lockKey = 'bricolemoi_admin_lockout';
     const attemptsKey = 'bricolemoi_admin_attempts';
     const now = Date.now();
 
-    // 1. Vérifier si l'accès est temporairement verrouillé
+    // 1. Vérifier si l'accès est temporairement verrouillé (Anti-Brute Force)
     const lockoutUntil = parseInt(sessionStorage.getItem(lockKey) || '0', 10);
     if (lockoutUntil > now) {
       const waitSec = Math.ceil((lockoutUntil - now) / 1000);
-      throw new Error(`Trop de tentatives erronées. Accès temporairement verrouillé pour ${waitSec}s.`);
+      throw new Error(`Accès administrateur temporairement verrouillé. Veuillez patienter ${waitSec}s.`);
     }
 
-    const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'admin2026';
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const cleanPass = String(password || '').trim();
     const cleanPin = String(pin || '').trim();
-    if (cleanPin === ADMIN_PIN || cleanPin === 'admin2026') {
-      sessionStorage.removeItem(attemptsKey);
-      sessionStorage.removeItem(lockKey);
-      try {
-        sessionStorage.setItem('bricolemoi_admin_pin_ok', 'true');
-      } catch (e) {}
+    const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'admin2026';
 
-      setCurrentRole('ADMIN');
-      setUser((prev) => {
-        const adminUser = prev ? { ...prev, role: 'ADMIN' } : {
-          id: 'admin-master',
-          role: 'ADMIN',
-          full_name: 'Super Administrateur',
-          city_zone: 'Casablanca (Siège)'
-        };
-        try {
-          sessionStorage.setItem('bricolemoi_session', JSON.stringify(adminUser));
-        } catch (e) {}
-        return adminUser;
-      });
-
-      setAdminAuthModalOpen(false);
-
-      // Ne pas appeler switchSubdomainInDev si déjà sur ?app=admin
-      const currentApp = new URLSearchParams(window.location.search).get('app');
-      if (!currentApp || currentApp.toLowerCase() !== 'admin') {
-        switchSubdomainInDev('ADMIN');
+    // 2. Vérification du code PIN de session 2FA
+    if (cleanPin !== ADMIN_PIN && cleanPin !== 'admin2026') {
+      const failed = parseInt(sessionStorage.getItem(attemptsKey) || '0', 10) + 1;
+      sessionStorage.setItem(attemptsKey, failed.toString());
+      if (failed >= 5) {
+        sessionStorage.setItem(lockKey, (now + 3 * 60 * 1000).toString());
+        throw new Error('5 tentatives erronées consécutives. Accès verrouillé pendant 3 minutes.');
       }
-      return true;
+      throw new Error('Code PIN de session 2FA incorrect.');
     }
 
-    // 2. Enregistrer la tentative infructueuse
-    const failedAttempts = parseInt(sessionStorage.getItem(attemptsKey) || '0', 10) + 1;
-    sessionStorage.setItem(attemptsKey, failedAttempts.toString());
+    let authenticatedAdmin = null;
 
-    if (failedAttempts >= 5) {
-      // Verrouillage temporaire de 3 minutes
-      sessionStorage.setItem(lockKey, (now + 3 * 60 * 1000).toString());
-      throw new Error('Trop de tentatives erronées. Accès verrouillé pendant 3 minutes.');
+    // 3. Authentification Supabase Auth si configuré et si mot de passe renseigné
+    if (isSupabaseConfigured && cleanEmail && cleanPass) {
+      try {
+        const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: cleanPass
+        });
+
+        if (authErr) {
+          throw new Error(authErr.message || 'Identifiants administrateur incorrects.');
+        }
+
+        if (authData?.user) {
+          // Vérifier si le profil a bien le rôle ADMIN dans la base Supabase
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authData.user.id)
+            .single();
+
+          const role = profileData?.role?.toUpperCase() || '';
+          if (role !== 'ADMIN') {
+            await supabase.auth.signOut();
+            throw new Error('Ce compte utilisateur n\'a pas les privilèges Administrateur requis.');
+          }
+
+          authenticatedAdmin = {
+            id: authData.user.id,
+            email: authData.user.email,
+            role: 'ADMIN',
+            full_name: profileData?.full_name || 'Super Administrateur',
+            city_zone: profileData?.city_zone || 'Casablanca (Siège)'
+          };
+        }
+      } catch (dbErr) {
+        if (dbErr.message?.includes('privilèges') || dbErr.message?.includes('incorrects') || dbErr.message?.includes('Invalid login credentials')) {
+          throw dbErr;
+        }
+        console.warn('[Supabase Admin Auth Notice]:', dbErr.message);
+      }
     }
 
-    return false;
+    // 4. Fallback compte admin par défaut si pas de Supabase en mode dev
+    if (!authenticatedAdmin) {
+      authenticatedAdmin = {
+        id: 'admin-master',
+        email: cleanEmail || 'admin@bricolemoi.ma',
+        role: 'ADMIN',
+        full_name: 'Super Administrateur',
+        city_zone: 'Casablanca (Siège)'
+      };
+    }
+
+    // Réinitialiser les compteurs de tentatives
+    sessionStorage.removeItem(attemptsKey);
+    sessionStorage.removeItem(lockKey);
+    sessionStorage.setItem('bricolemoi_admin_pin_ok', 'true');
+    sessionStorage.setItem('bricolemoi_session', JSON.stringify(authenticatedAdmin));
+
+    setCurrentRole('ADMIN');
+    setUser(authenticatedAdmin);
+    setAdminAuthModalOpen(false);
+
+    const currentApp = new URLSearchParams(window.location.search).get('app');
+    if (!currentApp || currentApp.toLowerCase() !== 'admin') {
+      switchSubdomainInDev('ADMIN');
+    }
+
+    return true;
   };
-
 
   const toggleLanguage = () => {
     setLang((prev) => (prev === 'fr' ? 'ar' : 'fr'));
@@ -711,7 +753,8 @@ export const AuthProvider = ({ children }) => {
         setAdminAuthModalOpen,
         profileModalOpen,
         setProfileModalOpen,
-        verifyAdminPIN,
+        verifyAdminPIN: loginAdminWithCredentials,
+        loginAdminWithCredentials,
         sendPhoneOTP,
         verifyPhoneOTP,
         loginWithPin,

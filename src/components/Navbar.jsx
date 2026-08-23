@@ -139,7 +139,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               <motion.button
                 whileTap={{ scale: 0.90 }}
                 onClick={() => switchSubdomainInDev('LANDING')}
-                className="h-9 sm:h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 text-xs font-bold px-2 sm:px-3.5 rounded-xl sm:rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                className="hidden sm:inline-flex h-9 sm:h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 text-xs font-bold px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl border border-slate-200 hover:border-slate-300 items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
                 title="Retour à l'accueil"
               >
                 <span>←</span>
@@ -206,7 +206,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               <motion.button
                 whileTap={{ scale: 0.90 }}
                 onClick={() => switchSubdomainInDev('LANDING')}
-                className="h-9 sm:h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-amber-600 text-xs font-bold px-2 sm:px-3.5 rounded-xl sm:rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                className="hidden sm:inline-flex h-9 sm:h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-amber-600 text-xs font-bold px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl border border-slate-200 hover:border-slate-300 items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
                 title="Retour à l'accueil"
               >
                 <span>←</span>

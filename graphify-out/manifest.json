@@ -114,9 +114,9 @@
     "semantic_hash": ""
   },
   "src/components/Navbar.jsx": {
-    "mtime": 1787478763.8316386,
-    "seen": 1787478878.044095,
-    "ast_hash": "d20cc57afc514362f739aac9ac24201d",
+    "mtime": 1787480833.5240393,
+    "seen": 1787480934.740191,
+    "ast_hash": "681caa839d35d06d46a57643bf0e6e86",
     "semantic_hash": ""
   },
   "src/components/PWAInstallPrompt.jsx": {
@@ -144,9 +144,9 @@
     "semantic_hash": ""
   },
   "src/components/UserProfileModal.jsx": {
-    "mtime": 1787410957.157336,
-    "seen": 1787411872.892815,
-    "ast_hash": "31934955fc9449c8b282d8c793a44f62",
+    "mtime": 1787480818.4498427,
+    "seen": 1787480934.740441,
+    "ast_hash": "abc78942739fef4dd7c399d7587fb26b",
     "semantic_hash": ""
   },
   "src/components/VoiceRecorder.jsx": {
@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "src/context/AuthContext.jsx": {
-    "mtime": 1787479936.1195655,
-    "seen": 1787480132.3406332,
-    "ast_hash": "a12b8f407d228bd403ab167a4e8568c8",
+    "mtime": 1787481092.838902,
+    "seen": 1787481243.498365,
+    "ast_hash": "6a6e95c52c1b67f4c87eb41416d4667f",
     "semantic_hash": ""
   },
   "src/context/EmergencyFlowContext.jsx": {
@@ -222,9 +222,9 @@
     "semantic_hash": ""
   },
   "src/layouts/AdminApp.jsx": {
-    "mtime": 1787479945.6572464,
-    "seen": 1787480132.340826,
-    "ast_hash": "fbf8bb240c399fc943cf27bf0c7d2810",
+    "mtime": 1787481106.0142674,
+    "seen": 1787481243.498572,
+    "ast_hash": "f23fbdebaa1dbaa9629079adfa8182df",
     "semantic_hash": ""
   },
   "src/layouts/ClientApp.jsx": {
@@ -690,15 +690,21 @@
     "semantic_hash": ""
   },
   "supabase/production_strict_rls.sql": {
-    "mtime": 1787479688.4191356,
-    "seen": 1787479843.553833,
-    "ast_hash": "2c7ce12fb51d9e26bc245cb2ce674b73",
+    "mtime": 1787480372.4481885,
+    "seen": 1787480934.7435572,
+    "ast_hash": "e76e403ff746d3e5bf126915081f65bf",
     "semantic_hash": ""
   },
   "supabase/secure_lead_unlock_rpc.sql": {
     "mtime": 1787479682.4526327,
     "seen": 1787479843.554052,
     "ast_hash": "938d4e12e6010a68a748df9801d7c41b",
+    "semantic_hash": ""
+  },
+  "supabase/admin_auth_and_audit.sql": {
+    "mtime": 1787481061.7252142,
+    "seen": 1787481243.499646,
+    "ast_hash": "6bc62a2adccb1b1c79dcc5edaa6e5997",
     "semantic_hash": ""
   }
 }
