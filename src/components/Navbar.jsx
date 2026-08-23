@@ -131,7 +131,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
         </motion.div>
 
         {/* Dynamic Dedicated Header Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
           {/* 1. CLIENT HEADER ACTIONS */}
           {appMode === 'CLIENT' && (
             <>
@@ -139,18 +139,18 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               <motion.button
                 whileTap={{ scale: 0.90 }}
                 onClick={() => switchSubdomainInDev('LANDING')}
-                className="h-10 sm:h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                className="h-9 sm:h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 text-xs font-bold px-2 sm:px-3.5 rounded-xl sm:rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
                 title="Retour à l'accueil"
               >
                 <span>←</span>
-                <span className="hidden xs:inline">Accueil</span>
+                <span className="hidden sm:inline">Accueil</span>
               </motion.button>
 
               {deferredPrompt && !isInstalled && (
                 <motion.button
                   whileTap={{ scale: 0.90 }}
                   onClick={installPWA}
-                  className="hidden sm:inline-flex h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl items-center gap-1.5 transition-all shadow-sm active:scale-90"
+                  className="hidden sm:inline-flex h-9 sm:h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl items-center gap-1.5 transition-all shadow-sm active:scale-90"
                 >
                   <Download className="w-4 h-4 text-white" />
                   <span>{t('pwa_install')}</span>
@@ -158,27 +158,42 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               )}
 
               {user ? (
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setProfileModalOpen(true)}
-                  className="h-10 sm:h-11 flex items-center gap-2 sm:gap-2.5 bg-white hover:bg-slate-50 border border-slate-200 px-2.5 sm:px-3 rounded-2xl shadow-xs transition-all cursor-pointer"
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-xs flex-shrink-0">
-                    {user.full_name?.charAt(0) || 'U'}
-                  </div>
-                  <div className="hidden sm:flex flex-col justify-center text-left leading-none">
-                    <p className="text-xs font-bold text-slate-800 leading-none">{user.full_name}</p>
-                    <p className="text-[10px] text-blue-600 font-semibold mt-1 leading-none">Mon Compte</p>
-                  </div>
-                </motion.button>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setProfileModalOpen(true)}
+                    className="h-9 sm:h-11 flex items-center gap-1.5 sm:gap-2.5 bg-white hover:bg-slate-50 border border-slate-200 px-2 sm:px-3 rounded-xl sm:rounded-2xl shadow-xs transition-all cursor-pointer"
+                    title="Mon Compte Client"
+                  >
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-extrabold text-xs shadow-xs flex-shrink-0">
+                      {user.full_name?.charAt(0) || 'U'}
+                    </div>
+                    <div className="hidden sm:flex flex-col justify-center text-left leading-none">
+                      <p className="text-xs font-bold text-slate-800 leading-none">{user.full_name}</p>
+                      <p className="text-[10px] text-blue-600 font-semibold mt-1 leading-none">Mon Compte</p>
+                    </div>
+                  </motion.button>
+
+                  {/* Deconnexion Button Client */}
+                  <motion.button
+                    whileTap={{ scale: 0.90 }}
+                    onClick={() => logout()}
+                    className="h-9 w-9 sm:w-auto sm:h-11 flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 p-0 sm:px-3.5 rounded-xl sm:rounded-2xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer flex-shrink-0"
+                    title="Se Déconnecter"
+                    aria-label="Se Déconnecter"
+                  >
+                    <SignOut weight="bold" className="w-4 h-4 text-red-500 flex-shrink-0" />
+                    <span className="hidden sm:inline">Déconnexion</span>
+                  </motion.button>
+                </div>
               ) : (
                 <motion.button
                   whileTap={{ scale: 0.92 }}
                   onClick={() => setAuthModalOpen(true)}
-                  className="h-10 sm:h-11 bg-white hover:bg-slate-50 text-slate-800 hover:text-blue-600 text-[11px] sm:text-xs font-bold px-3 sm:px-4 rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-2 transition-all shadow-xs active:scale-95 cursor-pointer"
+                  className="h-9 sm:h-11 bg-white hover:bg-slate-50 text-slate-800 hover:text-blue-600 text-[11px] sm:text-xs font-bold px-2.5 sm:px-4 rounded-xl sm:rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-1.5 sm:gap-2 transition-all shadow-xs active:scale-95 cursor-pointer"
                 >
                   <PhosphorUser weight="bold" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
-                  <span>Connexion / S'inscrire</span>
+                  <span>Connexion<span className="hidden sm:inline"> / S'inscrire</span></span>
                 </motion.button>
               )}
             </>
@@ -191,35 +206,38 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               <motion.button
                 whileTap={{ scale: 0.90 }}
                 onClick={() => switchSubdomainInDev('LANDING')}
-                className="h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-amber-600 text-xs font-bold px-2.5 sm:px-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                className="h-9 sm:h-11 bg-white hover:bg-slate-50 text-slate-700 hover:text-amber-600 text-xs font-bold px-2 sm:px-3.5 rounded-xl sm:rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
                 title="Retour à l'accueil"
               >
                 <span>←</span>
-                <span className="hidden xs:inline">Accueil</span>
+                <span className="hidden sm:inline">Accueil</span>
               </motion.button>
 
               {user ? (
                 <>
                   {/* Credit Balance Badge */}
-                  <div className="h-11 flex items-center gap-2 bg-amber-50 border border-amber-200 px-2.5 sm:px-3.5 rounded-2xl text-xs font-bold text-amber-900 shadow-xs">
-                    <Coins weight="duotone" className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                    <span className="text-[11px] text-amber-700 hidden xs:inline">Solde :</span>
-                    <span className="text-slate-900 font-mono font-black">{liveCreditBalance.toFixed(2)} <span className="text-amber-600 text-[10px]">DH</span></span>
+                  <div className="h-9 sm:h-11 flex items-center gap-1 sm:gap-2 bg-amber-50 border border-amber-200 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-xs font-bold text-amber-900 shadow-xs">
+                    <Coins weight="duotone" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 flex-shrink-0" />
+                    <span className="text-[11px] text-amber-700 hidden md:inline">Solde :</span>
+                    <span className="text-slate-900 font-mono font-black text-xs">
+                      {liveCreditBalance.toFixed(0)} <span className="text-amber-600 text-[10px]">DH</span>
+                    </span>
                   </div>
 
                   {/* User Profile & Pro Badge Card */}
-                  <div className="flex items-center gap-1.5 sm:gap-2.5">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setProfileModalOpen(true)}
-                      className="h-11 flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 px-2.5 sm:px-3 rounded-2xl shadow-xs transition-all cursor-pointer"
+                      className="h-9 sm:h-11 flex items-center gap-1.5 sm:gap-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 px-2 sm:px-3 rounded-xl sm:rounded-2xl shadow-xs transition-all cursor-pointer"
+                      title="Mon Profil Artisan"
                     >
                       <div className="relative flex-shrink-0">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
                           {user.full_name?.charAt(0) || 'M'}
                         </div>
-                        <span className="sm:hidden absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white border border-slate-200">
-                          <CheckCircle weight="fill" className="w-3 h-3 text-emerald-600" />
+                        <span className="sm:hidden absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-white border border-slate-200">
+                          <CheckCircle weight="fill" className="w-2.5 h-2.5 text-emerald-600" />
                         </span>
                       </div>
 
@@ -234,14 +252,15 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                       </div>
                     </motion.button>
 
-                    {/* Deconnexion Button */}
+                    {/* Deconnexion Button Maalem */}
                     <motion.button
                       whileTap={{ scale: 0.90 }}
                       onClick={() => logout()}
-                      className="h-11 flex items-center gap-2 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 px-2.5 sm:px-3.5 rounded-2xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                      className="h-9 w-9 sm:w-auto sm:h-11 flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 p-0 sm:px-3.5 rounded-xl sm:rounded-2xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer flex-shrink-0"
                       title="Se Déconnecter"
+                      aria-label="Se Déconnecter"
                     >
-                      <SignOut weight="bold" className="w-4 h-4 text-red-500" />
+                      <SignOut weight="bold" className="w-4 h-4 text-red-500 flex-shrink-0" />
                       <span className="hidden sm:inline">Déconnexion</span>
                     </motion.button>
                   </div>
@@ -251,7 +270,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                   <motion.button
                     whileTap={{ scale: 0.90 }}
                     onClick={() => setAuthModalOpen(true)}
-                    className="h-11 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs px-3.5 sm:px-4 rounded-2xl flex items-center gap-1.5 transition-all shadow-sm active:scale-90 cursor-pointer"
+                    className="h-9 sm:h-11 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs px-3 sm:px-4 rounded-xl sm:rounded-2xl flex items-center gap-1.5 transition-all shadow-sm active:scale-90 cursor-pointer"
                   >
                     <PhosphorUser weight="bold" className="w-4 h-4 text-white" />
                     <span>Espace Pro <span className="hidden xs:inline">• Connexion</span></span>
@@ -263,8 +282,8 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
 
           {/* 3. ADMIN HEADER ACTIONS */}
           {appMode === 'ADMIN' && (
-            <div className="flex items-center gap-2">
-              <span className="h-11 hidden sm:inline-flex items-center gap-1.5 px-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-purple-800 text-xs font-bold shadow-xs">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="h-9 sm:h-11 hidden sm:inline-flex items-center gap-1.5 px-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-purple-800 text-xs font-bold shadow-xs">
                 <LockKey weight="duotone" className="w-4 h-4 text-purple-600" />
                 <span>Accès Protégé</span>
               </span>
@@ -273,8 +292,9 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                 whileTap={{ scale: 0.90 }}
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="h-11 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs active:scale-95"
+                className="h-9 w-9 sm:w-auto sm:h-11 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 p-0 sm:px-3.5 rounded-xl sm:rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
                 title="Rafraîchir les données depuis Supabase"
+                aria-label="Rafraîchir"
               >
                 <RefreshCw className={`w-4 h-4 text-blue-600 ${refreshing ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">{refreshing ? 'Chargement...' : 'Rafraîchir'}</span>
@@ -288,10 +308,11 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                     switchSubdomainInDev('LANDING');
                   });
                 }}
-                className="h-11 bg-white hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 px-3.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
+                className="h-9 w-9 sm:w-auto sm:h-11 bg-white hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 p-0 sm:px-3.5 rounded-xl sm:rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
                 title="Quitter le Dashboard Admin"
+                aria-label="Quitter le Dashboard Admin"
               >
-                <SignOut weight="bold" className="w-4 h-4 text-red-500" />
+                <SignOut weight="bold" className="w-4 h-4 text-red-500 flex-shrink-0" />
                 <span className="hidden sm:inline">Quitter Admin</span>
               </motion.button>
             </div>
@@ -299,7 +320,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
 
           {/* 4. LANDING ROOT HEADER ACTIONS */}
           {appMode === 'LANDING' && (
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1 sm:gap-2.5">
               {/* Direct Quick Link to Client SOS */}
               <motion.button
                 whileTap={{ scale: 0.92 }}
@@ -333,25 +354,40 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               </motion.button>
 
               {user ? (
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setProfileModalOpen(true)}
-                  className="h-10 sm:h-11 flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 px-3 sm:px-3.5 rounded-2xl shadow-xs transition-all cursor-pointer"
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-extrabold text-xs">
-                    {user.full_name?.charAt(0) || 'U'}
-                  </div>
-                  <span className="text-xs font-bold text-slate-800 hidden md:inline">{user.full_name}</span>
-                </motion.button>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setProfileModalOpen(true)}
+                    className="h-9 sm:h-11 flex items-center gap-1.5 sm:gap-2 bg-white hover:bg-slate-50 border border-slate-200 px-2 sm:px-3.5 rounded-xl sm:rounded-2xl shadow-xs transition-all cursor-pointer"
+                    title="Mon Profil"
+                  >
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-extrabold text-xs">
+                      {user.full_name?.charAt(0) || 'U'}
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 hidden md:inline">{user.full_name}</span>
+                  </motion.button>
+
+                  {/* Deconnexion Button Landing */}
+                  <motion.button
+                    whileTap={{ scale: 0.90 }}
+                    onClick={() => logout()}
+                    className="h-9 w-9 sm:w-auto sm:h-11 flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 p-0 sm:px-3.5 rounded-xl sm:rounded-2xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer flex-shrink-0"
+                    title="Se Déconnecter"
+                    aria-label="Se Déconnecter"
+                  >
+                    <SignOut weight="bold" className="w-4 h-4 text-red-500 flex-shrink-0" />
+                    <span className="hidden sm:inline">Déconnexion</span>
+                  </motion.button>
+                </div>
               ) : (
                 <motion.button
                   whileTap={{ scale: 0.92 }}
                   whileHover={{ scale: 1.02 }}
                   onClick={() => setAuthModalOpen(true)}
-                  className="h-10 sm:h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-4 sm:px-5 rounded-2xl shadow-sm flex items-center gap-2 cursor-pointer transition-all active:scale-95"
+                  className="h-9 sm:h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-3 sm:px-5 rounded-xl sm:rounded-2xl shadow-sm flex items-center gap-1.5 sm:gap-2 cursor-pointer transition-all active:scale-95"
                 >
                   <PhosphorUser weight="bold" className="w-4 h-4 text-white" />
-                  <span>Connexion / S'inscrire</span>
+                  <span>Connexion<span className="hidden sm:inline"> / S'inscrire</span></span>
                 </motion.button>
               )}
             </div>

@@ -114,9 +114,9 @@
     "semantic_hash": ""
   },
   "src/components/Navbar.jsx": {
-    "mtime": 1787408901.2186804,
-    "seen": 1787409515.217505,
-    "ast_hash": "221e1617ac3ef577afc4e5b8aaff29a7",
+    "mtime": 1787478763.8316386,
+    "seen": 1787478878.044095,
+    "ast_hash": "d20cc57afc514362f739aac9ac24201d",
     "semantic_hash": ""
   },
   "src/components/PWAInstallPrompt.jsx": {
