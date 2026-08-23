@@ -27,13 +27,17 @@ export const AdminApp = () => {
 
   const handlePinSubmit = (e) => {
     e.preventDefault();
-    const success = verifyAdminPIN(pinInput);
-    if (success) {
-      sessionStorage.setItem('bricolemoi_admin_pin_ok', 'true');
-      setIsPinAuthenticated(true);
-      setErrorMsg('');
-    } else {
-      setErrorMsg('Code PIN Administrateur incorrect. (Utilisez admin2026)');
+    try {
+      const success = verifyAdminPIN(pinInput);
+      if (success) {
+        sessionStorage.setItem('bricolemoi_admin_pin_ok', 'true');
+        setIsPinAuthenticated(true);
+        setErrorMsg('');
+      } else {
+        setErrorMsg('Code PIN Administrateur incorrect.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Accès temporairement verrouillé.');
     }
   };
 

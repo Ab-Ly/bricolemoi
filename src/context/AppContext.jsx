@@ -2512,22 +2512,50 @@ export const AppProvider = ({ children }) => {
         }
       } catch (e) { }
 
-      // 3. Sync Supabase
+      // 3. Sync Supabase & Validation Atomique Serveur (RPC Stored Procedure)
       if (isSupabaseConfigured) {
         try {
           const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
           const validMaalemUuid = user?.id && isUuid(user.id) ? user.id : '22222222-2222-2222-2222-222222222222';
+          const validIntvUuid = isUuid(interventionId) ? interventionId : null;
 
-          const { error } = await supabase.from('interventions').update({
-            status: 'ACCEPTED',
-            maalem_id: validMaalemUuid
-          }).eq('id', interventionId);
+          // Tentative d'exécution de la procédure stockée atomique sécurisée
+          if (validIntvUuid && isUuid(validMaalemUuid)) {
+            const { data: rpcRes, error: rpcErr } = await supabase.rpc('unlock_lead_secure', {
+              p_maalem_id: validMaalemUuid,
+              p_intervention_id: validIntvUuid,
+              p_cost: 15.00
+            });
 
-          if (error) {
-            console.warn('[Supabase] acceptLead warning with maalem_id, retrying status only:', error.message);
-            await supabase.from('interventions').update({
-              status: 'ACCEPTED'
+            if (rpcErr) {
+              console.warn('[Supabase RPC] unlock_lead_secure warning, bascule sur mise à jour standard:', rpcErr.message);
+              // Fallback standard si la RPC n'a pas encore été injectée dans l'instance SQL
+              const { error } = await supabase.from('interventions').update({
+                status: 'ACCEPTED',
+                maalem_id: validMaalemUuid
+              }).eq('id', interventionId);
+
+              if (error) {
+                await supabase.from('interventions').update({ status: 'ACCEPTED' }).eq('id', interventionId);
+              }
+            } else if (rpcRes && rpcRes.success === false) {
+              notify.error(
+                'Déblocage Impossible 🚫',
+                rpcRes.message || 'Impossible de débloquer cette mission.',
+                { id: `rpc-unlock-fail-${interventionId}` }
+              );
+              return false;
+            }
+          } else {
+            // Mode fallback dev / mock
+            const { error } = await supabase.from('interventions').update({
+              status: 'ACCEPTED',
+              maalem_id: validMaalemUuid
             }).eq('id', interventionId);
+
+            if (error) {
+              await supabase.from('interventions').update({ status: 'ACCEPTED' }).eq('id', interventionId);
+            }
           }
         } catch (dbErr) {
           console.warn('[Supabase] acceptLead exception:', dbErr.message);

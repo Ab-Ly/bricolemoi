@@ -305,11 +305,24 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  // Vérification PIN Admin — lu depuis .env (VITE_ADMIN_PIN) avec fallback 'admin2026'
+  // Vérification PIN Admin avec protection Anti-Brute-Force
   const verifyAdminPIN = (pin) => {
+    const lockKey = 'bricolemoi_admin_lockout';
+    const attemptsKey = 'bricolemoi_admin_attempts';
+    const now = Date.now();
+
+    // 1. Vérifier si l'accès est temporairement verrouillé
+    const lockoutUntil = parseInt(sessionStorage.getItem(lockKey) || '0', 10);
+    if (lockoutUntil > now) {
+      const waitSec = Math.ceil((lockoutUntil - now) / 1000);
+      throw new Error(`Trop de tentatives erronées. Accès temporairement verrouillé pour ${waitSec}s.`);
+    }
+
     const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'admin2026';
     const cleanPin = String(pin || '').trim();
     if (cleanPin === ADMIN_PIN || cleanPin === 'admin2026') {
+      sessionStorage.removeItem(attemptsKey);
+      sessionStorage.removeItem(lockKey);
       try {
         sessionStorage.setItem('bricolemoi_admin_pin_ok', 'true');
       } catch (e) {}
@@ -337,6 +350,17 @@ export const AuthProvider = ({ children }) => {
       }
       return true;
     }
+
+    // 2. Enregistrer la tentative infructueuse
+    const failedAttempts = parseInt(sessionStorage.getItem(attemptsKey) || '0', 10) + 1;
+    sessionStorage.setItem(attemptsKey, failedAttempts.toString());
+
+    if (failedAttempts >= 5) {
+      // Verrouillage temporaire de 3 minutes
+      sessionStorage.setItem(lockKey, (now + 3 * 60 * 1000).toString());
+      throw new Error('Trop de tentatives erronées. Accès verrouillé pendant 3 minutes.');
+    }
+
     return false;
   };
 

@@ -192,15 +192,15 @@
     "semantic_hash": ""
   },
   "src/context/AppContext.jsx": {
-    "mtime": 1787410774.4260442,
-    "seen": 1787411872.8939352,
-    "ast_hash": "dfa65caef369425ae27eb2b17ec3d5cb",
+    "mtime": 1787479707.9247525,
+    "seen": 1787479843.551237,
+    "ast_hash": "a56d14243ea0468e01aaf7fde639ee7a",
     "semantic_hash": ""
   },
   "src/context/AuthContext.jsx": {
-    "mtime": 1787398962.3150198,
-    "seen": 1787399303.6977222,
-    "ast_hash": "9074586a59e36cbb76d99172c32391bf",
+    "mtime": 1787479936.1195655,
+    "seen": 1787480132.3406332,
+    "ast_hash": "a12b8f407d228bd403ab167a4e8568c8",
     "semantic_hash": ""
   },
   "src/context/EmergencyFlowContext.jsx": {
@@ -222,9 +222,9 @@
     "semantic_hash": ""
   },
   "src/layouts/AdminApp.jsx": {
-    "mtime": 1787241710.6643853,
-    "seen": 1787241846.7482371,
-    "ast_hash": "07077f0725cf85fa15c32e408fd8259a",
+    "mtime": 1787479945.6572464,
+    "seen": 1787480132.340826,
+    "ast_hash": "fbf8bb240c399fc943cf27bf0c7d2810",
     "semantic_hash": ""
   },
   "src/layouts/ClientApp.jsx": {
@@ -270,9 +270,9 @@
     "semantic_hash": ""
   },
   "src/lib/infobipAuthService.js": {
-    "mtime": 1787259103.561278,
-    "seen": 1787259161.192611,
-    "ast_hash": "f3687356f0cc2ab6d1fdcdb4d57cfb23",
+    "mtime": 1787479923.8040724,
+    "seen": 1787480132.341355,
+    "ast_hash": "adeacb2bbf1606a51407463e334f6641",
     "semantic_hash": ""
   },
   "src/lib/notify.jsx": {
@@ -330,9 +330,9 @@
     "semantic_hash": ""
   },
   "vercel.json": {
-    "mtime": 1787259087.411313,
-    "seen": 1787259161.1944609,
-    "ast_hash": "79363a9907831d4f4a992ebddc895e57",
+    "mtime": 1787479696.2212021,
+    "seen": 1787479843.554209,
+    "ast_hash": "06bc91d229402879471915e47bfb3e6e",
     "semantic_hash": ""
   },
   "vite.config.js": {
@@ -687,6 +687,18 @@
     "mtime": 1787410131.1645882,
     "seen": 1787411872.8964522,
     "ast_hash": "82760cc58d3cf7ccba3adfc75a7b547e",
+    "semantic_hash": ""
+  },
+  "supabase/production_strict_rls.sql": {
+    "mtime": 1787479688.4191356,
+    "seen": 1787479843.553833,
+    "ast_hash": "2c7ce12fb51d9e26bc245cb2ce674b73",
+    "semantic_hash": ""
+  },
+  "supabase/secure_lead_unlock_rpc.sql": {
+    "mtime": 1787479682.4526327,
+    "seen": 1787479843.554052,
+    "ast_hash": "938d4e12e6010a68a748df9801d7c41b",
     "semantic_hash": ""
   }
 }

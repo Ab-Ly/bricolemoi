@@ -40,6 +40,60 @@ export function formatMoroccanPhone(rawPhone, defaultDial = '+212') {
   return formatInternationalPhone(rawPhone, defaultDial);
 }
 
+const OTP_COOLDOWN_SECONDS = 45; // 45 secondes minimum entre deux demandes de SMS
+const MAX_OTP_PER_WINDOW = 4;     // Maximum 4 SMS autorisés sur 15 minutes
+const OTP_WINDOW_MS = 15 * 60 * 1000;
+
+/**
+ * Système de limitation de fréquence et protection anti-bombing SMS (Client-Side Rate Limiter)
+ */
+export function checkAndRecordOtpRateLimit(phone, isTestPhone = false) {
+  if (isTestPhone) return { allowed: true };
+  
+  try {
+    const key = `bricolemoi_otp_limit_${String(phone || '').replace(/\D/g, '')}`;
+    const raw = localStorage.getItem(key);
+    const history = raw ? JSON.parse(raw) : [];
+    const now = Date.now();
+
+    // Filtrer les tentatives dans la fenêtre glissante de 15 minutes
+    const recent = history.filter(ts => (now - ts) < OTP_WINDOW_MS);
+
+    // Règle 1 : Cooldown entre deux SMS consécutifs (45s)
+    if (recent.length > 0) {
+      const lastAttempt = recent[recent.length - 1];
+      const elapsedSec = Math.floor((now - lastAttempt) / 1000);
+      if (elapsedSec < OTP_COOLDOWN_SECONDS) {
+        const remaining = OTP_COOLDOWN_SECONDS - elapsedSec;
+        const err = new Error(`Veuillez patienter ${remaining}s avant de demander un nouveau code SMS.`);
+        err.code = 'RATE_LIMIT_COOLDOWN';
+        err.remainingSeconds = remaining;
+        throw err;
+      }
+    }
+
+    // Règle 2 : Seuil max de SMS par fenêtre de 15 minutes
+    if (recent.length >= MAX_OTP_PER_WINDOW) {
+      const oldestInWindow = recent[0];
+      const resetInMin = Math.ceil((OTP_WINDOW_MS - (now - oldestInWindow)) / 60000);
+      const err = new Error(`Trop de tentatives d'envoi de SMS. Veuillez patienter ${resetInMin} min avant de réessayer.`);
+      err.code = 'RATE_LIMIT_EXCEEDED';
+      err.resetInMinutes = resetInMin;
+      throw err;
+    }
+
+    // Enregistrer cette tentative
+    recent.push(now);
+    localStorage.setItem(key, JSON.stringify(recent));
+    return { allowed: true };
+  } catch (e) {
+    if (e.code === 'RATE_LIMIT_COOLDOWN' || e.code === 'RATE_LIMIT_EXCEEDED') {
+      throw e;
+    }
+    return { allowed: true };
+  }
+}
+
 /**
  * Envoie un code OTP par SMS via l'API standard Infobip et l'Edge Function Supabase
  * @param {string} phone - Numéro de téléphone brut
@@ -62,6 +116,9 @@ export async function sendInfobipOTP(phone, requestedChannel = 'sms', defaultDia
     international.includes('661001122') || 
     international.includes('111111') || 
     international.includes('222222');
+
+  // 2. Contrôle de sécurité Anti-Spam & Rate Limiting
+  checkAndRecordOtpRateLimit(formatted, isTestPhone);
 
   const otpCode = isTestPhone ? '123456' : String(Math.floor(100000 + Math.random() * 900000));
   const cleanPhone = international; // Ex: '33771937768' ou '212612345678'
