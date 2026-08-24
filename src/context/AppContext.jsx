@@ -692,9 +692,63 @@ export const AppProvider = ({ children }) => {
               let myUnlocked = [];
               try { myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]'); } catch (e) {}
 
+              // Enrichir la liste des clients et artisans depuis les interventions
+              const clientMap = new Map(clientProfiles.map((c) => [String(c.id).trim(), c]));
+              const maalemMap = new Map(formattedMaalems.map((m) => [String(m.id).trim(), m]));
+
+              realInterventions.forEach((intv) => {
+                const cId = String(intv.client_id || '').trim();
+                if (cId && !clientMap.has(cId)) {
+                  const clientProf = profilesMap.get(intv.client_id);
+                  clientMap.set(cId, {
+                    id: cId,
+                    full_name: clientProf?.full_name || intv.client_name || `Client #${cId.slice(0, 6)}`,
+                    phone: clientProf?.phone || intv.client_phone || '0661-000000',
+                    city_zone: clientProf?.city_zone || intv.district || 'Casablanca',
+                    district: clientProf?.city_zone || intv.district || 'Casablanca',
+                    created_at: intv.created_at || new Date().toISOString(),
+                    is_suspended: false,
+                    role: 'CLIENT'
+                  });
+                }
+
+                const mId = String(intv.maalem_id || '').trim();
+                if (mId && !maalemMap.has(mId)) {
+                  const maalemProf = profilesMap.get(intv.maalem_id);
+                  const details = detailsMap.get(mId) || {};
+                  maalemMap.set(mId, {
+                    id: mId,
+                    full_name: maalemProf?.full_name || intv.maalem_name || `Artisan Maâlem #${mId.slice(0, 6)}`,
+                    phone: maalemProf?.phone || intv.maalem_phone || '0661-111111',
+                    specialty: details.specialty || intv.service_type || 'PLUMBING',
+                    rating_avg: details.rating_avg || 5.0,
+                    is_verified: true,
+                    cin_verified: true,
+                    status: 'active',
+                    portfolio_urls: details.portfolio_urls || [],
+                    is_online: false,
+                    is_available: false,
+                    lat: intv.lat || 33.5883,
+                    lng: intv.lng || -7.6328,
+                    credit_balance: 15.00,
+                    district: intv.district || 'Casablanca'
+                  });
+                }
+              });
+
+              const enrichedClients = Array.from(clientMap.values());
+              const enrichedMaalems = Array.from(maalemMap.values());
+
+              setClients(enrichedClients);
+              setMaalems(enrichedMaalems);
+              try {
+                localStorage.setItem('bricolemoi_clients_cache', JSON.stringify(enrichedClients));
+                localStorage.setItem('bricolemoi_maalems_cache', JSON.stringify(enrichedMaalems));
+              } catch (e) { }
+
               const enrichedInterventions = realInterventions.map((intv) => {
-                const clientProf = profilesMap.get(intv.client_id);
-                const maalemProf = profilesMap.get(intv.maalem_id);
+                const clientProf = clientMap.get(String(intv.client_id || '').trim()) || profilesMap.get(intv.client_id);
+                const maalemProf = maalemMap.get(String(intv.maalem_id || '').trim()) || profilesMap.get(intv.maalem_id);
                 const rev = reviewsMap.get(String(intv.id).trim());
                 const isLocallyUnlocked = myUnlocked.includes(String(intv.id).trim());
 
