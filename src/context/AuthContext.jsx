@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }) => {
         if (isValidUUID(uid)) {
           const { data } = await supabase
             .from('profiles')
-            .select('*')
+            .select('id, full_name, phone, role, city_zone, is_suspended, credits, avatar_url')
             .eq('id', uid)
             .maybeSingle();
           profile = data;
@@ -178,7 +178,7 @@ export const AuthProvider = ({ children }) => {
 
           const { data } = await supabase
             .from('profiles')
-            .select('*')
+            .select('id, full_name, phone, role, city_zone, is_suspended, credits, avatar_url')
             .in('phone', candidateFormats)
             .maybeSingle();
           profile = data;
@@ -186,7 +186,7 @@ export const AuthProvider = ({ children }) => {
           if (!profile && last9.length >= 8) {
             const { data: ilikeProfile } = await supabase
               .from('profiles')
-              .select('*')
+              .select('id, full_name, phone, role, city_zone, is_suspended, credits, avatar_url')
               .ilike('phone', `%${last9}%`)
               .maybeSingle();
             profile = ilikeProfile;
@@ -222,7 +222,7 @@ export const AuthProvider = ({ children }) => {
           if (isValidUUID(targetId)) {
             const { data } = await supabase
               .from('maalem_details')
-              .select('*')
+              .select('id, specialty, rating_avg, review_count, is_verified, cin_verified, is_online, credit_balance, bio')
               .eq('id', targetId)
               .maybeSingle();
             maalemDetails = data;
@@ -362,7 +362,7 @@ export const AuthProvider = ({ children }) => {
     // 4. Vérification stricte du rôle ADMIN en base de données PostgreSQL
     const { data: profileData, error: profileErr } = await supabase
       .from('profiles')
-      .select('*')
+      .select('id, full_name, role, city_zone')
       .eq('id', authData.user.id)
       .single();
 
@@ -479,7 +479,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const { data: existingProfile } = await supabase
             .from('profiles')
-            .select('*')
+            .select('id, full_name, phone, role, city_zone, is_suspended, credits')
             .eq('phone', finalPhone)
             .maybeSingle();
 
@@ -514,7 +514,7 @@ export const AuthProvider = ({ children }) => {
             if (effectiveRole === 'MAALEM') {
               const { data: maalemDetails } = await supabase
                 .from('maalem_details')
-                .select('*')
+                .select('id, specialty, rating_avg, review_count, is_verified, cin_verified, is_online, credit_balance, bio, status')
                 .eq('id', authenticatedUser.id)
                 .maybeSingle();
 
@@ -662,7 +662,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const { data: existingProfile } = await supabase
             .from('profiles')
-            .select('*')
+            .select('id, full_name, phone, role, city_zone, is_suspended, credits, avatar_url')
             .eq('id', firebaseUid)
             .maybeSingle();
 

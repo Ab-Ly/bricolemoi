@@ -547,10 +547,15 @@ export const AppProvider = ({ children }) => {
       if (!isSupabaseConfigured) return;
       // 1. Profils + maalem_details
       try {
-        const { data: rawProfiles, error: pErr } = await supabase.from('profiles').select('*');
+        // 1. Profils + maalem_details (sélection ciblée sans images lourdes Base64)
+        const { data: rawProfiles, error: pErr } = await supabase
+          .from('profiles')
+          .select('id, full_name, phone, role, city_zone, is_suspended, created_at, credits, avatar_url, updated_at');
         if (pErr) console.warn('[Supabase] profiles read error:', pErr.message);
 
-        const { data: rawDetails, error: dErr } = await supabase.from('maalem_details').select('*');
+        const { data: rawDetails, error: dErr } = await supabase
+          .from('maalem_details')
+          .select('id, specialty, rating_avg, review_count, is_verified, cin_verified, is_online, credit_balance, bio, lat, lng, status, portfolio_urls');
         if (dErr) console.warn('[Supabase] maalem_details read error:', dErr.message);
 
         if (rawProfiles) {
@@ -653,14 +658,14 @@ export const AppProvider = ({ children }) => {
 
           setClients(clientProfiles);
 
-          // 2. Reviews (limitées aux 100 dernières)
+          // 2. Reviews (sélection ciblée & limitées aux 30 dernières)
           let reviewsMap = new Map();
           try {
             const { data: realReviews } = await supabase
               .from('reviews')
-              .select('*')
+              .select('id, intervention_id, maalem_id, client_id, rating, comment, client_name, created_at')
               .order('created_at', { ascending: false })
-              .limit(100);
+              .limit(30);
             if (realReviews) {
               setReviews(realReviews);
               try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(realReviews)); } catch (e) { }
@@ -668,13 +673,13 @@ export const AppProvider = ({ children }) => {
             }
           } catch (e) { }
 
-          // 3. Interventions (limitées aux 100 dernières, sans doublon d'appel profiles)
+          // 3. Interventions (sélection ciblée & limitées aux 40 dernières)
           try {
             const { data: realInterventions } = await supabase
               .from('interventions')
-              .select('*')
+              .select('id, title, category, status, priority, city, address, client_id, maalem_id, client_name, client_phone, maalem_name, maalem_phone, budget, final_price, rating, comment, created_at, lat, lng')
               .order('created_at', { ascending: false })
-              .limit(100);
+              .limit(40);
 
             if (realInterventions) {
               let myUnlocked = [];
@@ -702,13 +707,13 @@ export const AppProvider = ({ children }) => {
             }
           } catch (e) { }
 
-          // 4. Transactions (limitées aux 150 dernières, sans doublon d'appel profiles)
+          // 4. Transactions (sélection ciblée & limitées aux 50 dernières)
           try {
             const { data: realTransactions } = await supabase
               .from('transactions')
-              .select('*')
+              .select('id, maalem_id, maalem_name, maalem_phone, type, amount_dh, status, reference_ref, payment_method, admin_notes, created_at')
               .order('created_at', { ascending: false })
-              .limit(150);
+              .limit(50);
 
             if (realTransactions) {
               let cachedMap = new Map();

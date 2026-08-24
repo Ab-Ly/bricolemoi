@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useEmergencyFlow } from '../context/EmergencyFlowContext';
 import { EMERGENCY_STATES } from '../constants/emergencyStates';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { uploadMediaToR2 } from '../lib/r2StorageService';
 import { InteractiveMap } from './InteractiveMap';
 import { 
   Wrench, 
@@ -225,9 +226,18 @@ export const MaalemView = ({ onOpenCINVerification }) => {
   const [previewPhotoUrl, setPreviewPhotoUrl] = useState(null);
   const [receiptPhotoUrl, setReceiptPhotoUrl] = useState(null);
 
-  const handleReceiptFileChange = (e) => {
+  const handleReceiptFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    try {
+      const uploadedUrl = await uploadMediaToR2(file, 'receipts');
+      if (uploadedUrl) {
+        setReceiptPhotoUrl(uploadedUrl);
+        return;
+      }
+    } catch (err) {
+      console.warn('[MaalemView] Erreur upload reçu R2, fallback local:', err);
+    }
     const reader = new FileReader();
     reader.onload = () => {
       setReceiptPhotoUrl(reader.result);
@@ -423,37 +433,45 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
       alert('La photo ne doit pas dépasser 5 Mo.');
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const dataUrl = reader.result;
-      const currentList = Array.isArray(user?.maalem_details?.portfolio_urls) 
-        ? [...user.maalem_details.portfolio_urls] 
-        : Array.isArray(currentLiveMaalem?.portfolio_urls)
-        ? [...currentLiveMaalem.portfolio_urls]
-        : [];
-      if (currentList.length >= 3) {
-        alert('Maximum 3 photos de portfolio.');
-        return;
-      }
-      const updatedList = [...currentList, dataUrl];
-      const updatedUser = {
-        ...user,
-        maalem_details: {
-          ...(user?.maalem_details || {}),
-          portfolio_urls: updatedList
-        }
-      };
-      setUser(updatedUser);
+    let uploadedUrl = null;
+    try {
+      uploadedUrl = await uploadMediaToR2(file, 'portfolio');
+    } catch (err) {
+      console.warn('[MaalemView] Erreur upload portfolio R2:', err);
+    }
 
-      if (isSupabaseConfigured && user?.id) {
-        try {
-          await supabase.from('maalem_details').update({ portfolio_urls: updatedList }).eq('id', user.id);
-        } catch (err) {
-          console.warn('Update portfolio error:', err);
-        }
+    const finalUrl = uploadedUrl || await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
+
+    const currentList = Array.isArray(user?.maalem_details?.portfolio_urls) 
+      ? [...user.maalem_details.portfolio_urls] 
+      : Array.isArray(currentLiveMaalem?.portfolio_urls)
+      ? [...currentLiveMaalem.portfolio_urls]
+      : [];
+    if (currentList.length >= 3) {
+      alert('Maximum 3 photos de portfolio.');
+      return;
+    }
+    const updatedList = [...currentList, finalUrl];
+    const updatedUser = {
+      ...user,
+      maalem_details: {
+        ...(user?.maalem_details || {}),
+        portfolio_urls: updatedList
       }
     };
-    reader.readAsDataURL(file);
+    setUser(updatedUser);
+
+    if (isSupabaseConfigured && user?.id) {
+      try {
+        await supabase.from('maalem_details').update({ portfolio_urls: updatedList }).eq('id', user.id);
+      } catch (err) {
+        console.warn('Update portfolio error:', err);
+      }
+    }
   };
 
   const handleRemovePortfolioPhoto = async (idxToRemove) => {

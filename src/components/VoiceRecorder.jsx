@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Square } from 'lucide-react';
 import { Microphone, Play as PhosphorPlay, Pause as PhosphorPause, Trash, SpeakerHigh } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
+import { uploadMediaToR2 } from '../lib/r2StorageService';
 
 // Helper de détection multi-plateforme (iOS Safari, Android Chrome, Desktop)
 const getSupportedMimeType = () => {
@@ -138,11 +139,21 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
           }
         };
 
-        mediaRecorderRef.current.onstop = () => {
+        mediaRecorderRef.current.onstop = async () => {
           const finalMime = mediaRecorderRef.current?.mimeType || selectedMime || 'audio/webm';
           const audioBlob = new Blob(audioChunksRef.current, { type: finalMime });
 
-          // Convertir en Data URL Base64 universel (lisible sur tous les appareils et onglets)
+          // Téléversement direct vers Cloudflare R2 (Stockage 0€ Egress) avec fallback local
+          try {
+            const r2Url = await uploadMediaToR2(audioBlob, 'audio_notes');
+            if (r2Url) {
+              onAudioRecorded(r2Url);
+              return;
+            }
+          } catch (r2Err) {
+            console.warn('[VoiceRecorder] Fallback vers DataURL suite à une erreur R2:', r2Err);
+          }
+
           const reader = new FileReader();
           reader.onloadend = () => {
             const base64Url = reader.result;

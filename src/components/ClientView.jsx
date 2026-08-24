@@ -39,6 +39,7 @@ import { toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { COUNTRY_DIAL_CODES, MOROCCAN_CITIES } from '../constants/geo';
 import { reverseGeocodeMorocco, findNearestCatalogCity } from '../lib/geoService';
+import { uploadMediaToR2 } from '../lib/r2StorageService';
 import { CustomDropdown } from './CustomDropdown';
 import { 
   Buildings, 
@@ -289,9 +290,18 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
 
     for (const file of files) {
       if (photos.length >= 3) break;
-      const compressed = await compressImage(file);
-      setPhotos((prev) => (prev.length < 3 ? [...prev, compressed] : prev));
-      if (!photoUrl) setPhotoUrl(compressed);
+      try {
+        const uploadedUrl = await uploadMediaToR2(file, 'interventions');
+        if (uploadedUrl) {
+          setPhotos((prev) => (prev.length < 3 ? [...prev, uploadedUrl] : prev));
+          if (!photoUrl) setPhotoUrl(uploadedUrl);
+        }
+      } catch (err) {
+        console.warn('[ClientView] Erreur upload R2, fallback image locale:', err);
+        const compressed = await compressImage(file);
+        setPhotos((prev) => (prev.length < 3 ? [...prev, compressed] : prev));
+        if (!photoUrl) setPhotoUrl(compressed);
+      }
     }
   };
 
