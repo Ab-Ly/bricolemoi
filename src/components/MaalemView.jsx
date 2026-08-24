@@ -347,9 +347,12 @@ export const MaalemView = ({ onOpenCINVerification }) => {
       let myUnlocked = [];
       try { myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]'); } catch (e) {}
       if (myUnlocked.includes(String(item.id).trim())) return false; // Déjà débloqué sur cet appareil => ne plus afficher ici
-      if (item.status !== 'PENDING') return false; // Disparaît immédiatement dès déblocage
+      const isPending = item.status === 'PENDING' || item.status === 'SEARCHING' || !item.status;
+      if (!isPending) return false; // Disparaît immédiatement dès déblocage par un autre artisan
       if (!filterBySpecialtyOnly || maalemSpecialty === 'BOTH' || maalemSpecialty === 'ALL') return true;
-      return String(item.service_type || '').toUpperCase() === String(maalemSpecialty || '').toUpperCase();
+      const itemSpec = String(item.service_type || '').toUpperCase();
+      const mySpec = String(maalemSpecialty || '').toUpperCase();
+      return !itemSpec || itemSpec === mySpec || mySpec.includes(itemSpec) || itemSpec.includes(mySpec);
     })
     .map((item) => {
       const [lat, lng] = getIntvCoords(item);

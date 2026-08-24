@@ -273,11 +273,13 @@ export const EmergencyFlowProvider = ({ children }) => {
     const isMaalem = user?.role?.toUpperCase() === 'MAALEM';
     if (!isMaalem || !user?.id) return;
 
-    const userCity = user?.city_zone || user?.city || 'casablanca';
+    const rawCity = user?.city_zone || user?.city || 'casablanca';
+    const rootCity = String(rawCity).split('-')[0].trim() || 'casablanca';
     const userSpecialty = user?.maalem_details?.specialty || user?.specialty || 'all';
 
-    const specialtySosChannel = ABLY_CHANNELS.getSosChannel(userCity, userSpecialty);
-    const citySosChannel = ABLY_CHANNELS.getSosCityChannel(userCity);
+    const specialtySosChannel = ABLY_CHANNELS.getSosChannel(rootCity, userSpecialty);
+    const citySosChannel = ABLY_CHANNELS.getSosCityChannel(rootCity);
+    const globalJobsChannel = ABLY_CHANNELS.JOBS_STREAM;
 
     const handleSosBroadcast = ({ event, payload }) => {
       if (!payload) return;
@@ -295,7 +297,7 @@ export const EmergencyFlowProvider = ({ children }) => {
 
           if (document.hidden) {
             showLocalPushNotification(`🚨 URGENCE SOS : ${alertData.subcategory || alertData.service_type || 'Dépannage'}`, {
-              body: `Nouvelle demande à ${alertData.district || userCity}. Touchez pour intervenir.`,
+              body: `Nouvelle demande à ${alertData.district || rootCity}. Touchez pour intervenir.`,
               tag: `sos-${alertData.id}`
             });
           }
@@ -312,10 +314,12 @@ export const EmergencyFlowProvider = ({ children }) => {
 
     const unsubSpecialty = subscribeToRealtimeChannel(specialtySosChannel, handleSosBroadcast, user.id);
     const unsubCity = subscribeToRealtimeChannel(citySosChannel, handleSosBroadcast, user.id);
+    const unsubGlobal = subscribeToRealtimeChannel(globalJobsChannel, handleSosBroadcast, user.id);
 
     return () => {
       unsubSpecialty();
       unsubCity();
+      unsubGlobal();
       stopEmergencySiren();
     };
   }, [user?.id, user?.role, user?.city_zone, user?.specialty, flowState.state, flowState.incomingAlert?.id]);

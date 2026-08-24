@@ -673,13 +673,13 @@ export const AppProvider = ({ children }) => {
             }
           } catch (e) { }
 
-          // 3. Interventions (sélection ciblée & limitées aux 40 dernières)
+          // 3. Interventions (sélection ciblée des vraies colonnes BDD & limitées aux 50 dernières)
           try {
             const { data: realInterventions } = await supabase
               .from('interventions')
-              .select('id, title, category, status, priority, city, address, client_id, maalem_id, client_name, client_phone, maalem_name, maalem_phone, budget, final_price, rating, comment, created_at, lat, lng')
+              .select('id, client_id, maalem_id, service_type, subcategory, district, description_photo, audio_note_url, estimated_price_min, estimated_price_max, final_agreed_price, status, cost_lead, created_at, lat, lng, access_details, urgency_level, rating, comment, escrow_status')
               .order('created_at', { ascending: false })
-              .limit(40);
+              .limit(50);
 
             if (realInterventions) {
               let myUnlocked = [];
