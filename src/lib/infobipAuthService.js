@@ -428,7 +428,7 @@ export async function checkPhoneProfile(phone) {
   try {
     let { data: profiles, error } = await supabase
       .from('profiles')
-      .select('id, full_name, phone, role, city_zone, credits, pin_hash')
+      .select('*')
       .in('phone', candidates);
 
     // Si non trouvé par égalité stricte, recherche tolérante par sous-chaîne des chiffres nationaux
@@ -436,7 +436,7 @@ export async function checkPhoneProfile(phone) {
     if ((!profiles || profiles.length === 0) && national.length >= 8) {
       const { data: fuzzyProfiles } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, role, city_zone, credits, pin_hash')
+        .select('*')
         .ilike('phone', `%${national}%`);
       if (fuzzyProfiles && fuzzyProfiles.length > 0) {
         profiles = fuzzyProfiles;
@@ -458,17 +458,24 @@ export async function checkPhoneProfile(phone) {
       };
     }
 
-    // 3. Fallback: Vérifier dans les données locales ou maalem_details
+    // 3. Fallback: Vérifier dans les données locales ou caches maalems/clients
     try {
+      const cachedMaalems = JSON.parse(localStorage.getItem('bricolemoi_maalems_cache') || '[]');
+      const cachedClients = JSON.parse(localStorage.getItem('bricolemoi_clients_cache') || '[]');
       const onlineMap = JSON.parse(localStorage.getItem('bricolemoi_online_maalems_map') || '{}');
-      for (const mId in onlineMap) {
-        const m = onlineMap[mId];
+      const allCachedUsers = [
+        ...cachedMaalems.map(m => ({ ...m, role: 'MAALEM' })),
+        ...cachedClients.map(c => ({ ...c, role: 'CLIENT' })),
+        ...Object.values(onlineMap).map(m => ({ ...m, role: 'MAALEM' }))
+      ];
+
+      for (const m of allCachedUsers) {
         const mPhoneDigits = String(m.phone || '').replace(/\D/g, '');
-        if (mPhoneDigits && national && (mPhoneDigits.includes(national) || national.includes(mPhoneDigits))) {
+        if (mPhoneDigits && national && (mPhoneDigits.endsWith(national.slice(-8)) || national.endsWith(mPhoneDigits.slice(-8)))) {
           return {
             isValid: true,
             exists: true,
-            role: 'MAALEM',
+            role: (m.role || 'MAALEM').toUpperCase(),
             fullName: m.full_name || 'Artisan Maâlem',
             cityZone: m.city_zone || m.district || 'Casablanca',
             hasPin: true,
@@ -527,14 +534,14 @@ export async function loginWithPin({ phone, pin }) {
   if (isSupabaseConfigured) {
     let { data: profiles, error } = await supabase
       .from('profiles')
-      .select('id, full_name, phone, role, city_zone, credits, pin_hash')
+      .select('*')
       .in('phone', candidates);
 
     const national = candidates[3] || candidates[1] || '';
     if ((!profiles || profiles.length === 0) && national.length >= 8) {
       const { data: fuzzyProfiles } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, role, city_zone, credits, pin_hash')
+        .select('*')
         .ilike('phone', `%${national}%`);
       if (fuzzyProfiles && fuzzyProfiles.length > 0) {
         profiles = fuzzyProfiles;
@@ -543,60 +550,68 @@ export async function loginWithPin({ phone, pin }) {
 
     const profile = profiles && profiles.length > 0 ? profiles[0] : null;
 
-    if (!profile) {
-      throw new Error('Compte introuvable. Veuillez d\'abord vous inscrire.');
-    }
-
-    // Vérification STRICTE du PIN unique de l'utilisateur
-    const storedHash = profile.pin_hash || localHashed;
-    if (storedHash) {
-      if (storedHash !== hashed) {
+    if (profile) {
+      // Vérification du PIN unique de l'utilisateur
+      const storedHash = profile.pin_hash || localHashed;
+      if (storedHash && storedHash !== hashed) {
         throw new Error('Code PIN incorrect. Veuillez réessayer ou réinitialiser votre PIN.');
+      } else if (!storedHash) {
+        setLocalPin(formatted, hashed);
+        try {
+          await supabase.from('profiles').update({ pin_hash: hashed }).eq('id', profile.id);
+        } catch (e) {}
       }
-    } else {
-      // Aucun PIN enregistré : premier enregistrement du PIN
-      setLocalPin(formatted, hashed);
-      try {
-        await supabase.from('profiles').update({ pin_hash: hashed }).eq('id', profile.id);
-      } catch (e) {}
-    }
 
-    const effectiveRole = (profile.role || 'CLIENT').toUpperCase();
-    let maalemDetails = null;
+      const effectiveRole = (profile.role || 'CLIENT').toUpperCase();
+      let maalemDetails = null;
 
-    if (effectiveRole === 'MAALEM') {
-      const { data: mData } = await supabase
-        .from('maalem_details')
-        .select('id, specialty, cin_number, cin_photo_url, portfolio_urls, status, credit_balance, is_verified, rating_avg, consecutive_five_stars, hundred_dh_recharges_count')
-        .eq('id', profile.id)
-        .maybeSingle();
-      maalemDetails = mData;
-    }
-
-    return {
-      success: true,
-      user: {
-        id: profile.id,
-        phone: profile.phone,
-        role: effectiveRole,
-        full_name: profile.full_name,
-        city_zone: profile.city_zone,
-        credits: profile.credits || (effectiveRole === 'MAALEM' ? 15.00 : 0),
-        maalem_details: maalemDetails
+      if (effectiveRole === 'MAALEM') {
+        const { data: mData } = await supabase
+          .from('maalem_details')
+          .select('*')
+          .eq('id', profile.id)
+          .maybeSingle();
+        maalemDetails = mData;
       }
-    };
+
+      return {
+        success: true,
+        user: {
+          id: profile.id,
+          phone: profile.phone || formatted,
+          role: effectiveRole,
+          full_name: profile.full_name,
+          city_zone: profile.city_zone,
+          credits: profile.credits || (effectiveRole === 'MAALEM' ? 15.00 : 0),
+          maalem_details: maalemDetails
+        }
+      };
+    }
   }
 
-  // Fallback offline demo
-  return {
-    success: true,
-    user: {
-      id: 'demo-' + formatted.replace(/\D/g, ''),
-      phone: formatted,
-      role: 'CLIENT',
-      full_name: 'Utilisateur Démo'
+  // Fallback cache local si profil trouvé dans les listes
+  try {
+    const cachedMaalems = JSON.parse(localStorage.getItem('bricolemoi_maalems_cache') || '[]');
+    const nationalDigits = formatted.replace(/\D/g, '').slice(-8);
+    const mMatch = cachedMaalems.find(m => String(m.phone || '').replace(/\D/g, '').includes(nationalDigits));
+    if (mMatch) {
+      setLocalPin(formatted, hashed);
+      return {
+        success: true,
+        user: {
+          id: mMatch.id,
+          phone: mMatch.phone || formatted,
+          role: 'MAALEM',
+          full_name: mMatch.full_name,
+          city_zone: mMatch.city_zone || mMatch.district || 'Casablanca',
+          credits: mMatch.credit_balance || 15.00,
+          maalem_details: mMatch
+        }
+      };
     }
-  };
+  } catch (e) {}
+
+  throw new Error('Compte introuvable. Veuillez d\'abord vous inscrire.');
 }
 
 /**
