@@ -71,7 +71,7 @@ export const AdminDashboard = () => {
   const pendingRechargesCount = transactions.filter((t) => t.status === 'PENDING').length;
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className="space-y-6 max-w-7xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
       {/* 1. Header Global & KPIs Haute Densité */}
       <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-sm relative overflow-hidden text-slate-900">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
@@ -251,13 +251,13 @@ export const AdminDashboard = () => {
       </div>
 
       {/* 2. Barre de Navigation par Onglets (Segmented Control SaaS Pro) */}
-      <div className="bg-slate-100/90 border border-slate-200 p-1.5 rounded-2xl shadow-xs">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
+      <div className="bg-slate-100/90 border border-slate-200 p-1.5 rounded-2xl shadow-xs overflow-x-auto no-scrollbar">
+        <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-1.5 min-w-max sm:min-w-0">
           {/* Tab 1: Clients */}
           <button
             type="button"
             onClick={() => setActiveTab('CLIENTS')}
-            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`py-2.5 px-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer touch-target-44 whitespace-nowrap ${
               activeTab === 'CLIENTS'
                 ? 'bg-white text-blue-700 shadow-sm font-black border border-slate-200/90'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'

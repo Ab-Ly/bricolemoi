@@ -625,7 +625,7 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     : (!activeOngoingSOS && !latestClientIntv && isSearching ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null);
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-24 md:pb-12 font-sans">
+    <div className="space-y-8 max-w-4xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
       {/* 1. INTERVENTION EN COURS (PRISE EN CHARGE CONFIRMÉE PAR LE MAÂLEM) */}
       {activeOngoingSOS && !showNewSOSForm ? (
         <motion.div
@@ -1611,9 +1611,10 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
                 </h3>
                 <button
                   onClick={() => closeReviewModal()}
-                  className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 cursor-pointer touch-target-44 active:scale-95"
+                  title="Fermer"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
@@ -1782,7 +1783,8 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
                     });
                     setPendingCompletionModalInt(null);
                   }}
-                  className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-all cursor-pointer touch-target-44 active:scale-95"
+                  title="Fermer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1865,9 +1867,10 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
             >
               <button
                 onClick={() => setSosPhoneModalOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+                className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer touch-target-44 active:scale-95"
+                title="Fermer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
 
               <div className="text-center space-y-2 pt-1">

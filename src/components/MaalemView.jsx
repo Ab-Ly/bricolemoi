@@ -503,7 +503,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-24 md:pb-12 font-sans">
+    <div className="space-y-8 max-w-4xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
       {/* WhatsApp Welcome Message Banner (Polished RTL Darija with Actions) */}
       {whatsappMsg && (
         <motion.div
@@ -1575,14 +1575,15 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.94, opacity: 0, y: 15 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-slate-900 max-h-[85vh] overflow-y-auto modal-scroll"
+              className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative text-slate-900 max-h-[92dvh] overflow-y-auto modal-scroll pb-safe"
             >
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setRechargeModalOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors"
+                className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer touch-target-44 active:scale-95 z-20"
+                title="Fermer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </motion.button>
 
               <div className="text-center mb-6">
@@ -1763,7 +1764,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="bg-white border border-slate-200 p-6 rounded-3xl w-full max-w-2xl shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto modal-scroll flex flex-col text-slate-900"
+              className="bg-white border border-slate-200 p-4 sm:p-6 rounded-3xl w-full max-w-2xl shadow-2xl space-y-4 max-h-[92dvh] overflow-y-auto modal-scroll flex flex-col text-slate-900 pb-safe"
             >
               {/* Header Modal */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-200">
@@ -1783,9 +1784,10 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   </div>
                   <button
                     onClick={() => setHistoryModalOpen(false)}
-                    className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all cursor-pointer touch-target-44 active:scale-95"
+                    title="Fermer"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>

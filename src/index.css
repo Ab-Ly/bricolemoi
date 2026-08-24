@@ -274,11 +274,11 @@
 
 /* Mobile Safe Area and Viewport Height Utilities */
 .pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
 }
 
 .pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: max(env(safe-area-inset-top, 0px), 12px);
 }
 
 .min-h-dvh {
@@ -297,6 +297,38 @@
 .modal-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+/* Hide scrollbar for clean horizontal swipe tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Prevent auto-zoom on iOS Safari when tapping inputs */
+@media screen and (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Touch manipulation to eliminate 300ms mobile tap delays */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Minimum Touch Target standard (Apple/Google 44px) */
+.touch-target-44 {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Modern Clean & Trust Sonner Toast Styling */
