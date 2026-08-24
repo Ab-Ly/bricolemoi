@@ -511,7 +511,14 @@ export const AuthModal = () => {
           cityZone: profileCheck.cityZone
         });
         if (profileCheck.role) {
-          setRole(profileCheck.role);
+          const detectedRole = String(profileCheck.role).toUpperCase();
+          if (detectedRole === 'MAALEM' && role !== 'MAALEM') {
+            setRole('MAALEM');
+            setInfoMsg(`🛠️ Ravi de vous revoir ${profileCheck.fullName || 'Maâlem'} ! Compte Artisan détecté, accès direct à votre Espace Pro.`);
+          } else if (detectedRole === 'CLIENT' && role !== 'CLIENT') {
+            setRole('CLIENT');
+            setInfoMsg(`👤 Ravi de vous revoir ${profileCheck.fullName || 'Client'} ! Compte Particulier détecté.`);
+          }
         }
         if (profileCheck.fullName) {
           setFullName(profileCheck.fullName);

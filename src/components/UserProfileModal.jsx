@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { switchSubdomainInDev } from '../lib/subdomain';
 import { 
   User, 
   Phone, 
@@ -701,6 +702,32 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 </div>
               </div>
             </motion.div>
+          )}
+
+          {/* Quick Subdomain Switcher for Artisans */}
+          {user?.role === 'MAALEM' && (
+            <div className="pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  const currentApp = new URLSearchParams(window.location.search).get('app') || 'CLIENT';
+                  if (currentApp.toUpperCase() === 'MAALEM') {
+                    switchSubdomainInDev('CLIENT');
+                  } else {
+                    switchSubdomainInDev('MAALEM');
+                  }
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 border border-amber-300 text-amber-900 font-black text-xs shadow-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+              >
+                <Wrench className="w-4 h-4 text-amber-600" />
+                <span>
+                  {(new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('app') || '').toUpperCase() === 'MAALEM'
+                    ? '👤 Visiter le Portail Client'
+                    : '🛠️ Accéder à mon Radar Chantiers Pro'}
+                </span>
+              </button>
+            </div>
           )}
 
           {/* Logout Action Button */}

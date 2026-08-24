@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useEmergencyFlow } from '../context/EmergencyFlowContext';
+import { switchSubdomainInDev } from '../lib/subdomain';
 import { EMERGENCY_STATES } from '../constants/emergencyStates';
 import { VoiceRecorder } from './VoiceRecorder';
 import { InteractiveMap } from './InteractiveMap';
@@ -626,6 +627,38 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
+      {/* BANDEAU INTELLIGENT : Si un artisan est connecté sur le portail client */}
+      {user?.role === 'MAALEM' && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-amber-50 via-amber-100/70 to-amber-50 border border-amber-300/80 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+              🛠️
+            </div>
+            <div>
+              <p className="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                <span>Compte Artisan Connecté ({user.full_name || 'Maâlem'})</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+              </p>
+              <p className="text-[11px] text-amber-800 mt-0.5">
+                Vous consultez l'espace client. Vos alertes de chantiers et votre solde restent actifs.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => switchSubdomainInDev('MAALEM')}
+            className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all shrink-0"
+          >
+            <Zap className="w-3.5 h-3.5 fill-current" />
+            <span>Ouvrir mon Radar Chantiers Pro →</span>
+          </button>
+        </motion.div>
+      )}
+
       {/* 1. INTERVENTION EN COURS (PRISE EN CHARGE CONFIRMÉE PAR LE MAÂLEM) */}
       {activeOngoingSOS && !showNewSOSForm ? (
         <motion.div
