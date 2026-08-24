@@ -104,6 +104,16 @@ export const AppProvider = ({ children }) => {
   // Empêche le mélange de notifications entre différents appareils connectés
 
   const DUMMY_CLIENT_ID = '11111111-1111-1111-1111-111111111111';
+  const DUMMY_MAALEM_ID = '22222222-2222-2222-2222-222222222222';
+
+  const toSafeUUID = (id, fallback = DUMMY_MAALEM_ID) => {
+    if (!id) return fallback;
+    const str = String(id).trim();
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(str)) return str;
+    const digits = str.replace(/\D/g, '').padEnd(12, '0').slice(-12);
+    return `22222222-2222-2222-2222-${digits}`;
+  };
 
   const isCurrentUserClientOf = (intv) => {
     if (!intv) return false;
@@ -2221,9 +2231,11 @@ export const AppProvider = ({ children }) => {
       const cleanIntId = String(interventionId).trim();
       const ref = `ESCROW_INT_${cleanIntId}`;
 
+      const cleanMaalemId = toSafeUUID(maalemId);
+
       const newTx = {
         id: `tx-escrow-${cleanIntId}-${Date.now()}`,
-        maalem_id: maalemId,
+        maalem_id: cleanMaalemId,
         maalem_name: maalemName,
         maalem_phone: user?.phone || '',
         amount_dh: -Math.abs(amount),
@@ -2240,7 +2252,7 @@ export const AppProvider = ({ children }) => {
       if (isSupabaseConfigured && maalemId) {
         try {
           const { error: insErr } = await supabase.from('transactions').insert([{
-            maalem_id: maalemId,
+            maalem_id: cleanMaalemId,
             amount_dh: -Math.abs(amount),
             type: 'LEAD_ESCROW',
             payment_method: 'SYSTEM_ESCROW',
@@ -3361,8 +3373,9 @@ export const AppProvider = ({ children }) => {
 
       if (isSupabaseConfigured) {
         try {
+          const cleanMaalemId = toSafeUUID(maalemId);
           const { data: insertedTx, error: insErr } = await supabase.from('transactions').insert([{
-            maalem_id: maalemId,
+            maalem_id: cleanMaalemId,
             amount_dh: rechargeAmount,
             type: 'RECHARGE',
             payment_method,
@@ -3380,10 +3393,10 @@ export const AppProvider = ({ children }) => {
           if (instant) {
             await supabase.from('maalem_details').update({
               credit_balance: (user?.maalem_details?.credit_balance || 0) + rechargeAmount
-            }).eq('id', maalemId);
+            }).eq('id', cleanMaalemId);
             await supabase.from('profiles').update({
               credits: (user?.credits || 0) + rechargeAmount
-            }).eq('id', maalemId);
+            }).eq('id', cleanMaalemId);
           }
 
           await supabase.from('admin_notifications').insert([{
