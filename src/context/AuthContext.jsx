@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }) => {
         if (isValidUUID(uid)) {
           const { data } = await supabase
             .from('profiles')
-            .select('id, full_name, phone, role, city_zone, is_suspended, credits, avatar_url')
+            .select('id, full_name, phone, role, city_zone, credits, created_at')
             .eq('id', uid)
             .maybeSingle();
           profile = data;
@@ -178,7 +178,7 @@ export const AuthProvider = ({ children }) => {
 
           const { data } = await supabase
             .from('profiles')
-            .select('id, full_name, phone, role, city_zone, is_suspended, credits, avatar_url')
+            .select('id, full_name, phone, role, city_zone, credits, created_at')
             .in('phone', candidateFormats)
             .maybeSingle();
           profile = data;
@@ -186,7 +186,7 @@ export const AuthProvider = ({ children }) => {
           if (!profile && last9.length >= 8) {
             const { data: ilikeProfile } = await supabase
               .from('profiles')
-              .select('id, full_name, phone, role, city_zone, is_suspended, credits, avatar_url')
+              .select('id, full_name, phone, role, city_zone, credits, created_at')
               .ilike('phone', `%${last9}%`)
               .maybeSingle();
             profile = ilikeProfile;
@@ -222,7 +222,7 @@ export const AuthProvider = ({ children }) => {
           if (isValidUUID(targetId)) {
             const { data } = await supabase
               .from('maalem_details')
-              .select('id, specialty, rating_avg, review_count, is_verified, cin_verified, is_online, credit_balance, bio')
+              .select('id, specialty, cin_number, cin_photo_url, portfolio_urls, status, credit_balance, is_verified, rating_avg, consecutive_five_stars, hundred_dh_recharges_count')
               .eq('id', targetId)
               .maybeSingle();
             maalemDetails = data;
@@ -479,103 +479,107 @@ export const AuthProvider = ({ children }) => {
         try {
           const { data: existingProfile } = await supabase
             .from('profiles')
-            .select('id, full_name, phone, role, city_zone, is_suspended, credits')
-            .eq('phone', finalPhone)
-            .maybeSingle();
-
-          if (existingProfile) {
-            const effectiveRole = (existingProfile.role || 'CLIENT').toUpperCase();
-
-            if (mode === 'SIGN_UP' && effectiveRole !== normRole) {
-              throw new Error(`PHONE_ROLE_CONFLICT:${effectiveRole}`);
-            }
-
-            const updateFields = {
-              full_name: existingProfile.full_name || fullName,
-              city_zone: existingProfile.city_zone || cityZone
-            };
-            if (pinHash) updateFields.pin_hash = pinHash;
-
-            await supabase.from('profiles').update(updateFields).eq('id', existingProfile.id);
-
-            const effectiveCredits = existingProfile.credits !== undefined && existingProfile.credits !== null
-              ? Number(existingProfile.credits)
-              : (effectiveRole === 'MAALEM' ? 15.00 : 0);
-
-            authenticatedUser = {
-              ...authenticatedUser,
-              id: existingProfile.id || firebaseUid,
-              role: effectiveRole,
-              full_name: existingProfile.full_name || fullName,
-              city_zone: existingProfile.city_zone || cityZone,
-              credits: effectiveCredits
-            };
-
-            if (effectiveRole === 'MAALEM') {
-              const { data: maalemDetails } = await supabase
-                .from('maalem_details')
-                .select('id, specialty, rating_avg, review_count, is_verified, cin_verified, is_online, credit_balance, bio, status')
-                .eq('id', authenticatedUser.id)
+            .select('id, full_name, phone, role, city_zone, credits')
+                .eq('phone', finalPhone)
                 .maybeSingle();
 
-              authenticatedUser.maalem_details = {
-                ...(maalemDetails || {}),
-                specialty: maalemDetails?.specialty || specialty || 'PLUMBING',
-                credit_balance: effectiveCredits,
-                is_verified: true,
-                status: maalemDetails?.status || 'active'
-              };
-            }
-          } else {
-            const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-            const validProfileId = isUuid(firebaseUid) ? firebaseUid : (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : (normRole === 'MAALEM' ? '22222222-2222-2222-2222-222222222222' : '11111111-1111-1111-1111-111111111111'));
-            authenticatedUser.id = validProfileId;
+              if (existingProfile) {
+                const effectiveRole = (existingProfile.role || 'CLIENT').toUpperCase();
 
-            const profileData = {
-              id: validProfileId,
-              phone: finalPhone,
-              role: normRole,
-              full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
-              city_zone: cityZone || 'Casablanca',
-              credits: normRole === 'MAALEM' ? 15.00 : 0
-            };
-            if (pinHash) profileData.pin_hash = pinHash;
+                if (mode === 'SIGN_UP' && effectiveRole !== normRole) {
+                  throw new Error(`PHONE_ROLE_CONFLICT:${effectiveRole}`);
+                }
 
-            let { error: pError } = await supabase.from('profiles').upsert([profileData]).select();
-            if (pError) {
-              const baseProfile = {
-                id: validProfileId,
-                phone: finalPhone,
-                role: normRole,
-                full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
-                city_zone: cityZone || 'Casablanca'
-              };
-              await supabase.from('profiles').upsert([baseProfile]).select();
-            }
+                const updateFields = {
+                  full_name: existingProfile.full_name || fullName,
+                  city_zone: existingProfile.city_zone || cityZone
+                };
+                if (pinHash) updateFields.pin_hash = pinHash;
 
-            if (normRole === 'MAALEM') {
-              const defaultDetails = {
-                id: validProfileId,
-                specialty: specialty || 'PLUMBING',
-                is_verified: true,
-                cin_verified: true,
-                status: 'active',
-                credit_balance: 15.00,
-                portfolio_urls: Array.isArray(portfolioUrls) ? portfolioUrls : []
-              };
-              await supabase.from('maalem_details').upsert([defaultDetails]).select().catch(() => {});
-              authenticatedUser.maalem_details = defaultDetails;
-              authenticatedUser.credits = 15.00;
+                await supabase.from('profiles').update(updateFields).eq('id', existingProfile.id);
+
+                const effectiveCredits = existingProfile.credits !== undefined && existingProfile.credits !== null
+                  ? Number(existingProfile.credits)
+                  : (effectiveRole === 'MAALEM' ? 15.00 : 0);
+
+                authenticatedUser = {
+                  ...authenticatedUser,
+                  id: existingProfile.id || firebaseUid,
+                  role: effectiveRole,
+                  full_name: existingProfile.full_name || fullName,
+                  city_zone: existingProfile.city_zone || cityZone,
+                  credits: effectiveCredits
+                };
+
+                if (effectiveRole === 'MAALEM') {
+                  const { data: maalemDetails } = await supabase
+                    .from('maalem_details')
+                    .select('id, specialty, cin_number, cin_photo_url, portfolio_urls, status, credit_balance, is_verified, rating_avg, consecutive_five_stars, hundred_dh_recharges_count')
+                    .eq('id', authenticatedUser.id)
+                    .maybeSingle();
+
+                  authenticatedUser.maalem_details = {
+                    ...(maalemDetails || {}),
+                    specialty: maalemDetails?.specialty || specialty || 'PLUMBING',
+                    credit_balance: effectiveCredits,
+                    is_verified: true,
+                    status: maalemDetails?.status || 'active'
+                  };
+                }
+              } else {
+                const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+                const validProfileId = isUuid(firebaseUid) ? firebaseUid : (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : (normRole === 'MAALEM' ? '22222222-2222-2222-2222-222222222222' : '11111111-1111-1111-1111-111111111111'));
+                authenticatedUser.id = validProfileId;
+
+                const profileData = {
+                  id: validProfileId,
+                  phone: finalPhone,
+                  role: normRole,
+                  full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
+                  city_zone: cityZone || 'Casablanca',
+                  credits: normRole === 'MAALEM' ? 15.00 : 0
+                };
+                if (pinHash) profileData.pin_hash = pinHash;
+
+                let { error: pError } = await supabase.from('profiles').upsert([profileData]).select();
+                if (pError) {
+                  console.warn('[Supabase Profiles Upsert Warning]:', pError.message);
+                  const baseProfile = {
+                    id: validProfileId,
+                    phone: finalPhone,
+                    role: normRole,
+                    full_name: fullName || (normRole === 'MAALEM' ? 'Artisan Pro' : 'Client Particulier'),
+                    city_zone: cityZone || 'Casablanca'
+                  };
+                  await supabase.from('profiles').upsert([baseProfile]).select();
+                }
+
+                if (normRole === 'MAALEM') {
+                  const defaultDetails = {
+                    id: validProfileId,
+                    specialty: specialty || 'PLUMBING',
+                    cin_number: 'CIN-PENDING',
+                    cin_photo_url: 'https://images.unsplash.com/photo-1544717305-2782549b5136',
+                    portfolio_urls: portfolioUrls.length > 0 ? portfolioUrls : ['https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500'],
+                    status: 'active',
+                    credit_balance: 15.00,
+                    is_verified: true,
+                    rating_avg: 5.00,
+                    consecutive_five_stars: 0,
+                    hundred_dh_recharges_count: 0
+                  };
+                  await supabase.from('maalem_details').upsert([defaultDetails]).select().catch(() => {});
+                  authenticatedUser.maalem_details = defaultDetails;
+                }
+              }
+            } catch (dbErr) {
+              if (dbErr.message?.startsWith('PHONE_ROLE_CONFLICT')) {
+                throw dbErr;
+              }
+              console.warn('[Supabase Auth DB Warning]:', dbErr.message);
             }
           }
-        } catch (dbErr) {
-          if (dbErr.message?.startsWith('PHONE_ROLE_CONFLICT')) {
-            throw dbErr;
-          }
-          console.error('[Supabase DB Error]:', dbErr.message || dbErr);
         }
-      }
-    }
 
     // Broadcast inscription Maalem vers les autres onglets
     if (authenticatedUser.role === 'MAALEM') {
@@ -662,7 +666,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const { data: existingProfile } = await supabase
             .from('profiles')
-            .select('id, full_name, phone, role, city_zone, is_suspended, credits, avatar_url')
+            .select('id, full_name, phone, role, city_zone, credits')
             .eq('id', firebaseUid)
             .maybeSingle();
 

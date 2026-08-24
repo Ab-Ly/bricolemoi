@@ -341,7 +341,7 @@ export async function verifyInfobipOTP({ phone, token, role = 'CLIENT', fullName
     try {
       const { data: existing } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, role, city_zone, is_suspended, credits, pin_hash')
+        .select('id, full_name, phone, role, city_zone, credits, pin_hash')
         .eq('phone', formatted)
         .maybeSingle();
 
@@ -351,7 +351,7 @@ export async function verifyInfobipOTP({ phone, token, role = 'CLIENT', fullName
         const { data: created } = await supabase
           .from('profiles')
           .upsert([userProfile], { onConflict: 'phone' })
-          .select('id, full_name, phone, role, city_zone, is_suspended, credits, pin_hash')
+          .select('id, full_name, phone, role, city_zone, credits, pin_hash')
           .single();
         if (created) userProfile = { ...userProfile, ...created };
       }
@@ -428,7 +428,7 @@ export async function checkPhoneProfile(phone) {
   try {
     let { data: profiles, error } = await supabase
       .from('profiles')
-      .select('id, full_name, phone, role, city_zone, is_suspended, credits, pin_hash')
+      .select('id, full_name, phone, role, city_zone, credits, pin_hash')
       .in('phone', candidates);
 
     // Si non trouvé par égalité stricte, recherche tolérante par sous-chaîne des chiffres nationaux
@@ -436,7 +436,7 @@ export async function checkPhoneProfile(phone) {
     if ((!profiles || profiles.length === 0) && national.length >= 8) {
       const { data: fuzzyProfiles } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, role, city_zone, is_suspended, credits, pin_hash')
+        .select('id, full_name, phone, role, city_zone, credits, pin_hash')
         .ilike('phone', `%${national}%`);
       if (fuzzyProfiles && fuzzyProfiles.length > 0) {
         profiles = fuzzyProfiles;
@@ -527,14 +527,14 @@ export async function loginWithPin({ phone, pin }) {
   if (isSupabaseConfigured) {
     let { data: profiles, error } = await supabase
       .from('profiles')
-      .select('id, full_name, phone, role, city_zone, is_suspended, credits, pin_hash')
+      .select('id, full_name, phone, role, city_zone, credits, pin_hash')
       .in('phone', candidates);
 
     const national = candidates[3] || candidates[1] || '';
     if ((!profiles || profiles.length === 0) && national.length >= 8) {
       const { data: fuzzyProfiles } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, role, city_zone, is_suspended, credits, pin_hash')
+        .select('id, full_name, phone, role, city_zone, credits, pin_hash')
         .ilike('phone', `%${national}%`);
       if (fuzzyProfiles && fuzzyProfiles.length > 0) {
         profiles = fuzzyProfiles;
@@ -567,7 +567,7 @@ export async function loginWithPin({ phone, pin }) {
     if (effectiveRole === 'MAALEM') {
       const { data: mData } = await supabase
         .from('maalem_details')
-        .select('id, specialty, rating_avg, review_count, is_verified, cin_verified, is_online, credit_balance, bio')
+        .select('id, specialty, cin_number, cin_photo_url, portfolio_urls, status, credit_balance, is_verified, rating_avg, consecutive_five_stars, hundred_dh_recharges_count')
         .eq('id', profile.id)
         .maybeSingle();
       maalemDetails = mData;

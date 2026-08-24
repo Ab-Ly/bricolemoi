@@ -547,15 +547,15 @@ export const AppProvider = ({ children }) => {
       if (!isSupabaseConfigured) return;
       // 1. Profils + maalem_details
       try {
-        // 1. Profils + maalem_details (sélection ciblée sans images lourdes Base64)
+        // 1. Profils + maalem_details (colonnes strictes de la BDD PostgreSQL)
         const { data: rawProfiles, error: pErr } = await supabase
           .from('profiles')
-          .select('id, full_name, phone, role, city_zone, is_suspended, created_at, credits, avatar_url, updated_at');
+          .select('id, phone, role, full_name, city_zone, credits, created_at');
         if (pErr) console.warn('[Supabase] profiles read error:', pErr.message);
 
         const { data: rawDetails, error: dErr } = await supabase
           .from('maalem_details')
-          .select('id, specialty, rating_avg, review_count, is_verified, cin_verified, is_online, credit_balance, bio, lat, lng, status, portfolio_urls');
+          .select('id, specialty, cin_number, cin_photo_url, portfolio_urls, status, credit_balance, is_verified, rating_avg, consecutive_five_stars, hundred_dh_recharges_count');
         if (dErr) console.warn('[Supabase] maalem_details read error:', dErr.message);
 
         if (rawProfiles) {
@@ -601,8 +601,8 @@ export const AppProvider = ({ children }) => {
               phone: m.phone || '',
               specialty: details.specialty || m.specialty || 'PLUMBING',
               rating_avg: details.rating_avg || 5.0,
-              is_verified: details.is_verified ?? details.cin_verified ?? true,
-              cin_verified: details.cin_verified ?? details.is_verified ?? true,
+              is_verified: details.is_verified ?? true,
+              cin_verified: details.is_verified ?? true,
               status: details.status || m.status || 'active',
               portfolio_urls: details.portfolio_urls || m.portfolio_urls || [],
               is_online: onlineStatus,
@@ -635,7 +635,7 @@ export const AppProvider = ({ children }) => {
               city_zone: c.city_zone || 'Casablanca',
               district: c.city_zone || 'Casablanca',
               created_at: c.created_at || new Date().toISOString(),
-              is_suspended: Boolean(c.is_suspended),
+              is_suspended: false,
               role: c.role || 'client'
             }));
 
@@ -663,13 +663,20 @@ export const AppProvider = ({ children }) => {
           try {
             const { data: realReviews } = await supabase
               .from('reviews')
-              .select('id, intervention_id, maalem_id, client_id, rating, comment, client_name, created_at')
+              .select('id, intervention_id, maalem_id, client_id, rating, comment, badges, created_at')
               .order('created_at', { ascending: false })
               .limit(30);
             if (realReviews) {
-              setReviews(realReviews);
-              try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(realReviews)); } catch (e) { }
-              reviewsMap = new Map(realReviews.map((r) => [String(r.intervention_id).trim(), r]));
+              const enrichedReviews = realReviews.map((r) => {
+                const clientP = profilesMap.get(r.client_id);
+                return {
+                  ...r,
+                  client_name: clientP?.full_name || 'Client BricoleMoi'
+                };
+              });
+              setReviews(enrichedReviews);
+              try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(enrichedReviews)); } catch (e) { }
+              reviewsMap = new Map(enrichedReviews.map((r) => [String(r.intervention_id).trim(), r]));
             }
           } catch (e) { }
 
@@ -677,7 +684,7 @@ export const AppProvider = ({ children }) => {
           try {
             const { data: realInterventions } = await supabase
               .from('interventions')
-              .select('id, client_id, maalem_id, service_type, subcategory, district, description_photo, audio_note_url, estimated_price_min, estimated_price_max, final_agreed_price, status, cost_lead, created_at, lat, lng, access_details, urgency_level, rating, comment, escrow_status')
+              .select('id, client_id, maalem_id, service_type, district, description_photo, audio_note_url, estimated_price_min, estimated_price_max, final_agreed_price, status, cost_lead, created_at')
               .order('created_at', { ascending: false })
               .limit(50);
 
@@ -707,11 +714,11 @@ export const AppProvider = ({ children }) => {
             }
           } catch (e) { }
 
-          // 4. Transactions (sélection ciblée & limitées aux 50 dernières)
+          // 4. Transactions (sélection ciblée des vraies colonnes BDD & limitées aux 50 dernières)
           try {
             const { data: realTransactions } = await supabase
               .from('transactions')
-              .select('id, maalem_id, maalem_name, maalem_phone, type, amount_dh, status, reference_ref, payment_method, admin_notes, created_at')
+              .select('id, maalem_id, amount_dh, type, payment_method, reference_ref, status, created_at')
               .order('created_at', { ascending: false })
               .limit(50);
 
