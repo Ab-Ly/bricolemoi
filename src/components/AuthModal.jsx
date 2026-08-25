@@ -1128,16 +1128,22 @@ export const AuthModal = () => {
                   <span>{loading ? 'Connexion en cours...' : 'Se Connecter'}</span>
                 </motion.button>
 
-                {/* Option de secours SMS */}
+                {/* Option de secours WhatsApp / SMS */}
                 <div className="text-center pt-1">
                   <button
                     type="button"
                     onClick={handleSendLoginOtp}
                     disabled={loading}
-                    className="text-xs text-amber-700 hover:text-amber-800 underline font-bold flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
+                    className={`text-xs underline font-bold flex items-center justify-center gap-1.5 mx-auto cursor-pointer ${
+                      selectedCountry.dial === '+212' ? 'text-emerald-700 hover:text-emerald-800' : 'text-amber-700 hover:text-amber-800'
+                    }`}
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
-                    <span>PIN oublié ? Se connecter par Code SMS</span>
+                    <span>
+                      {selectedCountry.dial === '+212' 
+                        ? 'PIN oublié ? Se connecter par Code WhatsApp' 
+                        : 'PIN oublié ? Se connecter par Code SMS'}
+                    </span>
                   </button>
                 </div>
               </form>
@@ -1239,12 +1245,20 @@ export const AuthModal = () => {
                   disabled={loading || !fullName.trim()}
                   className={`w-full py-3.5 font-black text-xs rounded-2xl shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer mt-2 ${
                     isClient
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
+                      ? (selectedCountry.dial === '+212'
+                          ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-emerald-500/20'
+                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white')
                       : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <ChatCenteredText weight="duotone" className="w-4 h-4" />
-                  <span>{loading ? 'Envoi du code...' : 'Recevoir mon Code SMS d\'activation →'}</span>
+                  <span>
+                    {loading 
+                      ? 'Envoi du code...' 
+                      : selectedCountry.dial === '+212'
+                      ? 'Recevoir mon code par WhatsApp →'
+                      : 'Recevoir mon Code SMS d\'activation →'}
+                  </span>
                 </motion.button>
 
                 {/* Lien de bascule vers connexion PIN si le compte existe déjà */}
@@ -1270,20 +1284,32 @@ export const AuthModal = () => {
             )}
 
             {/* ======================================================== */}
-            {/* ÉCRAN 3 : VALIDATION DU CODE SMS (6 CHIFFRES)            */}
+            {/* ÉCRAN 3 : VALIDATION DU CODE (6 CHIFFRES)                 */}
             {/* ======================================================== */}
             {step === 'OTP_VERIFY' && (
               <form onSubmit={(e) => { e.preventDefault(); handleOtpProceed(); }} className="space-y-4">
-                <div className="p-3 rounded-2xl border bg-blue-50/70 border-blue-200 text-slate-700 flex items-center justify-between shadow-xs">
+                <div className={`p-3 rounded-2xl border flex items-center justify-between shadow-xs ${
+                  selectedCountry.dial === '+212'
+                    ? 'bg-emerald-50/80 border-emerald-200 text-emerald-950'
+                    : 'bg-blue-50/70 border-blue-200 text-slate-700'
+                }`}>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <div className={`w-9 h-9 rounded-xl text-white flex items-center justify-center shrink-0 shadow-xs ${
+                      selectedCountry.dial === '+212' ? 'bg-emerald-600' : 'bg-blue-600'
+                    }`}>
                       <ChatCenteredText weight="duotone" className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-900">Code de sécurité envoyé par SMS</p>
+                      <p className="text-xs font-bold text-slate-900">
+                        {selectedCountry.dial === '+212' 
+                          ? 'Code de sécurité envoyé sur WhatsApp 💬' 
+                          : 'Code de sécurité envoyé par SMS 📱'}
+                      </p>
                       <p className="text-[11px] text-slate-600 font-mono flex items-center gap-1.5 mt-0.5">
                         <span>{getFullInternationalNumber()}</span>
-                        <span className="text-blue-600 font-sans text-[10px] font-bold">(Expéditeur: BricoleMoi)</span>
+                        <span className={selectedCountry.dial === '+212' ? 'text-emerald-700 font-sans text-[10px] font-bold' : 'text-blue-600 font-sans text-[10px] font-bold'}>
+                          {selectedCountry.dial === '+212' ? '(WhatsApp BricoleMoi)' : '(Expéditeur: BricoleMoi)'}
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -1306,14 +1332,16 @@ export const AuthModal = () => {
                       autoFocus={idx === 0}
                       className={`h-12 w-full text-center font-mono text-xl font-black rounded-xl border transition-all duration-200 focus:outline-none ${
                         digit
-                          ? 'bg-blue-50 border-blue-600 text-blue-900 ring-1 ring-blue-600'
+                          ? (selectedCountry.dial === '+212'
+                              ? 'bg-emerald-50 border-emerald-600 text-emerald-900 ring-1 ring-emerald-600'
+                              : 'bg-blue-50 border-blue-600 text-blue-900 ring-1 ring-blue-600')
                           : 'bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300'
                       } focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
                     />
                   ))}
                 </div>
 
-                {/* Compte à rebours 5 minutes / Renvoi SMS */}
+                {/* Compte à rebours 5 minutes / Renvoi */}
                 <div className="flex items-center justify-between text-xs pt-0.5">
                   <span className="text-slate-500 text-[11px]">
                     {resendCountdown > 0 ? 'Code valable 5 minutes' : 'Code expiré'}
@@ -1333,7 +1361,7 @@ export const AuthModal = () => {
                       className="text-[11px] text-blue-600 hover:text-blue-700 underline font-bold flex items-center gap-1 transition-all cursor-pointer"
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Renvoyer un nouveau code SMS</span>
+                      <span>{selectedCountry.dial === '+212' ? 'Renvoyer un code WhatsApp' : 'Renvoyer un nouveau code SMS'}</span>
                     </button>
                   )}
                 </div>

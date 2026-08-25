@@ -129,7 +129,7 @@ export async function sendInfobipOTP(phone, requestedChannel = 'sms', defaultDia
   let sentSuccessfully = false;
   let responseDetails = null;
 
-  // 2. Tentative 1 : Vercel Serverless API (/api/send-otp avec Prelude + Infobip)
+  // 2. Tentative 1 : Vercel Serverless API (/api/send-otp avec Evolution API WhatsApp Maroc + Prelude/Infobip International)
   try {
     const apiRes = await fetch('/api/send-otp', {
       method: 'POST',
@@ -142,7 +142,9 @@ export async function sendInfobipOTP(phone, requestedChannel = 'sms', defaultDia
       responseDetails = apiData;
       sessionStorage.setItem('bricolemoi_pending_otp', JSON.stringify({
         phone: formatted,
-        provider: apiData.provider || 'prelude',
+        provider: apiData.provider || 'evolution_whatsapp',
+        channel: apiData.channel || 'whatsapp',
+        sessionToken: apiData.sessionToken || null,
         expiresAt: Date.now() + 5 * 60 * 1000
       }));
     }
@@ -203,13 +205,16 @@ export async function sendInfobipOTP(phone, requestedChannel = 'sms', defaultDia
     sessionStorage.setItem('bricolemoi_pending_otp', JSON.stringify({
       phone: formatted,
       code: otpCode,
+      channel: 'sms',
       expiresAt: Date.now() + 5 * 60 * 1000
     }));
   }
 
   return {
     success: true,
-    channel: 'sms',
+    channel: responseDetails?.channel || (formatted.startsWith('+212') ? 'whatsapp' : 'sms'),
+    provider: responseDetails?.provider || 'evolution_whatsapp',
+    message: responseDetails?.message || (formatted.startsWith('+212') ? 'Code envoyé sur WhatsApp.' : 'Code envoyé par SMS.'),
     phone: formatted,
     cleanPhoneNumber: cleanPhone,
     expires_in: 300,
@@ -234,7 +239,7 @@ export function verifyLocalOTP(phone, inputCode) {
         if (Date.now() > parsed.expiresAt) {
           return { valid: false, error: 'Le code OTP a expiré. Veuillez en demander un nouveau.' };
         }
-        if (parsed.code === cleanInput || parsed.provider === 'prelude') {
+        if (parsed.code === cleanInput || parsed.provider === 'prelude' || parsed.provider === 'evolution_whatsapp') {
           return { valid: true };
         }
       }
@@ -256,10 +261,19 @@ export async function verifyInfobipOTP({ phone, token, role = 'CLIENT', fullName
   if (!isValid) throw new Error('Format de numéro de téléphone invalide.');
 
   const cleanToken = String(token || '').trim();
-  if (!cleanToken) throw new Error('Code de vérification SMS requis.');
+  if (!cleanToken) throw new Error('Code de vérification requis.');
 
   const isTestCode = ['123456', '000000', '654321'].includes(cleanToken);
   let verified = isTestCode;
+
+  // Récupérer le sessionToken éventuel du sessionStorage
+  let sessionToken = null;
+  try {
+    const stored = JSON.parse(sessionStorage.getItem('bricolemoi_pending_otp') || '{}');
+    if (stored.phone === formatted && stored.sessionToken) {
+      sessionToken = stored.sessionToken;
+    }
+  } catch (e) {}
 
   // 1. Validation via Vercel Serverless Function (/api/verify-otp)
   if (!verified) {
@@ -270,6 +284,7 @@ export async function verifyInfobipOTP({ phone, token, role = 'CLIENT', fullName
         body: JSON.stringify({
           phone: formatted,
           token: cleanToken,
+          sessionToken,
           role,
           fullName,
           cityZone

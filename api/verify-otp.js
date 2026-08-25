@@ -1,5 +1,8 @@
-// Vercel Serverless Function: Vérification du code OTP via Prelude.so
+// Vercel Serverless Function: Vérification du code OTP (WhatsApp Evolution API / Prelude SMS)
+import crypto from 'crypto';
+
 const PRELUDE_API_KEY = process.env.PRELUDE_API_KEY || "sk_72Xju0Hj6c3evZiDyrQJ0alDnxPiLDaZ";
+const OTP_SIGNING_SECRET = process.env.OTP_SIGNING_SECRET || "bricolemoi_otp_jwt_secret_2026";
 
 function cleanPhoneNumber(rawPhone) {
   const input = String(rawPhone || "").trim();
@@ -19,6 +22,21 @@ function cleanPhoneNumber(rawPhone) {
   };
 }
 
+function verifyOtpSignature(phone, code, sessionToken) {
+  if (!sessionToken || typeof sessionToken !== "string") return false;
+  const parts = sessionToken.split(".");
+  if (parts.length !== 2) return false;
+
+  const [expiresAtStr, signature] = parts;
+  const expiresAt = parseInt(expiresAtStr, 10);
+  if (isNaN(expiresAt) || Date.now() > expiresAt) return false;
+
+  const expectedData = `${phone}:${code}:${expiresAt}`;
+  const expectedSig = crypto.createHmac("sha256", OTP_SIGNING_SECRET).update(expectedData).digest("hex");
+
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig));
+}
+
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -35,7 +53,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { phone, token, role, fullName, cityZone } = req.body || {};
+    const { phone, token, sessionToken, role, fullName, cityZone } = req.body || {};
     if (!phone || !token) {
       return res.status(400).json({ success: false, error: "Numéro de téléphone et code OTP requis." });
     }
@@ -64,7 +82,32 @@ export default async function handler(req, res) {
       });
     }
 
-    // === VÉRIFICATION AUPRÈS DE PRELUDE.SO ===
+    // === 1. VÉRIFICATION VIA SESSION TOKEN (WHATSAPP EVOLUTION API & INFOBIP FALLBACK) ===
+    if (sessionToken) {
+      try {
+        const isSignatureValid = verifyOtpSignature(formatted, cleanToken, sessionToken);
+        if (isSignatureValid) {
+          return res.status(200).json({
+            success: true,
+            message: "Code WhatsApp validé avec succès !",
+            verified: true,
+            provider: "evolution_whatsapp",
+            user: {
+              id: "usr_" + formatted.replace(/\D/g, ""),
+              phone: formatted,
+              role: role || "CLIENT",
+              full_name: fullName || (role === "MAALEM" ? "Artisan Pro" : "Client Particulier"),
+              city_zone: cityZone || "Casablanca",
+              credits: role === "MAALEM" ? 15.00 : 0
+            }
+          });
+        }
+      } catch (sigErr) {
+        console.warn("[Signature check notice]:", sigErr);
+      }
+    }
+
+    // === 2. VÉRIFICATION AUPRÈS DE PRELUDE.SO (SMS INTERNATIONAL) ===
     if (PRELUDE_API_KEY) {
       try {
         console.log(`[API Verify-OTP] Validation Prelude pour ${formatted}...`);
@@ -99,12 +142,6 @@ export default async function handler(req, res) {
               credits: role === "MAALEM" ? 15.00 : 0
             }
           });
-        } else {
-          return res.status(400).json({
-            success: false,
-            error: "Code de vérification incorrect ou expiré. Veuillez vérifier le message reçu.",
-            details: checkData
-          });
         }
       } catch (err) {
         console.error("[Prelude Verify Error]:", err);
@@ -113,7 +150,7 @@ export default async function handler(req, res) {
 
     return res.status(400).json({
       success: false,
-      error: "Impossible de valider le code OTP."
+      error: "Code de vérification incorrect ou expiré. Veuillez vérifier le message reçu."
     });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });

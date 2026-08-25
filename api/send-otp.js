@@ -1,7 +1,16 @@
-// Vercel Serverless Function: Envoi d'OTP via Prelude.so (avec Fallback Infobip)
+// Vercel Serverless Function: Envoi d'OTP
+// Maroc (+212) -> WhatsApp via Evolution API (VPS)
+// Hors Maroc -> SMS via Prelude.so & Infobip
+import crypto from 'crypto';
+
 const PRELUDE_API_KEY = process.env.PRELUDE_API_KEY || "sk_72Xju0Hj6c3evZiDyrQJ0alDnxPiLDaZ";
 const INFOBIP_API_KEY = process.env.INFOBIP_API_KEY || "6609e87c2786b4aa487b954b47f223ee-25c768b1-ab2b-4ca1-a75b-7fe84af955d8";
 const INFOBIP_BASE_URL = "https://k95d1n.api.infobip.com";
+
+const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || "http://51.255.46.206:8085";
+const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || "bricolemoi_secret_token_2026";
+const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE || "bricolemoi-otp";
+const OTP_SIGNING_SECRET = process.env.OTP_SIGNING_SECRET || "bricolemoi_otp_jwt_secret_2026";
 
 // Rate limiter in-memory pour prévenir le spam & toll fraud
 const recentRequests = new Map();
@@ -31,7 +40,7 @@ function cleanPhoneNumber(rawPhone) {
         cleanNumber: digits, 
         formatted: `+${digits}`, 
         isValid: false, 
-        error: "Les numéros fixes (05...) ne peuvent pas recevoir de SMS. Veuillez entrer un numéro mobile (06 ou 07)." 
+        error: "Les numéros fixes (05...) ne peuvent pas recevoir de messages. Veuillez entrer un numéro mobile (06 ou 07)." 
       };
     }
     if (!nationalPart.startsWith("6") && !nationalPart.startsWith("7") && !digits.endsWith("000000")) {
@@ -60,8 +69,14 @@ function cleanPhoneNumber(rawPhone) {
   return {
     cleanNumber: digits,
     formatted: `+${digits}`,
-    isValid: true
+    isValid: true,
+    isMorocco: digits.startsWith("212")
   };
+}
+
+function generateOtpSignature(phone, code, expiresAt) {
+  const data = `${phone}:${code}:${expiresAt}`;
+  return crypto.createHmac("sha256", OTP_SIGNING_SECRET).update(data).digest("hex");
 }
 
 export default async function handler(req, res) {
@@ -85,7 +100,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: "Numéro de téléphone requis." });
     }
 
-    const { cleanNumber, formatted, isValid, error } = cleanPhoneNumber(phone);
+    const { cleanNumber, formatted, isValid, isMorocco, error } = cleanPhoneNumber(phone);
     if (!isValid) {
       return res.status(400).json({ success: false, error: error || "Numéro de téléphone invalide." });
     }
@@ -109,22 +124,64 @@ export default async function handler(req, res) {
       cleanNumber.includes("222222");
 
     if (isTestNumber) {
+      const expiresAt = now + 5 * 60 * 1000;
+      const sessionToken = `${expiresAt}.${generateOtpSignature(formatted, "123456", expiresAt)}`;
       return res.status(200).json({
         success: true,
         message: "Code test envoyé.",
         phone: formatted,
         is_test: true,
+        channel: "test",
+        sessionToken,
         dev_code: "123456"
       });
     }
 
+    // === 1. ROUTAGE MAROC (+212) : WHATSAPP VIA EVOLUTION API ===
+    if (isMorocco && EVOLUTION_API_URL) {
+      const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+      const expiresAt = now + 5 * 60 * 1000;
+      const sessionToken = `${expiresAt}.${generateOtpSignature(formatted, otpCode, expiresAt)}`;
+
+      try {
+        console.log(`[API Send-OTP] Envoi WhatsApp Evolution API pour Maroc: ${cleanNumber}...`);
+        const evoRes = await fetch(`${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": EVOLUTION_API_KEY
+          },
+          body: JSON.stringify({
+            number: cleanNumber,
+            text: `🛠️ *BricoleMoi Maroc*\n\nVotre code de vérification WhatsApp est : *${otpCode}*\n\n_Ce code expire dans 5 minutes. Ne le partagez avec personne._`
+          })
+        });
+
+        const evoData = await evoRes.json().catch(() => ({}));
+        if (evoRes.ok && (evoData.key || evoData.status === "PENDING" || evoData.status === "SERVER_ACK")) {
+          return res.status(200).json({
+            success: true,
+            provider: "evolution_whatsapp",
+            channel: "whatsapp",
+            message: "Code de vérification envoyé sur WhatsApp.",
+            phone: formatted,
+            sessionToken,
+            details: evoData
+          });
+        }
+        console.warn("[Evolution API notice] Échec envoi WhatsApp, bascule sur SMS fallback:", evoData);
+      } catch (evoErr) {
+        console.error("[Evolution API Error]:", evoErr);
+      }
+    }
+
+    // === 2. ROUTAGE HORS MAROC (OU FALLBACK MAROC) : SMS VIA PRELUDE.SO ===
     let preludeSuccess = false;
     let preludeData = null;
 
-    // === 1. TENTATIVE PRELUDE.SO (SMS + WHATSAPP) ===
     if (PRELUDE_API_KEY) {
       try {
-        console.log(`[API Send-OTP] Appel Prelude pour ${formatted}...`);
+        console.log(`[API Send-OTP] Appel Prelude (SMS International) pour ${formatted}...`);
         const preludeRes = await fetch("https://api.prelude.dev/v2/verification", {
           method: "POST",
           headers: {
@@ -145,7 +202,8 @@ export default async function handler(req, res) {
           return res.status(200).json({
             success: true,
             provider: "prelude",
-            message: "Code envoyé avec succès via Prelude (WhatsApp & SMS).",
+            channel: "sms",
+            message: "Code envoyé par SMS via Prelude.",
             phone: formatted,
             verification_id: preludeData.id,
             details: preludeData
@@ -156,10 +214,12 @@ export default async function handler(req, res) {
       }
     }
 
-    // === 2. FALLBACK INFOBIP SMS ===
+    // === 3. ULTIME FALLBACK SMS VIA INFOBIP ===
     if (!preludeSuccess && INFOBIP_API_KEY) {
       const authHeader = INFOBIP_API_KEY.startsWith("App ") ? INFOBIP_API_KEY : `App ${INFOBIP_API_KEY}`;
       const fallbackOtp = String(Math.floor(100000 + Math.random() * 900000));
+      const expiresAt = now + 5 * 60 * 1000;
+      const sessionToken = `${expiresAt}.${generateOtpSignature(formatted, fallbackOtp, expiresAt)}`;
       const messageText = `BricoleMoi : Votre code de verification est ${fallbackOtp}. Valable 5 minutes.`;
 
       try {
@@ -183,8 +243,10 @@ export default async function handler(req, res) {
         return res.status(200).json({
           success: true,
           provider: "infobip_fallback",
+          channel: "sms",
           message: "Code envoyé par SMS de secours (Infobip).",
           phone: formatted,
+          sessionToken,
           details: infobipData
         });
       } catch (infobipErr) {
