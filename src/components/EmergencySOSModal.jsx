@@ -202,9 +202,9 @@ export const EmergencySOSModal = ({ alert, onAccept, onDismiss }) => {
                     whileTap={{ scale: 0.9 }}
                     type="button"
                     onClick={toggleAudio}
-                    className="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center font-bold shadow-xs flex-shrink-0 cursor-pointer"
+                    className="w-11 h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center font-bold shadow-xs flex-shrink-0 cursor-pointer touch-target-44"
                   >
-                    {isPlayingAudio ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                    {isPlayingAudio ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
                   </motion.button>
                   <div>
                     <p className="text-xs font-bold text-slate-900">Note Vocale du Client</p>
@@ -239,7 +239,7 @@ export const EmergencySOSModal = ({ alert, onAccept, onDismiss }) => {
               whileTap={{ scale: 0.94 }}
               type="button"
               onClick={handleDismissClick}
-              className="w-full sm:w-1/3 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full sm:w-1/3 py-3.5 min-h-[48px] bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 touch-target-44"
             >
               <X className="w-4 h-4" />
               <span>Ignorer</span>
@@ -250,7 +250,7 @@ export const EmergencySOSModal = ({ alert, onAccept, onDismiss }) => {
               type="button"
               disabled={accepting}
               onClick={handleAcceptClick}
-              className="w-full sm:w-2/3 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              className="w-full sm:w-2/3 py-4 min-h-[52px] bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 touch-target-44"
             >
               <Zap className="w-5 h-5 fill-current text-white" />
               <span>{accepting ? 'Déblocage en cours...' : 'ACCEPTER L\'INTERVENTION (-15 DH)'}</span>

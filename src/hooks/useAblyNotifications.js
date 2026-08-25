@@ -104,11 +104,13 @@ export const useAblyNotifications = ({ user, onSosAlert, onSosClaimed, onUserMes
     const isMaalem = user?.role?.toUpperCase() === 'MAALEM';
     if (!isMaalem) return;
 
-    const userCity = user?.city_zone || user?.city || 'casablanca';
+    const rawCity = user?.city_zone || user?.city || 'casablanca';
+    const rootCity = String(rawCity).split('-')[0].trim() || 'casablanca';
     const userSpecialty = user?.maalem_details?.specialty || user?.specialty || 'all';
 
-    const specialtySosChannel = ABLY_CHANNELS.getSosChannel(userCity, userSpecialty);
-    const citySosChannel = ABLY_CHANNELS.getSosCityChannel(userCity);
+    const specialtySosChannel = ABLY_CHANNELS.getSosChannel(rootCity, userSpecialty);
+    const citySosChannel = ABLY_CHANNELS.getSosCityChannel(rootCity);
+    const globalJobsChannel = ABLY_CHANNELS.JOBS_STREAM;
 
     const handleSosMessage = ({ event, payload }) => {
       if (!payload) return;
@@ -126,7 +128,7 @@ export const useAblyNotifications = ({ user, onSosAlert, onSosClaimed, onUserMes
         // Si l'application est en arrière-plan, déclencher la notification OS
         if (document.hidden) {
           showLocalPushNotification(`🚨 URGENCE SOS : ${lead.subcategory || lead.service_type || 'Dépannage'}`, {
-            body: `Nouvelle alerte à ${lead.district || userCity}. Touchez pour débloquer le lead.`,
+            body: `Nouvelle alerte à ${lead.district || rootCity}. Touchez pour débloquer le lead.`,
             tag: `sos-${lead.id}`
           });
         }
@@ -162,10 +164,12 @@ export const useAblyNotifications = ({ user, onSosAlert, onSosClaimed, onUserMes
     const unsubCity = specialtySosChannel !== citySosChannel 
       ? subscribeToRealtimeChannel(citySosChannel, handleSosMessage, user?.id) 
       : () => {};
+    const unsubGlobal = subscribeToRealtimeChannel(globalJobsChannel, handleSosMessage, user?.id);
 
     return () => {
       unsubSpecialty();
       unsubCity();
+      unsubGlobal();
       stopEmergencySiren();
     };
   }, [user?.role, user?.city_zone, user?.city, user?.specialty, user?.maalem_details?.specialty, user?.id, onSosAlert, onSosClaimed]);

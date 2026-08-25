@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useEmergencyFlow } from '../context/EmergencyFlowContext';
+import { switchSubdomainInDev } from '../lib/subdomain';
 import { EMERGENCY_STATES } from '../constants/emergencyStates';
 import { VoiceRecorder } from './VoiceRecorder';
 import { InteractiveMap } from './InteractiveMap';
@@ -39,6 +40,7 @@ import { toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { COUNTRY_DIAL_CODES, MOROCCAN_CITIES } from '../constants/geo';
 import { reverseGeocodeMorocco, findNearestCatalogCity } from '../lib/geoService';
+import { uploadMediaToR2 } from '../lib/r2StorageService';
 import { CustomDropdown } from './CustomDropdown';
 import { 
   Buildings, 
@@ -289,9 +291,18 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
 
     for (const file of files) {
       if (photos.length >= 3) break;
-      const compressed = await compressImage(file);
-      setPhotos((prev) => (prev.length < 3 ? [...prev, compressed] : prev));
-      if (!photoUrl) setPhotoUrl(compressed);
+      try {
+        const uploadedUrl = await uploadMediaToR2(file, 'interventions');
+        if (uploadedUrl) {
+          setPhotos((prev) => (prev.length < 3 ? [...prev, uploadedUrl] : prev));
+          if (!photoUrl) setPhotoUrl(uploadedUrl);
+        }
+      } catch (err) {
+        console.warn('[ClientView] Erreur upload R2, fallback image locale:', err);
+        const compressed = await compressImage(file);
+        setPhotos((prev) => (prev.length < 3 ? [...prev, compressed] : prev));
+        if (!photoUrl) setPhotoUrl(compressed);
+      }
     }
   };
 
@@ -615,7 +626,39 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     : (!activeOngoingSOS && !latestClientIntv && isSearching ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null);
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-24 md:pb-12 font-sans">
+    <div className="space-y-8 max-w-4xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
+      {/* BANDEAU INTELLIGENT : Si un artisan est connecté sur le portail client */}
+      {user?.role === 'MAALEM' && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-amber-50 via-amber-100/70 to-amber-50 border border-amber-300/80 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+              🛠️
+            </div>
+            <div>
+              <p className="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                <span>Compte Artisan Connecté ({user.full_name || 'Maâlem'})</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+              </p>
+              <p className="text-[11px] text-amber-800 mt-0.5">
+                Vous consultez l'espace client. Vos alertes de chantiers et votre solde restent actifs.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => switchSubdomainInDev('MAALEM')}
+            className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all shrink-0"
+          >
+            <Zap className="w-3.5 h-3.5 fill-current" />
+            <span>Ouvrir mon Radar Chantiers Pro →</span>
+          </button>
+        </motion.div>
+      )}
+
       {/* 1. INTERVENTION EN COURS (PRISE EN CHARGE CONFIRMÉE PAR LE MAÂLEM) */}
       {activeOngoingSOS && !showNewSOSForm ? (
         <motion.div
@@ -1601,9 +1644,10 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
                 </h3>
                 <button
                   onClick={() => closeReviewModal()}
-                  className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 cursor-pointer touch-target-44 active:scale-95"
+                  title="Fermer"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
@@ -1772,7 +1816,8 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
                     });
                     setPendingCompletionModalInt(null);
                   }}
-                  className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-all cursor-pointer touch-target-44 active:scale-95"
+                  title="Fermer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1855,9 +1900,10 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
             >
               <button
                 onClick={() => setSosPhoneModalOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+                className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer touch-target-44 active:scale-95"
+                title="Fermer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
 
               <div className="text-center space-y-2 pt-1">

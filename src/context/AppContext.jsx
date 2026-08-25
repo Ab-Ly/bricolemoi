@@ -104,6 +104,16 @@ export const AppProvider = ({ children }) => {
   // Empêche le mélange de notifications entre différents appareils connectés
 
   const DUMMY_CLIENT_ID = '11111111-1111-1111-1111-111111111111';
+  const DUMMY_MAALEM_ID = '22222222-2222-2222-2222-222222222222';
+
+  const toSafeUUID = (id, fallback = DUMMY_MAALEM_ID) => {
+    if (!id) return fallback;
+    const str = String(id).trim();
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(str)) return str;
+    const digits = str.replace(/\D/g, '').padEnd(12, '0').slice(-12);
+    return `22222222-2222-2222-2222-${digits}`;
+  };
 
   const isCurrentUserClientOf = (intv) => {
     if (!intv) return false;
@@ -545,206 +555,342 @@ export const AppProvider = ({ children }) => {
     // Chargement des données réelles depuis Supabase — appelé au mount et sur refresh manuel
     const fetchRealSupabaseData = async () => {
       if (!isSupabaseConfigured) return;
+
       // 1. Profils + maalem_details
+      let rawProfiles = [];
+      let rawDetails = [];
+
       try {
-        const { data: rawProfiles, error: pErr } = await supabase.from('profiles').select('*');
-        if (pErr) console.warn('[Supabase] profiles read error:', pErr.message);
+        let pRes = await supabase
+          .from('profiles')
+          .select('id, phone, role, full_name, city_zone, created_at');
+        if (pRes.error) {
+          // Fallback select
+          const fb = await supabase.from('profiles').select('*');
+          rawProfiles = fb.data || [];
+        } else {
+          rawProfiles = pRes.data || [];
+        }
+      } catch (e) {
+        console.warn('[Supabase] profiles fetch error:', e?.message);
+      }
 
-        const { data: rawDetails, error: dErr } = await supabase.from('maalem_details').select('*');
-        if (dErr) console.warn('[Supabase] maalem_details read error:', dErr.message);
+      try {
+        let dRes = await supabase
+          .from('maalem_details')
+          .select('id, specialty, cin_number, cin_photo_url, portfolio_urls, status, credit_balance, is_verified, rating_avg, consecutive_five_stars, hundred_dh_recharges_count');
+        if (dRes.error) {
+          const fb = await supabase.from('maalem_details').select('*');
+          rawDetails = fb.data || [];
+        } else {
+          rawDetails = dRes.data || [];
+        }
+      } catch (e) {
+        console.warn('[Supabase] maalem_details fetch error:', e?.message);
+      }
 
-        if (rawProfiles) {
-          const detailsMap = new Map((rawDetails || []).map(d => [d.id, d]));
-          const onlineMapFromStorage = getOnlineMaalemsFromStorage();
-          const profilesMap = new Map(rawProfiles.map(p => [p.id, p]));
+      const detailsMap = new Map((rawDetails || []).map((d) => [String(d.id).trim(), d]));
+      const onlineMapFromStorage = getOnlineMaalemsFromStorage();
+      const profilesMap = new Map((rawProfiles || []).map((p) => [String(p.id).trim(), p]));
 
-          const maalemProfiles = rawProfiles.filter(m => {
-            const r = String(m.role || '').toLowerCase();
-            return r === 'maalem';
+      // Construction des Maâlems depuis profiles + maalem_details
+      const maalemProfiles = (rawProfiles || []).filter((m) => {
+        const r = String(m.role || '').toLowerCase();
+        return r === 'maalem';
+      });
+
+      const formattedMaalems = maalemProfiles.map((m) => {
+        const details = detailsMap.get(String(m.id).trim()) || {};
+        const zone = (m.city_zone || '').toLowerCase();
+        let mLat = parseFloat(m.lat || details.lat);
+        let mLng = parseFloat(m.lng || details.lng);
+
+        if (isNaN(mLat) || isNaN(mLng) || mLng >= 0 || mLat < 20 || mLat > 38) {
+          if (zone.includes('fès') || zone.includes('fes')) {
+            mLat = 34.0331 + (Math.random() - 0.5) * 0.015; mLng = -5.0003 + (Math.random() - 0.5) * 0.015;
+          } else if (zone.includes('rabat')) {
+            mLat = 34.0209 + (Math.random() - 0.5) * 0.015; mLng = -6.8416 + (Math.random() - 0.5) * 0.015;
+          } else if (zone.includes('marrakech')) {
+            mLat = 31.6295 + (Math.random() - 0.5) * 0.015; mLng = -7.9811 + (Math.random() - 0.5) * 0.015;
+          } else if (zone.includes('tanger')) {
+            mLat = 35.7595 + (Math.random() - 0.5) * 0.015; mLng = -5.8340 + (Math.random() - 0.5) * 0.015;
+          } else if (zone.includes('agadir')) {
+            mLat = 30.4278 + (Math.random() - 0.5) * 0.015; mLng = -9.5981 + (Math.random() - 0.5) * 0.015;
+          } else {
+            mLat = 33.5883 + (Math.random() - 0.5) * 0.015; mLng = -7.6328 + (Math.random() - 0.5) * 0.015;
+          }
+        }
+
+        const isThisSelf = user && String(user.id).trim() === String(m.id).trim();
+        const storageEntry = onlineMapFromStorage[m.id];
+        const isFreshHeartbeat = Boolean(storageEntry && storageEntry.last_seen_at && (Date.now() - storageEntry.last_seen_at < 90000));
+        const onlineStatus = isThisSelf ? Boolean(isMaalemOnline) : isFreshHeartbeat;
+
+        return {
+          id: m.id,
+          full_name: m.full_name || 'Artisan Maalem',
+          phone: m.phone || '',
+          specialty: details.specialty || m.specialty || 'PLUMBING',
+          rating_avg: details.rating_avg || 5.0,
+          is_verified: details.is_verified ?? true,
+          cin_verified: details.is_verified ?? true,
+          status: details.status || m.status || 'active',
+          portfolio_urls: details.portfolio_urls || m.portfolio_urls || [],
+          is_online: onlineStatus,
+          is_available: onlineStatus,
+          lat: mLat,
+          lng: mLng,
+          credit_balance: isThisSelf
+            ? (user.credits !== undefined && user.credits !== null
+              ? Number(user.credits)
+              : (user.maalem_details?.credit_balance !== undefined && user.maalem_details?.credit_balance !== null
+                ? Number(user.maalem_details.credit_balance)
+                : (details.credit_balance ?? m.credits ?? 15.00)))
+            : (details.credit_balance !== undefined && details.credit_balance !== null
+              ? Number(details.credit_balance)
+              : (m.credits !== undefined && m.credits !== null
+                ? Number(m.credits)
+                : 15.00)),
+          district: m.city_zone || 'Casablanca'
+        };
+      });
+
+      // Construction des Clients depuis profiles
+      const clientProfiles = (rawProfiles || [])
+        .filter((p) => String(p.role || '').toLowerCase() !== 'maalem')
+        .map((c) => ({
+          id: c.id,
+          full_name: c.full_name || 'Client BricoleMoi',
+          phone: c.phone || 'Non renseigné',
+          city_zone: c.city_zone || 'Casablanca',
+          district: c.city_zone || 'Casablanca',
+          created_at: c.created_at || new Date().toISOString(),
+          is_suspended: false,
+          role: c.role || 'client'
+        }));
+
+      // Inclure le client connecté en local s'il n'est pas encore propagé
+      if (user && String(user.role || '').toUpperCase() === 'CLIENT') {
+        const alreadyInList = clientProfiles.some((c) => String(c.id).trim() === String(user.id).trim());
+        if (!alreadyInList) {
+          clientProfiles.unshift({
+            id: user.id,
+            full_name: user.full_name || 'Client BricoleMoi',
+            phone: user.phone || 'En attente',
+            city_zone: user.city_zone || 'Casablanca',
+            district: user.city_zone || 'Casablanca',
+            created_at: new Date().toISOString(),
+            is_suspended: false,
+            role: 'CLIENT'
           });
+        }
+      }
 
-          const formattedMaalems = maalemProfiles.map((m) => {
-            const details = detailsMap.get(m.id) || {};
-            const zone = (m.city_zone || '').toLowerCase();
-            let mLat = parseFloat(m.lat || details.lat);
-            let mLng = parseFloat(m.lng || details.lng);
+      // Map globale consolidée clients et maalems
+      const clientMap = new Map(clientProfiles.map((c) => [String(c.id).trim(), c]));
+      const maalemMap = new Map(formattedMaalems.map((m) => [String(m.id).trim(), m]));
 
-            if (isNaN(mLat) || isNaN(mLng) || mLng >= 0 || mLat < 20 || mLat > 38) {
-              if (zone.includes('fès') || zone.includes('fes')) {
-                mLat = 34.0331 + (Math.random() - 0.5) * 0.015; mLng = -5.0003 + (Math.random() - 0.5) * 0.015;
-              } else if (zone.includes('rabat')) {
-                mLat = 34.0209 + (Math.random() - 0.5) * 0.015; mLng = -6.8416 + (Math.random() - 0.5) * 0.015;
-              } else if (zone.includes('marrakech')) {
-                mLat = 31.6295 + (Math.random() - 0.5) * 0.015; mLng = -7.9811 + (Math.random() - 0.5) * 0.015;
-              } else if (zone.includes('tanger')) {
-                mLat = 35.7595 + (Math.random() - 0.5) * 0.015; mLng = -5.8340 + (Math.random() - 0.5) * 0.015;
-              } else if (zone.includes('agadir')) {
-                mLat = 30.4278 + (Math.random() - 0.5) * 0.015; mLng = -9.5981 + (Math.random() - 0.5) * 0.015;
-              } else {
-                mLat = 33.5883 + (Math.random() - 0.5) * 0.015; mLng = -7.6328 + (Math.random() - 0.5) * 0.015;
-              }
-            }
+      // 2. Reviews (sélection ciblée & limitées aux 30 dernières)
+      let reviewsMap = new Map();
+      try {
+        const { data: realReviews } = await supabase
+          .from('reviews')
+          .select('id, intervention_id, maalem_id, client_id, rating, comment, badges, created_at')
+          .order('created_at', { ascending: false })
+          .limit(30);
 
-            const isThisSelf = user && String(user.id).trim() === String(m.id).trim();
-            const storageEntry = onlineMapFromStorage[m.id];
-            const isFreshHeartbeat = Boolean(storageEntry && storageEntry.last_seen_at && (Date.now() - storageEntry.last_seen_at < 90000));
-            const onlineStatus = isThisSelf ? Boolean(isMaalemOnline) : isFreshHeartbeat;
-
+        if (realReviews) {
+          const enrichedReviews = realReviews.map((r) => {
+            const clientP = profilesMap.get(String(r.client_id).trim()) || clientMap.get(String(r.client_id).trim());
             return {
-              id: m.id,
-              full_name: m.full_name || 'Artisan Maalem',
-              phone: m.phone || '',
-              specialty: details.specialty || m.specialty || 'PLUMBING',
-              rating_avg: details.rating_avg || 5.0,
-              is_verified: details.is_verified ?? details.cin_verified ?? true,
-              cin_verified: details.cin_verified ?? details.is_verified ?? true,
-              status: details.status || m.status || 'active',
-              portfolio_urls: details.portfolio_urls || m.portfolio_urls || [],
-              is_online: onlineStatus,
-              is_available: onlineStatus,
-              lat: mLat,
-              lng: mLng,
-              credit_balance: isThisSelf
-                ? (user.credits !== undefined && user.credits !== null
-                  ? Number(user.credits)
-                  : (user.maalem_details?.credit_balance !== undefined && user.maalem_details?.credit_balance !== null
-                    ? Number(user.maalem_details.credit_balance)
-                    : (details.credit_balance ?? m.credits ?? 15.00)))
-                : (details.credit_balance !== undefined && details.credit_balance !== null
-                  ? Number(details.credit_balance)
-                  : (m.credits !== undefined && m.credits !== null
-                    ? Number(m.credits)
-                    : 15.00)),
-              district: m.city_zone || 'Casablanca'
+              ...r,
+              client_name: clientP?.full_name || 'Client BricoleMoi'
             };
           });
+          setReviews(enrichedReviews);
+          try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(enrichedReviews)); } catch (e) { }
+          reviewsMap = new Map(enrichedReviews.map((r) => [String(r.intervention_id).trim(), r]));
+        }
+      } catch (e) { }
 
-          setMaalems(formattedMaalems);
+      // 3. Interventions (sélection ciblée des vraies colonnes BDD & limitées aux 50 dernières)
+      try {
+        let intvData = null;
+        const { data: realInterventions, error: intvErr } = await supabase
+          .from('interventions')
+          .select('id, client_id, maalem_id, service_type, district, description_photo, audio_note_url, estimated_price_min, estimated_price_max, final_agreed_price, status, cost_lead, created_at')
+          .order('created_at', { ascending: false })
+          .limit(50);
 
-          const clientProfiles = rawProfiles
-            .filter((p) => String(p.role || '').toLowerCase() !== 'maalem')
-            .map((c) => ({
-              id: c.id,
-              full_name: c.full_name || 'Client BricoleMoi',
-              phone: c.phone || 'Non renseigné',
-              city_zone: c.city_zone || 'Casablanca',
-              district: c.city_zone || 'Casablanca',
-              created_at: c.created_at || new Date().toISOString(),
-              is_suspended: Boolean(c.is_suspended),
-              role: c.role || 'client'
-            }));
+        if (intvErr) {
+          const fb = await supabase.from('interventions').select('*').order('created_at', { ascending: false }).limit(50);
+          intvData = fb.data;
+        } else {
+          intvData = realInterventions;
+        }
 
-          // Inclure le client connecté en local s'il n'est pas encore propagé
-          if (user && String(user.role || '').toUpperCase() === 'CLIENT') {
-            const alreadyInList = clientProfiles.some(c => String(c.id).trim() === String(user.id).trim());
-            if (!alreadyInList) {
-              clientProfiles.unshift({
-                id: user.id,
-                full_name: user.full_name || 'Client BricoleMoi',
-                phone: user.phone || 'En attente',
-                city_zone: user.city_zone || 'Casablanca',
-                district: user.city_zone || 'Casablanca',
-                created_at: new Date().toISOString(),
+        if (intvData) {
+          let myUnlocked = [];
+          try { myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]'); } catch (e) {}
+
+          // Extraction exhaustive des clients et artisans depuis les interventions
+          intvData.forEach((intv) => {
+            const cId = String(intv.client_id || '').trim();
+            const cPhone = intv.client_phone ? String(intv.client_phone).trim() : '';
+            if (cId && !clientMap.has(cId)) {
+              const clientProf = profilesMap.get(cId);
+              clientMap.set(cId, {
+                id: cId,
+                full_name: clientProf?.full_name || intv.client_name || `Client #${cId.slice(0, 6)}`,
+                phone: clientProf?.phone || cPhone || 'Non renseigné',
+                city_zone: clientProf?.city_zone || intv.district || 'Casablanca',
+                district: clientProf?.city_zone || intv.district || 'Casablanca',
+                created_at: intv.created_at || new Date().toISOString(),
+                is_suspended: false,
+                role: 'CLIENT'
+              });
+            }
+
+            const mId = String(intv.maalem_id || '').trim();
+            if (mId && !maalemMap.has(mId)) {
+              const maalemProf = profilesMap.get(mId);
+              const details = detailsMap.get(mId) || {};
+              maalemMap.set(mId, {
+                id: mId,
+                full_name: maalemProf?.full_name || intv.maalem_name || `Artisan Maâlem #${mId.slice(0, 6)}`,
+                phone: maalemProf?.phone || intv.maalem_phone || '',
+                specialty: details.specialty || intv.service_type || 'PLUMBING',
+                rating_avg: details.rating_avg || 5.0,
+                is_verified: true,
+                cin_verified: true,
+                status: 'active',
+                portfolio_urls: details.portfolio_urls || [],
+                is_online: false,
+                is_available: false,
+                lat: intv.lat || 33.5883,
+                lng: intv.lng || -7.6328,
+                credit_balance: 15.00,
+                district: intv.district || 'Casablanca'
+              });
+            }
+          });
+
+          const enrichedInterventions = intvData.map((intv) => {
+            const clientProf = clientMap.get(String(intv.client_id || '').trim()) || profilesMap.get(String(intv.client_id).trim());
+            const maalemProf = maalemMap.get(String(intv.maalem_id || '').trim()) || profilesMap.get(String(intv.maalem_id).trim());
+            const rev = reviewsMap.get(String(intv.id).trim());
+            const isLocallyUnlocked = myUnlocked.includes(String(intv.id).trim());
+
+            return {
+              ...intv,
+              status: isLocallyUnlocked && intv.status === 'PENDING' ? 'ACCEPTED' : intv.status,
+              maalem_id: isLocallyUnlocked && !intv.maalem_id ? (user?.id || '22222222-2222-2222-2222-222222222222') : intv.maalem_id,
+              rating: intv.rating ?? rev?.rating ?? null,
+              comment: intv.comment || rev?.comment || null,
+              client_name: clientProf?.full_name || intv.client_name || 'Client BricoleMoi',
+              client_phone: clientProf?.phone || intv.client_phone || '0661-234567',
+              maalem_name: maalemProf?.full_name || intv.maalem_name || (intv.maalem_id ? 'Artisan Maalem' : null),
+              maalem_phone: maalemProf?.phone || intv.maalem_phone || ''
+            };
+          });
+          setInterventions(enrichedInterventions);
+        }
+      } catch (e) { }
+
+      // Extraire également depuis adminAlerts (litiges) pour ne rater aucun utilisateur
+      if (Array.isArray(adminAlerts)) {
+        adminAlerts.forEach((alt) => {
+          if (alt.client_name || alt.client_phone) {
+            const altCId = String(alt.client_id || alt.client_phone || alt.client_name).trim();
+            if (altCId && !clientMap.has(altCId)) {
+              clientMap.set(altCId, {
+                id: altCId,
+                full_name: alt.client_name || 'Client BricoleMoi',
+                phone: alt.client_phone || 'Non renseigné',
+                city_zone: alt.district || alt.city || 'Casablanca',
+                district: alt.district || alt.city || 'Casablanca',
+                created_at: alt.created_at || new Date().toISOString(),
                 is_suspended: false,
                 role: 'CLIENT'
               });
             }
           }
 
-          setClients(clientProfiles);
-
-          // 2. Reviews (limitées aux 100 dernières)
-          let reviewsMap = new Map();
-          try {
-            const { data: realReviews } = await supabase
-              .from('reviews')
-              .select('*')
-              .order('created_at', { ascending: false })
-              .limit(100);
-            if (realReviews) {
-              setReviews(realReviews);
-              try { localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(realReviews)); } catch (e) { }
-              reviewsMap = new Map(realReviews.map((r) => [String(r.intervention_id).trim(), r]));
-            }
-          } catch (e) { }
-
-          // 3. Interventions (limitées aux 100 dernières, sans doublon d'appel profiles)
-          try {
-            const { data: realInterventions } = await supabase
-              .from('interventions')
-              .select('*')
-              .order('created_at', { ascending: false })
-              .limit(100);
-
-            if (realInterventions) {
-              let myUnlocked = [];
-              try { myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]'); } catch (e) {}
-
-              const enrichedInterventions = realInterventions.map((intv) => {
-                const clientProf = profilesMap.get(intv.client_id);
-                const maalemProf = profilesMap.get(intv.maalem_id);
-                const rev = reviewsMap.get(String(intv.id).trim());
-                const isLocallyUnlocked = myUnlocked.includes(String(intv.id).trim());
-
-                return {
-                  ...intv,
-                  status: isLocallyUnlocked && intv.status === 'PENDING' ? 'ACCEPTED' : intv.status,
-                  maalem_id: isLocallyUnlocked && !intv.maalem_id ? (user?.id || '22222222-2222-2222-2222-222222222222') : intv.maalem_id,
-                  rating: intv.rating ?? rev?.rating ?? null,
-                  comment: intv.comment || rev?.comment || null,
-                  client_name: clientProf?.full_name || intv.client_name || 'Client BricoleMoi',
-                  client_phone: clientProf?.phone || intv.client_phone || '0661-234567',
-                  maalem_name: maalemProf?.full_name || intv.maalem_name || (intv.maalem_id ? 'Artisan Maalem' : null),
-                  maalem_phone: maalemProf?.phone || intv.maalem_phone || ''
-                };
+          if (alt.maalem_name || alt.maalem_phone || alt.maalem_id) {
+            const altMId = String(alt.maalem_id || alt.maalem_phone || alt.maalem_name).trim();
+            if (altMId && !maalemMap.has(altMId)) {
+              maalemMap.set(altMId, {
+                id: altMId,
+                full_name: alt.maalem_name || 'Artisan Maâlem',
+                phone: alt.maalem_phone || '',
+                specialty: alt.specialty || 'PLUMBING',
+                rating_avg: 5.0,
+                is_verified: true,
+                cin_verified: true,
+                status: 'active',
+                portfolio_urls: [],
+                is_online: false,
+                is_available: false,
+                lat: 33.5883,
+                lng: -7.6328,
+                credit_balance: 15.00,
+                district: alt.district || 'Casablanca'
               });
-              setInterventions(enrichedInterventions);
             }
-          } catch (e) { }
-
-          // 4. Transactions (limitées aux 150 dernières, sans doublon d'appel profiles)
-          try {
-            const { data: realTransactions } = await supabase
-              .from('transactions')
-              .select('*')
-              .order('created_at', { ascending: false })
-              .limit(150);
-
-            if (realTransactions) {
-              let cachedMap = new Map();
-              try {
-                const cachedRaw = localStorage.getItem('bricolemoi_transactions_cache');
-                if (cachedRaw) {
-                  const parsed = JSON.parse(cachedRaw);
-                  (parsed || []).forEach((c) => {
-                    if (c.id) cachedMap.set(String(c.id).trim(), c);
-                    if (c.reference_ref) cachedMap.set(String(c.reference_ref).trim().toLowerCase(), c);
-                  });
-                }
-              } catch (e) { }
-
-              const enrichedTx = realTransactions.map((tx) => {
-                const p = profilesMap.get(tx.maalem_id);
-                const cachedMatch = cachedMap.get(String(tx.id).trim()) || (tx.reference_ref && cachedMap.get(String(tx.reference_ref).trim().toLowerCase()));
-                const effectiveStatus = (cachedMatch && cachedMatch.status !== 'PENDING') ? cachedMatch.status : tx.status;
-                const effectiveNotes = cachedMatch?.admin_notes || tx.admin_notes;
-
-                return {
-                  ...tx,
-                  status: effectiveStatus,
-                  admin_notes: effectiveNotes,
-                  maalem_name: p?.full_name || tx.maalem_name || (user?.id === tx.maalem_id ? user?.full_name : 'Artisan Maalem'),
-                  maalem_phone: p?.phone || tx.maalem_phone || (user?.id === tx.maalem_id ? user?.phone : '')
-                };
-              });
-              setTransactions(enrichedTx);
-              try { localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(enrichedTx)); } catch (e) { }
-            }
-          } catch (e) { }
-        }
-      } catch (err) {
-        console.warn('[Supabase] Exception chargement profils:', err.message);
+          }
+        });
       }
+
+      // Appliquer les listes finales complètes
+      const finalClients = Array.from(clientMap.values());
+      const finalMaalems = Array.from(maalemMap.values());
+
+      setClients(finalClients);
+      setMaalems(finalMaalems);
+      try {
+        localStorage.setItem('bricolemoi_clients_cache', JSON.stringify(finalClients));
+        localStorage.setItem('bricolemoi_maalems_cache', JSON.stringify(finalMaalems));
+      } catch (e) { }
+
+      // 4. Transactions (sélection ciblée des vraies colonnes BDD & limitées aux 50 dernières)
+      try {
+        const { data: realTransactions } = await supabase
+          .from('transactions')
+          .select('id, maalem_id, amount_dh, type, payment_method, reference_ref, status, created_at')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (realTransactions) {
+          let cachedMap = new Map();
+          try {
+            const cachedRaw = localStorage.getItem('bricolemoi_transactions_cache');
+            if (cachedRaw) {
+              const parsed = JSON.parse(cachedRaw);
+              (parsed || []).forEach((c) => {
+                if (c.id) cachedMap.set(String(c.id).trim(), c);
+                if (c.reference_ref) cachedMap.set(String(c.reference_ref).trim().toLowerCase(), c);
+              });
+            }
+          } catch (e) { }
+
+          const enrichedTx = realTransactions.map((tx) => {
+            const p = profilesMap.get(String(tx.maalem_id).trim()) || maalemMap.get(String(tx.maalem_id).trim());
+            const cachedMatch = cachedMap.get(String(tx.id).trim()) || (tx.reference_ref && cachedMap.get(String(tx.reference_ref).trim().toLowerCase()));
+            const effectiveStatus = (cachedMatch && cachedMatch.status !== 'PENDING') ? cachedMatch.status : tx.status;
+            const effectiveNotes = cachedMatch?.admin_notes || tx.admin_notes;
+
+            return {
+              ...tx,
+              status: effectiveStatus,
+              admin_notes: effectiveNotes,
+              maalem_name: p?.full_name || tx.maalem_name || (user?.id === tx.maalem_id ? user?.full_name : 'Artisan Maalem'),
+              maalem_phone: p?.phone || tx.maalem_phone || (user?.id === tx.maalem_id ? user?.phone : '')
+            };
+          });
+          setTransactions(enrichedTx);
+          try { localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(enrichedTx)); } catch (e) { }
+        }
+      } catch (e) { }
     };
 
     // Mount initial + auto-refresh au focus de l'onglet
@@ -2085,9 +2231,11 @@ export const AppProvider = ({ children }) => {
       const cleanIntId = String(interventionId).trim();
       const ref = `ESCROW_INT_${cleanIntId}`;
 
+      const cleanMaalemId = toSafeUUID(maalemId);
+
       const newTx = {
         id: `tx-escrow-${cleanIntId}-${Date.now()}`,
-        maalem_id: maalemId,
+        maalem_id: cleanMaalemId,
         maalem_name: maalemName,
         maalem_phone: user?.phone || '',
         amount_dh: -Math.abs(amount),
@@ -2104,7 +2252,7 @@ export const AppProvider = ({ children }) => {
       if (isSupabaseConfigured && maalemId) {
         try {
           const { error: insErr } = await supabase.from('transactions').insert([{
-            maalem_id: maalemId,
+            maalem_id: cleanMaalemId,
             amount_dh: -Math.abs(amount),
             type: 'LEAD_ESCROW',
             payment_method: 'SYSTEM_ESCROW',
@@ -3225,8 +3373,9 @@ export const AppProvider = ({ children }) => {
 
       if (isSupabaseConfigured) {
         try {
+          const cleanMaalemId = toSafeUUID(maalemId);
           const { data: insertedTx, error: insErr } = await supabase.from('transactions').insert([{
-            maalem_id: maalemId,
+            maalem_id: cleanMaalemId,
             amount_dh: rechargeAmount,
             type: 'RECHARGE',
             payment_method,
@@ -3244,10 +3393,10 @@ export const AppProvider = ({ children }) => {
           if (instant) {
             await supabase.from('maalem_details').update({
               credit_balance: (user?.maalem_details?.credit_balance || 0) + rechargeAmount
-            }).eq('id', maalemId);
+            }).eq('id', cleanMaalemId);
             await supabase.from('profiles').update({
               credits: (user?.credits || 0) + rechargeAmount
-            }).eq('id', maalemId);
+            }).eq('id', cleanMaalemId);
           }
 
           await supabase.from('admin_notifications').insert([{

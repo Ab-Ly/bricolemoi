@@ -511,7 +511,14 @@ export const AuthModal = () => {
           cityZone: profileCheck.cityZone
         });
         if (profileCheck.role) {
-          setRole(profileCheck.role);
+          const detectedRole = String(profileCheck.role).toUpperCase();
+          if (detectedRole === 'MAALEM' && role !== 'MAALEM') {
+            setRole('MAALEM');
+            setInfoMsg(`🛠️ Ravi de vous revoir ${profileCheck.fullName || 'Maâlem'} ! Compte Artisan détecté, accès direct à votre Espace Pro.`);
+          } else if (detectedRole === 'CLIENT' && role !== 'CLIENT') {
+            setRole('CLIENT');
+            setInfoMsg(`👤 Ravi de vous revoir ${profileCheck.fullName || 'Client'} ! Compte Particulier détecté.`);
+          }
         }
         if (profileCheck.fullName) {
           setFullName(profileCheck.fullName);
@@ -749,7 +756,7 @@ export const AuthModal = () => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.94, opacity: 0, y: 15 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className={`relative z-10 w-full max-w-[430px] rounded-3xl p-5 sm:p-6 text-slate-800 overflow-hidden shadow-2xl bg-white transition-all duration-300 border ${
+            className={`relative z-10 w-full max-w-[440px] max-h-[92dvh] overflow-y-auto modal-scroll rounded-3xl p-4 sm:p-6 text-slate-800 shadow-2xl bg-white transition-all duration-300 border ${
               isClient
                 ? 'border-slate-200/90'
                 : 'border-amber-200/90'
@@ -769,7 +776,7 @@ export const AuthModal = () => {
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="p-1.5 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer active:scale-95"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer active:scale-95 touch-target-44 shrink-0"
                     title="Retour"
                   >
                     <ArrowLeft className="w-4 h-4" />
@@ -781,7 +788,7 @@ export const AuthModal = () => {
                     isClient 
                       ? 'bg-blue-600' 
                       : 'bg-amber-500'
-                  } animate-pulse`} />
+                  } animate-pulse shrink-0`} />
                   
                   <div>
                     <h3 className="text-sm font-black text-slate-900 tracking-tight leading-none">
@@ -805,7 +812,8 @@ export const AuthModal = () => {
               <button
                 type="button"
                 onClick={handleClose}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer active:scale-95"
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer active:scale-95 touch-target-44 shrink-0 ml-2"
+                title="Fermer"
               >
                 <X className="w-4 h-4" />
               </button>
