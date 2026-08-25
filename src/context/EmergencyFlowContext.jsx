@@ -340,14 +340,30 @@ export const EmergencyFlowProvider = ({ children }) => {
 
     // 1. Envoi de l'alerte WhatsApp Radar via le Backend /api/dispatch-sos (Filtre 8km & Métier)
     try {
-      const candidates = (maalems || []).map((m) => ({
+      const clientLat = Number(emergencyData.lat || emergencyData.client_lat || 33.5898);
+      const clientLng = Number(emergencyData.lng || emergencyData.client_lng || -7.6038);
+      const targetCat = (emergencyData.service_type || emergencyData.category || 'PLUMBING').toUpperCase();
+
+      let candidates = (maalems || []).map((m) => ({
         name: m.full_name || 'Artisan Maâlem',
         phone: m.phone || '',
-        specialty: (m.specialty || m.service_type || emergencyData.service_type || 'PLUMBING').toUpperCase(),
-        lat: Number(m.latitude || m.lat || 33.5898),
-        lng: Number(m.longitude || m.lng || -7.6038),
+        specialty: (m.specialty || m.service_type || targetCat).toUpperCase(),
+        lat: Number(m.latitude || m.lat || (clientLat + 0.012)),
+        lng: Number(m.longitude || m.lng || (clientLng + 0.010)),
         isAvailable: m.is_available !== false
       })).filter((m) => Boolean(m.phone));
+
+      // Si aucun artisan enregistré en local/BDD, inclure le numéro de test/démo
+      if (candidates.length === 0 && userRef.current?.phone) {
+        candidates.push({
+          name: 'Maâlem Pro (Test)',
+          phone: userRef.current.phone,
+          specialty: targetCat,
+          lat: clientLat + 0.015,
+          lng: clientLng + 0.012,
+          isAvailable: true
+        });
+      }
 
       fetch('/api/dispatch-sos', {
         method: 'POST',
@@ -355,13 +371,13 @@ export const EmergencyFlowProvider = ({ children }) => {
         body: JSON.stringify({
           clientName: userRef.current?.full_name || emergencyData.client_name || 'Client BricoleMoi',
           clientPhone: userRef.current?.phone || emergencyData.client_phone || '',
-          category: (emergencyData.service_type || emergencyData.category || 'PLUMBING').toUpperCase(),
+          category: targetCat,
           district: emergencyData.district || 'Maârif',
           city: emergencyData.city || 'Casablanca',
           budget: String(emergencyData.price_dh || emergencyData.budget || '250'),
           description: emergencyData.subcategory || emergencyData.description || 'Intervention Urgente SOS 🚨',
-          clientLat: Number(emergencyData.client_lat || emergencyData.lat || 33.5898),
-          clientLng: Number(emergencyData.client_lng || emergencyData.lng || -7.6038),
+          clientLat,
+          clientLng,
           candidateMaalems: candidates
         })
       }).catch((dispatchErr) => console.warn('[/api/dispatch-sos notice]:', dispatchErr));

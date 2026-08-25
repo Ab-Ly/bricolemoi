@@ -20,6 +20,18 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
   return Math.round(R * c * 10) / 10;
 }
 
+// Normalisation robuste des numéros marocains vers le format international 212XXXXXXXXX
+function formatEvolutionNumber(rawPhone) {
+  let digits = String(rawPhone || "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("0")) {
+    digits = "212" + digits.slice(1);
+  } else if (!digits.startsWith("212") && digits.length === 9) {
+    digits = "212" + digits;
+  }
+  return digits;
+}
+
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -37,36 +49,43 @@ export default async function handler(req, res) {
 
   try {
     const {
-      clientName,
+      clientName = "Client BricoleMoi",
       clientPhone,
       category = "PLUMBING",
       district = "Maârif",
       city = "Casablanca",
       budget = "250",
-      description = "Intervention Urgente SOS",
+      description = "Intervention Urgente SOS 🚨",
       clientLat = 33.5898,
       clientLng = -7.6038,
       candidateMaalems = []
     } = req.body || {};
 
-    const cleanClientPhone = String(clientPhone || "").replace(/\D/g, "");
-    console.log(`🚨 [SOS Dispatch API] Nouvelle urgence de ${clientName} (${cleanClientPhone}) à ${district}, ${city}`);
+    const formattedClientPhone = formatEvolutionNumber(clientPhone);
+    console.log(`🚨 [SOS Dispatch API] Nouvelle urgence de ${clientName} (${formattedClientPhone}) à ${district}, ${city}`);
 
     // 1. Appel n8n en tâche de fond
     fetch(N8N_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify({
+        ...req.body,
+        clientPhone: formattedClientPhone
+      })
     }).catch((err) => console.warn("[n8n Hook Error]:", err.message));
 
     // 2. Filtrer les Maâlems dans un rayon de <= 8 km
-    const targetCategory = category.toUpperCase();
+    const targetCategory = String(category).toUpperCase();
     const qualifiedMaalems = candidateMaalems
-      .map((m) => ({
-        ...m,
-        cleanPhone: String(m.phone || "").replace(/\D/g, ""),
-        distanceKm: getDistanceKm(clientLat, clientLng, Number(m.lat || m.latitude), Number(m.lng || m.longitude))
-      }))
+      .map((m) => {
+        const evoPhone = formatEvolutionNumber(m.phone);
+        const dist = getDistanceKm(clientLat, clientLng, Number(m.lat || m.latitude), Number(m.lng || m.longitude));
+        return {
+          ...m,
+          cleanPhone: evoPhone,
+          distanceKm: dist
+        };
+      })
       .filter((m) => m.cleanPhone && m.distanceKm <= 8.0)
       .sort((a, b) => a.distanceKm - b.distanceKm);
 
@@ -98,8 +117,9 @@ export default async function handler(req, res) {
     }
 
     // 4. Envoi de la confirmation WhatsApp au client
-    if (cleanClientPhone && cleanClientPhone.startsWith("212")) {
+    if (formattedClientPhone && formattedClientPhone.startsWith("212")) {
       try {
+        console.log(`[SOS Dispatch] Envoi confirmation WhatsApp au client ${formattedClientPhone}...`);
         await fetch(`${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
           method: "POST",
           headers: {
@@ -107,8 +127,8 @@ export default async function handler(req, res) {
             "apikey": EVOLUTION_API_KEY
           },
           body: JSON.stringify({
-            number: cleanClientPhone,
-            text: `✅ *BricoleMoi - Demande SOS Transmise !*\n\nBonjour *${clientName}*,\nVotre demande de *${targetCategory}* à *${city}* a bien été transmise aux artisans qualifiés dans un rayon de 8 km.\n\nVous recevrez un contact immédiat dès qu'un Maâlem valide son intervention. 🇲🇦🛠️`
+            number: formattedClientPhone,
+            text: `✅ *BricoleMoi - Demande SOS Transmise !*\n\nBonjour *${clientName}*,\nVotre demande urgente de *${targetCategory}* à *${city} (${district})* a bien été transmise aux artisans qualifiés dans un rayon de 8 km.\n\nVous recevrez un contact immédiat dès qu'un Maâlem valide son intervention. 🇲🇦🛠️`
           })
         });
       } catch (clientErr) {
@@ -120,7 +140,8 @@ export default async function handler(req, res) {
       success: true,
       message: "Alerte SOS diffusée avec succès.",
       maalemsNotified: sentCount,
-      totalQualified: qualifiedMaalems.length
+      totalQualified: qualifiedMaalems.length,
+      clientNotified: Boolean(formattedClientPhone)
     });
   } catch (error) {
     console.error("[Dispatch SOS Fatal Error]:", error);
