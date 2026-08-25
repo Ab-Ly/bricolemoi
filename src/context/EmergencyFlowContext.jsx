@@ -338,7 +338,39 @@ export const EmergencyFlowProvider = ({ children }) => {
     });
     notify.sos('🚨 Radar SOS Activé', 'Diffusion en direct aux artisans disponibles...', { id: `sos-active-${emergencyData.id || Date.now()}` });
 
-    // Envoi de la notification Web Push d'urgence en arrière-plan vers tous les artisans
+    // 1. Envoi de l'alerte WhatsApp Radar via n8n (Filtre 8km & Métier)
+    const n8nWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 'http://n8n-nfyfefwxs67boyv7oeeu02s4.51.255.46.206.sslip.io/webhook/bricolemoi-booking-radar';
+    try {
+      const candidates = (maalems || []).map((m) => ({
+        name: m.full_name || 'Artisan Maâlem',
+        phone: m.phone || '',
+        specialty: (m.specialty || m.service_type || emergencyData.service_type || 'PLUMBING').toUpperCase(),
+        lat: Number(m.latitude || m.lat || 33.5898),
+        lng: Number(m.longitude || m.lng || -7.6038),
+        isAvailable: m.is_available !== false
+      })).filter((m) => Boolean(m.phone));
+
+      fetch(n8nWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientName: userRef.current?.full_name || emergencyData.client_name || 'Client BricoleMoi',
+          clientPhone: userRef.current?.phone || emergencyData.client_phone || '',
+          category: (emergencyData.service_type || emergencyData.category || 'PLUMBING').toUpperCase(),
+          district: emergencyData.district || 'Maârif',
+          city: emergencyData.city || 'Casablanca',
+          budget: String(emergencyData.price_dh || emergencyData.budget || '250'),
+          description: emergencyData.subcategory || emergencyData.description || 'Intervention Urgente SOS 🚨',
+          clientLat: Number(emergencyData.client_lat || emergencyData.lat || 33.5898),
+          clientLng: Number(emergencyData.client_lng || emergencyData.lng || -7.6038),
+          candidateMaalems: candidates
+        })
+      }).catch((n8nErr) => console.warn('[n8n WhatsApp SOS Dispatch notice]:', n8nErr));
+    } catch (e) {
+      console.warn('[n8n SOS error]:', e);
+    }
+
+    // 2. Envoi de la notification Web Push d'urgence en arrière-plan vers tous les artisans
     try {
       fetch('/api/send-push', {
         method: 'POST',
@@ -353,7 +385,7 @@ export const EmergencyFlowProvider = ({ children }) => {
         })
       }).catch((err) => console.warn('[Push Dispatch Non-blocking Error]:', err));
     } catch (e) {}
-  }, []);
+  }, [maalems]);
 
   /**
    * VUE 3 -> Acceptation de la mission par le Maâlem (15 DH)
