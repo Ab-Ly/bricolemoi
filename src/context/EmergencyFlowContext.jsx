@@ -338,8 +338,7 @@ export const EmergencyFlowProvider = ({ children }) => {
     });
     notify.sos('🚨 Radar SOS Activé', 'Diffusion en direct aux artisans disponibles...', { id: `sos-active-${emergencyData.id || Date.now()}` });
 
-    // 1. Envoi de l'alerte WhatsApp Radar via n8n (Filtre 8km & Métier)
-    const n8nWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 'http://n8n-nfyfefwxs67boyv7oeeu02s4.51.255.46.206.sslip.io/webhook/bricolemoi-booking-radar';
+    // 1. Envoi de l'alerte WhatsApp Radar via le Backend /api/dispatch-sos (Filtre 8km & Métier)
     try {
       const candidates = (maalems || []).map((m) => ({
         name: m.full_name || 'Artisan Maâlem',
@@ -350,7 +349,7 @@ export const EmergencyFlowProvider = ({ children }) => {
         isAvailable: m.is_available !== false
       })).filter((m) => Boolean(m.phone));
 
-      fetch(n8nWebhookUrl, {
+      fetch('/api/dispatch-sos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -365,9 +364,9 @@ export const EmergencyFlowProvider = ({ children }) => {
           clientLng: Number(emergencyData.client_lng || emergencyData.lng || -7.6038),
           candidateMaalems: candidates
         })
-      }).catch((n8nErr) => console.warn('[n8n WhatsApp SOS Dispatch notice]:', n8nErr));
+      }).catch((dispatchErr) => console.warn('[/api/dispatch-sos notice]:', dispatchErr));
     } catch (e) {
-      console.warn('[n8n SOS error]:', e);
+      console.warn('[SOS Dispatch Error]:', e);
     }
 
     // 2. Envoi de la notification Web Push d'urgence en arrière-plan vers tous les artisans
