@@ -120,6 +120,7 @@ export const reverseGeocodeMorocco = async (lat, lng) => {
         .replace(/Province de /gi, '')
         .replace(/Préfecture de /gi, '')
         .replace(/Cercle de /gi, '')
+        .replace(/Pachalik de /gi, '')
         .trim();
 
       const cleanDistrict = String(rawDistrict || catalogFallback.district)
@@ -128,15 +129,33 @@ export const reverseGeocodeMorocco = async (lat, lng) => {
         .replace(/Boulevard /gi, '')
         .trim();
 
+      // Normalisation sans accent pour matcher le catalogue officiel (ex: Fes -> Fès, Meknes -> Meknès)
+      const norm = (s) => String(s || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+      
+      const matchedCityObj = MOROCCAN_CITIES.find(c => 
+        norm(c.name) === norm(cleanCity) || 
+        norm(cleanCity).includes(norm(c.name)) || 
+        norm(c.name).includes(norm(cleanCity))
+      ) || catalogFallback;
+
+      const matchedDistrictObj = (matchedCityObj.districts || []).find(d => 
+        norm(d.name) === norm(cleanDistrict) || 
+        norm(cleanDistrict).includes(norm(d.name)) || 
+        norm(d.name).includes(norm(cleanDistrict))
+      );
+
+      const resolvedCityName = matchedCityObj.name || catalogFallback.city;
+      const resolvedDistrictName = matchedDistrictObj?.name || cleanDistrict || catalogFallback.district;
+
       const result = {
-        city: cleanCity || catalogFallback.city,
-        district: cleanDistrict || catalogFallback.district,
-        fullLabel: cleanDistrict && cleanDistrict !== cleanCity 
-          ? `${cleanCity} - ${cleanDistrict}`
-          : cleanCity,
+        city: resolvedCityName,
+        district: resolvedDistrictName,
+        fullLabel: resolvedDistrictName && resolvedDistrictName !== resolvedCityName 
+          ? `${resolvedCityName} - ${resolvedDistrictName}`
+          : resolvedCityName,
         lat: numLat,
         lng: numLng,
-        region: addr.state || catalogFallback.region || 'Maroc',
+        region: matchedCityObj.region || addr.state || catalogFallback.region || 'Maroc',
         cached_at: Date.now()
       };
 

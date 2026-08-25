@@ -320,7 +320,8 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     label: c.name
   }));
 
-  const currentCityObj = MOROCCAN_CITIES.find((c) => c.name === selectedCity) || MOROCCAN_CITIES[0];
+  const normCity = (s) => String(s || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  const currentCityObj = MOROCCAN_CITIES.find((c) => normCity(c.name) === normCity(selectedCity)) || MOROCCAN_CITIES[0];
   const districtOptions = (currentCityObj.districts || []).map((d) => ({
     value: d.name,
     label: d.name
@@ -328,7 +329,7 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
 
   const handleCityChange = (newCity) => {
     setSelectedCity(newCity);
-    const targetCity = MOROCCAN_CITIES.find((c) => c.name === newCity);
+    const targetCity = MOROCCAN_CITIES.find((c) => normCity(c.name) === normCity(newCity));
     if (targetCity && targetCity.districts && targetCity.districts.length > 0) {
       const firstDistrict = targetCity.districts[0];
       setSelectedDistrict(firstDistrict.name);
