@@ -336,7 +336,7 @@ export const notify = {
                   🚨 URGENCE SOS CLIENT
                 </span>
                 <h4 className="text-sm font-black text-slate-900 truncate mt-0.5">
-                  {lead.specialty || 'Plomberie & Dépannage'}
+                  {lead?.specialty || 'Plomberie & Dépannage'}
                 </h4>
               </div>
             </div>
@@ -357,10 +357,10 @@ export const notify = {
                 <MapPin className="w-3.5 h-3.5 text-blue-600" /> Quartier :
               </span>
               <span className="font-bold text-slate-800">
-                {lead.district || lead.city_zone || 'Casablanca'}
+                {lead?.district || lead?.city_zone || 'Casablanca'}
               </span>
             </div>
-            {lead.distance_km && (
+            {lead?.distance_km && (
               <div className="flex items-center justify-between">
                 <span className="text-slate-500">Distance estimée :</span>
                 <span className="font-mono font-bold text-blue-600">
@@ -368,8 +368,8 @@ export const notify = {
                 </span>
               </div>
             )}
-            {lead.description && (
-              <p className="text-[11px] text-slate-600 italic line-clamp-2 pt-1 border-t border-slate-200">
+            {lead?.description && (
+              <p className="text-slate-600 italic text-[11px] line-clamp-2 bg-white p-2 rounded-xl border border-slate-200">
                 "{lead.description}"
               </p>
             )}
@@ -398,6 +398,72 @@ export const notify = {
         </div>
       ), {
         duration: options.duration || 10000,
+        id: toastId,
+        ...options
+      });
+    });
+
+    return toastId;
+  },
+
+  /**
+   * Universal SOS / Radar Alert / Reward Notification
+   */
+  sos: (param1, param2, options = {}) => {
+    if (typeof param1 === 'object' && param1 !== null) {
+      return notify.emergency(param1, param2, options);
+    }
+
+    const title = param1 || '🚨 Alerte SOS';
+    const description = param2 || '';
+    const dedupKey = `sos:${title}:${description || ''}`;
+    if (shouldSkipDuplicate(dedupKey, options.cooldownMs || 4000)) {
+      return null;
+    }
+
+    const toastId = options.id || dedupKey;
+
+    enqueueToast(() => {
+      if (!options.silent) {
+        playNotificationSound('sos');
+        triggerVibration([200, 100, 200]);
+      }
+
+      toast.custom((t) => (
+        <div className="w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-xl border-2 border-amber-400 rounded-2xl p-3.5 sm:p-4 shadow-xl flex items-start justify-between gap-3 text-slate-900 relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.99] group font-sans">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-red-500 text-white flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5 animate-pulse">
+              <Zap className="w-5 h-5 fill-white" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-tight">
+                {title}
+              </h4>
+              {description && (
+                <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed">
+                  {description}
+                </p>
+              )}
+              {options.badge && (
+                <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-[10px] font-mono font-bold text-amber-800 shadow-xs">
+                  {options.badge}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => toast.dismiss(t)}
+            className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0 cursor-pointer"
+            title="Fermer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ), {
+        duration: options.duration || 6000,
         id: toastId,
         ...options
       });

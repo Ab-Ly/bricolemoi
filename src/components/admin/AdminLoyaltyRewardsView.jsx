@@ -88,81 +88,81 @@ export const AdminLoyaltyRewardsView = () => {
 
   return (
     <div className="space-y-6 font-sans text-slate-900">
-      {/* 1. Header & KPIs Haute Densité */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 1. Header & KPIs Haute Densité (Mobile Responsive 2x2 ou 4 cols) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* KPI 1 : Total Leads Gratuits */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-sm flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-              Leads 100% Offerts
+            <span className="text-[10px] sm:text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+              Leads Offerts
             </span>
-            <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center">
-              <Gift className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center shrink-0">
+              <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div>
-            <p className="text-3xl font-black text-slate-900 font-mono">{totalFreeLeadsCount}</p>
-            <p className="text-[11px] text-purple-700 font-bold mt-0.5 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-purple-600" />
-              <span>Attribués via Jauge 4/4 &amp; Bonus</span>
+            <p className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">{totalFreeLeadsCount}</p>
+            <p className="text-[10px] sm:text-[11px] text-purple-700 font-bold mt-0.5 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-purple-600 shrink-0" />
+              <span>Jauge 4/4 &amp; Bonus</span>
             </p>
           </div>
         </div>
 
         {/* KPI 2 : Budget Gratuités en DH */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-sm flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-              Budget Primes Distribué
+            <span className="text-[10px] sm:text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+              Budget Primes
             </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center">
-              <Coins className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+              <Coins className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div>
-            <p className="text-3xl font-black text-slate-900 font-mono">
-              {totalBudgetDistributedDH.toFixed(2)} <span className="text-sm font-sans font-bold text-slate-500">DH</span>
+            <p className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">
+              {totalBudgetDistributedDH.toFixed(2)} <span className="text-xs sm:text-sm font-sans font-bold text-slate-500">DH</span>
             </p>
-            <p className="text-[11px] text-emerald-700 font-bold mt-0.5">
-              15.00 DH de valeur par Lead SOS
+            <p className="text-[10px] sm:text-[11px] text-emerald-700 font-bold mt-0.5">
+              15 DH / Lead SOS
             </p>
           </div>
         </div>
 
         {/* KPI 3 : Artisans Récompensés */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-sm flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-              Maâlems Récompensés
+            <span className="text-[10px] sm:text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+              Artisans Élite
             </span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
-              <Award className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+              <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div>
-            <p className="text-3xl font-black text-slate-900 font-mono">
-              {uniqueRewardedMaalemsCount} <span className="text-sm font-sans font-bold text-slate-400">/ {maalems.length}</span>
+            <p className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">
+              {uniqueRewardedMaalemsCount} <span className="text-xs font-sans font-bold text-slate-400">/ {maalems.length}</span>
             </p>
-            <p className="text-[11px] text-amber-700 font-bold mt-0.5">
-              Artisans ayant complété la jauge
+            <p className="text-[10px] sm:text-[11px] text-amber-700 font-bold mt-0.5">
+              Cycle 4/4 complété
             </p>
           </div>
         </div>
 
         {/* KPI 4 : Taux d'Excellence */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm flex flex-col justify-between space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-sm flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-              Taux Avis Qualifiants
+            <span className="text-[10px] sm:text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+              Avis 4★ &amp; 5★
             </span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div>
-            <p className="text-3xl font-black text-slate-900 font-mono">{excellenceRate}%</p>
-            <p className="text-[11px] text-blue-700 font-bold mt-0.5">
-              Notes 4★ et 5★ sur les chantiers
+            <p className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">{excellenceRate}%</p>
+            <p className="text-[10px] sm:text-[11px] text-blue-700 font-bold mt-0.5">
+              Taux satisfaction
             </p>
           </div>
         </div>
@@ -318,87 +318,134 @@ export const AdminLoyaltyRewardsView = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-800">
-              <thead className="bg-slate-50 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th className="py-3 px-3">Date &amp; Heure</th>
-                  <th className="py-3 px-3">Artisan Maâlem</th>
-                  <th className="py-3 px-3">Type de Prime</th>
-                  <th className="py-3 px-3">Valeur Offerte</th>
-                  <th className="py-3 px-3">Missions Qualifiantes</th>
-                  <th className="py-3 px-3">Statut</th>
-                  <th className="py-3 px-3 text-right">Détails</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {loyaltyRewardsHistory.map((rec) => (
-                  <tr key={rec.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-3 font-mono text-[11px] text-slate-600">
-                      {new Date(rec.created_at).toLocaleDateString('fr-FR', {
-                        day: '2-digit',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </td>
-                    <td className="py-3 px-3 font-bold text-slate-900">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-purple-500" />
-                        <span>{rec.maalem_name || 'Artisan Maâlem'}</span>
-                      </div>
-                      <span className="text-[10px] font-mono text-slate-400">{rec.maalem_phone}</span>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">
-                        {rec.reward_type === 'MANUAL_FREE_LEAD' ? '👑 Geste Admin' : '⭐ Cycle 4/4 Avis'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 font-mono font-black text-emerald-700">
+          <>
+            {/* Vue Mobile : Cartes empilées tactiles */}
+            <div className="block sm:hidden space-y-2.5">
+              {loyaltyRewardsHistory.map((rec) => (
+                <div 
+                  key={rec.id} 
+                  className="p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl space-y-2.5 shadow-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">
+                      {rec.reward_type === 'MANUAL_FREE_LEAD' ? '👑 Geste Admin' : '⭐ Cycle 4/4 Avis'}
+                    </span>
+                    <span className="font-mono font-black text-emerald-700 text-xs">
                       +{Number(rec.reward_value_dh || 15).toFixed(2)} DH
-                    </td>
-                    <td className="py-3 px-3 text-slate-600">
-                      {rec.qualifying_missions && rec.qualifying_missions.length > 0 ? (
-                        <span className="text-[11px] font-mono text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                          {rec.qualifying_missions.length} chantiers validés
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 text-[11px] italic">Attribué manuellement</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold flex items-center gap-1 w-fit">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        <span>Crédité au solde</span>
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedAuditRecord(rec)}
-                        className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
-                      >
-                        <Eye className="w-3 h-3 text-purple-600" />
-                        <span>Audit</span>
-                      </button>
-                    </td>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900">{rec.maalem_name || 'Artisan Maâlem'}</h4>
+                      <p className="text-[10px] font-mono text-slate-400">{rec.maalem_phone}</p>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-500">
+                      {new Date(rec.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                    </span>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                    <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      <span>Crédité au solde</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAuditRecord(rec)}
+                      className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-xs font-bold shadow-xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-purple-600" />
+                      <span>Détail</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Vue Desktop / Tablette : Tableau complet */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-800">
+                <thead className="bg-slate-50 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="py-3 px-3">Date &amp; Heure</th>
+                    <th className="py-3 px-3">Artisan Maâlem</th>
+                    <th className="py-3 px-3">Type de Prime</th>
+                    <th className="py-3 px-3">Valeur Offerte</th>
+                    <th className="py-3 px-3">Missions Qualifiantes</th>
+                    <th className="py-3 px-3">Statut</th>
+                    <th className="py-3 px-3 text-right">Détails</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {loyaltyRewardsHistory.map((rec) => (
+                    <tr key={rec.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-3 font-mono text-[11px] text-slate-600">
+                        {new Date(rec.created_at).toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </td>
+                      <td className="py-3 px-3 font-bold text-slate-900">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-purple-500" />
+                          <span>{rec.maalem_name || 'Artisan Maâlem'}</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400">{rec.maalem_phone}</span>
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">
+                          {rec.reward_type === 'MANUAL_FREE_LEAD' ? '👑 Geste Admin' : '⭐ Cycle 4/4 Avis'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 font-mono font-black text-emerald-700">
+                        +{Number(rec.reward_value_dh || 15).toFixed(2)} DH
+                      </td>
+                      <td className="py-3 px-3 text-slate-600">
+                        {rec.qualifying_missions && rec.qualifying_missions.length > 0 ? (
+                          <span className="text-[11px] font-mono text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            {rec.qualifying_missions.length} chantiers validés
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-[11px] italic">Attribué manuellement</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold flex items-center gap-1 w-fit">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>Crédité au solde</span>
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAuditRecord(rec)}
+                          className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <Eye className="w-3 h-3 text-purple-600" />
+                          <span>Audit</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
-      {/* 5. Modale d'Attribution Manuelle de Lead Gratuit */}
+      {/* 5. Modale d'Attribution Manuelle de Lead Gratuit (Mobile scrollable) */}
       <AnimatePresence>
         {isManualModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 text-slate-900"
+              className="bg-white rounded-3xl p-5 sm:p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
@@ -481,15 +528,15 @@ export const AdminLoyaltyRewardsView = () => {
         )}
       </AnimatePresence>
 
-      {/* 6. Modale de Consultation Détaillée d'Audit */}
+      {/* 6. Modale de Consultation Détaillée d'Audit (Mobile responsive) */}
       <AnimatePresence>
         {selectedAuditRecord && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 text-slate-900"
+              className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
