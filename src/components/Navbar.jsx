@@ -75,10 +75,9 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-all text-[10px] sm:text-[11px] group cursor-pointer"
             >
-              <WhatsappLogo weight="fill" className="w-3 h-3 text-emerald-400 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline text-slate-400 group-hover:text-slate-200">WhatsApp :</span>
-              <strong className="text-emerald-400 font-mono font-bold tracking-wider hidden xs:inline">+212 619 18 40 98</strong>
-              <span className="text-emerald-400 font-bold xs:hidden">WhatsApp</span>
+              <WhatsappLogo weight="fill" className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span className="text-slate-400 font-bold hidden md:inline">WhatsApp :</span>
+              <strong className="text-emerald-400 font-mono font-bold tracking-wider">+212 619 18 40 98</strong>
             </a>
 
             <motion.button 

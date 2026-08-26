@@ -235,10 +235,10 @@ export const SPECIALTY_CONFIG = {
 
 export const getSpecialtyMeta = (type) => {
   const norm = String(type || '').toUpperCase();
+  if (norm.includes('ELECTRO') || norm.includes('APPLIANCE') || norm.includes('WASH') || norm.includes('FOUR') || norm.includes('CUISSON')) return SPECIALTY_CONFIG.ELECTROMENAGER;
   if (norm.includes('PLOMB') || norm.includes('PLUMB')) return SPECIALTY_CONFIG.PLUMBING;
   if (norm.includes('ELEC')) return SPECIALTY_CONFIG.ELECTRICIAN;
   if (norm.includes('CLIM') || norm.includes('FROID') || norm.includes('HVAC')) return SPECIALTY_CONFIG.CLIMATISATION;
-  if (norm.includes('ELECTRO') || norm.includes('WASH') || norm.includes('FOUR')) return SPECIALTY_CONFIG.ELECTROMENAGER;
   if (norm.includes('VOLET') || norm.includes('RIDEAU') || norm.includes('STORE')) return SPECIALTY_CONFIG.VOLETS_RIDEAUX;
   if (norm.includes('DEMENAG') || norm.includes('DEM') || norm.includes('MOVE') || norm.includes('TRUCK')) return SPECIALTY_CONFIG.DEMENAGEMENT;
   if (norm.includes('SOLAR') || norm.includes('SOLAIRE') || norm.includes('CHAUFFE_SOLAIRE')) return SPECIALTY_CONFIG.SOLAIRE;
