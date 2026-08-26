@@ -3371,6 +3371,28 @@ export const AppProvider = ({ children }) => {
         bc.close();
       } catch (e) { }
 
+      // Notification WhatsApp Admin automatique avec Pièce Jointe (Evolution API + n8n)
+      try {
+        fetch('/api/notify-recharge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            maalemId,
+            maalemName,
+            maalemPhone: user?.phone || '',
+            specialty: user?.maalem_details?.specialty || user?.specialty || 'Général',
+            cityZone: user?.city_zone || user?.district || 'Casablanca',
+            amountDh: rechargeAmount,
+            paymentMethod: payment_method,
+            referenceRef: newTx.reference_ref,
+            receiptPhotoUrl: receipt_photo_url || null,
+            transactionId: newTx.id
+          })
+        }).catch((notifyErr) => console.warn('[/api/notify-recharge notice]:', notifyErr));
+      } catch (e) {
+        console.warn('[Notify Admin Recharge Error]:', e);
+      }
+
       if (isSupabaseConfigured) {
         try {
           const cleanMaalemId = toSafeUUID(maalemId);
