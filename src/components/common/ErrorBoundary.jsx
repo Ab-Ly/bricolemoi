@@ -1,6 +1,5 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, Trash2, Home, ShieldAlert } from 'lucide-react';
-import { telemetry } from '../../lib/telemetry';
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -20,15 +19,7 @@ export class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     const eventId = 'err-' + Date.now();
     this.setState({ errorInfo, eventId });
-
-    telemetry.recordEvent({
-      type: 'REACT_ERROR_BOUNDARY',
-      message: error?.message || 'Erreur de rendu de composant React',
-      source: this.props.name || 'ReactComponent',
-      stack: error?.stack || errorInfo?.componentStack || null,
-      severity: 'CRITICAL',
-      metadata: { componentStack: errorInfo?.componentStack }
-    });
+    console.error('[ErrorBoundary caught error]', error, errorInfo);
   }
 
   handleReload = () => {
@@ -37,7 +28,6 @@ export class ErrorBoundary extends React.Component {
   };
 
   handleResetAndClear = () => {
-    telemetry.selfRepair();
     try {
       sessionStorage.clear();
       localStorage.removeItem('bricolemoi_sync_payload');

@@ -668,9 +668,7 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
         const { latitude, longitude, accuracy } = position.coords;
         applyPosition(latitude, longitude, `(Précision: ±${Math.round(accuracy || 10)}m)`);
       },
-      (highAccErr) => {
-        console.warn('High-accuracy GPS timeout or error, trying network location fallback:', highAccErr);
-
+      () => {
         // Stage 2: Standard Network Location Fallback
         navigator.geolocation.getCurrentPosition(
           (netPosition) => {
@@ -679,7 +677,6 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
           },
           (finalErr) => {
             setIsLocating(false);
-            console.warn('Final Geolocation fallback:', finalErr);
 
             // Stage 3: Smooth Fallback to Casablanca Center / Selected District
             const fallbackLat = selectedLat || 33.5883;

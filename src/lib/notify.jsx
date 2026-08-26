@@ -16,7 +16,6 @@ import {
   X
 } from 'lucide-react';
 import { playNotificationSound, triggerVibration } from './audioNotifier';
-import { telemetry } from './telemetry';
 
 // =========================================================================
 // 1. Cache de déduplication anti-double notification (TTL 4.5s)
@@ -66,12 +65,7 @@ const processQueue = () => {
   }, STAGGER_DELAY_MS);
 };
 
-const enqueueToast = (toastTriggerFn, meta = null) => {
-  if (meta && typeof meta === 'object') {
-    try {
-      telemetry.recordNotification(meta.type || 'info', meta.title || 'Notification', meta.description || '');
-    } catch (e) {}
-  }
+const enqueueToast = (toastTriggerFn) => {
   notificationQueue.push(toastTriggerFn);
   if (!isProcessingQueue) {
     processQueue();

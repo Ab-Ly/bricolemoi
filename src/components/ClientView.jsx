@@ -445,11 +445,10 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
 
       navigator.geolocation.getCurrentPosition(
         applyLivePosition,
-        (highAccErr) => {
-          console.warn('GPS High-accuracy fallback, trying fast network geolocation:', highAccErr);
+        () => {
           navigator.geolocation.getCurrentPosition(
             applyLivePosition,
-            (finalErr) => console.warn('Final HTML5 Geolocation fallback:', finalErr),
+            () => {},
             { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
           );
         },

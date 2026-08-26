@@ -710,7 +710,9 @@ export const AuthProvider = ({ children }) => {
                     consecutive_five_stars: 0,
                     hundred_dh_recharges_count: 0
                   };
-                  await supabase.from('maalem_details').upsert([defaultDetails]).select().catch(() => {});
+                  try {
+                    await supabase.from('maalem_details').upsert([defaultDetails]).select();
+                  } catch (upsertErr) {}
                   authenticatedUser.maalem_details = defaultDetails;
                 }
               }

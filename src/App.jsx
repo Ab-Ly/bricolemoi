@@ -14,7 +14,6 @@ import { useAblyNotifications } from './hooks/useAblyNotifications';
 import { EmergencySOSModal } from './components/EmergencySOSModal';
 import { getAppSubdomain, switchSubdomainInDev, APP_SUBDOMAINS } from './lib/subdomain';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { DiagnosticsWidget } from './components/admin/DiagnosticsWidget';
 
 // Code Splitting & Lazy-loaded Sub-Apps
 const ClientApp = lazy(() => import('./layouts/ClientApp'));
@@ -178,7 +177,6 @@ const MainApp = () => {
             }} 
             onDismiss={dismissSosAlert} 
           />
-          <DiagnosticsWidget />
         </Suspense>
       </ErrorBoundary>
     );
@@ -224,7 +222,6 @@ const MainApp = () => {
             }} 
             onDismiss={dismissSosAlert} 
           />
-          <DiagnosticsWidget />
         </Suspense>
       </ErrorBoundary>
     );
@@ -270,7 +267,6 @@ const MainApp = () => {
             }} 
             onDismiss={dismissSosAlert} 
           />
-          <DiagnosticsWidget />
         </Suspense>
       </ErrorBoundary>
     );
@@ -335,9 +331,6 @@ const MainApp = () => {
           dismissSosAlert();
         }} 
       />
-
-      {/* Contrôleur d'Événements & Superviseur de Bugs */}
-      <DiagnosticsWidget />
 
       <footer className="hidden md:block border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 mt-16">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">

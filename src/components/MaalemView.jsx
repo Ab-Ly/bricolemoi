@@ -186,11 +186,10 @@ export const MaalemView = ({ onOpenCINVerification }) => {
 
       navigator.geolocation.getCurrentPosition(
         applyMaalemPosition,
-        (highAccErr) => {
-          console.warn('Maalem GPS high-accuracy fallback, trying fast network geolocation:', highAccErr);
+        () => {
           navigator.geolocation.getCurrentPosition(
             applyMaalemPosition,
-            (finalErr) => console.warn('Final Maalem Geolocation fallback:', finalErr),
+            () => {},
             { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
           );
         },

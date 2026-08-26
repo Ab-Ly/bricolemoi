@@ -12,6 +12,8 @@ import { generateReceiptPDF } from '../lib/pdfReceiptGenerator';
 import { calculateMaalemRating } from '../utils/ratingUtils';
 import { calculateMaalemBalance } from '../utils/balanceUtils';
 
+const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
 const AppContext = createContext();
 
 // Haversine formula — distance en km (équivalent PostGIS ST_DistanceSphere)
@@ -3381,16 +3383,18 @@ export const AppProvider = ({ children }) => {
             })
             .eq('id', String(intervention_id).trim());
 
-          await supabase.from('reviews').insert([{
-            intervention_id,
-            maalem_id: targetMaalemId,
-            client_id: user?.id,
-            client_name: user?.full_name || currentInt?.client_name || 'Client Maroc',
-            rating: Number(rating),
-            comment: fullComment
-          }]).catch(() => { });
+          try {
+            await supabase.from('reviews').insert([{
+              intervention_id,
+              maalem_id: targetMaalemId,
+              client_id: user?.id,
+              client_name: user?.full_name || currentInt?.client_name || 'Client Maroc',
+              rating: Number(rating),
+              comment: fullComment
+            }]);
+          } catch (revErr) { }
         } catch (e) {
-          console.warn('[Supabase] submitReview BDD warning:', e.message);
+          console.warn('[Supabase] submitReview BDD notice:', e.message);
         }
       }
 
