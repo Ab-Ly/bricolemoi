@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ClientView } from '../components/ClientView';
 import { Navbar } from '../components/Navbar';
@@ -8,6 +8,25 @@ import { switchSubdomainInDev } from '../lib/subdomain';
 
 export const ClientApp = ({ initialCategory, initialCity, initialDistrict }) => {
   const { user, setUser, setAuthModalOpen, currentRole, switchRole, logout } = useAuth();
+
+  // Nettoyage immédiat de l'URL pour garder une barre d'adresse propre (ex: ?app=client sans trailing parameters)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const url = new URL(window.location.href);
+        let hasChanges = false;
+        ['category', 'city', 'district'].forEach((param) => {
+          if (url.searchParams.has(param)) {
+            url.searchParams.delete(param);
+            hasChanges = true;
+          }
+        });
+        if (hasChanges) {
+          window.history.replaceState(window.history.state, '', url.toString());
+        }
+      } catch (e) {}
+    }
+  }, []);
 
   // Role Etanchéité Guard: If logged in as MAALEM on client.*, block access & redirect
   const isUnauthorizedRole = user && user.role?.toUpperCase() !== 'CLIENT';
