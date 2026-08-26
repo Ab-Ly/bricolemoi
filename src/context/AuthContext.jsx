@@ -1,7 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { translations } from '../lib/i18n';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
-import { auth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut, googleProvider, signInWithPopup } from '../lib/firebaseClient';
+import { 
+  auth, 
+  RecaptchaVerifier, 
+  signInWithPhoneNumber, 
+  onAuthStateChanged, 
+  signOut, 
+  googleProvider, 
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signInWithCredential,
+  GoogleAuthProvider
+} from '../lib/firebaseClient';
 import { switchSubdomainInDev } from '../lib/subdomain';
 import { 
   sendInfobipOTP, 
@@ -111,6 +123,21 @@ export const AuthProvider = ({ children }) => {
     document.documentElement.setAttribute('dir', dir);
     document.documentElement.setAttribute('lang', lang);
   }, [lang]);
+
+  // Traitement du résultat de redirection Google Auth (Mobile / PWA)
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          await processGoogleUser(result.user, 'CLIENT');
+        }
+      })
+      .catch((err) => {
+        if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+          console.warn('[Google Redirect Auth Warning]:', err.message);
+        }
+      });
+  }, []);
 
   // Firebase Auth Listener — source de vérité pour la session
   useEffect(() => {
@@ -643,76 +670,159 @@ export const AuthProvider = ({ children }) => {
     return await checkPhoneProfileService(phone);
   };
 
-  // Connexion / Inscription 1-Clic avec Google
-  const loginWithGoogle = async (preferredRole = 'CLIENT') => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const firebaseUser = result.user;
-      const firebaseUid = toValidUUID(firebaseUser.uid);
-      const email = firebaseUser.email || '';
-      const fullName = firebaseUser.displayName || email.split('@')[0] || 'Client Google';
-      const photoURL = firebaseUser.photoURL || '';
+  // Traitement centralisé et intelligent d'un utilisateur Google
+  const processGoogleUser = async (firebaseUser, preferredRole = 'CLIENT') => {
+    if (!firebaseUser) return null;
+    const firebaseUid = toValidUUID(firebaseUser.uid);
+    const email = firebaseUser.email || '';
+    const fullName = firebaseUser.displayName || email.split('@')[0] || 'Client Google';
+    const photoURL = firebaseUser.photoURL || '';
+    const hasRealPhone = Boolean(firebaseUser.phoneNumber && firebaseUser.phoneNumber.length >= 8);
 
-      let authenticatedUser = {
-        id: firebaseUid,
-        email,
-        full_name: fullName,
-        role: preferredRole,
-        avatar_url: photoURL,
-        city_zone: 'Casablanca - Centre-Ville'
-      };
+    let authenticatedUser = {
+      id: firebaseUid,
+      email,
+      full_name: fullName,
+      role: preferredRole,
+      avatar_url: photoURL,
+      city_zone: 'Casablanca - Centre-Ville',
+      phone: hasRealPhone ? firebaseUser.phoneNumber : '',
+      needsPhone: !hasRealPhone
+    };
 
-      if (isSupabaseConfigured) {
-        try {
-          const { data: existingProfile } = await supabase
-            .from('profiles')
-            .select('id, full_name, phone, role, city_zone, credits')
-            .eq('id', firebaseUid)
-            .maybeSingle();
+    if (isSupabaseConfigured) {
+      try {
+        // 1. Recherche par ID Firebase ou par Email (Account Linking automatique)
+        let { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id, full_name, phone, role, city_zone, credits, avatar_url')
+          .or(`id.eq.${firebaseUid},email.eq.${email}`)
+          .maybeSingle();
 
-          if (existingProfile) {
-            authenticatedUser = {
-              ...authenticatedUser,
-              ...existingProfile,
-              role: existingProfile.role || preferredRole
-            };
-          } else {
-            const newProfile = {
-              id: firebaseUid,
-              full_name: fullName,
-              phone: firebaseUser.phoneNumber || `+212600${Math.floor(100000 + Math.random() * 900000)}`,
-              role: preferredRole,
-              city_zone: 'Casablanca - Centre-Ville'
-            };
-            try {
-              await supabase.from('profiles').upsert([newProfile]);
-            } catch (err) {
-              console.warn('[Google Auth DB Warning]:', err);
-            }
+        if (existingProfile) {
+          const profileHasValidPhone = Boolean(existingProfile.phone && !existingProfile.phone.includes('600') && existingProfile.phone.length >= 8);
+          authenticatedUser = {
+            ...authenticatedUser,
+            ...existingProfile,
+            avatar_url: photoURL || existingProfile.avatar_url,
+            needsPhone: !profileHasValidPhone
+          };
+
+          // Mettre à jour l'avatar et l'email si nécessaire
+          try {
+            await supabase.from('profiles').update({
+              email,
+              avatar_url: photoURL || existingProfile.avatar_url
+            }).eq('id', existingProfile.id);
+          } catch (e) {}
+        } else {
+          // Nouveau profil Google
+          const newProfile = {
+            id: firebaseUid,
+            full_name: fullName,
+            email,
+            avatar_url: photoURL,
+            phone: hasRealPhone ? firebaseUser.phoneNumber : null,
+            role: preferredRole,
+            city_zone: 'Casablanca - Centre-Ville'
+          };
+          try {
+            await supabase.from('profiles').upsert([newProfile]);
+          } catch (err) {
+            console.warn('[Google Auth DB Warning]:', err);
           }
-        } catch (dbErr) {
-          console.warn('[Google Auth DB Warning]:', dbErr);
         }
+      } catch (dbErr) {
+        console.warn('[Google Auth DB Link Warning]:', dbErr);
+      }
+    }
+
+    setUser(authenticatedUser);
+    setCurrentRole(authenticatedUser.role || preferredRole);
+    sessionStorage.setItem('bricolemoi_session', JSON.stringify(authenticatedUser));
+    localStorage.setItem('bricolemoi_session', JSON.stringify(authenticatedUser));
+
+    // Notifier le tableau de bord admin en temps réel
+    try {
+      const bc = new BroadcastChannel('bricolemoi_intertab_sync');
+      bc.postMessage({ type: 'PROFILE_UPDATED', user: authenticatedUser });
+      bc.close();
+    } catch (e) {}
+
+    switchSubdomainInDev(authenticatedUser.role);
+    return authenticatedUser;
+  };
+
+  // Connexion / Inscription 1-Clic avec Google (Support Popup + Fallback Redirect PWA/Mobile)
+  const loginWithGoogle = async (preferredRole = 'CLIENT', preferRedirect = false) => {
+    try {
+      const isStandalonePwa = typeof window !== 'undefined' && (
+        window.matchMedia('(display-mode: standalone)').matches || 
+        window.navigator.standalone === true
+      );
+      const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (preferRedirect || (isStandalonePwa && isMobile)) {
+        await signInWithRedirect(auth, googleProvider);
+        return null;
       }
 
-      setUser(authenticatedUser);
-      setCurrentRole(authenticatedUser.role);
-      sessionStorage.setItem('bricolemoi_session', JSON.stringify(authenticatedUser));
-      setAuthModalOpen(false);
-
-      // Notifier le tableau de bord admin en temps réel
       try {
-        const bc = new BroadcastChannel('bricolemoi_intertab_sync');
-        bc.postMessage({ type: 'PROFILE_UPDATED', user: authenticatedUser });
-        bc.close();
-      } catch (e) {}
-
-      switchSubdomainInDev(authenticatedUser.role);
-      return authenticatedUser;
+        const result = await signInWithPopup(auth, googleProvider);
+        return await processGoogleUser(result.user, preferredRole);
+      } catch (popupErr) {
+        // Si la popup est bloquée par le navigateur mobile/Safari, basculer sur la redirection
+        if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/cancelled-popup-request') {
+          console.log('[Google Auth] Popup bloquée -> redirection automatique...');
+          await signInWithRedirect(auth, googleProvider);
+          return null;
+        }
+        throw popupErr;
+      }
     } catch (err) {
       console.error('[Google Sign-In Error]:', err);
       throw err;
     }
+  };
+
+  // Association sécurisée du numéro WhatsApp au profil Google connecté
+  const linkGooglePhone = async (rawPhone, userCity = 'Casablanca') => {
+    if (!user) throw new Error('Aucun utilisateur connecté.');
+    const { formatted, isValid } = formatMoroccanPhone(rawPhone);
+    if (!isValid) throw new Error('Numéro de téléphone marocain invalide.');
+
+    const updatedUser = {
+      ...user,
+      phone: formatted,
+      city_zone: userCity || user.city_zone || 'Casablanca',
+      needsPhone: false
+    };
+
+    setUser(updatedUser);
+    sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+    localStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            phone: formatted,
+            city_zone: updatedUser.city_zone
+          })
+          .eq('id', user.id);
+      } catch (err) {
+        console.warn('[linkGooglePhone Supabase Warning]:', err.message);
+      }
+    }
+
+    try {
+      const bc = new BroadcastChannel('bricolemoi_intertab_sync');
+      bc.postMessage({ type: 'PROFILE_UPDATED', user: updatedUser });
+      bc.close();
+    } catch (e) {}
+
+    return updatedUser;
   };
 
   const logout = async (onLoggedOut) => {
@@ -756,6 +866,7 @@ export const AuthProvider = ({ children }) => {
         resetPinWithOtp,
         checkPhoneProfile,
         loginWithGoogle,
+        linkGooglePhone,
         isLoading,
         logout
       }}

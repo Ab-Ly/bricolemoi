@@ -6,7 +6,10 @@ import {
   onAuthStateChanged, 
   signOut, 
   GoogleAuthProvider, 
-  signInWithPopup 
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signInWithCredential
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -22,4 +25,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-export { RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup };
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+export { 
+  RecaptchaVerifier, 
+  signInWithPhoneNumber, 
+  onAuthStateChanged, 
+  signOut, 
+  GoogleAuthProvider, 
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signInWithCredential
+};
