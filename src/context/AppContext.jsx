@@ -1071,7 +1071,8 @@ export const AppProvider = ({ children }) => {
           setInterventions((prev) => {
             const updated = prev.map((i) => {
               if (String(i.id).trim() === String(intervention_id).trim()) {
-                targetIntv = { ...i, progress_step };
+                const newStatus = (i.status === 'PENDING' || !i.status) ? (progress_step === 'ARRIVED' ? 'ARRIVED' : 'ACCEPTED') : i.status;
+                targetIntv = { ...i, progress_step, status: newStatus };
                 return targetIntv;
               }
               return i;
@@ -2877,7 +2878,7 @@ export const AppProvider = ({ children }) => {
       setInterventions((prev) => {
         const updated = prev.map((item) =>
           item.id === interventionId
-            ? { ...item, progress_step: progressStep }
+            ? { ...item, progress_step: progressStep, status: (item.status === 'PENDING' || !item.status) ? (progressStep === 'ARRIVED' ? 'ARRIVED' : 'ACCEPTED') : item.status }
             : item
         );
         try {

@@ -75,10 +75,15 @@ function emergencyFlowReducer(state, action) {
     case ACTIONS.UPDATE_PROGRESS:
       return {
         ...state,
-        progressStep: action.payload.step,
+        state: EMERGENCY_STATES.MATCHED,
+        progressStep: action.payload.step || state.progressStep || 'ON_THE_WAY',
         activeEmergency: state.activeEmergency 
-          ? { ...state.activeEmergency, progress_step: action.payload.step }
-          : null
+          ? { 
+              ...state.activeEmergency, 
+              progress_step: action.payload.step,
+              status: state.activeEmergency.status === 'PENDING' ? 'ACCEPTED' : state.activeEmergency.status 
+            }
+          : { id: action.payload.intervention_id || 'active', progress_step: action.payload.step, status: 'ACCEPTED' }
       };
 
     case ACTIONS.COMPLETE_MISSION:
@@ -121,12 +126,11 @@ export const EmergencyFlowProvider = ({ children }) => {
     userRef.current = user;
   }, [user]);
 
-  // Synchronisation avec les interventions existantes au montage ou changement d'utilisateur
+  // Synchronisation avec les interventions existantes au montage ou changement d'interventions/utilisateur
   useEffect(() => {
-    if (!user) return;
-    const isMaalem = user.role?.toUpperCase() === 'MAALEM';
+    const isMaalem = user?.role?.toUpperCase() === 'MAALEM';
 
-    if (isMaalem) {
+    if (isMaalem && user?.id) {
       // Trouver si le Maâlem a une intervention en cours
       const activeJob = interventions?.find(
         (i) => String(i.maalem_id || '').trim() === String(user.id).trim() && 
@@ -142,16 +146,31 @@ export const EmergencyFlowProvider = ({ children }) => {
         });
       }
     } else {
-      // Côté Client : vérifier si une demande est active
-      const myPending = interventions?.find(
-        (i) => String(i.client_id || '').trim() === String(user.id).trim() && i.status === 'PENDING'
-      );
+      // Côté Client : identifier ses interventions créées localement ou via compte
+      let myCreated = [];
+      try {
+        myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
+      } catch (e) {}
+
+      const isMyIntv = (i) => {
+        if (!i) return false;
+        if (myCreated.includes(String(i.id).trim())) return true;
+        if (user?.id && String(i.client_id || '').trim() === String(user.id).trim()) return true;
+        return false;
+      };
+
       const myMatched = interventions?.find(
-        (i) => String(i.client_id || '').trim() === String(user.id).trim() && 
-               ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
+        (i) => isMyIntv(i) && 
+               (['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status) ||
+                ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(i.progress_step) ||
+                Boolean(i.maalem_id && i.status !== 'CANCELLED' && i.status !== 'COMPLETED'))
       );
 
-      if (myMatched && flowState.state !== EMERGENCY_STATES.MATCHED && flowState.state !== EMERGENCY_STATES.COMPLETED) {
+      const myPending = interventions?.find(
+        (i) => isMyIntv(i) && i.status === 'PENDING' && !myMatched
+      );
+
+      if (myMatched && (flowState.state !== EMERGENCY_STATES.MATCHED || flowState.progressStep !== myMatched.progress_step)) {
         const maalemInfo = maalems?.find((m) => String(m.id).trim() === String(myMatched.maalem_id).trim()) || {
           id: myMatched.maalem_id,
           full_name: myMatched.maalem_name || 'Artisan Maâlem',
@@ -174,7 +193,7 @@ export const EmergencyFlowProvider = ({ children }) => {
         });
       }
     }
-  }, [user?.id, user?.role, interventions, maalems]);
+  }, [user?.id, user?.role, interventions, maalems, flowState.state, flowState.progressStep]);
 
   // =========================================================================
   // 2. SOUSCRIPTIONS TEMPS RÉEL ABLY SELON LE RÔLE (CLIENT / MAÂLEM)

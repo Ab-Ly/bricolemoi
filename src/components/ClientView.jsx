@@ -611,17 +611,22 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
   // L'intervention la plus récente de l'utilisateur
   const latestClientIntv = myClientInterventions[0] || null;
 
-  // L'intervention active en cours (priorité absolue à toute mission acceptée / en cours / validation)
+  // L'intervention active en cours (priorité absolue à toute mission acceptée / en déplacement / sur place / validation)
   const ongoingFromList = activeClientInterventions.find((i) =>
-    ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
+    ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status) ||
+    ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(i.progress_step) ||
+    Boolean(i.maalem_id && i.status !== 'CANCELLED' && i.status !== 'COMPLETED')
   );
 
-  const activeOngoingSOS = ongoingFromList || (!latestClientIntv && isMatched && activeEmergency && !isCompleted ? activeEmergency : null);
+  const activeOngoingSOS =
+    ongoingFromList ||
+    (isMatched && activeEmergency && !isCompleted ? activeEmergency : null) ||
+    (activeEmergency && (['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(activeEmergency.status) || ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(activeEmergency.progress_step) || Boolean(activeEmergency.maalem_id)) && !isCompleted ? activeEmergency : null);
 
-  // L'intervention en recherche (si une demande est PENDING)
-  const pendingFromList = activeClientInterventions.find((i) => i.status === 'PENDING');
+  // L'intervention en recherche (UNIQUEMENT s'il n'y a AUCUNE mission en cours acceptée/matchée)
+  const pendingFromList = !activeOngoingSOS ? activeClientInterventions.find((i) => i.status === 'PENDING' && !i.maalem_id && !i.progress_step) : null;
   const activePendingSOS = !activeOngoingSOS
-    ? (pendingFromList || (!latestClientIntv && isSearching ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null))
+    ? (pendingFromList || (isSearching && !isMatched ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null))
     : null;
 
   return (
