@@ -679,13 +679,24 @@ export const AuthProvider = ({ children }) => {
     const photoURL = firebaseUser.photoURL || '';
     const hasRealPhone = Boolean(firebaseUser.phoneNumber && firebaseUser.phoneNumber.length >= 8);
 
+    let detectedZone = 'Casablanca';
+    try {
+      const gps = JSON.parse(localStorage.getItem('bricolemoi_client_gps') || '{}');
+      const intent = JSON.parse(localStorage.getItem('bricolemoi_pending_intent') || '{}');
+      const c = intent.city || gps.city;
+      const d = intent.district || gps.district;
+      if (c) {
+        detectedZone = d ? `${c} - ${d}` : c;
+      }
+    } catch (e) {}
+
     let authenticatedUser = {
       id: firebaseUid,
       email,
       full_name: fullName,
       role: preferredRole,
       avatar_url: photoURL,
-      city_zone: 'Casablanca - Centre-Ville',
+      city_zone: detectedZone,
       phone: hasRealPhone ? firebaseUser.phoneNumber : '',
       needsPhone: !hasRealPhone
     };

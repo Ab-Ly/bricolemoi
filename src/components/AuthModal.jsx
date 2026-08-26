@@ -50,6 +50,7 @@ import {
 import { SpecialtySelect } from './SpecialtySelect';
 import { CustomDropdown } from './CustomDropdown';
 import { formatInternationalPhone } from '../lib/infobipAuthService';
+import { reverseGeocodeMorocco } from '../lib/geoService';
 import { COUNTRY_DIAL_CODES, MOROCCAN_CITIES } from '../constants/geo';
 
 export const AuthModal = () => {
@@ -161,6 +162,35 @@ export const AuthModal = () => {
     const dName = typeof d === 'string' ? d : (d?.name || String(d));
     return { value: dName, label: dName };
   });
+
+  // Auto-détection GPS intelligente et silencieuse au chargement
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const { latitude, longitude } = pos.coords;
+            const geoResult = await reverseGeocodeMorocco(latitude, longitude);
+            if (geoResult?.city) {
+              setSelectedCity(geoResult.city);
+              if (geoResult.district) {
+                setSelectedDistrict(geoResult.district);
+              }
+              localStorage.setItem('bricolemoi_client_gps', JSON.stringify({
+                city: geoResult.city,
+                district: geoResult.district || 'Centre',
+                lat: latitude,
+                lng: longitude,
+                detected_at: Date.now()
+              }));
+            }
+          } catch (e) {}
+        },
+        () => {},
+        { timeout: 3500, maximumAge: 120000 }
+      );
+    }
+  }, []);
 
   // Synchronisation dynamique quand la modal s'ouvre
   useEffect(() => {
@@ -500,7 +530,8 @@ export const AuthModal = () => {
     setErrorBanner('');
     try {
       const fullNumber = getFullInternationalNumber();
-      await linkGooglePhone(fullNumber, selectedCity);
+      const finalZone = selectedDistrict ? `${selectedCity} - ${selectedDistrict}` : selectedCity;
+      await linkGooglePhone(fullNumber, finalZone);
       handleClose();
     } catch (err) {
       setErrorBanner(err.message || 'Erreur lors de l\'enregistrement du numéro.');
@@ -1525,6 +1556,35 @@ export const AuthModal = () => {
                       <span>{phoneValidation.message}</span>
                     </motion.div>
                   )}
+                </div>
+
+                {/* Ville & Quartier de l'utilisateur (auto-détecté par GPS) */}
+                <div className="grid grid-cols-2 gap-2.5 pt-1">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-700 mb-1 block">
+                      📍 Ville :
+                    </label>
+                    <CustomDropdown
+                      options={cityOptions}
+                      value={selectedCity}
+                      onChange={handleCityChange}
+                      icon={Buildings}
+                      className="w-full text-xs font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-700 mb-1 block">
+                      🏘️ Quartier :
+                    </label>
+                    <CustomDropdown
+                      options={districtOptions}
+                      value={selectedDistrict}
+                      onChange={setSelectedDistrict}
+                      icon={MapPinLine}
+                      className="w-full text-xs font-bold"
+                    />
+                  </div>
                 </div>
 
                 <motion.button
