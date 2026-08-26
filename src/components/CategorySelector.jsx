@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EnhancedCategoryIcon, getSpecialtyMeta } from './EnhancedCategoryIcon';
+import { searchRepairProblems } from '../lib/semanticSearchService';
 import { 
   Sparkles, 
   Zap, 
@@ -19,7 +20,9 @@ import {
   Wrench,
   ShieldAlert,
   Flame,
-  Radio
+  Radio,
+  Clock,
+  Coins
 } from 'lucide-react';
 import { 
   Drop, 
@@ -256,6 +259,9 @@ export const CATEGORIES_TAXONOMY = [
 export const CategorySelector = ({ selectedCategory, selectedSubcategory, onSelectCategory, onSelectSubcategory }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Suggestions sémantiques intelligentes (Dictionnaire Marocain + Typo tolerance)
+  const semanticSuggestions = searchQuery.trim().length >= 2 ? searchRepairProblems(searchQuery, 4) : [];
+
   // Trouver la catégorie courante
   const currentCat = CATEGORIES_TAXONOMY.find((c) => c.slug === selectedCategory) || CATEGORIES_TAXONOMY[0];
 
@@ -265,7 +271,8 @@ export const CategorySelector = ({ selectedCategory, selectedSubcategory, onSele
     const q = searchQuery.toLowerCase();
     const matchCat = cat.name.toLowerCase().includes(q) || cat.nameAr.includes(q);
     const matchSub = cat.subcategories.some((s) => s.name.toLowerCase().includes(q));
-    return matchCat || matchSub;
+    const matchSemantic = semanticSuggestions.some((s) => s.category === cat.slug);
+    return matchCat || matchSub || matchSemantic;
   });
 
   return (
@@ -277,21 +284,79 @@ export const CategorySelector = ({ selectedCategory, selectedSubcategory, onSele
         </div>
         <input
           type="text"
-          placeholder="Rechercher une panne ou un besoin (ex: fuite d'eau, chauffe-eau, disjoncteur, clé cassée, BA13, canapé...)"
+          placeholder="Rechercher une panne (ex: fuite d'eau, chauffe-eau coule, disjoncteur saute, porte claquée, qadous, sarout...)"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white rounded-2xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-xs"
+          className="w-full pl-10 pr-10 py-3.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white rounded-2xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-xs"
         />
         {searchQuery && (
           <button
             type="button"
             onClick={() => setSearchQuery('')}
-            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700"
+            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 cursor-pointer"
           >
             ✕
           </button>
         )}
       </div>
+
+      {/* Suggestions Sémantiques Instantanées (Dictionnaire Pannes Maroc) */}
+      <AnimatePresence>
+        {semanticSuggestions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-2xl space-y-2 shadow-xs"
+          >
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-black text-blue-950 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                <span>Pannes détectées correspondantes :</span>
+              </span>
+              <span className="text-[10px] text-blue-600 font-bold">1-Clic pour choisir</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {semanticSuggestions.map((problem) => (
+                <button
+                  key={problem.id}
+                  type="button"
+                  onClick={() => {
+                    onSelectCategory(problem.category);
+                    onSelectSubcategory(problem.title);
+                    setSearchQuery('');
+                  }}
+                  className="p-2.5 bg-white hover:bg-blue-50 border border-blue-100 hover:border-blue-300 rounded-xl flex items-center justify-between text-left transition-all cursor-pointer shadow-2xs group active:scale-98"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-blue-100/70 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs">
+                      ⚡
+                    </div>
+                    <div className="truncate">
+                      <p className="text-xs font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors truncate">
+                        {problem.title}
+                      </p>
+                      <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5" dir="rtl">
+                        {problem.titleAr}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 pl-2">
+                    <span className="text-[10px] font-black text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200 font-mono block">
+                      {problem.minPrice}-{problem.maxPrice} DH
+                    </span>
+                    <span className="text-[9px] text-slate-400 font-medium">
+                      {problem.timeEstimate}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Grid of Clickable Category Cards with Modern Clean Trust */}
       <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">

@@ -18,9 +18,11 @@ import {
   Star,
   CheckCircle2,
   Sparkles,
-  PhoneCall
+  PhoneCall,
+  Search
 } from 'lucide-react';
 import { EnhancedCategoryIcon, getSpecialtyMeta } from './EnhancedCategoryIcon';
+import { searchRepairProblems } from '../lib/semanticSearchService';
 import { PromoVideoPlayer } from './PromoVideoPlayer';
 
 const MOROCCAN_SERVICES = [
@@ -187,6 +189,10 @@ export const LandingPage = ({ onSelectJourney }) => {
   // Client Request State
   const [selectedServiceId, setSelectedServiceId] = useState('PLUMBING');
   const [selectedCityName, setSelectedCityName] = useState('Casablanca');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Semantic suggestions
+  const semanticSuggestions = searchQuery.trim().length >= 2 ? searchRepairProblems(searchQuery, 4) : [];
 
   // Maalem Revenue Calculator State
   const [dailyJobs, setDailyJobs] = useState(4);
@@ -358,8 +364,99 @@ export const LandingPage = ({ onSelectJourney }) => {
               </div>
             </div>
 
+            {/* Smart Semantic Search Bar */}
+            <div className="pt-5 space-y-3">
+              <div className="relative">
+                <Search className="w-4 h-4 text-blue-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder={isAr ? "ابحث عن عطب أو مشكل (مثال: تسرب الماء، شوفو خاسر، ديجونكتور كيطيح، ساروت مبلوكي...)" : "Rechercher une panne (ex: fuite d'eau, chauffe-eau coule, disjoncteur saute, porte claquée, qadous...)"}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white rounded-2xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-xs"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Semantic Suggestions */}
+              <AnimatePresence>
+                {semanticSuggestions.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="p-3 bg-blue-50/80 border border-blue-200/80 rounded-2xl space-y-2 shadow-xs"
+                  >
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-[11px] font-black text-blue-950 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                        <span>{isAr ? 'الأعطاب المطابقة لبحثك :' : 'Pannes détectées correspondantes :'}</span>
+                      </span>
+                      <span className="text-[10px] text-blue-600 font-bold">{isAr ? 'اضغط للاختيار السريع' : '1-Clic pour choisir'}</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {semanticSuggestions.map((problem) => (
+                        <button
+                          key={problem.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedServiceId(problem.category);
+                            if (problem.detectedCity) {
+                              setSelectedCityName(problem.detectedCity);
+                            }
+                            try {
+                              localStorage.setItem('bricolemoi_pending_intent', JSON.stringify({ 
+                                category: problem.category, 
+                                city: problem.detectedCity || selectedCityName,
+                                district: problem.detectedDistrict || 'Centre',
+                                subcategory: problem.title
+                              }));
+                            } catch (e) {}
+                            setSearchQuery('');
+                          }}
+                          className="p-2.5 bg-white hover:bg-blue-50 border border-blue-100 hover:border-blue-300 rounded-xl flex items-center justify-between text-left transition-all cursor-pointer shadow-2xs group active:scale-98"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-7 h-7 rounded-lg bg-blue-100/70 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs">
+                              ⚡
+                            </div>
+                            <div className="truncate">
+                              <p className="text-xs font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors truncate">
+                                {isAr ? problem.titleAr : problem.title}
+                              </p>
+                              <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
+                                {isAr ? problem.title : problem.titleAr}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0 pl-2">
+                            <span className="text-[10px] font-black text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200 font-mono block">
+                              {problem.minPrice}-{problem.maxPrice} DH
+                            </span>
+                            <span className="text-[9px] text-slate-400 font-medium">
+                              {problem.timeEstimate}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Service Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-4">
               {MOROCCAN_SERVICES.map((srv) => {
                 const isSelected = srv.id === selectedServiceId;
                 const meta = getSpecialtyMeta(srv.iconType || srv.id);
