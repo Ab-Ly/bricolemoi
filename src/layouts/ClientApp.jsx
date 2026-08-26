@@ -13,12 +13,18 @@ export const ClientApp = ({ initialCategory, initialCity, initialDistrict }) => 
   const isUnauthorizedRole = user && user.role?.toUpperCase() !== 'CLIENT';
 
   const handleQuickClientLogin = () => {
+    let dynamicZone = 'Casablanca - Centre-Ville';
+    try {
+      const gps = JSON.parse(localStorage.getItem('bricolemoi_client_gps') || '{}');
+      if (gps.city) dynamicZone = gps.district ? `${gps.city} - ${gps.district}` : gps.city;
+    } catch (e) {}
+
     const demoClient = {
       id: '11111111-1111-1111-1111-111111111111',
       role: 'CLIENT',
       full_name: 'Karim Particulier',
       phone: '+212600112233',
-      city_zone: 'Casablanca - Maârif'
+      city_zone: dynamicZone
     };
     setUser(demoClient);
     switchRole('CLIENT');
