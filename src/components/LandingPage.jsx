@@ -228,7 +228,7 @@ export const LandingPage = ({ onSelectJourney }) => {
         <div className="absolute top-40 left-1/3 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl" />
       </div>
 
-      {/* BANNIÈRE SPÉCIALE DARIJA POUR LES ARTISANS (ACCÈS DIRECT SANS CONFUSION) */}
+      {/* BANNIÈRE SPÉCIALE ARTISANS (ACCÈS DIRECT SANS CONFUSION) */}
       <div className="max-w-4xl mx-auto px-3 pt-2">
         <button
           type="button"
@@ -241,20 +241,20 @@ export const LandingPage = ({ onSelectJourney }) => {
             </div>
             <div className="min-w-0">
               <p className="text-xs sm:text-sm font-black text-slate-900 flex flex-wrap items-center gap-1.5 leading-tight">
-                <span>واش نتا معلّم وبغيتي تخدم ؟</span>
+                <span>{isAr ? 'واش نتا معلّم وبغيتي تخدم ؟' : 'Vous êtes Artisan Maâlem ?'}</span>
                 <span className="text-[10px] sm:text-[11px] font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300">
-                  فضاء الحرفيين
+                  {isAr ? 'فضاء الحرفيين' : 'Espace Pro 🇲🇦'}
                 </span>
               </p>
               <p className="text-[11px] text-amber-900 font-semibold mt-0.5 truncate">
-                استقبل الشانطيات المباشرة في حومتك على التيليفون • +15 درهم مجانية ⚡
+                {isAr ? 'استقبل الشانطيات المباشرة في حومتك على التيليفون • +15 درهم مجانية ⚡' : 'Recevez des chantiers directs sur votre téléphone • +15 DH offerts ⚡'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 group-hover:from-amber-600 group-hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-xs flex-shrink-0 transition-all">
-            <span>دخول المعلمين</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 group-hover:from-amber-600 group-hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-xs flex-shrink-0 transition-all">
+            <span>{isAr ? 'دخول المعلمين' : 'Espace Maâlem'}</span>
+            <ArrowRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
           </div>
         </button>
       </div>
@@ -352,7 +352,7 @@ export const LandingPage = ({ onSelectJourney }) => {
               </div>
               {activeTab === 'CLIENT' && (
                 <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider">
-                  محدد ✓
+                  {isAr ? 'محدد ✓' : 'Sélectionné ✓'}
                 </span>
               )}
             </div>
@@ -404,7 +404,7 @@ export const LandingPage = ({ onSelectJourney }) => {
                 🛠️
               </div>
               <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black">
-                +15 DH هدية 🎁
+                {isAr ? '🎁 +15 DH هدية' : '🎁 +15 DH Offerts'}
               </span>
             </div>
 
