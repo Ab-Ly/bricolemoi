@@ -228,39 +228,8 @@ export const LandingPage = ({ onSelectJourney }) => {
         <div className="absolute top-40 left-1/3 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl" />
       </div>
 
-      {/* BANNIÈRE SPÉCIALE ARTISANS (ACCÈS DIRECT SANS CONFUSION) */}
-      <div className="max-w-4xl mx-auto px-3 pt-2">
-        <button
-          type="button"
-          onClick={() => onSelectJourney('MAALEM')}
-          className="w-full p-3 sm:p-3.5 bg-gradient-to-r from-amber-50 via-amber-100/70 to-orange-50 hover:from-amber-100 hover:to-orange-100 border-2 border-amber-300 rounded-2xl flex items-center justify-between gap-3 text-left transition-all cursor-pointer shadow-xs hover:shadow-md group active:scale-98"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-lg shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
-              👷‍♂️
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm font-black text-slate-900 flex flex-wrap items-center gap-1.5 leading-tight">
-                <span>{isAr ? 'واش نتا معلّم وبغيتي تخدم ؟' : 'Vous êtes Artisan Maâlem ?'}</span>
-                <span className="text-[10px] sm:text-[11px] font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300">
-                  {isAr ? 'فضاء الحرفيين' : 'Espace Pro 🇲🇦'}
-                </span>
-              </p>
-              <p className="text-[11px] text-amber-900 font-semibold mt-0.5 truncate">
-                {isAr ? 'استقبل الشانطيات المباشرة في حومتك على التيليفون • +15 درهم مجانية ⚡' : 'Recevez des chantiers directs sur votre téléphone • +15 DH offerts ⚡'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 group-hover:from-amber-600 group-hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-xs flex-shrink-0 transition-all">
-            <span>{isAr ? 'دخول المعلمين' : 'Espace Maâlem'}</span>
-            <ArrowRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
-          </div>
-        </button>
-      </div>
-
-      {/* 1. HERO SECTION : Interactive Switcher (Client vs Maâlem) */}
-      <section className="relative pt-2 pb-2 text-center max-w-5xl mx-auto space-y-6">
+      {/* 1. HERO SECTION : 100% CLIENT SOS DÉPANNAGE */}
+      <section className="relative pt-6 pb-2 text-center max-w-4xl mx-auto space-y-5">
         
         {/* Badge Live Status */}
         <motion.div
@@ -279,21 +248,10 @@ export const LandingPage = ({ onSelectJourney }) => {
           transition={{ delay: 0.1 }}
           className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.15]"
         >
-          {activeTab === 'CLIENT' ? (
-            <>
-              {t.hero_client_title} <br />
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 bg-clip-text text-transparent">
-                {t.hero_client_highlight}
-              </span>
-            </>
-          ) : (
-            <>
-              {t.hero_maalem_title} <br />
-              <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent">
-                {t.hero_maalem_highlight}
-              </span>
-            </>
-          )}
+          {t.hero_client_title} <br />
+          <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 bg-clip-text text-transparent">
+            {t.hero_client_highlight}
+          </span>
         </motion.h1>
 
         {/* Hero Subtitle */}
@@ -303,7 +261,7 @@ export const LandingPage = ({ onSelectJourney }) => {
           transition={{ delay: 0.15 }}
           className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed"
         >
-          {activeTab === 'CLIENT' ? t.hero_client_sub : t.hero_maalem_sub}
+          {t.hero_client_sub}
         </motion.p>
 
         {/* Floating Trust Metrics Bar */}
@@ -331,108 +289,6 @@ export const LandingPage = ({ onSelectJourney }) => {
             <span className="text-slate-500 text-[11px]">{isAr ? 'أكثر من 1250 تقييم' : '+1 250 Avis'}</span>
           </div>
         </motion.div>
-
-        {/* TWO PROMINENT ENTRY CARDS (CLIENT vs MAALEM) */}
-        <div className="pt-4 max-w-2xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 px-2">
-          {/* Card 1 : Client */}
-          <motion.div
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setActiveTab('CLIENT')}
-            className={`p-4 sm:p-5 rounded-3xl border-2 transition-all cursor-pointer text-left flex flex-col justify-between gap-3 relative ${
-              activeTab === 'CLIENT'
-                ? 'bg-blue-50/95 border-blue-600 ring-4 ring-blue-500/20 shadow-md'
-                : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50/80 shadow-xs'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-xs ${
-                activeTab === 'CLIENT' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'
-              }`}>
-                🚨
-              </div>
-              {activeTab === 'CLIENT' && (
-                <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider">
-                  {isAr ? 'محدد ✓' : 'Sélectionné ✓'}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900 font-sans leading-tight">
-                {isAr ? 'باغي معلّم في دارك ؟' : 'Besoin d\'un Dépannage ?'}
-              </h3>
-              <p className="text-xs font-bold text-blue-700 mt-0.5">
-                {isAr ? 'طلب بلومبي، تريسيان، قفلجي...' : 'Client : Plombier, Électricien...'}
-              </p>
-              <p className="text-[11px] text-slate-500 mt-1 font-medium leading-normal">
-                {isAr ? 'حرفي مؤهل يوصل لعندك في 15 دقيقة مع ضمان الخدمة' : 'Un artisan vérifié arrive chez vous en ~15 minutes chrono.'}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveTab('CLIENT');
-                document.getElementById('bricolemoi-simulator')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className={`w-full py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all ${
-                activeTab === 'CLIENT'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-700'
-              }`}
-            >
-              <Zap className="w-3.5 h-3.5 fill-current" />
-              <span>{isAr ? 'اطلب معلّم دابا ⚡' : 'Voir les Tarifs & Commander'}</span>
-            </button>
-          </motion.div>
-
-          {/* Card 2 : Artisan Maâlem */}
-          <motion.div
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setActiveTab('MAALEM')}
-            className={`p-4 sm:p-5 rounded-3xl border-2 transition-all cursor-pointer text-left flex flex-col justify-between gap-3 relative ${
-              activeTab === 'MAALEM'
-                ? 'bg-amber-50/95 border-amber-500 ring-4 ring-amber-500/20 shadow-md'
-                : 'bg-white border-slate-200 hover:border-amber-300 hover:bg-slate-50/80 shadow-xs'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-xs ${
-                activeTab === 'MAALEM' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-800'
-              }`}>
-                🛠️
-              </div>
-              <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black">
-                {isAr ? '🎁 +15 DH هدية' : '🎁 +15 DH Offerts'}
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900 font-sans leading-tight">
-                {isAr ? 'واش نتا معلّم حريفي ؟' : 'Vous êtes Artisan Maâlem ?'}
-              </h3>
-              <p className="text-xs font-bold text-amber-800 mt-0.5">
-                {isAr ? 'فضاء الحرفيين وأصحاب الصنعة' : 'Espace Pro : Recevez des Chantiers'}
-              </p>
-              <p className="text-[11px] text-slate-500 mt-1 font-medium leading-normal">
-                {isAr ? 'استقبل مكالمات وشانطيات مباشرة في حومتك بدون وسيط' : 'Recevez des demandes réelles directement par WhatsApp et appel.'}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectJourney('MAALEM');
-              }}
-              className="w-full py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-xs cursor-pointer active:scale-95"
-            >
-              <Wrench className="w-3.5 h-3.5" />
-              <span>{isAr ? 'دخول فضاء الشانطيات 👷‍♂️' : 'Ouvrir mon Espace Maâlem'}</span>
-            </button>
-          </motion.div>
-        </div>
       </section>
 
       {/* 2. DYNAMIC INTERACTIVE WIDGETS SECTION */}
@@ -677,6 +533,33 @@ export const LandingPage = ({ onSelectJourney }) => {
                   <ArrowRight className={`w-4 h-4 group-hover:translate-x-1 transition-transform ${isAr ? 'rotate-180' : ''}`} />
                 </motion.button>
               </div>
+            </div>
+
+            {/* Bandeau Artisans Discret & Équilibré sous le simulateur */}
+            <div className="mt-8 pt-6 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-amber-50/70 via-amber-50/40 to-orange-50/70 p-4 sm:p-5 rounded-2xl border border-amber-200/90 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-base shadow-xs shrink-0">
+                  👷‍♂️
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm font-black text-slate-900 leading-tight">
+                    {isAr ? 'واش نتا معلّم وبغيتي تستقبل الشانطيات ؟' : 'Vous êtes Artisan Maâlem Qualifié ?'}
+                  </p>
+                  <p className="text-[11px] text-amber-800 font-medium mt-0.5">
+                    {isAr ? 'انضم إلى شبكة بريكول موي واستقبل طلبات الزبناء المباشرة في مدينتك • +15 درهم مجانية' : 'Rejoignez le réseau BricoleMoi et recevez des missions directes • +15 DH de bienvenue offerts.'}
+                  </p>
+                </div>
+              </div>
+
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                type="button"
+                onClick={() => onSelectJourney('MAALEM')}
+                className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-xs shrink-0 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+              >
+                <span>{isAr ? 'دخول فضاء الحرفيين' : 'Espace Maâlem Pro'}</span>
+                <ArrowRight className={`w-3.5 h-3.5 ${isAr ? 'rotate-180' : ''}`} />
+              </motion.button>
             </div>
           </motion.section>
         ) : (
