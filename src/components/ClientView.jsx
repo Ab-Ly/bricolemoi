@@ -6,6 +6,7 @@ import { useEmergencyFlow } from '../context/EmergencyFlowContext';
 import { switchSubdomainInDev } from '../lib/subdomain';
 import { EMERGENCY_STATES } from '../constants/emergencyStates';
 import { VoiceRecorder } from './VoiceRecorder';
+import { VoiceAudioPlayer } from './VoiceAudioPlayer';
 import { InteractiveMap } from './InteractiveMap';
 import { CGUModal } from './CGUModal';
 import { CategorySelector } from './CategorySelector';
@@ -815,6 +816,14 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
             </div>
           )}
 
+          {/* Note Vocale Enregistrée par le Client */}
+          {activeOngoingSOS.audio_note_url && (
+            <VoiceAudioPlayer
+              audioUrl={activeOngoingSOS.audio_note_url}
+              title="Votre Note Vocale Envoyée au Maâlem"
+            />
+          )}
+
           {/* Carte Interactive Live */}
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
@@ -924,6 +933,14 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
               <span>Annuler la demande SOS</span>
             </motion.button>
           </div>
+
+          {/* Note Vocale SOS Enregistrée */}
+          {activePendingSOS.audio_note_url && (
+            <VoiceAudioPlayer
+              audioUrl={activePendingSOS.audio_note_url}
+              title="Votre Note Vocale SOS Transmise aux Artisans"
+            />
+          )}
 
           {/* Carte interactive en direct pour le Client */}
           <div className="space-y-2">

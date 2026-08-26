@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Square } from 'lucide-react';
+import { Square, AlertCircle } from 'lucide-react';
 import { Microphone, Play as PhosphorPlay, Pause as PhosphorPause, Trash, SpeakerHigh } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
-import { uploadMediaToR2 } from '../lib/r2StorageService';
+import { uploadMediaToR2, blobToDataUrl } from '../lib/r2StorageService';
+import { notify } from '../lib/notify';
 
-// Helper de détection multi-plateforme (iOS Safari, Android Chrome, Desktop)
+// Helper de détection multi-plateforme robuste (iOS Safari, Android Chrome, Desktop)
 const getSupportedMimeType = () => {
   if (typeof window === 'undefined' || typeof MediaRecorder === 'undefined') return '';
   const candidates = [
@@ -26,23 +27,6 @@ const getSupportedMimeType = () => {
   return '';
 };
 
-// Synthétiseur d'audio de démonstration si le micro n'est pas autorisé
-const generateFallbackAudioDataUrl = () => {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(440, ctx.currentTime);
-    gain.gain.setValueAtTime(0.2, ctx.currentTime);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.3);
-  } catch (e) {}
-  return 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A/wD/';
-};
-
 export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
   const { lang } = useAuth();
   const isAr = lang === 'ar';
@@ -53,8 +37,10 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
   const [playbackTime, setPlaybackTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [audioLevels, setAudioLevels] = useState([25, 40, 20, 50, 30, 60, 35, 45, 20, 30]);
+  const [micError, setMicError] = useState(null);
 
   const mediaRecorderRef = useRef(null);
+  const mediaStreamRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
   const audioRef = useRef(null);
@@ -67,6 +53,9 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+      }
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close().catch(() => {});
       }
@@ -91,7 +80,6 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
         if (!analyserRef.current) return;
         analyserRef.current.getByteFrequencyData(dataArray);
         
-        // Extraire 10 points de volume représentatifs
         const sampledBars = [
           dataArray[1] || 20,
           dataArray[2] || 40,
@@ -116,6 +104,7 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
 
   // Démarrer l'enregistrement par micro
   const startRecording = async () => {
+    setMicError(null);
     audioChunksRef.current = [];
     setRecordingTime(0);
 
@@ -125,74 +114,93 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
     }
 
     try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const selectedMime = getSupportedMimeType();
-        const options = selectedMime ? { mimeType: selectedMime } : {};
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("L'enregistrement audio n'est pas supporté sur ce navigateur.");
+      }
 
-        mediaRecorderRef.current = new MediaRecorder(stream, options);
-        startVolumeAnalyser(stream);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      mediaStreamRef.current = stream;
 
-        mediaRecorderRef.current.ondataavailable = (event) => {
-          if (event.data && event.data.size > 0) {
-            audioChunksRef.current.push(event.data);
-          }
-        };
+      const selectedMime = getSupportedMimeType();
+      let recorder;
+      try {
+        recorder = selectedMime ? new MediaRecorder(stream, { mimeType: selectedMime }) : new MediaRecorder(stream);
+      } catch (mimeErr) {
+        recorder = new MediaRecorder(stream);
+      }
+      mediaRecorderRef.current = recorder;
 
-        mediaRecorderRef.current.onstop = async () => {
-          const finalMime = mediaRecorderRef.current?.mimeType || selectedMime || 'audio/webm';
-          const audioBlob = new Blob(audioChunksRef.current, { type: finalMime });
+      startVolumeAnalyser(stream);
 
-          // Téléversement direct vers Cloudflare R2 (Stockage 0€ Egress) avec fallback local
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        const finalMime = recorder.mimeType || selectedMime || 'audio/webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: finalMime });
+
+        if (audioBlob.size > 0) {
+          // 1. Conversion DataURL immédiate garantie
           try {
-            const r2Url = await uploadMediaToR2(audioBlob, 'audio_notes');
-            if (r2Url) {
-              onAudioRecorded(r2Url);
-              return;
+            const dataUrl = await blobToDataUrl(audioBlob);
+            if (dataUrl) {
+              onAudioRecorded(dataUrl);
             }
-          } catch (r2Err) {
-            console.warn('[VoiceRecorder] Fallback vers DataURL suite à une erreur R2:', r2Err);
+          } catch (convErr) {
+            const blobUrl = URL.createObjectURL(audioBlob);
+            onAudioRecorded(blobUrl);
           }
 
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64Url = reader.result;
-            onAudioRecorded(base64Url);
-          };
-          reader.readAsDataURL(audioBlob);
-        };
+          // 2. Upload R2 asynchrone en arrière-plan
+          uploadMediaToR2(audioBlob, 'audio_notes')
+            .then((r2Url) => {
+              if (r2Url && r2Url.startsWith('http')) {
+                onAudioRecorded(r2Url);
+              }
+            })
+            .catch(() => {});
+        }
 
-        mediaRecorderRef.current.start(100);
-        setIsRecording(true);
+        // Arrêter proprement toutes les pistes audio du micro
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+          mediaStreamRef.current = null;
+        }
+      };
 
-        timerRef.current = setInterval(() => {
-          setRecordingTime((prev) => {
-            if (prev >= 60) {
-              stopRecording();
-              return 60;
-            }
-            return prev + 1;
-          });
-        }, 1000);
-      } else {
-        fallbackSimulatedRecording();
-      }
+      recorder.start(150);
+      setIsRecording(true);
+
+      timerRef.current = setInterval(() => {
+        setRecordingTime((prev) => {
+          if (prev >= 60) {
+            stopRecording();
+            return 60;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+
     } catch (err) {
-      console.warn('[Microphone] Notice:', err.message);
-      fallbackSimulatedRecording();
+      console.error('[VoiceRecorder] Error:', err);
+      const isPermissionDenied = err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+      const errorMsg = isPermissionDenied
+        ? (isAr ? 'يرجى السماح بالوصول إلى الميكروفون في متصفحك' : 'Veuillez autoriser l\'accès au microphone dans les réglages de votre navigateur')
+        : (isAr ? 'تعذر تشغيل الميكروفون' : 'Impossible de démarrer l\'enregistrement vocal');
+      
+      setMicError(errorMsg);
+      notify.error(errorMsg);
+      setIsRecording(false);
     }
-  };
-
-  const fallbackSimulatedRecording = () => {
-    setIsRecording(true);
-    let seconds = 0;
-    timerRef.current = setInterval(() => {
-      seconds += 1;
-      setRecordingTime(seconds);
-      if (seconds >= 6) {
-        stopRecording();
-      }
-    }, 1000);
   };
 
   const stopRecording = () => {
@@ -206,13 +214,14 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
       audioContextRef.current.close().catch(() => {});
     }
 
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
-    } else {
-      onAudioRecorded(generateFallbackAudioDataUrl());
-    }
     if (timerRef.current) clearInterval(timerRef.current);
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {}
+    }
+
     setIsRecording(false);
   };
 
@@ -237,7 +246,9 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setPlaybackTime(audioRef.current.currentTime);
-      setDuration(audioRef.current.duration || recordingTime || 6);
+      if (audioRef.current.duration && !isNaN(audioRef.current.duration)) {
+        setDuration(audioRef.current.duration);
+      }
     }
   };
 
@@ -263,6 +274,14 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
           </span>
         )}
       </div>
+
+      {/* Erreur de Permission Micro */}
+      {micError && (
+        <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+          <span className="font-medium">{micError}</span>
+        </div>
+      )}
 
       {/* État 1 : Bouton Micro Style WhatsApp */}
       {!audioUrl && !isRecording && (
@@ -331,6 +350,11 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
             src={audioUrl}
             onEnded={handleAudioEnded}
             onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={() => {
+              if (audioRef.current && audioRef.current.duration && !isNaN(audioRef.current.duration)) {
+                setDuration(audioRef.current.duration);
+              }
+            }}
             preload="metadata"
             className="hidden"
           />
@@ -357,7 +381,17 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
               </div>
               
               {/* Barre de progression */}
-              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+              <div 
+                className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200 cursor-pointer"
+                onClick={(e) => {
+                  if (!audioRef.current || !duration) return;
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const clickX = e.clientX - rect.left;
+                  const newTime = (clickX / rect.width) * duration;
+                  audioRef.current.currentTime = newTime;
+                  setPlaybackTime(newTime);
+                }}
+              >
                 <div
                   className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-100"
                   style={{ width: `${duration > 0 ? (playbackTime / duration) * 100 : 100}%` }}
