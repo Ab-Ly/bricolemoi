@@ -139,6 +139,29 @@ export const AuthProvider = ({ children }) => {
       });
   }, []);
 
+  // Synchronisation multi-onglets de la déconnexion
+  useEffect(() => {
+    let bc;
+    try {
+      bc = new BroadcastChannel('bricolemoi_intertab_sync');
+      bc.onmessage = (e) => {
+        if (e.data?.type === 'USER_LOGGED_OUT') {
+          setUser(null);
+          setCurrentRole('CLIENT');
+          sessionStorage.removeItem('bricolemoi_session');
+          localStorage.removeItem('bricolemoi_session');
+          sessionStorage.removeItem('bricolemoi_admin_pin_ok');
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('bricolemoi_user_logged_out'));
+          }
+        }
+      };
+    } catch (e) {}
+    return () => {
+      if (bc) bc.close();
+    };
+  }, []);
+
   // Firebase Auth Listener — source de vérité pour la session
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -836,7 +859,29 @@ export const AuthProvider = ({ children }) => {
     return updatedUser;
   };
 
+  // Smart Logout : Déconnexion Propre, Multi-Onglets & Mémorisation Reconnexion 1-Clic
   const logout = async (onLoggedOut) => {
+    // 1. Mémorisation intelligente du compte pour reconnexion 1-clic PIN
+    if (user && user.phone) {
+      try {
+        localStorage.setItem('bricolemoi_last_user', JSON.stringify({
+          phone: user.phone,
+          fullName: user.full_name,
+          avatarUrl: user.avatar_url || null,
+          role: user.role || 'CLIENT',
+          cityZone: user.city_zone || 'Casablanca'
+        }));
+      } catch (e) {}
+    }
+
+    // 2. Notification immédiate aux autres onglets
+    try {
+      const bc = new BroadcastChannel('bricolemoi_intertab_sync');
+      bc.postMessage({ type: 'USER_LOGGED_OUT' });
+      bc.close();
+    } catch (e) {}
+
+    // 3. Révocation des sessions Firebase & Supabase
     try {
       await signOut(auth);
     } catch (e) {}
@@ -845,10 +890,19 @@ export const AuthProvider = ({ children }) => {
         await supabase.auth.signOut();
       } catch (e) {}
     }
+
+    // 4. Nettoyage complet des caches de session
     setUser(null);
     setCurrentRole('CLIENT');
     sessionStorage.removeItem('bricolemoi_session');
+    localStorage.removeItem('bricolemoi_session');
     sessionStorage.removeItem('bricolemoi_admin_pin_ok');
+
+    // 5. Événement système global pour couper la présence en ligne (Ably) et les sirènes
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('bricolemoi_user_logged_out'));
+    }
+
     if (onLoggedOut) onLoggedOut();
   };
 
