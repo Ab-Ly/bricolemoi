@@ -605,6 +605,12 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     setPendingCompletionModalInt(null);
     setComment('');
     setTipAmount(0);
+
+    if (typeof submitClientFeedback === 'function') {
+      try {
+        await submitClientFeedback({ rating, comment: fullComment, badges: selectedBadges, tipDh: tipAmount });
+      } catch (err) {}
+    }
   };
 
   // L'intervention la plus récente de l'utilisateur
@@ -802,31 +808,55 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
             </div>
           </div>
 
-          {/* Validation Fin de Travaux si en attente */}
-          {activeOngoingSOS.status === 'PENDING_COMPLETION' && (
-            <div className="p-4 bg-emerald-50 border-2 border-emerald-300 rounded-2xl space-y-3 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-black text-emerald-900 flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  <span>Le Maâlem a terminé l'intervention</span>
+          {/* Action Directe Client : Validation & Clôture */}
+          <div className={`p-4 rounded-2xl border-2 space-y-3 shadow-xs ${
+            activeOngoingSOS.status === 'PENDING_COMPLETION'
+              ? 'bg-purple-50/90 border-purple-300'
+              : 'bg-emerald-50/70 border-emerald-300'
+          }`}>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-black text-slate-900 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <span>
+                  {activeOngoingSOS.status === 'PENDING_COMPLETION'
+                    ? 'Le Maâlem a terminé l\'intervention'
+                    : 'Artisan sur place • Intervention en cours'}
                 </span>
+              </span>
+              {activeOngoingSOS.final_agreed_price && (
                 <span className="text-sm font-black font-mono text-emerald-900 bg-white px-3 py-1 rounded-xl border border-emerald-200 shadow-xs">
-                  {activeOngoingSOS.final_agreed_price || 150} DH
+                  {activeOngoingSOS.final_agreed_price} DH
                 </span>
-              </div>
-              <p className="text-xs text-slate-700">
-                Montant convenu pour la prestation : <strong>{activeOngoingSOS.final_agreed_price || 150} DH</strong>. Veuillez confirmer pour finaliser et évaluer l'artisan.
-              </p>
+              )}
+            </div>
+            <p className="text-xs text-slate-600">
+              {activeOngoingSOS.status === 'PENDING_COMPLETION'
+                ? `Montant convenu : ${activeOngoingSOS.final_agreed_price || 150} DH. Veuillez confirmer et laisser votre note pour clôturer la mission.`
+                : 'Les travaux sont finis ou en cours de finalisation ? Touchez ci-dessous pour valider la prestation et noter votre Maâlem.'}
+            </p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setPendingCompletionModalInt(activeOngoingSOS)}
-                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-sm rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                className="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
               >
-                <CheckCircle2 className="w-5 h-5" />
-                <span>Confirmer &amp; Évaluer la Prestation</span>
+                <Star className="w-4 h-4 fill-amber-300 text-amber-300" />
+                <span>Valider la Fin des Travaux &amp; Laisser un Avis (5★)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm('Voulez-vous vraiment annuler ou clôturer cette intervention ?')) {
+                    cancelIntervention(activeOngoingSOS.id);
+                  }
+                }}
+                className="px-3.5 py-3 bg-white hover:bg-red-50 text-red-600 border border-slate-200 hover:border-red-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 text-center shrink-0"
+              >
+                Annuler
               </button>
             </div>
-          )}
+          </div>
 
           {/* Note Vocale Enregistrée par le Client */}
           {activeOngoingSOS.audio_note_url && (
