@@ -110,6 +110,11 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
     }
   }
 
+  // Synthèse des badges triés par fréquence
+  const badgesSummary = Object.entries(badgesMap)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+
   // Calcul des avis qualifiants pour la Jauge de Fidélité (Note >= 4★)
   const qualifyingReviews = allMaalemReviews.filter((r) => Number(r.rating) >= 4);
   const totalQualifyingCount = qualifyingReviews.length;
