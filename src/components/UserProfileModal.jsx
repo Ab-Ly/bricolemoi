@@ -35,6 +35,7 @@ import { reverseGeocodeMorocco } from '../lib/geoService';
 
 import { calculateMaalemBalance } from '../utils/balanceUtils';
 import { calculateMaalemRating } from '../utils/ratingUtils';
+import { updateProfilePin } from '../lib/infobipAuthService';
 
 export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfile }) => {
   const { user, setUser, logout } = useAuth();
@@ -52,6 +53,11 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
   const [selectedCountry, setSelectedCountry] = useState(COUNTRY_DIAL_CODES[0]);
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const countryDropdownRef = useRef(null);
+
+  // États pour la modification du Code PIN à 4 chiffres
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [updatingPin, setUpdatingPin] = useState(false);
 
   const [selectedCity, setSelectedCity] = useState(() => {
     if (user?.city_zone) return user.city_zone.split(' - ')[0];
@@ -289,6 +295,41 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
     }
   };
 
+  const handleUpdatePin = async (e) => {
+    e.preventDefault();
+    const cleanNew = String(newPin || '').trim();
+    const cleanConf = String(confirmPin || '').trim();
+
+    if (cleanNew.length !== 4 || !/^\d{4}$/.test(cleanNew)) {
+      toast.error('Le code PIN doit comporter exactement 4 chiffres numériques.');
+      return;
+    }
+
+    if (cleanNew !== cleanConf) {
+      toast.error('Les deux codes PIN saisis ne correspondent pas.');
+      return;
+    }
+
+    const targetPhone = user?.phone || getFullPhone();
+    if (!targetPhone) {
+      toast.error('Veuillez d\'abord enregistrer votre numéro de téléphone.');
+      return;
+    }
+
+    setUpdatingPin(true);
+    try {
+      await updateProfilePin({ phone: targetPhone, pin: cleanNew });
+      toast.success('🔐 Votre code PIN à 4 chiffres a été mis à jour avec succès !');
+      setNewPin('');
+      setConfirmPin('');
+      setActiveTab('info');
+    } catch (err) {
+      toast.error(err.message || 'Impossible de mettre à jour le code PIN.');
+    } finally {
+      setUpdatingPin(false);
+    }
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -420,6 +461,18 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             >
               <Edit3 className="w-3 h-3" />
               <span>{isMissingPhone ? 'Compléter' : 'Modifier'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('pin')}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                activeTab === 'pin'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Lock className="w-3 h-3 text-amber-500" />
+              <span>Code PIN</span>
             </button>
             {!isMaalem && (
               <button
@@ -779,6 +832,72 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 </div>
               </div>
             </motion.div>
+          )}
+
+          {/* Tab 4: Modification Sécurisée du Code PIN */}
+          {activeTab === 'pin' && (
+            <motion.form 
+              initial={{ opacity: 0, y: 5 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              onSubmit={handleUpdatePin}
+              className="space-y-4"
+            >
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+                <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
+                  <Lock className="w-4 h-4 text-amber-600" />
+                  <span>Code PIN Secret de Connexion (4 chiffres)</span>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Ce code personnel à 4 chiffres vous permet de vous connecter instantanément en 1 seconde sans attendre de SMS.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Nouveau Code PIN (4 chiffres)
+                  </label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={4}
+                    placeholder="••••"
+                    value={newPin}
+                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
+                    className="w-full text-center text-2xl font-mono tracking-widest py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-amber-500 focus:outline-none transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Confirmer le Nouveau Code PIN
+                  </label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={4}
+                    placeholder="••••"
+                    value={confirmPin}
+                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                    className="w-full text-center text-2xl font-mono tracking-widest py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-amber-500 focus:outline-none transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                type="submit"
+                disabled={updatingPin || newPin.length !== 4 || confirmPin.length !== 4}
+                className="w-full py-3 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50 transition-all"
+              >
+                <Lock className="w-4 h-4 text-amber-400" />
+                <span>{updatingPin ? 'Mise à jour...' : 'Valider mon Nouveau Code PIN'}</span>
+              </motion.button>
+            </motion.form>
           )}
 
           {/* Quick Subdomain Switcher for Artisans */}
