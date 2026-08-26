@@ -110,10 +110,11 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
     }
   }
 
-  // Synthèse des badges triés par fréquence
-  const badgesSummary = Object.entries(badgesMap)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
+  // Calcul des avis qualifiants pour la Jauge de Fidélité (Note >= 4★)
+  const qualifyingReviews = allMaalemReviews.filter((r) => Number(r.rating) >= 4);
+  const totalQualifyingCount = qualifyingReviews.length;
+  const currentCycleProgress = totalQualifyingCount % 4; // 0, 1, 2, 3 (4 déclenche le lead gratuit et revient à 0)
+  const totalFreeLeadsEarned = Math.floor(totalQualifyingCount / 4);
 
   return {
     averageRating,
@@ -121,6 +122,23 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
     maalemReviews: allMaalemReviews,
     breakdown,
     badgesSummary,
-    consecutiveFiveStars
+    consecutiveFiveStars,
+    loyalty: {
+      qualifyingCount: totalQualifyingCount,
+      currentCycleProgress, // 0 to 3 (or 4 when just completed)
+      targetPerReward: 4,
+      totalFreeLeadsEarned,
+      remainingCount: 4 - currentCycleProgress,
+      progressPercentage: (currentCycleProgress / 4) * 100,
+      qualifyingReviews: qualifyingReviews.slice(0, 4)
+    }
   };
+};
+
+/**
+ * Helper direct pour obtenir les statistiques de fidélité 4/4 d'un Maâlem
+ */
+export const calculateMaalemLoyalty = (maalemOrUser, reviews = [], interventions = []) => {
+  const ratingData = calculateMaalemRating(maalemOrUser, reviews, interventions);
+  return ratingData.loyalty;
 };

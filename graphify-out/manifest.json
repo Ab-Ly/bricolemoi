@@ -192,9 +192,9 @@
     "semantic_hash": ""
   },
   "src/components/ClientView.jsx": {
-    "mtime": 1787749408.4322338,
-    "seen": 1787751820.684405,
-    "ast_hash": "1ab92d1f9ef5d9d6d636c550688bb36b",
+    "mtime": 1787755438.4775066,
+    "seen": 1787755670.8014562,
+    "ast_hash": "efa238baaee06e8260199d85232f53c4",
     "semantic_hash": ""
   },
   "src/components/CustomDropdown.jsx": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   "src/components/MaalemView.jsx": {
-    "mtime": 1787695857.9045343,
-    "seen": 1787751820.684416,
-    "ast_hash": "264672f90341010793ef2aa5cce68d45",
+    "mtime": 1787755395.670811,
+    "seen": 1787755670.802379,
+    "ast_hash": "7f957f10624d09a13011c325ac8ea31b",
     "semantic_hash": ""
   },
   "src/components/Navbar.jsx": {
@@ -288,9 +288,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/AdminDashboard.jsx": {
-    "mtime": 1787695857.9075418,
-    "seen": 1787751820.684434,
-    "ast_hash": "bc2dc2af6bb50c890566e3cba8da8c65",
+    "mtime": 1787755340.9321294,
+    "seen": 1787755670.8034902,
+    "ast_hash": "1acec330ff2546a6d500700d99bec189",
     "semantic_hash": ""
   },
   "src/components/admin/AdminDisputesView.jsx": {
@@ -336,9 +336,9 @@
     "semantic_hash": ""
   },
   "src/context/AppContext.jsx": {
-    "mtime": 1787749408.4582632,
-    "seen": 1787751820.684451,
-    "ast_hash": "df4039bfd32abc869149cab5b0241ede",
+    "mtime": 1787755272.3936877,
+    "seen": 1787755670.804202,
+    "ast_hash": "053c1a754420fd3eded93312b7b14084",
     "semantic_hash": ""
   },
   "src/context/AuthContext.jsx": {
@@ -474,9 +474,9 @@
     "semantic_hash": ""
   },
   "src/utils/ratingUtils.js": {
-    "mtime": 1787749408.4686146,
-    "seen": 1787751820.6844952,
-    "ast_hash": "c8f08d28a4a2b97f9239cb278f29530c",
+    "mtime": 1787755173.2769082,
+    "seen": 1787755670.806262,
+    "ast_hash": "85f30ee2890c3c1c5fd3ac156f192a94",
     "semantic_hash": ""
   },
   "supabase/MASTER_DEFINITIVE_MIGRATION.sql": {
@@ -759,6 +759,12 @@
     "mtime": 1787749408.4655528,
     "seen": 1787751820.684486,
     "ast_hash": "312b9edbd550fb2115fa7b08d72f80c7",
+    "semantic_hash": ""
+  },
+  "src/components/admin/AdminLoyaltyRewardsView.jsx": {
+    "mtime": 1787755306.020888,
+    "seen": 1787755670.8036768,
+    "ast_hash": "f206a97244360cddea69d13d354105b0",
     "semantic_hash": ""
   }
 }

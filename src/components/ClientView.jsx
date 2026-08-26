@@ -660,6 +660,17 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
           </button>
         </motion.div>
       )}
+      {/* BANDEAU RÉASSURANCE & TRANSPARENCE TARIF LIBRE */}
+      <div className="p-3.5 bg-gradient-to-r from-blue-50 via-indigo-50/70 to-blue-50 border border-blue-200/80 rounded-2xl flex items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+            🤝
+          </div>
+          <p className="text-xs font-semibold text-blue-950">
+            <strong className="font-bold text-blue-800">Mise en relation directe :</strong> Convenez librement du devis avec votre artisan sur place, sans frais d'intermédiaire ni commission prélevée sur ses travaux.
+          </p>
+        </div>
+      </div>
 
       {/* 1. INTERVENTION EN COURS (PRISE EN CHARGE CONFIRMÉE PAR LE MAÂLEM) */}
       {activeOngoingSOS && !showNewSOSForm ? (

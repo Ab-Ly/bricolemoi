@@ -15,13 +15,15 @@ import {
   CheckCircle2, 
   AlertTriangle,
   Receipt,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Gift
 } from 'lucide-react';
 import { AdminClientsView } from './AdminClientsView';
 import { AdminLiveMissions } from './AdminLiveMissions';
 import { AdminMaalemsView } from './AdminMaalemsView';
 import { AdminDisputesView } from './AdminDisputesView';
 import { AdminRechargesView } from './AdminRechargesView';
+import { AdminLoyaltyRewardsView } from './AdminLoyaltyRewardsView';
 
 export const AdminDashboard = () => {
   const { user } = useAuth();
@@ -32,6 +34,7 @@ export const AdminDashboard = () => {
     transactions = [],
     adminAlerts = [],
     reviews = [],
+    loyaltyRewardsHistory = [],
     refreshData,
     quickCreditMaalem,
     toggleMaalemSuspension,
@@ -355,6 +358,25 @@ export const AdminDashboard = () => {
               </span>
             )}
           </button>
+
+          {/* Tab 6: Gratuités & Fidélité 4/4 */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('LOYALTY')}
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'LOYALTY'
+                ? 'bg-white text-indigo-700 shadow-sm font-black border border-slate-200/90'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
+            }`}
+          >
+            <Gift className={`w-4 h-4 ${activeTab === 'LOYALTY' ? 'text-indigo-600' : 'text-slate-500'}`} />
+            <span>🎯 Gratuités &amp; Fidélité</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
+              activeTab === 'LOYALTY' ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-200/80 text-slate-600'
+            }`}>
+              {loyaltyRewardsHistory.length}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -438,6 +460,17 @@ export const AdminDashboard = () => {
               onReject={rejectRecharge}
               onGenerateReceiptPDF={generateReceiptPDF}
             />
+          </motion.div>
+        )}
+
+        {activeTab === 'LOYALTY' && (
+          <motion.div
+            key="loyalty"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <AdminLoyaltyRewardsView />
           </motion.div>
         )}
       </AnimatePresence>

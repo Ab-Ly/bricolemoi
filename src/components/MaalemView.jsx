@@ -75,9 +75,11 @@ export const MaalemView = ({ onOpenCINVerification }) => {
     maalems,
     transactions,
     reviews = [],
+    loyaltyRewardsHistory = [],
     generateReceiptPDF,
     acceptLead, 
     requestWorkCompletion,
+    requestOnSiteReview,
     updateInterventionProgress,
     reportUnreachableClient,
     declareMissionUnfeasible,
@@ -873,52 +875,90 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
           </div>
         </div>
 
-        {/* Gamification Progress Gauges */}
-        <div className="mt-6 pt-5 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl shadow-xs">
-            <div className="flex justify-between items-center text-xs mb-2">
-              <span className="font-black text-slate-900 flex items-center gap-1.5">
-                <Award className="w-4 h-4 text-amber-600" />
-                <span>Jauge 1 : Avis 5 Étoiles Consécutifs</span>
-              </span>
-              <span className="font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 font-mono text-xs">
-                {maalemDetails.consecutive_five_stars || 0} / 5
-              </span>
-            </div>
-            <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden p-0.5">
-              <div
-                className="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full transition-all duration-500 shadow-xs"
-                style={{ width: `${((maalemDetails.consecutive_five_stars || 0) / 5) * 100}%` }}
-              />
-            </div>
-            <p className="text-[11px] text-slate-600 mt-2 font-medium flex items-center gap-1.5">
-              <Gift className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-              <span>5 avis 5★ consécutifs = <strong className="text-amber-700 font-bold">+15.00 DH GRATUITS (1er Lead Offert)</strong> !</span>
-            </p>
-          </div>
+        {/* Jauge UI/UX d'Élite : Déverrouillage Lead SOS Gratuit 4/4 */}
+        {(() => {
+          const loyalty = ratingInfo?.loyalty || {
+            currentCycleProgress: 0,
+            remainingCount: 4,
+            progressPercentage: 0,
+            totalFreeLeadsEarned: 0
+          };
+          const progress = loyalty.currentCycleProgress || 0;
+          const remaining = loyalty.remainingCount || (4 - progress);
+          const isCompletedNow = progress === 4;
 
-          <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl shadow-xs">
-            <div className="flex justify-between items-center text-xs mb-2">
-              <span className="font-black text-slate-900 flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4 text-blue-600" />
-                <span>Jauge 2 : Recharges de 100 DH</span>
-              </span>
-              <span className="font-black text-blue-800 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200 font-mono text-xs">
-                {maalemDetails.hundred_dh_recharges_count || 0} / 5
-              </span>
+          return (
+            <div className="mt-6 pt-5 border-t border-slate-200">
+              <div className="p-4 sm:p-5 bg-gradient-to-r from-purple-50 via-indigo-50/60 to-purple-50 border-2 border-purple-300/80 rounded-2xl shadow-sm space-y-3.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-xs shrink-0">
+                      🎁
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                        <span>Jauge de Prime : 1 Lead SOS 100% Gratuit (+15 DH)</span>
+                        <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-mono font-black border border-purple-200">
+                          {progress} / 4 Avis 4★+
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-600 font-medium mt-0.5">
+                        {progress === 0 && 'Obtenez 4 avis de 4★ ou 5★ pour débloquer votre prochain Lead SOS 100% Offert !'}
+                        {progress > 0 && progress < 4 && `🔥 Plus que ${remaining} avis client 5★ sur place pour recevoir votre Lead Gratuit !`}
+                        {progress === 4 && '🎉 Cycle 4/4 complété ! 15 DH de crédit offert ajoutés à votre solde !'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="px-2.5 py-1 rounded-xl bg-white border border-purple-200 text-purple-800 text-xs font-mono font-black shadow-xs flex items-center gap-1">
+                      <Gift className="w-3.5 h-3.5 text-purple-600" />
+                      <span>{loyalty.totalFreeLeadsEarned || 0} Leads Gagnés</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4 Paliers Visuels Interactifs */}
+                <div className="grid grid-cols-4 gap-2 pt-1">
+                  {[1, 2, 3, 4].map((step) => {
+                    const isDone = progress >= step;
+                    const isGift = step === 4;
+
+                    return (
+                      <div
+                        key={step}
+                        className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
+                          isDone
+                            ? isGift
+                              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-700 shadow-md shadow-purple-500/20 ring-2 ring-purple-400'
+                              : 'bg-amber-100/90 text-amber-900 border-amber-300 font-bold'
+                            : 'bg-white/80 text-slate-400 border-slate-200'
+                        }`}
+                      >
+                        <span className="text-sm">
+                          {isGift ? (isDone ? '🎁' : '🎯') : (isDone ? '⭐' : '⚪')}
+                        </span>
+                        <span className={`text-[10px] font-mono font-black ${isDone && isGift ? 'text-white' : ''}`}>
+                          {isGift ? '4. OFFERT' : `Avis #${step}`}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Barre de Progression Fluide */}
+                <div className="w-full h-2.5 bg-purple-200/70 rounded-full overflow-hidden p-0.5">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-amber-400 via-purple-500 to-indigo-600 rounded-full shadow-xs"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(progress / 4) * 100}%` }}
+                    transition={{ duration: 0.6 }}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden p-0.5">
-              <div
-                className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500 shadow-xs"
-                style={{ width: `${((maalemDetails.hundred_dh_recharges_count || 0) / 5) * 100}%` }}
-              />
-            </div>
-            <p className="text-[11px] text-slate-600 mt-2 font-medium flex items-center gap-1.5">
-              <Gift className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-              <span>À la 5ème recharge de 100 DH = <strong className="text-blue-700 font-bold">+15.00 DH GRATUITS (1er Lead Offert)</strong> !</span>
-            </p>
-          </div>
-        </div>
+          );
+        })()}
       </motion.div>
 
       {/* 1.1 SECTION LEADS DÉBLOQUÉS ACTIFS (EN TÊTE DE DASHBOARD - ACTION PRIORITAIRE) */}
@@ -1145,19 +1185,25 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                   {/* Action d'Accomplissement des Travaux & Saisie du Montant Réel */}
                   <div className="pt-2 border-t border-slate-200 space-y-3">
                     {lead.status === 'PENDING_COMPLETION' ? (
-                      <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 flex items-center justify-between shadow-xs">
+                      <div className="p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-xs font-bold text-purple-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
                         <span className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-amber-600 animate-spin flex-shrink-0" />
-                          <span>Demande de fin de chantier transmise ({lead.final_agreed_price || currentAgreedPrice} DH)</span>
+                          <Clock className="w-4 h-4 text-purple-600 animate-spin flex-shrink-0" />
+                          <span>Demande de notation transmise • En attente de la note du client sur son écran</span>
                         </span>
-                        <span className="text-[10px] font-mono text-amber-800 bg-amber-100 px-2 py-0.5 rounded">En attente client</span>
+                        <button
+                          type="button"
+                          onClick={() => requestOnSiteReview(lead.id)}
+                          className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-[11px] font-black cursor-pointer self-end sm:self-auto"
+                        >
+                          Renvoyer l'Alerte 📱
+                        </button>
                       </div>
                     ) : lead.status === 'COMPLETED' ? (
-                      <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-2 shadow-xs">
+                      <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs space-y-2 shadow-xs">
                         <div className="flex items-center justify-between font-bold">
                           <span className="flex items-center gap-1.5 text-emerald-800">
                             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            <span>Intervention Clôturée &amp; Validée ({lead.final_agreed_price} DH)</span>
+                            <span>Intervention Clôturée &amp; Validée</span>
                           </span>
                           <span className="px-2.5 py-0.5 rounded-full font-black font-mono flex items-center gap-1 text-xs text-amber-800 bg-amber-50 border border-amber-200 shadow-xs">
                             <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
@@ -1172,29 +1218,13 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-                          <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                            <Coins className="w-4 h-4 text-amber-600" />
-                            <span>Prix Final Convenu des Travaux :</span>
-                          </label>
-
-                          {/* Champ Saisie Manuelle Numérique Pure */}
-                          <div className="relative">
-                            <input
-                              type="number"
-                              min="0"
-                              max="50000"
-                              placeholder="Ex: 250"
-                              value={currentAgreedPrice || ''}
-                              onChange={(e) => {
-                                const val = e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0);
-                                setAgreedPrices((prev) => ({ ...prev, [lead.id]: val }));
-                              }}
-                              className="w-full py-2.5 px-4 pr-14 bg-white border border-slate-300 rounded-xl text-lg font-mono font-black text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-xs placeholder:text-slate-400 placeholder:font-normal placeholder:text-sm"
-                            />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-mono font-black text-slate-500 pointer-events-none">
-                              DH
-                            </span>
+                        <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-2xl flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                            ⭐
+                          </div>
+                          <div className="min-w-0 text-xs">
+                            <p className="font-black text-slate-900">Travaux terminés sur place ?</p>
+                            <p className="text-[11px] text-purple-800 font-medium">Demandez la note 5★ au client sur place pour débloquer votre Lead SOS Gratuit !</p>
                           </div>
                         </div>
 
@@ -1202,14 +1232,13 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                           whileTap={{ scale: 0.95 }}
                           type="button"
                           onClick={() => {
-                            const finalP = Number(currentAgreedPrice) || 150;
-                            requestWorkCompletion(lead.id, finalP);
-                            flowFinishMission(finalP);
+                            requestOnSiteReview(lead.id);
+                            flowFinishMission();
                           }}
-                          className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                          className="w-full py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs sm:text-sm rounded-2xl shadow-md shadow-purple-600/25 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                         >
-                          <CheckCircle2 className="w-4 h-4 text-white" />
-                          <span>Déclarer les travaux terminés &amp; Valider ({currentAgreedPrice || 150} DH)</span>
+                          <Star className="w-4 h-4 fill-amber-300 text-amber-300" />
+                          <span>📱 Faire Valider &amp; Noter par le Client sur Place</span>
                         </motion.button>
                       </div>
                     )}

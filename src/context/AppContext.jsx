@@ -84,6 +84,15 @@ export const AppProvider = ({ children }) => {
       return [];
     }
   });
+  // Registre de Suivi des Gratuités & Primes Fidélité Maâlems (4 avis >= 4★ = 1 Lead Gratuit)
+  const [loyaltyRewardsHistory, setLoyaltyRewardsHistory] = useState(() => {
+    try {
+      const cached = localStorage.getItem('bricolemoi_loyalty_rewards_cache');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
 
   // État de Disponibilité En Ligne / Hors Ligne pour le Maâlem
   const [isMaalemOnline, setIsMaalemOnline] = useState(() => {
@@ -1234,6 +1243,35 @@ export const AppProvider = ({ children }) => {
             try { localStorage.setItem('bricolemoi_admin_alerts', JSON.stringify(next)); } catch (e) {}
             return next;
           });
+        } else if (data.type === 'ON_SITE_REVIEW_REQUESTED' && data.intervention_id) {
+          const { intervention_id, client_id, maalem_name } = data;
+          setInterventions((prev) => {
+            const next = prev.map((i) =>
+              String(i.id).trim() === String(intervention_id).trim()
+                ? { ...i, status: 'PENDING_COMPLETION', on_site_review_requested: true }
+                : i
+            );
+            try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
+          if (isCurrentUserClientOf({ id: intervention_id, client_id })) {
+            notify.info(
+              'Validation d\'Intervention ✨',
+              `${maalem_name || 'Votre Maâlem'} sollicite votre évaluation pour clôturer l'intervention et valider son travail.`
+            );
+          }
+        } else if (data.type === 'LOYALTY_LEAD_REWARDED' && data.reward) {
+          setLoyaltyRewardsHistory((prev) => {
+            const next = [data.reward, ...prev.filter((r) => r.id !== data.reward.id)];
+            try { localStorage.setItem('bricolemoi_loyalty_rewards_cache', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
+          if (isCurrentUserAdmin()) {
+            notify.success(
+              'Prime Lead Gratuit 🎁',
+              `L'artisan ${data.reward.maalem_name || 'Maâlem'} a complété 4 interventions bien notées (≥ 4★) et a reçu son Lead 100% Offert !`
+            );
+          }
         } else if (data.type === 'MAALEM_HEARTBEAT' && data.maalem_id) {
           updateOnlineMaalemInStorage(data.maalem_id, true, {
             full_name: data.full_name,
@@ -2588,24 +2626,66 @@ export const AppProvider = ({ children }) => {
       const serviceType = targetIntv?.service_type || user?.specialty || 'all';
 
       const nowIso = new Date().toISOString();
+      const cleanIntId = String(interventionId).trim();
+      const cleanMaalemId = toSafeUUID(user?.id);
+
       const acceptedItem = {
         id: interventionId,
         status: 'ACCEPTED',
-        escrow_status: 'RESERVED',
-        maalem_id: user?.id,
-        maalem_name: user?.full_name,
+        escrow_status: 'DEBITED',
+        maalem_id: cleanMaalemId,
+        maalem_name: user?.full_name || 'Artisan Maâlem',
         maalem_phone: user?.phone,
         accepted_at: nowIso,
         progress_step: 'ON_THE_WAY'
       };
 
-      // Réservation de l'Escrow 15 DH en transaction temporaire
-      await reserveLeadCredit(interventionId, user?.id, 15.00);
+      // 1. Débit Immédiat Sécurisé de 15.00 DH pour le Déblocage du Lead
+      const leadCost = 15.00;
+      const ref = `LEAD_UNLOCK_${cleanIntId}_${Date.now()}`;
+      
+      const newDebitTx = {
+        id: `tx-lead-${cleanIntId}-${Date.now()}`,
+        maalem_id: cleanMaalemId,
+        maalem_name: user?.full_name || 'Artisan Maalem',
+        maalem_phone: user?.phone || '',
+        amount_dh: -leadCost,
+        type: 'LEAD_DEDUCTION',
+        payment_method: 'SYSTEM_DEBIT',
+        reference_ref: ref,
+        status: 'VALIDATED',
+        admin_notes: `Déblocage Immédiat Contact SOS #${cleanIntId}`,
+        created_at: nowIso
+      };
 
-      // 1. Mise à jour optimiste du statut intervention (retire le lead des flux ouverts)
+      setTransactions((prev) => [newDebitTx, ...prev]);
+
+      // Mettre à jour credit_balance du Maâlem en direct
+      if (user?.role === 'MAALEM') {
+        const currentBal = Number(user?.maalem_details?.credit_balance ?? user?.credits ?? leadCost);
+        const newBal = Math.max(0, currentBal - leadCost);
+        setUser((prev) => ({
+          ...prev,
+          credits: newBal,
+          maalem_details: {
+            ...(prev?.maalem_details || {}),
+            credit_balance: newBal
+          }
+        }));
+      }
+
+      setMaalems((prev) =>
+        prev.map((m) =>
+          String(m.id).trim() === cleanMaalemId
+            ? { ...m, credit_balance: Math.max(0, Number(m.credit_balance || leadCost) - leadCost) }
+            : m
+        )
+      );
+
+      // 2. Mise à jour optimiste du statut intervention
       setInterventions((prev) => {
         const updated = prev.map((item) =>
-          String(item.id).trim() === String(interventionId).trim()
+          String(item.id).trim() === cleanIntId
             ? { ...item, ...acceptedItem }
             : item
         );
@@ -2613,31 +2693,31 @@ export const AppProvider = ({ children }) => {
         return updated;
       });
 
-      // 2. Publication Ably Realtime immédiate (<50ms) :
+      // 3. Publication Ably Realtime immédiate (<50ms) :
       publishRealtimeEvent('job_accepted', {
         intervention_id: interventionId,
-        maalem_id: user?.id,
+        maalem_id: cleanMaalemId,
         maalem_name: user?.full_name,
         maalem_phone: user?.phone,
         accepted_at: nowIso,
         progress_step: 'ON_THE_WAY'
       });
 
-      // - Canal SOS géographique (ferme la modale pour les autres Maâlems du secteur)
+      // - Canaux SOS géographiques
       publishRealtimeEvent('sos:claimed', {
         intervention_id: interventionId,
-        maalem_id: user?.id
+        maalem_id: cleanMaalemId
       }, ABLY_CHANNELS.getSosChannel(cityName, serviceType));
       publishRealtimeEvent('sos:claimed', {
         intervention_id: interventionId,
-        maalem_id: user?.id
+        maalem_id: cleanMaalemId
       }, ABLY_CHANNELS.getSosCityChannel(cityName));
 
-      // - Canal Personnel du Client (notifie le client sur son canal dédié)
+      // - Canal Personnel du Client
       if (targetIntv?.client_id) {
         publishRealtimeEvent('job:accepted', {
           intervention_id: interventionId,
-          maalem_id: user?.id,
+          maalem_id: cleanMaalemId,
           maalem_name: user?.full_name,
           maalem_phone: user?.phone,
           accepted_at: nowIso
@@ -2654,38 +2734,31 @@ export const AppProvider = ({ children }) => {
       // Mémoriser que cet appareil a débloqué ce lead
       try {
         const myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
-        if (!myUnlocked.includes(String(interventionId).trim())) {
-          myUnlocked.push(String(interventionId).trim());
+        if (!myUnlocked.includes(cleanIntId)) {
+          myUnlocked.push(cleanIntId);
           localStorage.setItem('bricolemoi_my_unlocked_leads', JSON.stringify(myUnlocked));
         }
       } catch (e) { }
 
-      // 3. Sync Supabase & Validation Atomique Serveur (RPC Stored Procedure)
+      // 4. Sync Supabase & Validation Atomique Serveur
       if (isSupabaseConfigured) {
         try {
           const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
           const validMaalemUuid = user?.id && isUuid(user.id) ? user.id : '22222222-2222-2222-2222-222222222222';
           const validIntvUuid = isUuid(interventionId) ? interventionId : null;
 
-          // Tentative d'exécution de la procédure stockée atomique sécurisée
           if (validIntvUuid && isUuid(validMaalemUuid)) {
             const { data: rpcRes, error: rpcErr } = await supabase.rpc('unlock_lead_secure', {
               p_maalem_id: validMaalemUuid,
               p_intervention_id: validIntvUuid,
-              p_cost: 15.00
+              p_cost: leadCost
             });
 
             if (rpcErr) {
-              console.warn('[Supabase RPC] unlock_lead_secure warning, bascule sur mise à jour standard:', rpcErr.message);
-              // Fallback standard si la RPC n'a pas encore été injectée dans l'instance SQL
-              const { error } = await supabase.from('interventions').update({
+              await supabase.from('interventions').update({
                 status: 'ACCEPTED',
                 maalem_id: validMaalemUuid
               }).eq('id', interventionId);
-
-              if (error) {
-                await supabase.from('interventions').update({ status: 'ACCEPTED' }).eq('id', interventionId);
-              }
             } else if (rpcRes && rpcRes.success === false) {
               notify.error(
                 'Déblocage Impossible 🚫',
@@ -2695,23 +2768,63 @@ export const AppProvider = ({ children }) => {
               return false;
             }
           } else {
-            // Mode fallback dev / mock
-            const { error } = await supabase.from('interventions').update({
+            await supabase.from('interventions').update({
               status: 'ACCEPTED',
               maalem_id: validMaalemUuid
             }).eq('id', interventionId);
-
-            if (error) {
-              await supabase.from('interventions').update({ status: 'ACCEPTED' }).eq('id', interventionId);
-            }
           }
         } catch (dbErr) {
           console.warn('[Supabase] acceptLead exception:', dbErr.message);
         }
       }
 
-      showToast('🛡️ Mission acceptée ! 15 DH placés en garantie (débités uniquement une fois validé).', 'success');
+      showToast('🟢 Contact débloqué avec succès ! Coordonnées complètes et itinéraire GPS disponibles.', 'success');
       return true;
+    };
+
+    // Maalem déclenche la demande de validation et notation sur place au client
+    const requestOnSiteReview = async (interventionId) => {
+      const cleanId = String(interventionId).trim();
+      const targetIntv = interventions.find((i) => String(i.id).trim() === cleanId);
+
+      setInterventions((prev) => {
+        const updated = prev.map((item) =>
+          String(item.id).trim() === cleanId
+            ? { ...item, status: 'PENDING_COMPLETION', on_site_review_requested: true }
+            : item
+        );
+        try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated)); } catch (e) { }
+        return updated;
+      });
+
+      const payload = {
+        type: 'ON_SITE_REVIEW_REQUESTED',
+        intervention_id: cleanId,
+        client_id: targetIntv?.client_id,
+        maalem_id: user?.id,
+        maalem_name: user?.full_name || 'Votre Artisan Maâlem',
+        _ts: Date.now()
+      };
+
+      try {
+        localStorage.setItem('bricolemoi_sync_payload', JSON.stringify(payload));
+        const bc = new BroadcastChannel('bricolemoi_intertab_sync');
+        bc.postMessage(payload);
+      } catch (e) { }
+
+      if (isSupabaseConfigured) {
+        try {
+          publishRealtimeEvent('on_site_review_requested', payload);
+          if (targetIntv?.client_id) {
+            publishRealtimeEvent('job:review_requested', payload, ABLY_CHANNELS.getUserChannel(targetIntv.client_id));
+          }
+          await supabase.from('interventions').update({ status: 'PENDING_COMPLETION' }).eq('id', cleanId);
+        } catch (e) {
+          console.warn('[Supabase] requestOnSiteReview error:', e.message);
+        }
+      }
+
+      showToast('📱 Demande de notation sur place envoyée au client ! Présentez votre écran.', 'info');
     };
 
     // Maalem met à jour l'étape d'avancement (En route, Sur place, etc.)
@@ -3266,46 +3379,148 @@ export const AppProvider = ({ children }) => {
         showToast('⭐ Évaluation & Confirmation d\'accomplissement enregistrées ! Merci.', 'success');
       }
 
-      if (user?.role === 'MAALEM' && user?.maalem_details) {
-        let streak = user.maalem_details.consecutive_five_stars || 0;
-        let balance = user.maalem_details.credit_balance || 0;
+      // === MOTEUR DE FIDÉLITÉ AUTOMATIQUE : 4 AVIS QUALIFIANTS (≥ 4★) = 1 LEAD SOS GRATUIT (15 DH) ===
+      if (Number(rating) >= 4) {
+        const qualifyingReviews = nextReviews.filter(
+          (r) => String(r.maalem_id || '').trim() === String(targetMaalemId).trim() && Number(r.rating) >= 4
+        );
+        const totalQualifying = qualifyingReviews.length;
 
-        if (rating === 5) {
-          streak += 1;
-          if (streak >= 5) {
-            // Aligné sur le trigger SQL : bonus +100 DH après 5 avis 5⭐ consécutifs
-            balance += 100.00;
-            streak = 0;
-            showToast('🎉 FÉLICITATIONS ! 5 avis 5★ consécutifs : +100 DH (valeur 6-7 leads) crédités ! 🎁', 'success');
+        // Détection de complétion de cycle 4/4 (ex: 4ème, 8ème, 12ème avis...)
+        if (totalQualifying > 0 && totalQualifying % 4 === 0) {
+          const rewardAmount = 15.00;
 
-            setTransactions((prev) => [
-              {
-                id: 'tx-bonus-' + Date.now(),
-                maalem_id: user.id,
-                maalem_name: user.full_name,
-                amount_dh: 100.00,
-                type: 'BONUS',
-                payment_method: 'FIVE_STAR_BONUS',
-                reference_ref: 'BONUS-STREAK-5STAR-100DH',
-                status: 'VALIDATED',
-                created_at: new Date().toISOString()
-              },
-              ...prev
-            ]);
+          // 1. Créditer le solde du Maâlem (+15 DH = 1 lead gratuit)
+          setMaalems((prev) =>
+            prev.map((m) => {
+              if (String(m.id).trim() === String(targetMaalemId).trim()) {
+                return { ...m, credit_balance: Number(m.credit_balance || 0) + rewardAmount };
+              }
+              return m;
+            })
+          );
+
+          if (userRef.current && String(userRef.current.id).trim() === String(targetMaalemId).trim()) {
+            setUser((prev) => {
+              const prevBal = Number(prev?.maalem_details?.credit_balance ?? prev?.credits ?? 0);
+              return {
+                ...prev,
+                credits: prevBal + rewardAmount,
+                maalem_details: {
+                  ...(prev?.maalem_details || {}),
+                  credit_balance: prevBal + rewardAmount
+                }
+              };
+            });
           }
-        } else {
-          streak = 0;
+
+          // 2. Transaction Audit Bonus
+          const bonusTx = {
+            id: 'tx-loyalty-' + Date.now(),
+            maalem_id: targetMaalemId,
+            maalem_name: targetMaalemName,
+            maalem_phone: currentInt?.maalem_phone || '',
+            amount_dh: rewardAmount,
+            type: 'BONUS',
+            payment_method: 'LOYALTY_4_REVIEWS_FREE_LEAD',
+            reference_ref: `BONUS-LOYALTY-4STAR-${Date.now()}`,
+            status: 'VALIDATED',
+            admin_notes: `Prime Fidélité 4/4 avis ≥4★ accordée (1 Lead SOS Gratuit = +15 DH)`,
+            created_at: new Date().toISOString()
+          };
+          setTransactions((prev) => [bonusTx, ...prev]);
+
+          // 3. Enregistrement Audit dans loyaltyRewardsHistory
+          const qualifyingMissions = updatedInterventions
+            .filter((i) => String(i.maalem_id || '').trim() === String(targetMaalemId).trim() && Number(i.rating) >= 4)
+            .slice(0, 4)
+            .map((i) => ({
+              id: i.id,
+              client_name: i.client_name || 'Client',
+              rating: i.rating,
+              district: i.district || 'Casablanca',
+              created_at: i.created_at
+            }));
+
+          const newRewardRecord = {
+            id: 'reward-' + Date.now(),
+            maalem_id: targetMaalemId,
+            maalem_name: targetMaalemName,
+            maalem_phone: currentInt?.maalem_phone || '',
+            reward_type: 'FREE_SOS_LEAD',
+            reward_value_dh: rewardAmount,
+            qualifying_reviews_count: 4,
+            qualifying_missions: qualifyingMissions,
+            created_at: new Date().toISOString(),
+            status: 'GRANTED_AND_CREDITED'
+          };
+
+          setLoyaltyRewardsHistory((prev) => {
+            const next = [newRewardRecord, ...prev];
+            try { localStorage.setItem('bricolemoi_loyalty_rewards_cache', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
+
+          // 4. Notification Admin & Alertes en temps réel
+          const adminNotif = {
+            id: 'notif-loyalty-' + Date.now(),
+            type: 'LOYALTY_REWARD',
+            title: '🎁 Prime Lead Gratuit Débloquée !',
+            message: `L'artisan ${targetMaalemName} a validé 4 avis ≥ 4★ et a reçu 1 Lead SOS 100% Offert (+15 DH).`,
+            maalem_id: targetMaalemId,
+            created_at: new Date().toISOString()
+          };
+          setAdminAlerts((prev) => [adminNotif, ...prev]);
+
+          // 5. Broadcast Multi-Tab & Ably
+          broadcastSync({
+            type: 'LOYALTY_LEAD_REWARDED',
+            reward: newRewardRecord,
+            adminNotif,
+            maalem_id: targetMaalemId,
+            _ts: Date.now()
+          });
+
+          playNotificationSound('success');
+          showToast(`🎉 FÉLICITATIONS ! 4 interventions réussies (≥ 4★) : 1 Lead SOS 100% Gratuit (+15 DH) crédité sur votre solde ! 🎁`, 'success');
         }
-
-        setUser({
-          ...user,
-          maalem_details: {
-            ...user.maalem_details,
-            consecutive_five_stars: streak,
-            credit_balance: balance
-          }
-        });
       }
+    };
+
+    // Octroi manuel d'un Lead Gratuit par l'Administrateur
+    const awardManualFreeLead = async (maalemId, reason = 'Geste commercial Admin') => {
+      const targetMaalem = maalems.find((m) => String(m.id).trim() === String(maalemId).trim());
+      const rewardAmount = 15.00;
+
+      await quickCreditMaalem(maalemId, rewardAmount);
+
+      const newRewardRecord = {
+        id: 'manual-reward-' + Date.now(),
+        maalem_id: maalemId,
+        maalem_name: targetMaalem?.full_name || 'Artisan Maalem',
+        maalem_phone: targetMaalem?.phone || '',
+        reward_type: 'MANUAL_FREE_LEAD',
+        reward_value_dh: rewardAmount,
+        qualifying_reviews_count: 0,
+        admin_notes: reason,
+        created_at: new Date().toISOString(),
+        status: 'GRANTED_BY_ADMIN'
+      };
+
+      setLoyaltyRewardsHistory((prev) => {
+        const next = [newRewardRecord, ...prev];
+        try { localStorage.setItem('bricolemoi_loyalty_rewards_cache', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+
+      broadcastSync({
+        type: 'LOYALTY_LEAD_REWARDED',
+        reward: newRewardRecord,
+        maalem_id: maalemId,
+        _ts: Date.now()
+      });
+
+      showToast(`🎁 1 Lead Gratuit (+15 DH) accordé avec succès à ${targetMaalem?.full_name || 'l\'artisan'} !`, 'success');
     };
 
     // Demande de recharge crédit Maalem avec justificatif de paiement
@@ -4027,7 +4242,11 @@ export const AppProvider = ({ children }) => {
           confirmLeadDebit,
           releaseLeadCredit,
           declareMissionUnfeasible,
-          relaunchEmergencyRequest
+          relaunchEmergencyRequest,
+          loyaltyRewardsHistory,
+          setLoyaltyRewardsHistory,
+          requestOnSiteReview,
+          awardManualFreeLead
         }}
       >
         {children}
