@@ -30,16 +30,8 @@ import {
 import { toast } from 'sonner';
 import { EnhancedCategoryIcon, getSpecialtyLabel } from './EnhancedCategoryIcon';
 import { SpecialtySelect } from './SpecialtySelect';
-import { COUNTRY_DIAL_CODES } from '../constants/geo';
-
-const CITIES = [
-  { name: 'Casablanca', districts: ['Maârif', 'Gauthier', 'Bourgogne', 'Ain Diab', 'Californie', 'Sidi Maârouf', 'Oasis', 'Centre Ville'] },
-  { name: 'Rabat', districts: ['Agdal', 'Hay Riad', 'Hassan', 'Souissi', 'Les Orangers', 'Aviation'] },
-  { name: 'Marrakech', districts: ['Guéliz', 'Hivernage', 'Palmeraie', 'Médina', 'Targa', 'Mhamid'] },
-  { name: 'Fès', districts: ['Ville Nouvelle', 'Narjiss', 'Atlas', 'Route d\'Immouzzer', 'Médina'] },
-  { name: 'Tanger', districts: ['Malabata', 'Centre Ville', 'Iberia', 'Boubana', 'Marchane', 'Achakar'] },
-  { name: 'Agadir', districts: ['Sonaba', 'Haut Founty', 'Talborjt', 'Dakhla', 'Bensergao'] }
-];
+import { COUNTRY_DIAL_CODES, MOROCCAN_CITIES } from '../constants/geo';
+import { reverseGeocodeMorocco } from '../lib/geoService';
 
 import { calculateMaalemBalance } from '../utils/balanceUtils';
 import { calculateMaalemRating } from '../utils/ratingUtils';
@@ -61,10 +53,29 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const countryDropdownRef = useRef(null);
 
-  const [selectedCity, setSelectedCity] = useState(user?.city_zone?.split(' - ')[0] || 'Casablanca');
-  const [selectedDistrict, setSelectedDistrict] = useState(user?.city_zone?.split(' - ')[1] || 'Maârif');
+  const [selectedCity, setSelectedCity] = useState(() => {
+    if (user?.city_zone) return user.city_zone.split(' - ')[0];
+    try {
+      const gps = JSON.parse(localStorage.getItem('bricolemoi_client_gps') || '{}');
+      return gps.city || MOROCCAN_CITIES[0].name;
+    } catch (e) {
+      return MOROCCAN_CITIES[0].name;
+    }
+  });
+
+  const [selectedDistrict, setSelectedDistrict] = useState(() => {
+    if (user?.city_zone && user.city_zone.includes(' - ')) return user.city_zone.split(' - ')[1];
+    try {
+      const gps = JSON.parse(localStorage.getItem('bricolemoi_client_gps') || '{}');
+      return gps.district || 'Centre';
+    } catch (e) {
+      return 'Centre';
+    }
+  });
+
   const [specialty, setSpecialty] = useState(user?.maalem_details?.specialty || 'PLUMBING');
   const [saving, setSaving] = useState(false);
+  const [detectingGps, setDetectingGps] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -126,7 +137,39 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
   const completedCount = myClientInterventions.filter(i => i.status === 'COMPLETED').length;
   const activeCount = myClientInterventions.filter(i => i.status === 'PENDING' || i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.status === 'PENDING_COMPLETION').length;
 
-  const currentCityObj = CITIES.find(c => c.name === selectedCity) || CITIES[0];
+  const currentCityObj = MOROCCAN_CITIES.find(c => c.name === selectedCity) || MOROCCAN_CITIES[0];
+
+  const handleDetectGps = () => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      toast.error('Géolocalisation non supportée par votre appareil.');
+      return;
+    }
+    setDetectingGps(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const geoResult = await reverseGeocodeMorocco(latitude, longitude);
+          if (geoResult?.city) {
+            setSelectedCity(geoResult.city);
+            if (geoResult.district) {
+              setSelectedDistrict(geoResult.district);
+            }
+            toast.success(`📍 Position détectée : ${geoResult.city} (${geoResult.district || 'Centre'})`);
+          }
+        } catch (e) {
+          toast.error('Impossible de déterminer la position GPS.');
+        } finally {
+          setDetectingGps(false);
+        }
+      },
+      () => {
+        setDetectingGps(false);
+        toast.error('Accès GPS refusé ou temporairement indisponible.');
+      },
+      { timeout: 5000, maximumAge: 60000 }
+    );
+  };
 
   const cleanPhoneInput = (input, dial) => {
     let digits = String(input || '').replace(/\D/g, '');
@@ -404,7 +447,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                   <MapPin className="w-4 h-4 text-blue-600" />
                   <span className="text-xs font-bold text-slate-700">Ville &amp; Quartier</span>
                 </div>
-                <span className="text-xs font-bold text-slate-900">{user.city_zone || 'Casablanca - Maarif'}</span>
+                <span className="text-xs font-bold text-slate-900">{user.city_zone || 'Maroc'}</span>
               </div>
 
               {isMaalem && (
@@ -629,31 +672,50 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Ville :</label>
-                  <select
-                    value={selectedCity}
-                    onChange={(e) => {
-                      setSelectedCity(e.target.value);
-                      const city = CITIES.find(c => c.name === e.target.value);
-                      if (city && city.districts[0]) setSelectedDistrict(city.districts[0]);
-                    }}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:border-blue-600 focus:bg-white focus:outline-none cursor-pointer"
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-700">Ville &amp; Quartier :</label>
+                  <button
+                    type="button"
+                    onClick={handleDetectGps}
+                    disabled={detectingGps}
+                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer transition-colors"
                   >
-                    {CITIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                  </select>
+                    <MapPin className={`w-3.5 h-3.5 ${detectingGps ? 'animate-bounce text-blue-600' : 'text-blue-500'}`} />
+                    <span>{detectingGps ? 'Détection GPS...' : '📍 Détecter ma position'}</span>
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Quartier :</label>
-                  <select
-                    value={selectedDistrict}
-                    onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:border-blue-600 focus:bg-white focus:outline-none cursor-pointer"
-                  >
-                    {currentCityObj.districts.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <select
+                      value={selectedCity}
+                      onChange={(e) => {
+                        setSelectedCity(e.target.value);
+                        const city = MOROCCAN_CITIES.find(c => c.name === e.target.value);
+                        if (city && city.districts && city.districts[0]) {
+                          const firstD = typeof city.districts[0] === 'object' ? (city.districts[0].name || 'Centre') : String(city.districts[0]);
+                          setSelectedDistrict(firstD);
+                        }
+                      }}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:border-blue-600 focus:bg-white focus:outline-none cursor-pointer"
+                    >
+                      {MOROCCAN_CITIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <select
+                      value={selectedDistrict}
+                      onChange={(e) => setSelectedDistrict(e.target.value)}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:border-blue-600 focus:bg-white focus:outline-none cursor-pointer"
+                    >
+                      {(currentCityObj.districts || []).map(d => {
+                        const dName = typeof d === 'object' ? (d.name || String(d)) : String(d);
+                        return <option key={dName} value={dName}>{dName}</option>;
+                      })}
+                    </select>
+                  </div>
                 </div>
               </div>
 
