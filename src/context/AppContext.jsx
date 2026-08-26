@@ -48,6 +48,11 @@ export const AppProvider = ({ children }) => {
       return [];
     }
   });
+
+  const interventionsRef = useRef(interventions);
+  useEffect(() => {
+    interventionsRef.current = interventions;
+  }, [interventions]);
   const [maalems, setMaalems] = useState(() => {
     try {
       const cached = localStorage.getItem('bricolemoi_maalems_cache');
@@ -902,13 +907,55 @@ export const AppProvider = ({ children }) => {
       } catch (e) { }
     };
 
-    // Mount initial + auto-refresh au focus de l'onglet
+    // Mount initial + auto-refresh au focus de l'onglet + polling automatique de secours inter-appareils
     useEffect(() => {
       fetchRealSupabaseData();
 
       const onFocus = () => fetchRealSupabaseData();
       window.addEventListener('focus', onFocus);
-      return () => window.removeEventListener('focus', onFocus);
+
+      // Polling haute fréquence (3.5s) pour synchronisation multi-appareils (Desktop Client <-> Mobile Maâlem)
+      const pollInterval = setInterval(() => {
+        const hasActiveMission = (interventionsRef.current || []).some((i) =>
+          ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
+        );
+        if (hasActiveMission || typeof window !== 'undefined' && window.location.pathname.includes('client')) {
+          fetchRealSupabaseData();
+        }
+      }, 3500);
+
+      // Abonnement Supabase Realtime aux changements de la table 'interventions'
+      let supabaseChannel = null;
+      if (isSupabaseConfigured) {
+        try {
+          supabaseChannel = supabase
+            .channel('public:interventions_realtime_sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'interventions' }, (payload) => {
+              if (payload.new) {
+                const item = payload.new;
+                setInterventions((prev) => {
+                  const exists = prev.some((i) => String(i.id).trim() === String(item.id).trim());
+                  const next = exists
+                    ? prev.map((i) => (String(i.id).trim() === String(item.id).trim() ? { ...i, ...item } : i))
+                    : [item, ...prev];
+                  try { localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next)); } catch (e) {}
+                  return next;
+                });
+              }
+            })
+            .subscribe();
+        } catch (e) {
+          console.warn('[Supabase Realtime Sync Warning]:', e);
+        }
+      }
+
+      return () => {
+        window.removeEventListener('focus', onFocus);
+        clearInterval(pollInterval);
+        if (supabaseChannel) {
+          try { supabase.removeChannel(supabaseChannel); } catch (e) {}
+        }
+      };
     }, []);
 
     // Synchronisation automatique des avis insatisfaisants (<= 3 étoiles) vers le tableau de bord Admin Litiges
