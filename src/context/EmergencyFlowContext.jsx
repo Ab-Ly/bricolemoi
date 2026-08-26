@@ -232,7 +232,7 @@ export const EmergencyFlowProvider = ({ children }) => {
             type: ACTIONS.UPDATE_PROGRESS,
             payload: { step: payload.progress_step }
           });
-        } else if (event === 'work:completion_requested') {
+        } else if (event === 'work:completion_requested' || event === 'job:review_requested' || event === 'on_site_review_requested') {
           const currentApp = getAppSubdomain();
           const currentRole = (user?.role || 'CLIENT').toUpperCase();
           if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') return;

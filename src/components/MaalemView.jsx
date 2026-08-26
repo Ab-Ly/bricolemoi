@@ -366,7 +366,7 @@ export const MaalemView = ({ onOpenCINVerification }) => {
   // 2. Chantiers Actifs Débloqués (Missions en cours: En route, Sur place, Attente validation - Trié du plus récent au plus ancien)
   const activeUnlockedLeads = interventions
     .filter((item) => {
-      if (item.status !== 'ACCEPTED' && item.status !== 'PENDING_COMPLETION') return false;
+      if (!['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(item.status)) return false;
       let myUnlocked = [];
       try { myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]'); } catch (e) {}
       const isLocalUnlocked = myUnlocked.includes(String(item.id).trim());
@@ -399,12 +399,20 @@ export const MaalemView = ({ onOpenCINVerification }) => {
   const handleUnlockLead = async (leadId) => {
     const res = await acceptLead(leadId);
     if (res !== false) {
+      try {
+        const myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
+        if (!myUnlocked.includes(String(leadId).trim())) {
+          myUnlocked.push(String(leadId).trim());
+          localStorage.setItem('bricolemoi_my_unlocked_leads', JSON.stringify(myUnlocked));
+        }
+      } catch (e) {}
+
       setTimeout(() => {
         const el = document.getElementById('active-unlocked-missions-section') || document.getElementById(`active-lead-${leadId}`);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 250);
+      }, 150);
     }
   };
 

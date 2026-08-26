@@ -205,30 +205,32 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
   const DUMMY_CLIENT_ID = '11111111-1111-1111-1111-111111111111';
 
   // 1. Étanchéité Stricte : Un client ne voit que ses PROPRES interventions
-  const myClientInterventions = interventions.filter((item) => {
-    let myCreated = [];
-    try {
-      myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
-    } catch (e) {}
+  const myClientInterventions = interventions
+    .filter((item) => {
+      let myCreated = [];
+      try {
+        myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
+      } catch (e) {}
 
-    const isOwnerByLocalCreated = myCreated.includes(String(item.id).trim());
-    if (isOwnerByLocalCreated) return true;
+      const isOwnerByLocalCreated = myCreated.includes(String(item.id).trim());
+      if (isOwnerByLocalCreated) return true;
 
-    if (!user) return false; // Non connecté et non créé sur cet appareil => étanchéité stricte
+      if (!user) return false; // Non connecté et non créé sur cet appareil => étanchéité stricte
 
-    const isOwnerById = user.id && user.id !== DUMMY_CLIENT_ID && item.client_id && item.client_id !== DUMMY_CLIENT_ID && String(item.client_id).trim() === String(user.id).trim();
-    const cp = String(user.phone || '').replace(/\D/g, '');
-    const ip = String(item.client_phone || '').replace(/\D/g, '');
-    const isOwnerByPhone = cp.length >= 8 && ip.length >= 8 && cp === ip && cp !== '0661234567';
+      const isOwnerById = user.id && user.id !== DUMMY_CLIENT_ID && item.client_id && item.client_id !== DUMMY_CLIENT_ID && String(item.client_id).trim() === String(user.id).trim();
+      const cp = String(user.phone || '').replace(/\D/g, '');
+      const ip = String(item.client_phone || '').replace(/\D/g, '');
+      const isOwnerByPhone = cp.length >= 8 && ip.length >= 8 && cp === ip && cp !== '0661234567';
 
-    return isOwnerById || isOwnerByPhone;
-  });
+      return isOwnerById || isOwnerByPhone;
+    })
+    .sort((a, b) => new Date(b.created_at || b.updated_at || 0) - new Date(a.created_at || a.updated_at || 0));
 
   const [clientHistoryPage, setClientHistoryPage] = useState(1);
 
   // Séparation : Demandes actives en cours vs Historique des prestations passées
   const activeClientInterventions = myClientInterventions
-    .filter((item) => item.status === 'PENDING' || item.status === 'ACCEPTED' || item.status === 'PENDING_COMPLETION' || item.status === 'UNFEASIBLE')
+    .filter((item) => ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION', 'UNFEASIBLE'].includes(item.status))
     .sort((a, b) => new Date(b.created_at || b.updated_at || 0) - new Date(a.created_at || a.updated_at || 0));
 
   const completedClientInterventions = myClientInterventions
@@ -245,7 +247,7 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
   // Écouteur automatique : Déclenchement au premier plan dès que le Maâlem demande la fin de chantier
   useEffect(() => {
     const pendingInt = myClientInterventions.find(
-      (i) => i.status === 'PENDING_COMPLETION' && !dismissedCompletionIds.includes(i.id)
+      (i) => (i.status === 'PENDING_COMPLETION' || i.on_site_review_requested) && !dismissedCompletionIds.includes(i.id)
     );
     if (pendingInt && (!pendingCompletionModalInt || pendingCompletionModalInt.id !== pendingInt.id)) {
       setPendingCompletionModalInt(pendingInt);
@@ -584,28 +586,24 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
+    const targetIntv = reviewModalInt || pendingCompletionModalInt || activeOngoingSOS || latestClientIntv;
+    if (!targetIntv) return;
+
     const fullComment = `${comment.trim()}${selectedBadges.length > 0 ? ` [Badges: ${selectedBadges.join(', ')}]` : ''}${tipAmount > 0 ? ` [Pourboire: +${tipAmount} DH]` : ''}`;
 
-    if (reviewModalInt) {
-      await submitReview({
-        intervention_id: reviewModalInt.id,
-        maalem_id: reviewModalInt.maalem_id,
-        rating,
-        comment: fullComment,
-        badges: selectedBadges,
-        tip_dh: tipAmount
-      });
-      setDismissedReviewIds((prev) => [...prev, reviewModalInt.id]);
-      setReviewModalInt(null);
-    }
-
-    await submitClientFeedback({
+    await submitReview({
+      intervention_id: targetIntv.id,
+      maalem_id: targetIntv.maalem_id,
       rating,
       comment: fullComment,
       badges: selectedBadges,
-      tipDh: tipAmount
+      tip_dh: tipAmount
     });
 
+    setDismissedReviewIds((prev) => Array.from(new Set([...prev, targetIntv.id])));
+    setDismissedCompletionIds((prev) => Array.from(new Set([...prev, targetIntv.id])));
+    setReviewModalInt(null);
+    setPendingCompletionModalInt(null);
     setComment('');
     setTipAmount(0);
   };
@@ -613,19 +611,18 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
   // L'intervention la plus récente de l'utilisateur
   const latestClientIntv = myClientInterventions[0] || null;
 
-  // L'intervention active en cours (si la plus récente est ACCEPTED ou PENDING_COMPLETION)
-  const isLatestActiveOngoing = Boolean(
-    latestClientIntv && (latestClientIntv.status === 'ACCEPTED' || latestClientIntv.status === 'PENDING_COMPLETION')
+  // L'intervention active en cours (priorité absolue à toute mission acceptée / en cours / validation)
+  const ongoingFromList = activeClientInterventions.find((i) =>
+    ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
   );
-  const activeOngoingSOS = isLatestActiveOngoing 
-    ? latestClientIntv 
-    : (!latestClientIntv && isMatched && activeEmergency && !isCompleted ? activeEmergency : null);
 
-  // L'intervention en recherche (si la plus récente est PENDING)
-  const isLatestPending = Boolean(!activeOngoingSOS && latestClientIntv && latestClientIntv.status === 'PENDING');
-  const activePendingSOS = isLatestPending
-    ? latestClientIntv
-    : (!activeOngoingSOS && !latestClientIntv && isSearching ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null);
+  const activeOngoingSOS = ongoingFromList || (!latestClientIntv && isMatched && activeEmergency && !isCompleted ? activeEmergency : null);
+
+  // L'intervention en recherche (si une demande est PENDING)
+  const pendingFromList = activeClientInterventions.find((i) => i.status === 'PENDING');
+  const activePendingSOS = !activeOngoingSOS
+    ? (pendingFromList || (!latestClientIntv && isSearching ? (activeEmergency || { id: 'pending-sos', service_type: serviceType, district: `${selectedCity} - ${selectedDistrict}` }) : null))
+    : null;
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
