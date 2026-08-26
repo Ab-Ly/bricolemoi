@@ -33,16 +33,25 @@ export const MOROCCAN_CITIES = [
       { name: 'Gauthier', lat: 33.5820, lng: -7.6290 },
       { name: 'Anfa / Aïn Diab', lat: 33.5910, lng: -7.6600 },
       { name: 'Hay Hassani', lat: 33.5650, lng: -7.6650 },
+      { name: 'Oulfa', lat: 33.5480, lng: -7.6750 },
+      { name: 'Lissasfa', lat: 33.5300, lng: -7.6800 },
       { name: 'Sidi Maarouf', lat: 33.5350, lng: -7.6450 },
-      { name: 'Aïn Sebaâ', lat: 33.6050, lng: -7.5300 },
-      { name: 'Bernoussi', lat: 33.6150, lng: -7.5000 },
+      { name: 'Californie', lat: 33.5420, lng: -7.6180 },
+      { name: 'CIL / Beauséjour', lat: 33.5720, lng: -7.6520 },
       { name: 'Oasis / Polo', lat: 33.5600, lng: -7.6250 },
       { name: 'Centre-Ville', lat: 33.5930, lng: -7.6150 },
       { name: 'Belvédère', lat: 33.5970, lng: -7.5950 },
       { name: '2 Mars', lat: 33.5700, lng: -7.6100 },
       { name: 'Derb Sultan', lat: 33.5650, lng: -7.5900 },
-      { name: 'Californie', lat: 33.5420, lng: -7.6180 },
-      { name: 'CIL / Beauséjour', lat: 33.5720, lng: -7.6520 }
+      { name: 'Sbata', lat: 33.5500, lng: -7.5700 },
+      { name: 'Sidi Othman', lat: 33.5600, lng: -7.5500 },
+      { name: 'Hay Mohammadi', lat: 33.5900, lng: -7.5650 },
+      { name: 'Aïn Sebaâ', lat: 33.6050, lng: -7.5300 },
+      { name: 'Bernoussi', lat: 33.6150, lng: -7.5000 },
+      { name: 'Sidi Moumen', lat: 33.5900, lng: -7.5200 },
+      { name: 'Tit Mellil', lat: 33.5550, lng: -7.4800 },
+      { name: 'Médiouna', lat: 33.4500, lng: -7.5100 },
+      { name: 'Errahma', lat: 33.5150, lng: -7.7650 }
     ]
   },
   {
@@ -225,13 +234,19 @@ export const MOROCCAN_CITIES = [
       { name: 'Ville Nouvelle', lat: 34.0331, lng: -5.0003 },
       { name: 'Médina / Fès El Bali', lat: 34.0600, lng: -4.9750 },
       { name: 'Atlas', lat: 34.0200, lng: -5.0050 },
+      { name: 'Saïss', lat: 33.9850, lng: -4.9750 },
+      { name: 'Oulad Tayeb', lat: 33.9550, lng: -4.9950 },
+      { name: 'Aïn Chkef', lat: 33.9700, lng: -5.0400 },
       { name: 'Narjiss', lat: 34.0050, lng: -4.9900 },
       { name: 'Route d\'Imouzzer', lat: 33.9900, lng: -5.0100 },
+      { name: 'Route de Sefrou', lat: 34.0000, lng: -4.9700 },
       { name: 'Champ de Course', lat: 34.0300, lng: -5.0150 },
       { name: 'Mont Fleuri', lat: 34.0100, lng: -4.9800 },
+      { name: 'Dokkarat', lat: 34.0450, lng: -5.0100 },
+      { name: 'Aïn Kadous', lat: 34.0650, lng: -4.9900 },
       { name: 'Zouagha', lat: 34.0400, lng: -5.0500 },
       { name: 'Bensouda', lat: 34.0250, lng: -5.0700 },
-      { name: 'Saïss', lat: 33.9850, lng: -4.9750 }
+      { name: 'Sidi Harazem', lat: 34.0250, lng: -4.8800 }
     ]
   },
   {
@@ -248,7 +263,9 @@ export const MOROCCAN_CITIES = [
       { name: 'Bassatine', lat: 33.9100, lng: -5.5300 },
       { name: 'Zitoune', lat: 33.8750, lng: -5.5550 },
       { name: 'Marjane', lat: 33.8650, lng: -5.5400 },
-      { name: 'Sidi Bouzekri', lat: 33.8850, lng: -5.5100 }
+      { name: 'Sidi Bouzekri', lat: 33.8850, lng: -5.5100 },
+      { name: 'Toulal', lat: 33.8890, lng: -5.5900 },
+      { name: 'Ouislane', lat: 33.9120, lng: -5.4850 }
     ]
   },
   {

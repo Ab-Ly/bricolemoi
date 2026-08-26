@@ -97,6 +97,17 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           setPhone(user.phone.replace(/^\+/, ''));
         }
       }
+      if (user.city_zone) {
+        const parts = user.city_zone.split(' - ');
+        if (parts[0]) setSelectedCity(parts[0]);
+        if (parts[1]) setSelectedDistrict(parts[1]);
+      } else {
+        try {
+          const gps = JSON.parse(localStorage.getItem('bricolemoi_client_gps') || '{}');
+          if (gps.city) setSelectedCity(gps.city);
+          if (gps.district) setSelectedDistrict(gps.district);
+        } catch (e) {}
+      }
       if (isMissingPhone) {
         setActiveTab('edit');
       }
@@ -778,10 +789,13 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                       onChange={(e) => setSelectedDistrict(e.target.value)}
                       className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:border-blue-600 focus:bg-white focus:outline-none cursor-pointer"
                     >
-                      {(currentCityObj.districts || []).map(d => {
-                        const dName = typeof d === 'object' ? (d.name || String(d)) : String(d);
-                        return <option key={dName} value={dName}>{dName}</option>;
-                      })}
+                      {(() => {
+                        const rawDistricts = (currentCityObj.districts || []).map(d => typeof d === 'object' ? (d.name || String(d)) : String(d));
+                        const allOptions = (selectedDistrict && !rawDistricts.includes(selectedDistrict))
+                          ? [selectedDistrict, ...rawDistricts]
+                          : rawDistricts;
+                        return allOptions.map(dName => <option key={dName} value={dName}>{dName}</option>);
+                      })()}
                     </select>
                   </div>
                 </div>
