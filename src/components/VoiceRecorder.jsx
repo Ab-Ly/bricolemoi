@@ -191,10 +191,13 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
       }, 1000);
 
     } catch (err) {
-      console.error('[VoiceRecorder] Error:', err);
+      console.warn('[VoiceRecorder] Micro info:', err.name);
       const isPermissionDenied = err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+      const isNotFound = err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError';
       const errorMsg = isPermissionDenied
         ? (isAr ? 'يرجى السماح بالوصول إلى الميكروفون في متصفحك' : 'Veuillez autoriser l\'accès au microphone dans les réglages de votre navigateur')
+        : isNotFound
+        ? (isAr ? 'لم يتم العثور على ميكروفون في هذا الجهاز' : 'Aucun microphone détecté sur cet appareil (branchez un micro ou utilisez un smartphone)')
         : (isAr ? 'تعذر تشغيل الميكروفون' : 'Impossible de démarrer l\'enregistrement vocal');
       
       setMicError(errorMsg);

@@ -75,8 +75,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigation HTML (SPA) : NETWORK-FIRST absolu pour toujours charger les derniers hashes JS Vite
-  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+  // Navigation HTML (SPA) : NETWORK-FIRST absolu avec fallback systématique vers index.html
+  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.startsWith('/client') || url.pathname.startsWith('/maalem') || url.pathname.startsWith('/admin')) {
     event.respondWith(
       fetch(request)
         .then((networkResponse) => {
@@ -85,40 +85,48 @@ self.addEventListener('fetch', (event) => {
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(request, responseToCache);
             });
+            return networkResponse;
           }
-          return networkResponse;
+          return caches.match('/index.html').then((cached) => cached || networkResponse);
         })
         .catch(async () => {
-          const cached = await caches.match(request);
+          const cached = await caches.match('/index.html') || await caches.match('/');
           if (cached) return cached;
-          const fallback = (await caches.match('/index.html')) || (await caches.match('/'));
-          if (fallback) return fallback;
-          return new Response('Mode hors-ligne BricoleMoi actif.', {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+          return new Response('<!DOCTYPE html><html><head><meta charset="utf-8"><title>BricoleMoi</title></head><body><div id="root">Chargement BricoleMoi...</div><script>window.location.reload();</script></body></html>', {
+            status: 200,
+            headers: { 'Content-Type': 'text/html; charset=utf-8' }
           });
         })
     );
     return;
   }
 
-  // Assets JS / CSS / Images statiques : Stale-While-Revalidate
+  // Assets JS / CSS / Images statiques : Cache-First / SWR avec fallback de sécurité
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
-      const fetchPromise = fetch(request)
+      if (cachedResponse) {
+        // Mettre à jour le cache en arrière-plan
+        fetch(request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse));
+            }
+          })
+          .catch(() => {});
+        return cachedResponse;
+      }
+
+      return fetch(request)
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache);
-            });
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           }
           return networkResponse;
         })
-        .catch(() => cachedResponse);
-
-      return cachedResponse || fetchPromise;
+        .catch(() => {
+          return new Response('', { status: 408, statusText: 'Request Timeout' });
+        });
     })
   );
 });

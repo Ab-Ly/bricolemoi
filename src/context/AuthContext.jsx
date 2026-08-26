@@ -818,12 +818,31 @@ export const AuthProvider = ({ children }) => {
 
     if (isSupabaseConfigured) {
       try {
-        // 1. Recherche par ID Firebase ou par Email (Account Linking automatique)
-        let { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('id, full_name, phone, role, city_zone, credits, avatar_url')
-          .or(`id.eq.${firebaseUid},email.eq.${email}`)
-          .maybeSingle();
+        // 1. Recherche par ID Firebase (si UUID) ou par Email sécurisé
+        let existingProfile = null;
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(firebaseUid);
+        
+        if (isUuid) {
+          try {
+            const { data } = await supabase
+              .from('profiles')
+              .select('id, full_name, phone, role, city_zone, credits, avatar_url')
+              .eq('id', firebaseUid)
+              .maybeSingle();
+            if (data) existingProfile = data;
+          } catch (e) {}
+        }
+
+        if (!existingProfile && email) {
+          try {
+            const { data } = await supabase
+              .from('profiles')
+              .select('id, full_name, phone, role, city_zone, credits, avatar_url')
+              .eq('email', email)
+              .maybeSingle();
+            if (data) existingProfile = data;
+          } catch (e) {}
+        }
 
         if (existingProfile) {
           const profileHasValidPhone = Boolean(existingProfile.phone && !existingProfile.phone.includes('600') && existingProfile.phone.length >= 8);
@@ -834,29 +853,28 @@ export const AuthProvider = ({ children }) => {
             needsPhone: !profileHasValidPhone
           };
 
-          // Mettre à jour l'avatar et l'email si nécessaire
+          // Mettre à jour l'avatar si nécessaire
           try {
             await supabase.from('profiles').update({
-              email,
               avatar_url: photoURL || existingProfile.avatar_url
             }).eq('id', existingProfile.id);
           } catch (e) {}
         } else {
           // Nouveau profil Google
           const newProfile = {
-            id: firebaseUid,
             full_name: fullName,
             email,
             avatar_url: photoURL,
             phone: hasRealPhone ? firebaseUser.phoneNumber : null,
             role: preferredRole,
-            city_zone: 'Casablanca - Centre-Ville'
+            city_zone: detectedZone || 'Casablanca - Centre-Ville'
           };
+          if (isUuid) {
+            newProfile.id = firebaseUid;
+          }
           try {
             await supabase.from('profiles').upsert([newProfile]);
-          } catch (err) {
-            console.warn('[Google Auth DB Warning]:', err);
-          }
+          } catch (err) {}
         }
       } catch (dbErr) {
         console.warn('[Google Auth DB Link Warning]:', dbErr);

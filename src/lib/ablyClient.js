@@ -125,20 +125,31 @@ export const getAblyClient = (clientId = null) => {
 
     ablyInstance = new Ably.Realtime(clientOptions);
 
-    // Sauvegarde de la clé de récupération lors des transitions d'état
-    ablyInstance.connection.on('connected', (stateChange) => {
-      try {
-        const key = typeof ablyInstance.connection.createRecoveryKey === 'function'
-          ? ablyInstance.connection.createRecoveryKey()
-          : ablyInstance.connection.recoveryKey;
-        if (key) {
-          sessionStorage.setItem('bricolemoi_ably_recovery_key', key);
-        }
-      } catch (e) {}
-    });
+    ablyInstance.connection.on((stateChange) => {
+      if (stateChange.current === 'connected') {
+        try {
+          const key = typeof ablyInstance.connection.createRecoveryKey === 'function'
+            ? ablyInstance.connection.createRecoveryKey()
+            : ablyInstance.connection.recoveryKey;
+          if (key) {
+            sessionStorage.setItem('bricolemoi_ably_recovery_key', key);
+          }
+        } catch (e) {}
+      }
 
-    ablyInstance.connection.on('failed', (stateChange) => {
-      console.error('[Ably] ❌ Connexion échouée:', stateChange.reason);
+      if (stateChange.reason && (stateChange.reason.code === 80018 || stateChange.reason.statusCode === 400)) {
+        console.warn('[Ably] Clé de session expirée, reconnexion propre...');
+        try {
+          sessionStorage.removeItem('bricolemoi_ably_recovery_key');
+        } catch (e) {}
+        setTimeout(() => {
+          if (ablyInstance && ablyInstance.connection.state !== 'connected') {
+            try {
+              ablyInstance.connect();
+            } catch (err) {}
+          }
+        }, 500);
+      }
     });
 
     return ablyInstance;
