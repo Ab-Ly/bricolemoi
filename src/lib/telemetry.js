@@ -226,6 +226,30 @@ class TelemetrySupervisor {
       } catch (error) {
         const duration = Math.round(performance.now() - startTime);
         if (!isInternalTracking) {
+          const isAbort = error?.name === 'AbortError' || String(error?.message || '').toLowerCase().includes('aborted');
+          const isMapTile =
+            url.includes('tile.openstreetmap') ||
+            url.includes('cartocdn.com') ||
+            url.includes('basemaps') ||
+            url.includes('/tiles/') ||
+            (url.endsWith('.png') && url.includes('/osm'));
+
+          // Annulation normale de tuiles cartographiques MapLibre lors du déplacement/zoom
+          if (isAbort && isMapTile) {
+            throw error;
+          }
+
+          if (isAbort) {
+            this.recordEvent({
+              type: 'FETCH_ABORTED',
+              category: 'NETWORK',
+              message: `Requête interrompue/annulée [${method}] ${url}`,
+              severity: 'INFO',
+              metadata: { url, method, duration }
+            });
+            throw error;
+          }
+
           this.recordEvent({
             type: 'FETCH_FAILED',
             category: 'NETWORK',

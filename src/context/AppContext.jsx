@@ -2790,13 +2790,12 @@ export const AppProvider = ({ children }) => {
       // 4. Sync Supabase & Validation Atomique Serveur
       if (isSupabaseConfigured) {
         try {
-          const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-          const validMaalemUuid = user?.id && isUuid(user.id) ? user.id : '22222222-2222-2222-2222-222222222222';
+          const isUserUuid = user?.id && isUuid(user.id);
           const validIntvUuid = isUuid(interventionId) ? interventionId : null;
 
-          if (validIntvUuid && isUuid(validMaalemUuid)) {
+          if (validIntvUuid && isUserUuid) {
             const { data: rpcRes, error: rpcErr } = await supabase.rpc('unlock_lead_secure', {
-              p_maalem_id: validMaalemUuid,
+              p_maalem_id: user.id,
               p_intervention_id: validIntvUuid,
               p_cost: leadCost
             });
@@ -2804,7 +2803,7 @@ export const AppProvider = ({ children }) => {
             if (rpcErr) {
               await supabase.from('interventions').update({
                 status: 'ACCEPTED',
-                maalem_id: validMaalemUuid
+                maalem_id: user.id
               }).eq('id', interventionId);
             } else if (rpcRes && rpcRes.success === false) {
               notify.error(
@@ -2815,10 +2814,9 @@ export const AppProvider = ({ children }) => {
               return false;
             }
           } else {
-            await supabase.from('interventions').update({
-              status: 'ACCEPTED',
-              maalem_id: validMaalemUuid
-            }).eq('id', interventionId);
+            const updatePayload = { status: 'ACCEPTED' };
+            if (isUserUuid) updatePayload.maalem_id = user.id;
+            await supabase.from('interventions').update(updatePayload).eq('id', interventionId);
           }
         } catch (dbErr) {
           console.warn('[Supabase] acceptLead exception:', dbErr.message);
