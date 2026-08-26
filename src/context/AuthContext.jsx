@@ -17,7 +17,7 @@ import {
 import { switchSubdomainInDev } from '../lib/subdomain';
 import { 
   sendInfobipOTP, 
-  verifyInfobipOTP,
+  verifyInfobipOTP, 
   verifyLocalOTP, 
   formatMoroccanPhone, 
   formatInternationalPhone,
@@ -26,6 +26,7 @@ import {
   updateProfilePin,
   hashPin
 } from '../lib/infobipAuthService';
+import { reverseGeocodeMorocco } from '../lib/geoService';
 
 const AuthContext = createContext();
 
@@ -161,6 +162,97 @@ export const AuthProvider = ({ children }) => {
       if (bc) bc.close();
     };
   }, []);
+
+  // ====================================================================
+  // GÉOLOCALISATION 100% AUTONOME EN ARRIÈRE-PLAN (CLIENT & MAÂLEM)
+  // ====================================================================
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) return;
+
+    let isCancelled = false;
+
+    const performSilentGeoSync = async () => {
+      // Vérifier si la position a déjà été détectée récemment (< 15 min)
+      try {
+        const lastGps = JSON.parse(localStorage.getItem('bricolemoi_client_gps') || '{}');
+        if (lastGps.detected_at && Date.now() - lastGps.detected_at < 900000 && lastGps.city) {
+          // Si l'utilisateur est connecté et n'a pas de zone définie, appliquer celle du cache
+          if (user && user.id) {
+            const currentZone = (user.city_zone || '').trim().toLowerCase();
+            const isGeneric = !currentZone || currentZone === 'maroc' || currentZone === 'casablanca' || currentZone === 'casablanca - maarif' || currentZone === 'casablanca - centre-ville';
+            if (isGeneric && lastGps.city) {
+              const cachedZone = lastGps.district ? `${lastGps.city} - ${lastGps.district}` : lastGps.city;
+              const updated = { ...user, city_zone: cachedZone };
+              setUser(updated);
+              sessionStorage.setItem('bricolemoi_session', JSON.stringify(updated));
+              localStorage.setItem('bricolemoi_session', JSON.stringify(updated));
+            }
+          }
+          return;
+        }
+      } catch (e) {}
+
+      // Interrogation silencieuse de la position GPS
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          if (isCancelled) return;
+          try {
+            const { latitude, longitude } = pos.coords;
+            const geoResult = await reverseGeocodeMorocco(latitude, longitude);
+            if (!geoResult || !geoResult.city) return;
+
+            const detectedZone = geoResult.district
+              ? `${geoResult.city} - ${geoResult.district}`
+              : geoResult.city;
+
+            // 1. Mise en cache GPS local
+            localStorage.setItem('bricolemoi_client_gps', JSON.stringify({
+              city: geoResult.city,
+              district: geoResult.district || 'Centre',
+              lat: latitude,
+              lng: longitude,
+              detected_at: Date.now()
+            }));
+
+            // 2. Si un utilisateur est connecté avec zone générique ou manquante, mise à jour instantanée
+            if (user && user.id) {
+              const currentZone = (user.city_zone || '').trim().toLowerCase();
+              const isGeneric = !currentZone || currentZone === 'maroc' || currentZone === 'casablanca' || currentZone === 'casablanca - maarif' || currentZone === 'casablanca - centre-ville';
+
+              if (isGeneric) {
+                const updatedUser = {
+                  ...user,
+                  city_zone: detectedZone
+                };
+                setUser(updatedUser);
+                sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+                localStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+
+                // 3. Mise à jour silencieuse en base Supabase
+                if (isSupabaseConfigured) {
+                  supabase
+                    .from('profiles')
+                    .update({ city_zone: detectedZone })
+                    .eq('id', user.id)
+                    .then(() => {})
+                    .catch(() => {});
+                }
+              }
+            }
+          } catch (e) {}
+        },
+        () => {}, // Pas d'alerte ou de blocage si permission refusée
+        { timeout: 5000, maximumAge: 180000 }
+      );
+    };
+
+    // Déclenchement transparent avec léger délai
+    const timer = setTimeout(performSilentGeoSync, 1000);
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
+  }, [user?.id]);
 
   // Firebase Auth Listener — source de vérité pour la session
   useEffect(() => {
