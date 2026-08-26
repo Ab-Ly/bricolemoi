@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { translations } from '../lib/i18n';
@@ -202,11 +202,24 @@ export const LandingPage = ({ onSelectJourney }) => {
   const netPerJob = avgJobPrice - leadCost;
   const calculatedMonthlyRevenue = dailyJobs * netPerJob * monthlyWorkingDays;
 
+  // Redirection automatique des artisans déjà connectés vers leur Radar
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('bricolemoi_session') || localStorage.getItem('bricolemoi_session');
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u && (u.role === 'MAALEM' || u.role === 'PRO')) {
+          onSelectJourney('MAALEM');
+        }
+      }
+    } catch (e) {}
+  }, []);
+
   const currentService = MOROCCAN_SERVICES.find((s) => s.id === selectedServiceId) || MOROCCAN_SERVICES[0];
   const currentCity = MOROCCAN_CITIES.find((c) => c.name === selectedCityName) || MOROCCAN_CITIES[0];
 
   return (
-    <div className={`space-y-16 pb-16 relative overflow-hidden ${isAr ? 'font-arabic' : 'font-sans'}`}>
+    <div className={`space-y-12 pb-16 relative overflow-hidden ${isAr ? 'font-arabic' : 'font-sans'}`}>
       
       {/* Ambient Decorative Lighting Background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10 overflow-hidden">
@@ -215,8 +228,39 @@ export const LandingPage = ({ onSelectJourney }) => {
         <div className="absolute top-40 left-1/3 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl" />
       </div>
 
+      {/* BANNIÈRE SPÉCIALE DARIJA POUR LES ARTISANS (ACCÈS DIRECT SANS CONFUSION) */}
+      <div className="max-w-4xl mx-auto px-3 pt-2">
+        <button
+          type="button"
+          onClick={() => onSelectJourney('MAALEM')}
+          className="w-full p-3 sm:p-3.5 bg-gradient-to-r from-amber-50 via-amber-100/70 to-orange-50 hover:from-amber-100 hover:to-orange-100 border-2 border-amber-300 rounded-2xl flex items-center justify-between gap-3 text-left transition-all cursor-pointer shadow-xs hover:shadow-md group active:scale-98"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-lg shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
+              👷‍♂️
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm font-black text-slate-900 flex flex-wrap items-center gap-1.5 leading-tight">
+                <span>واش نتا معلّم وبغيتي تخدم ؟</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300">
+                  فضاء الحرفيين
+                </span>
+              </p>
+              <p className="text-[11px] text-amber-900 font-semibold mt-0.5 truncate">
+                استقبل الشانطيات المباشرة في حومتك على التيليفون • +15 درهم مجانية ⚡
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 group-hover:from-amber-600 group-hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-xs flex-shrink-0 transition-all">
+            <span>دخول المعلمين</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </div>
+        </button>
+      </div>
+
       {/* 1. HERO SECTION : Interactive Switcher (Client vs Maâlem) */}
-      <section className="relative pt-6 pb-2 text-center max-w-5xl mx-auto space-y-6">
+      <section className="relative pt-2 pb-2 text-center max-w-5xl mx-auto space-y-6">
         
         {/* Badge Live Status */}
         <motion.div
@@ -288,35 +332,106 @@ export const LandingPage = ({ onSelectJourney }) => {
           </div>
         </motion.div>
 
-        {/* HERO TAB SWITCHER (Client vs Artisan) */}
-        <div className="pt-3 flex justify-center">
-          <div className="p-1.5 bg-slate-200/70 backdrop-blur-md border border-slate-200 rounded-2xl flex items-center gap-1 shadow-inner max-w-md w-full">
-            <button
-              type="button"
-              onClick={() => setActiveTab('CLIENT')}
-              className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                activeTab === 'CLIENT'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              <Zap className="w-4 h-4" />
-              <span>{t.hero_client_tab}</span>
-            </button>
+        {/* TWO PROMINENT ENTRY CARDS (CLIENT vs MAALEM) */}
+        <div className="pt-4 max-w-2xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 px-2">
+          {/* Card 1 : Client */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setActiveTab('CLIENT')}
+            className={`p-4 sm:p-5 rounded-3xl border-2 transition-all cursor-pointer text-left flex flex-col justify-between gap-3 relative ${
+              activeTab === 'CLIENT'
+                ? 'bg-blue-50/95 border-blue-600 ring-4 ring-blue-500/20 shadow-md'
+                : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50/80 shadow-xs'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-xs ${
+                activeTab === 'CLIENT' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'
+              }`}>
+                🚨
+              </div>
+              {activeTab === 'CLIENT' && (
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider">
+                  محدد ✓
+                </span>
+              )}
+            </div>
+
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-slate-900 font-sans leading-tight">
+                {isAr ? 'باغي معلّم في دارك ؟' : 'Besoin d\'un Dépannage ?'}
+              </h3>
+              <p className="text-xs font-bold text-blue-700 mt-0.5">
+                {isAr ? 'طلب بلومبي، تريسيان، قفلجي...' : 'Client : Plombier, Électricien...'}
+              </p>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium leading-normal">
+                {isAr ? 'حرفي مؤهل يوصل لعندك في 15 دقيقة مع ضمان الخدمة' : 'Un artisan vérifié arrive chez vous en ~15 minutes chrono.'}
+              </p>
+            </div>
 
             <button
               type="button"
-              onClick={() => setActiveTab('MAALEM')}
-              className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                activeTab === 'MAALEM'
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/20'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveTab('CLIENT');
+                document.getElementById('bricolemoi-simulator')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className={`w-full py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all ${
+                activeTab === 'CLIENT'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-700'
               }`}
             >
-              <Wrench className="w-4 h-4" />
-              <span>{t.hero_maalem_tab}</span>
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>{isAr ? 'اطلب معلّم دابا ⚡' : 'Voir les Tarifs & Commander'}</span>
             </button>
-          </div>
+          </motion.div>
+
+          {/* Card 2 : Artisan Maâlem */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setActiveTab('MAALEM')}
+            className={`p-4 sm:p-5 rounded-3xl border-2 transition-all cursor-pointer text-left flex flex-col justify-between gap-3 relative ${
+              activeTab === 'MAALEM'
+                ? 'bg-amber-50/95 border-amber-500 ring-4 ring-amber-500/20 shadow-md'
+                : 'bg-white border-slate-200 hover:border-amber-300 hover:bg-slate-50/80 shadow-xs'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-xs ${
+                activeTab === 'MAALEM' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-800'
+              }`}>
+                🛠️
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black">
+                +15 DH هدية 🎁
+              </span>
+            </div>
+
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-slate-900 font-sans leading-tight">
+                {isAr ? 'واش نتا معلّم حريفي ؟' : 'Vous êtes Artisan Maâlem ?'}
+              </h3>
+              <p className="text-xs font-bold text-amber-800 mt-0.5">
+                {isAr ? 'فضاء الحرفيين وأصحاب الصنعة' : 'Espace Pro : Recevez des Chantiers'}
+              </p>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium leading-normal">
+                {isAr ? 'استقبل مكالمات وشانطيات مباشرة في حومتك بدون وسيط' : 'Recevez des demandes réelles directement par WhatsApp et appel.'}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectJourney('MAALEM');
+              }}
+              className="w-full py-2.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-xs cursor-pointer active:scale-95"
+            >
+              <Wrench className="w-3.5 h-3.5" />
+              <span>{isAr ? 'دخول فضاء الشانطيات 👷‍♂️' : 'Ouvrir mon Espace Maâlem'}</span>
+            </button>
+          </motion.div>
         </div>
       </section>
 
