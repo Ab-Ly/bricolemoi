@@ -13,6 +13,8 @@ import { useApp } from './context/AppContext';
 import { useAblyNotifications } from './hooks/useAblyNotifications';
 import { EmergencySOSModal } from './components/EmergencySOSModal';
 import { getAppSubdomain, switchSubdomainInDev, APP_SUBDOMAINS } from './lib/subdomain';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { DiagnosticsWidget } from './components/admin/DiagnosticsWidget';
 
 // Code Splitting & Lazy-loaded Sub-Apps
 const ClientApp = lazy(() => import('./layouts/ClientApp'));
@@ -138,130 +140,139 @@ const MainApp = () => {
   // Render 100% Dedicated Subdomain Layouts without Dev Toolbar
   if (activeSubdomain === APP_SUBDOMAINS.CLIENT) {
     return (
-      <Suspense fallback={<AppLoadingFallback />}>
-        <Toaster 
-          position="top-center" 
-          theme="light" 
-          offset="16px" 
-          gap={10} 
-          visibleToasts={3} 
-          expand={false} 
-          closeButton
-          toastOptions={{
-            style: {
-              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-              borderRadius: '1.25rem',
-              padding: '0.85rem 1.15rem',
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              color: '#0f172a',
-              boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
-            }
-          }}
-        />
-        <ClientApp initialCategory={navParams.category} initialCity={navParams.city} initialDistrict={navParams.district} />
-        <AuthModal />
-        <AdminAuthModal />
-        <UserProfileModal 
-          isOpen={profileModalOpen} 
-          onClose={() => setProfileModalOpen(false)} 
-          onLoggedOut={() => switchSubdomainInDev('LANDING')}
-        />
-        <EmergencySOSModal 
-          alert={activeSosAlert} 
-          onAccept={async (id) => {
-            await acceptLead(id);
-            dismissSosAlert();
-          }} 
-          onDismiss={dismissSosAlert} 
-        />
-      </Suspense>
+      <ErrorBoundary name="ClientAppRoot">
+        <Suspense fallback={<AppLoadingFallback />}>
+          <Toaster 
+            position="top-center" 
+            theme="light" 
+            offset="16px" 
+            gap={10} 
+            visibleToasts={3} 
+            expand={false} 
+            closeButton
+            toastOptions={{
+              style: {
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                borderRadius: '1.25rem',
+                padding: '0.85rem 1.15rem',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                color: '#0f172a',
+                boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
+              }
+            }}
+          />
+          <ClientApp initialCategory={navParams.category} initialCity={navParams.city} initialDistrict={navParams.district} />
+          <AuthModal />
+          <AdminAuthModal />
+          <UserProfileModal 
+            isOpen={profileModalOpen} 
+            onClose={() => setProfileModalOpen(false)} 
+            onLoggedOut={() => switchSubdomainInDev('LANDING')}
+          />
+          <EmergencySOSModal 
+            alert={activeSosAlert} 
+            onAccept={async (id) => {
+              await acceptLead(id);
+              dismissSosAlert();
+            }} 
+            onDismiss={dismissSosAlert} 
+          />
+          <DiagnosticsWidget />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
   if (activeSubdomain === APP_SUBDOMAINS.MAALEM) {
     return (
-      <Suspense fallback={<AppLoadingFallback />}>
-        <Toaster 
-          position="top-center" 
-          theme="light" 
-          offset="16px" 
-          gap={10} 
-          visibleToasts={3} 
-          expand={false} 
-          closeButton
-          toastOptions={{
-            style: {
-              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-              borderRadius: '1.25rem',
-              padding: '0.85rem 1.15rem',
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              color: '#0f172a',
-              boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
-            }
-          }}
-        />
-        <MaalemApp />
-        <AuthModal />
-        <AdminAuthModal />
-        <UserProfileModal 
-          isOpen={profileModalOpen} 
-          onClose={() => setProfileModalOpen(false)} 
-          onLoggedOut={() => switchSubdomainInDev('LANDING')}
-        />
-        <EmergencySOSModal 
-          alert={activeSosAlert} 
-          onAccept={async (id) => {
-            await acceptLead(id);
-            dismissSosAlert();
-          }} 
-          onDismiss={dismissSosAlert} 
-        />
-      </Suspense>
+      <ErrorBoundary name="MaalemAppRoot">
+        <Suspense fallback={<AppLoadingFallback />}>
+          <Toaster 
+            position="top-center" 
+            theme="light" 
+            offset="16px" 
+            gap={10} 
+            visibleToasts={3} 
+            expand={false} 
+            closeButton
+            toastOptions={{
+              style: {
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                borderRadius: '1.25rem',
+                padding: '0.85rem 1.15rem',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                color: '#0f172a',
+                boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
+              }
+            }}
+          />
+          <MaalemApp />
+          <AuthModal />
+          <AdminAuthModal />
+          <UserProfileModal 
+            isOpen={profileModalOpen} 
+            onClose={() => setProfileModalOpen(false)} 
+            onLoggedOut={() => switchSubdomainInDev('LANDING')}
+          />
+          <EmergencySOSModal 
+            alert={activeSosAlert} 
+            onAccept={async (id) => {
+              await acceptLead(id);
+              dismissSosAlert();
+            }} 
+            onDismiss={dismissSosAlert} 
+          />
+          <DiagnosticsWidget />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
   if (activeSubdomain === APP_SUBDOMAINS.ADMIN) {
     return (
-      <Suspense fallback={<AppLoadingFallback />}>
-        <Toaster 
-          position="top-center" 
-          theme="light" 
-          offset="16px" 
-          gap={10} 
-          visibleToasts={3} 
-          expand={false} 
-          closeButton
-          toastOptions={{
-            style: {
-              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-              borderRadius: '1.25rem',
-              padding: '0.85rem 1.15rem',
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              color: '#0f172a',
-              boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
-            }
-          }}
-        />
-        <AdminApp />
-        <AuthModal />
-        <AdminAuthModal />
-        <UserProfileModal 
-          isOpen={profileModalOpen} 
-          onClose={() => setProfileModalOpen(false)} 
-          onLoggedOut={() => switchSubdomainInDev('LANDING')}
-        />
-        <EmergencySOSModal 
-          alert={activeSosAlert} 
-          onAccept={async (id) => {
-            await acceptLead(id);
-            dismissSosAlert();
-          }} 
-          onDismiss={dismissSosAlert} 
-        />
-      </Suspense>
+      <ErrorBoundary name="AdminAppRoot">
+        <Suspense fallback={<AppLoadingFallback />}>
+          <Toaster 
+            position="top-center" 
+            theme="light" 
+            offset="16px" 
+            gap={10} 
+            visibleToasts={3} 
+            expand={false} 
+            closeButton
+            toastOptions={{
+              style: {
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                borderRadius: '1.25rem',
+                padding: '0.85rem 1.15rem',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                color: '#0f172a',
+                boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04)'
+              }
+            }}
+          />
+          <AdminApp />
+          <AuthModal />
+          <AdminAuthModal />
+          <UserProfileModal 
+            isOpen={profileModalOpen} 
+            onClose={() => setProfileModalOpen(false)} 
+            onLoggedOut={() => switchSubdomainInDev('LANDING')}
+          />
+          <EmergencySOSModal 
+            alert={activeSosAlert} 
+            onAccept={async (id) => {
+              await acceptLead(id);
+              dismissSosAlert();
+            }} 
+            onDismiss={dismissSosAlert} 
+          />
+          <DiagnosticsWidget />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
@@ -325,6 +336,9 @@ const MainApp = () => {
         }} 
       />
 
+      {/* Contrôleur d'Événements & Superviseur de Bugs */}
+      <DiagnosticsWidget />
+
       <footer className="hidden md:block border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 mt-16">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -342,12 +356,14 @@ const MainApp = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppProvider>
-        <EmergencyFlowProvider>
-          <MainApp />
-        </EmergencyFlowProvider>
-      </AppProvider>
-    </AuthProvider>
+    <ErrorBoundary name="RootApplication">
+      <AuthProvider>
+        <AppProvider>
+          <EmergencyFlowProvider>
+            <MainApp />
+          </EmergencyFlowProvider>
+        </AppProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
