@@ -255,12 +255,17 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
   useEffect(() => {
     const pendingInt = myClientInterventions.find(
-      (i) => (i.status === 'PENDING_COMPLETION' || i.on_site_review_requested) && !dismissedCompletionIds.includes(i.id)
+      (i) => (i.status === 'PENDING_COMPLETION' || i.on_site_review_requested) && 
+             i.status !== 'COMPLETED' && 
+             i.status !== 'CANCELLED' && 
+             !dismissedCompletionIds.includes(i.id)
     );
     if (pendingInt && (!pendingCompletionModalInt || pendingCompletionModalInt.id !== pendingInt.id)) {
       setPendingCompletionModalInt(pendingInt);
+    } else if (!pendingInt && pendingCompletionModalInt) {
+      setPendingCompletionModalInt(null);
     }
-  }, [myClientInterventions, dismissedCompletionIds]);
+  }, [myClientInterventions, dismissedCompletionIds, pendingCompletionModalInt]);
 
   const compressImage = (file) => {
     return new Promise((resolve) => {

@@ -502,6 +502,16 @@ export const useAblySupabaseSync = ({
         }).filter(Boolean);
 
         setInterventions(enrichedInterventions);
+        try {
+          localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(enrichedInterventions));
+          
+          // Purger les chantiers clôturés des leads débloqués locaux
+          const activeUnlocked = myUnlocked.filter(id => {
+            const match = enrichedInterventions.find(i => String(i.id).trim() === id);
+            return match && match.status !== 'COMPLETED' && match.status !== 'CANCELLED';
+          });
+          localStorage.setItem('bricolemoi_my_unlocked_leads', JSON.stringify(activeUnlocked));
+        } catch (e) {}
       }
     } catch (e) {}
 
