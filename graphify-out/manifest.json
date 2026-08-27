@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1787864129.6904743,
-    "seen": 1787865045.896471,
-    "ast_hash": "3fcf8787ff758de7b0528d266a611a1a",
+    "mtime": 1787865413.4197757,
+    "seen": 1787865758.374739,
+    "ast_hash": "edeb8405404b1b7f31d5bd05b9e55c39",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "src/App.jsx": {
-    "mtime": 1787861456.67394,
-    "seen": 1787863242.615753,
-    "ast_hash": "916ff26dced41e2948007d82b4c7c238",
+    "mtime": 1787865386.62131,
+    "seen": 1787865758.3874712,
+    "ast_hash": "5749b9391476baafa5867f073e28bffb",
     "semantic_hash": ""
   },
   "src/components/AdminAuthModal.jsx": {
@@ -384,9 +384,9 @@
     "semantic_hash": ""
   },
   "src/lib/ablyClient.js": {
-    "mtime": 1787749408.4634862,
-    "seen": 1787856220.055583,
-    "ast_hash": "c5a6b3c5f9bf282ea0f6b369570c9400",
+    "mtime": 1787865353.5872674,
+    "seen": 1787865758.4231942,
+    "ast_hash": "4bc2c23a5542f57e5526cc37eaffc9de",
     "semantic_hash": ""
   },
   "src/lib/ablyRealtimeService.js": {
@@ -912,9 +912,9 @@
     "semantic_hash": ""
   },
   "src/components/common/ErrorBoundary.jsx": {
-    "mtime": 1787861467.9034708,
-    "seen": 1787863242.62253,
-    "ast_hash": "3cb5b7ac9bf53f9ea6b7ed20b4b5a8d7",
+    "mtime": 1787865395.6461742,
+    "seen": 1787865758.4094841,
+    "ast_hash": "c7f4b80095bd1152629a33954d7a567c",
     "semantic_hash": ""
   },
   "src/components/maalem/MaalemView.jsx": {
@@ -1077,6 +1077,18 @@
     "mtime": 1787864212.648857,
     "seen": 1787865045.89957,
     "ast_hash": "2c4f9a7cec7941f856ed9132c22319e9",
+    "semantic_hash": ""
+  },
+  "scripts/logs.js": {
+    "mtime": 1787865404.7043161,
+    "seen": 1787865758.386553,
+    "ast_hash": "fc24ca0814c8d396410a76ac98588942",
+    "semantic_hash": ""
+  },
+  "src/lib/remoteLogger.js": {
+    "mtime": 1787865465.2418017,
+    "seen": 1787865758.425857,
+    "ast_hash": "3b6e8aaec834c6487d57f2bb43898931",
     "semantic_hash": ""
   }
 }
