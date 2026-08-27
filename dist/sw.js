@@ -101,11 +101,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Assets JS / CSS / Images statiques : Cache-First / SWR avec fallback de sécurité
+  // Assets JS / CSS / Chunks Vite : Network-First systématique (toujours la dernière version si en ligne)
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.includes('/assets/')) {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Autres fichiers statiques : Images / Icônes (Cache-First avec SWR)
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Mettre à jour le cache en arrière-plan
         fetch(request)
           .then((networkResponse) => {
             if (networkResponse && networkResponse.status === 200) {
@@ -124,11 +139,16 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => {
-          return new Response('', { status: 408, statusText: 'Request Timeout' });
-        });
+        .catch(() => caches.match(request));
     })
   );
+});
+
+// 3.5 Écouteur de message pour forcer l'activation immédiate sans attendre
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // 4. 🔔 Web Push Notifications d'Urgence SOS (Réveil sonore & haptique)
