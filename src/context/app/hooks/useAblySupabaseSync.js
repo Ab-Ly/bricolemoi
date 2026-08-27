@@ -318,6 +318,10 @@ export const useAblySupabaseSync = ({
 
       const isThisSelf = user && String(user.id).trim() === String(m.id).trim();
       const storageEntry = onlineMapFromStorage[m.id];
+      const isOnline = isThisSelf
+        ? Boolean(isMaalemOnline)
+        : (details.is_online !== undefined ? Boolean(details.is_online) : Boolean(storageEntry));
+
       const directDbCredit = details.credit_balance !== undefined && details.credit_balance !== null
         ? Number(details.credit_balance)
         : (m.credits !== undefined && m.credits !== null ? Number(m.credits) : 15.0);
@@ -347,8 +351,8 @@ export const useAblySupabaseSync = ({
         cin_verified: details.is_verified ?? true,
         status: details.status || m.status || 'active',
         portfolio_urls: details.portfolio_urls || m.portfolio_urls || [],
-        is_online: onlineStatus,
-        is_available: onlineStatus,
+        is_online: isOnline,
+        is_available: isOnline,
         lat: mLat,
         lng: mLng,
         credit_balance: directDbCredit,
