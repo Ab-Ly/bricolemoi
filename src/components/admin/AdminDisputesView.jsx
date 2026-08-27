@@ -32,7 +32,58 @@ export const AdminDisputesView = ({
   const [rejectReasonModalAlert, setRejectReasonModalAlert] = useState(null);
   const [rejectReasonText, setRejectReasonText] = useState('Délai anti-abus dépassé (> 30 min)');
 
-  const filteredAlerts = adminAlerts.filter((a) => {
+  const allDisputes = React.useMemo(() => {
+    const map = new Map();
+
+    (adminAlerts || []).forEach((a) => {
+      if (a && (a.intervention_id || a.id)) {
+        map.set(String(a.intervention_id || a.id), a);
+      }
+    });
+
+    (interventions || []).forEach((intv) => {
+      if (!intv) return;
+      const intId = String(intv.id);
+      if (map.has(intId)) return;
+
+      const hasLowRating = intv.rating && Number(intv.rating) <= 2;
+      const hasUnreachable = Boolean(intv.unreachable_reason);
+      const hasUnfeasible = Boolean(intv.unfeasible_reason);
+
+      if (hasLowRating || hasUnreachable || hasUnfeasible) {
+        const maalem = (maalems || []).find((m) => String(m.id).trim() === String(intv.maalem_id).trim());
+        map.set(intId, {
+          id: `dispute-${intId}`,
+          intervention_id: intId,
+          service_type: intv.service_type,
+          subcategory: intv.subcategory,
+          maalem_id: intv.maalem_id,
+          maalem_name: intv.maalem_name || maalem?.full_name || 'Artisan Maâlem',
+          maalem_phone: intv.maalem_phone || maalem?.phone || '',
+          client_id: intv.client_id,
+          client_name: intv.client_name || 'Client BricoleMoi',
+          client_phone: intv.client_phone || '',
+          district: intv.district || 'Casablanca',
+          rating: intv.rating ? Number(intv.rating) : null,
+          comment: intv.comment || '',
+          badges: Array.isArray(intv.badges) ? intv.badges : [],
+          reason_label: hasUnreachable
+            ? `Client Injoignable : ${intv.unreachable_reason}`
+            : (hasUnfeasible
+              ? `Chantier Infaisable : ${intv.unfeasible_reason}`
+              : `Alerte Qualité Client (${intv.rating}⭐)`),
+          status: intv.status === 'UNREACHABLE_REFUNDED' ? 'REFUNDED_RESOLVED' : 'PENDING',
+          created_at: intv.completed_at || intv.updated_at || intv.created_at || new Date().toISOString()
+        });
+      }
+    });
+
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    );
+  }, [adminAlerts, interventions, maalems]);
+
+  const filteredAlerts = allDisputes.filter((a) => {
     if (filter === 'PENDING') return a.status !== 'REFUNDED_RESOLVED' && a.status !== 'REJECTED';
     if (filter === 'RESOLVED') return a.status === 'REFUNDED_RESOLVED' || a.status === 'REJECTED';
     return true;

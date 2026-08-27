@@ -108,12 +108,12 @@ export const MaalemRadarHeader = ({
                 <span className="whitespace-nowrap font-medium">
                   {(ratingInfo.totalReviews ?? ratingInfo.reviewsCount ?? 0)} avis {(ratingInfo.totalReviews ?? ratingInfo.reviewsCount ?? 0) <= 1 ? 'client' : 'clients'}
                 </span>
-                {ratingInfo.consecutiveFiveStars > 0 && (
+                {ratingInfo.loyalty?.qualifyingCount > 0 && (
                   <>
                     <span>•</span>
                     <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 inline-flex items-center gap-1 whitespace-nowrap text-[11px]">
                       <Award className="w-3 h-3 text-blue-600 shrink-0" />
-                      <span>{((ratingInfo.consecutiveFiveStars - 1) % 4) + 1}/4 pour 1 Lead SOS Offert</span>
+                      <span>{ratingInfo.loyalty.currentCycleProgress}/4 pour 1 Lead SOS Offert</span>
                     </span>
                   </>
                 )}
@@ -132,11 +132,6 @@ export const MaalemRadarHeader = ({
               <span className="text-lg font-black font-mono text-slate-900 whitespace-nowrap">
                 {liveAvailableBalance.toFixed(2)} DH
               </span>
-              {totalReservedEscrow > 0 && (
-                <span className="text-[10px] text-amber-800 font-bold font-mono bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 whitespace-nowrap">
-                  ({totalReservedEscrow} DH réservé)
-                </span>
-              )}
             </div>
           </div>
 

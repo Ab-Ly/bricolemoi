@@ -93,9 +93,13 @@ export const AdminDashboard = () => {
 
   const onlineMaalemsCount = maalems.filter((m) => m.is_online).length;
   const activeClientsCount = clients.filter((c) => !c.is_suspended).length;
-  const pendingDisputesCount = adminAlerts.filter(
-    (a) => a.status !== 'REFUNDED_RESOLVED' && a.status !== 'REJECTED'
-  ).length;
+  const lowRatingIntvsCount = interventions.filter(
+    (i) => (i.rating && Number(i.rating) <= 2) || i.unreachable_reason || i.unfeasible_reason
+  ).filter((i) => i.status !== 'UNREACHABLE_REFUNDED').length;
+  const pendingDisputesCount = Math.max(
+    adminAlerts.filter((a) => a.status !== 'REFUNDED_RESOLVED' && a.status !== 'REJECTED').length,
+    lowRatingIntvsCount
+  );
   const pendingRechargesCount = transactions.filter((t) => t.status === 'PENDING').length;
 
   return (

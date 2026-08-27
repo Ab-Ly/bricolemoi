@@ -24,15 +24,13 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
     myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
   } catch (e) {}
 
-  // 1. Filtrage précis des avis pour cet artisan
+  // 1. Filtrage précis et strict des avis pour cet artisan
   const matchedReviews = (reviews || []).filter((r) => {
     if (!r) return false;
     const matchId = mId && String(r.maalem_id || '').trim() === mId;
     const matchPhone = mPhone && mPhone.length > 7 && String(r.maalem_phone || '').replace(/\D/g, '') === mPhone;
     const isUnlocked = r.intervention_id && myUnlocked.includes(String(r.intervention_id).trim());
-    const isFallback = (!mId || mId === 'maalem-1' || mId === '22222222-2222-2222-2222-222222222222' || !r.maalem_id) && 
-      (maalemOrUser.role?.toUpperCase() === 'MAALEM' || maalemOrUser.specialty);
-    return matchId || matchPhone || isUnlocked || isFallback;
+    return matchId || matchPhone || isUnlocked;
   });
 
   // 2. Fusion avec les interventions complétées (Chantiers Clôturés & Évalués)
@@ -44,8 +42,7 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
       const matchIntId = mId && String(i.maalem_id || '').trim() === mId;
       const matchIntPhone = mPhone && mPhone.length > 7 && String(i.maalem_phone || '').replace(/\D/g, '') === mPhone;
       const isLocalUnlocked = myUnlocked.includes(String(i.id).trim());
-      const isFallback = (!mId || mId === 'maalem-1' || mId === '22222222-2222-2222-2222-222222222222') && (maalemOrUser.role?.toUpperCase() === 'MAALEM');
-      const isCandidate = matchIntId || matchIntPhone || isLocalUnlocked || isFallback;
+      const isCandidate = matchIntId || matchIntPhone || isLocalUnlocked;
       return isCandidate && !reviewedInterventionIds.has(String(i.id).trim());
     })
     .map((i) => {
