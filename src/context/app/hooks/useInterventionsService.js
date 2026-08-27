@@ -555,20 +555,30 @@ export const useInterventionsService = ({
     publishRealtimeEvent('job_accepted', {
       intervention_id: interventionId,
       maalem_id: cleanMaalemId,
-      maalem_name: user?.full_name,
-      maalem_phone: user?.phone,
+      maalem_name: actualMaalemName,
+      maalem_phone: actualMaalemPhone,
       accepted_at: nowIso,
       progress_step: 'ON_THE_WAY'
-    });
+    }, ABLY_CHANNELS.JOBS_STREAM);
 
     publishRealtimeEvent(
       'sos:claimed',
-      { intervention_id: interventionId, maalem_id: cleanMaalemId },
+      { 
+        intervention_id: interventionId, 
+        maalem_id: cleanMaalemId,
+        maalem_name: actualMaalemName,
+        maalem_phone: actualMaalemPhone
+      },
       ABLY_CHANNELS.getSosChannel(cityName, serviceType)
     );
     publishRealtimeEvent(
       'sos:claimed',
-      { intervention_id: interventionId, maalem_id: cleanMaalemId },
+      { 
+        intervention_id: interventionId, 
+        maalem_id: cleanMaalemId,
+        maalem_name: actualMaalemName,
+        maalem_phone: actualMaalemPhone
+      },
       ABLY_CHANNELS.getSosCityChannel(cityName)
     );
 
@@ -578,8 +588,8 @@ export const useInterventionsService = ({
         {
           intervention_id: interventionId,
           maalem_id: cleanMaalemId,
-          maalem_name: user?.full_name,
-          maalem_phone: user?.phone,
+          maalem_name: actualMaalemName,
+          maalem_phone: actualMaalemPhone,
           accepted_at: nowIso
         },
         ABLY_CHANNELS.getUserChannel(targetIntv.client_id)
@@ -706,12 +716,28 @@ export const useInterventionsService = ({
         );
         publishRealtimeEvent('job_progress_updated', {
           intervention_id: interventionId,
-          progress_step: progressStep
-        });
+          progress_step: progressStep,
+          maalem_id: targetIntv?.maalem_id || user?.id,
+          maalem_name: targetIntv?.maalem_name || user?.full_name,
+          maalem_phone: targetIntv?.maalem_phone || user?.phone
+        }, ABLY_CHANNELS.JOBS_STREAM);
+        publishRealtimeEvent('job:progress', {
+          intervention_id: interventionId,
+          progress_step: progressStep,
+          maalem_id: targetIntv?.maalem_id || user?.id,
+          maalem_name: targetIntv?.maalem_name || user?.full_name,
+          maalem_phone: targetIntv?.maalem_phone || user?.phone
+        }, ABLY_CHANNELS.JOBS_STREAM);
         if (targetIntv?.client_id) {
           publishRealtimeEvent(
             'job:progress',
-            { intervention_id: interventionId, progress_step: progressStep },
+            { 
+              intervention_id: interventionId, 
+              progress_step: progressStep,
+              maalem_id: targetIntv?.maalem_id || user?.id,
+              maalem_name: targetIntv?.maalem_name || user?.full_name,
+              maalem_phone: targetIntv?.maalem_phone || user?.phone
+            },
             ABLY_CHANNELS.getUserChannel(targetIntv.client_id)
           );
         }
