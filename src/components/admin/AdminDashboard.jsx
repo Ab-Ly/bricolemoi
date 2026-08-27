@@ -92,6 +92,7 @@ export const AdminDashboard = () => {
   const completedSOSCount = interventions.filter((i) => i.status === 'COMPLETED').length;
 
   const onlineMaalemsCount = maalems.filter((m) => m.is_online).length;
+  const activeClientsCount = (clients || []).filter((c) => !c.is_suspended).length;
   const resolvedDisputesMap = React.useMemo(() => {
     try {
       return JSON.parse(localStorage.getItem('bricolemoi_resolved_disputes') || '{}');
