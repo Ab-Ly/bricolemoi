@@ -11,7 +11,10 @@
     "listen": "node scripts/listen.js",
     "audit": "node scripts/audit.js",
     "reconcile": "node scripts/reconcile.js",
-    "simulate": "node scripts/simulate.js"
+    "simulate": "node scripts/simulate.js",
+    "deploy": "npx vercel",
+    "deploy:prod": "npx vercel --prod",
+    "deploy:logs": "npx vercel logs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1116.0",
