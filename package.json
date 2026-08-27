@@ -14,7 +14,8 @@
     "simulate": "node scripts/simulate.js",
     "deploy": "npx vercel",
     "deploy:prod": "npx vercel --prod",
-    "deploy:logs": "npx vercel logs"
+    "deploy:logs": "npx vercel logs",
+    "deploy:status": "node scripts/watch-deploy.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1116.0",
