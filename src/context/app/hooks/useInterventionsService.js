@@ -45,13 +45,8 @@ export const useInterventionsService = ({
 
     const finalPhoto = description_photo || null;
 
-    const validUuidPattern =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const generatedId = generateUuid();
-    const validClientId =
-      user?.id && validUuidPattern.test(user.id)
-        ? user.id
-        : '11111111-1111-1111-1111-111111111111';
+    const validClientId = user?.id && isUuid(user.id) ? user.id : null;
 
     const dbPayload = {
       id: generatedId,
