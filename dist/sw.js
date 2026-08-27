@@ -11,36 +11,22 @@ const PRECACHE_ASSETS = [
   '/favicon.svg'
 ];
 
-// 1. Installation & Pre-caching
+// 1. Installation
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS).catch((err) => {
-        console.warn('[SW] Pre-cache non-fatal warning:', err);
-      });
-    })
-  );
   self.skipWaiting();
 });
 
-// 2. Activation & Clean Old Caches
+// 2. Activation & Purge All Old Caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log('[SW] Purging old cache:', key);
-            return caches.delete(key);
-          }
-        })
-      );
+      return Promise.all(keys.map((key) => caches.delete(key)));
     })
   );
   self.clients.claim();
 });
 
-// 3. Fetch Strategy: Network-First for HTML/Navigation, Cache-First for Fonts, SWR for Assets
+// 3. Fetch Strategy: Direct Network for code & data, minimal caching for static fonts/icons
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
@@ -48,100 +34,36 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // Ignorer les requêtes vers les backends API temps-réel (Supabase, Ably, Infobip, Google)
+  // Ignorer les requêtes d'API temps réel
   if (
     url.hostname.includes('supabase.co') ||
     url.hostname.includes('ably.io') ||
     url.hostname.includes('infobip.com') ||
-    url.hostname.includes('googleapis.com')
+    url.hostname.includes('googleapis.com') ||
+    url.hostname.includes('localhost') ||
+    url.hostname.includes('127.0.0.1')
   ) {
     return;
   }
 
-  // Polices Google Fonts : Cache-First
+  // Ne pas intercepter le code JS, CSS ou la navigation HTML : toujours réseau direct frais
+  if (
+    request.mode === 'navigate' ||
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.includes('/assets/')
+  ) {
+    return;
+  }
+
+  // Polices Google Fonts uniquement : Cache-First
   if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          if (response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        });
-      })
+      caches.match(request).then((cached) => cached || fetch(request))
     );
     return;
   }
-
-  // Navigation HTML (SPA) : NETWORK-FIRST absolu avec fallback systématique vers index.html
-  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html') || url.pathname.startsWith('/client') || url.pathname.startsWith('/maalem') || url.pathname.startsWith('/admin')) {
-    event.respondWith(
-      fetch(request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache);
-            });
-            return networkResponse;
-          }
-          return caches.match('/index.html').then((cached) => cached || networkResponse);
-        })
-        .catch(async () => {
-          const cached = await caches.match('/index.html') || await caches.match('/');
-          if (cached) return cached;
-          return new Response('<!DOCTYPE html><html><head><meta charset="utf-8"><title>BricoleMoi</title></head><body><div id="root">Chargement BricoleMoi...</div><script>window.location.reload();</script></body></html>', {
-            status: 200,
-            headers: { 'Content-Type': 'text/html; charset=utf-8' }
-          });
-        })
-    );
-    return;
-  }
-
-  // Assets JS / CSS / Chunks Vite : Network-First systématique (toujours la dernière version si en ligne)
-  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.includes('/assets/')) {
-    event.respondWith(
-      fetch(request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const clone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return networkResponse;
-        })
-        .catch(() => caches.match(request))
-    );
-    return;
-  }
-
-  // Autres fichiers statiques : Images / Icônes (Cache-First avec SWR)
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        fetch(request)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse));
-            }
-          })
-          .catch(() => {});
-        return cachedResponse;
-      }
-
-      return fetch(request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const clone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return networkResponse;
-        })
-        .catch(() => caches.match(request));
-    })
-  );
 });
 
 // 3.5 Écouteur de message pour forcer l'activation immédiate sans attendre
