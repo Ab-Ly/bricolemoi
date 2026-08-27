@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { switchSubdomainInDev } from '../lib/subdomain';
 import { 
-  User, 
+  User as UserIcon, 
   Phone, 
   ShieldCheck, 
   CreditCard, 
@@ -529,7 +529,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
               <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <User className="w-4 h-4 text-blue-600" />
+                  <UserIcon className="w-4 h-4 text-blue-600" />
                   <span className="text-xs font-bold text-slate-700">Nom &amp; Prénom</span>
                 </div>
                 <span className="text-xs font-bold text-slate-900">{user.full_name || 'Non renseigné'}</span>
