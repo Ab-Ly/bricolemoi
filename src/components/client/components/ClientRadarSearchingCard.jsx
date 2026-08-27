@@ -27,18 +27,18 @@ export const ClientRadarSearchingCard = ({
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="flex items-center gap-3.5">
-          <div className="relative flex items-center justify-center">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
-              <Radio className="w-7 h-7 text-white animate-pulse" />
+          <div className="relative flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+              <Radio className="w-6 h-6 text-white animate-pulse" />
             </div>
-            <div className="absolute inset-0 rounded-2xl border-2 border-blue-500 animate-ping opacity-25 pointer-events-none" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
-              <span className="text-xs font-black uppercase tracking-wider text-blue-700 font-mono">
-                Diffusion Live en Cours
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600" />
               </span>
+              <span className="tracking-wide uppercase">Diffusion Live en Cours</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Recherche de votre Artisan Maâlem

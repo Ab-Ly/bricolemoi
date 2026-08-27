@@ -97,21 +97,21 @@ export const MaalemLeadsFeed = ({
             {availableLeads.map((item) => {
               const lat = item.lat;
               const lng = item.lng;
-              const distanceKm = item.calculatedDistance || 1.2;
-              const defaultPhotosByService = {
-                ELECTRICIAN:
-                  'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80',
-                PLUMBING:
-                  'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=600&q=80',
-                AUTO_MECHANIC:
-                  'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=600&q=80',
-                CLIMATISATION:
-                  'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=600&q=80'
-              };
               const displayPhoto =
-                item.description_photo ||
-                defaultPhotosByService[item.service_type] ||
-                defaultPhotosByService.PLUMBING;
+                item.description_photo && !item.description_photo.includes('unsplash.com')
+                  ? item.description_photo
+                  : null;
+
+              const itemCoords = (lat && lng)
+                ? [lat, lng]
+                : [34.0181, -5.0078];
+
+              const calcDist = (maalemPos && maalemPos[0] && itemCoords[0])
+                ? (Math.sqrt(
+                    Math.pow((itemCoords[0] - maalemPos[0]) * 111, 2) +
+                    Math.pow((itemCoords[1] - maalemPos[1]) * 111 * Math.cos(maalemPos[0] * (Math.PI / 180)), 2)
+                  )).toFixed(1)
+                : null;
 
               return (
                 <motion.div
@@ -138,7 +138,7 @@ export const MaalemLeadsFeed = ({
                       <button
                         type="button"
                         onClick={() => {
-                          setFocusedMapCoords([lat, lng]);
+                          setFocusedMapCoords(itemCoords);
                           document
                             .getElementById('maalem-radar-map')
                             ?.scrollIntoView({ behavior: 'smooth' });
@@ -146,7 +146,11 @@ export const MaalemLeadsFeed = ({
                         className="text-xs text-blue-700 hover:text-blue-900 font-black bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 flex items-center gap-1 font-mono cursor-pointer transition-all active:scale-95 shadow-xs"
                         title="Cliquer pour centrer la carte sur cette demande SOS"
                       >
-                        <span>📍 {distanceKm} km</span>
+                        {calcDist ? (
+                          <span>📍 ~{calcDist} km</span>
+                        ) : (
+                          <span>📍 Secteur Direct</span>
+                        )}
                         <span className="text-[10px] text-blue-600 font-bold bg-white px-1.5 py-0.5 rounded ml-1 border border-blue-200">
                           🎯 Carte
                         </span>

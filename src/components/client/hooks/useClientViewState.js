@@ -478,12 +478,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
   const executeSOSCreation = async (overridePhone) => {
     setSubmitting(true);
     const fullDistrictLabel = `${selectedCity} - ${selectedDistrict}`;
-    const primaryPhoto =
-      photos[0] ||
-      photoUrl ||
-      (serviceType === 'plomberie'
-        ? 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=600&q=80'
-        : 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=600&q=80');
+    const primaryPhoto = photos[0] || photoUrl || null;
 
     try {
       const created = await createIntervention({
@@ -493,7 +488,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
         lat: selectedLat,
         lng: selectedLng,
         description_photo: primaryPhoto,
-        photos_list: photos.length > 0 ? photos : [primaryPhoto],
+        photos_list: photos.length > 0 ? photos : (primaryPhoto ? [primaryPhoto] : []),
         access_details: accessDetails,
         urgency_level: urgencyLevel,
         audio_note_url: audioUrl,

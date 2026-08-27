@@ -125,29 +125,27 @@ export const EmergencySOSModal = ({ alert, onAccept, onDismiss }) => {
 
           {/* Header with Siren & Live Beacon */}
           <div className="flex items-start justify-between gap-3 pt-2">
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3.5 min-w-0">
               {/* Siren Container */}
-              <div className="relative flex items-center justify-center w-14 h-14 flex-shrink-0">
-                <div className="absolute inset-0 rounded-2xl bg-red-100 animate-ping" />
-                <div className="w-14 h-14 rounded-2xl bg-red-50 border-2 border-red-400 text-red-600 flex items-center justify-center shadow-xs">
-                  <Siren className="w-8 h-8 animate-bounce text-red-600" />
-                </div>
+              <div className="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 border-2 border-red-400 text-red-600 shadow-xs shrink-0">
+                <Siren className="w-6 h-6 animate-bounce text-red-600" />
               </div>
 
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping" />
-                  <span className="text-xs font-black uppercase tracking-wider text-red-600 font-mono">
-                    Urgence SOS en Direct • {countdown}s
+              <div className="min-w-0 space-y-1">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-50 text-red-700 border border-red-200 shadow-2xs">
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
                   </span>
+                  <span className="tracking-wide uppercase">Urgence SOS • {countdown}s</span>
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight truncate">
                   {serviceLabel}
                 </h3>
               </div>
             </div>
 
-            <span className="px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-xs shadow-xs">
+            <span className="px-3.5 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-xs shadow-xs whitespace-nowrap shrink-0 self-start">
               15 DH
             </span>
           </div>
@@ -155,16 +153,16 @@ export const EmergencySOSModal = ({ alert, onAccept, onDismiss }) => {
           {/* Details Card */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4.5 space-y-3 shadow-xs">
             {/* Subcategory & District */}
-            <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-3">
-              <div>
+            <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
+              <div className="min-w-0 flex-1">
                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Panne déclarée</span>
-                <span className="text-sm font-black text-slate-900">{alert.subcategory || 'Dépannage d\'urgence'}</span>
+                <span className="text-sm font-black text-slate-900 break-words">{alert.subcategory || 'Dépannage d\'urgence'}</span>
               </div>
-              <div className="text-right">
+              <div className="text-right shrink-0 max-w-[150px]">
                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Quartier</span>
-                <span className="text-sm font-black text-slate-900 flex items-center gap-1 justify-end">
-                  <MapPin className="w-3.5 h-3.5 text-blue-600" />
-                  <span>{alert.district || 'Casablanca'}</span>
+                <span className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-1 justify-end truncate">
+                  <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  <span className="truncate">{alert.district || 'Casablanca'}</span>
                 </span>
               </div>
             </div>
@@ -218,8 +216,8 @@ export const EmergencySOSModal = ({ alert, onAccept, onDismiss }) => {
               </div>
             )}
 
-            {/* Photo Preview if available */}
-            {alert.description_photo && (
+            {/* Photo Preview ONLY if real uploaded photo */}
+            {alert.description_photo && !alert.description_photo.includes('unsplash.com') && (
               <div className="relative rounded-xl overflow-hidden border border-slate-200 max-h-36">
                 <img
                   src={alert.description_photo}

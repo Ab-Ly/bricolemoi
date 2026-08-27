@@ -13,6 +13,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { WhatsappLogo } from '@phosphor-icons/react';
+import { getCoordinatesFromDistrict } from '../../../lib/geoService';
 
 export const MaalemActiveMissionCard = ({
   activeUnlockedLeads,
@@ -72,9 +73,19 @@ export const MaalemActiveMissionCard = ({
                 }). أنا في الطريق إليك.`
               )}`
             : '#';
-          const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lead.lat || 33.5883},${
-            lead.lng || -7.6328
-          }`;
+          const rawLat = parseFloat(lead.lat);
+          const rawLng = parseFloat(lead.lng);
+          const hasExplicitGps =
+            !isNaN(rawLat) &&
+            !isNaN(rawLng) &&
+            rawLat !== 0 &&
+            (rawLat !== 33.5883 || (lead.district && lead.district.toLowerCase().includes('casablanca')));
+
+          const destCoords = hasExplicitGps
+            ? { lat: rawLat, lng: rawLng }
+            : getCoordinatesFromDistrict(lead.district, lead.lat, lead.lng);
+
+          const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destCoords.lat},${destCoords.lng}`;
 
           return (
             <div

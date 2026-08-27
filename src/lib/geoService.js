@@ -173,3 +173,54 @@ export const reverseGeocodeMorocco = async (lat, lng) => {
 
   return catalogFallback;
 };
+
+/**
+ * Résolution des coordonnées GPS exactes à partir du label du quartier ou de la ville
+ * Ex: "Fès - Zouagha" -> { lat: 34.0400, lng: -5.0500 }
+ */
+export const getCoordinatesFromDistrict = (districtLabel, fallbackLat, fallbackLng) => {
+  if (!districtLabel || typeof districtLabel !== 'string') {
+    return {
+      lat: fallbackLat || 34.0181,
+      lng: fallbackLng || -5.0078
+    };
+  }
+
+  const norm = (s) => String(s || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  const cleanLabel = norm(districtLabel);
+  const parts = cleanLabel.split(/[-–—/]/).map((p) => p.trim());
+  const cityName = parts[0];
+  const districtName = parts[1] || parts[0];
+
+  // 1. Recherche par ville puis quartier
+  for (const city of MOROCCAN_CITIES) {
+    const cNorm = norm(city.name);
+    if (cleanLabel.includes(cNorm) || cNorm.includes(cityName)) {
+      if (city.districts && city.districts.length > 0) {
+        const foundDistrict = city.districts.find(
+          (d) => cleanLabel.includes(norm(d.name)) || norm(d.name).includes(districtName)
+        );
+        if (foundDistrict && foundDistrict.lat && foundDistrict.lng) {
+          return { lat: foundDistrict.lat, lng: foundDistrict.lng };
+        }
+        return { lat: city.districts[0].lat || city.lat, lng: city.districts[0].lng || city.lng };
+      }
+      return { lat: city.lat, lng: city.lng };
+    }
+  }
+
+  // 2. Recherche générale de quartier
+  for (const city of MOROCCAN_CITIES) {
+    for (const d of city.districts || []) {
+      if (cleanLabel.includes(norm(d.name))) {
+        return { lat: d.lat, lng: d.lng };
+      }
+    }
+  }
+
+  return {
+    lat: fallbackLat || 34.0181,
+    lng: fallbackLng || -5.0078
+  };
+};
+

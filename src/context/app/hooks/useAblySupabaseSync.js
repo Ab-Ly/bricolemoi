@@ -388,7 +388,7 @@ export const useAblySupabaseSync = ({
         .from('reviews')
         .select('id, intervention_id, maalem_id, client_id, rating, comment, badges, created_at')
         .order('created_at', { ascending: false })
-        .limit(30);
+        .limit(100);
 
       if (realReviews) {
         const enrichedReviews = realReviews.map((r) => {
@@ -412,10 +412,10 @@ export const useAblySupabaseSync = ({
       const { data: realInterventions, error: intvErr } = await supabase
         .from('interventions')
         .select(
-          'id, client_id, maalem_id, service_type, district, description_photo, audio_note_url, estimated_price_min, estimated_price_max, final_agreed_price, status, cost_lead, created_at'
+          'id, client_id, maalem_id, service_type, subcategory, district, lat, lng, description_photo, audio_note_url, estimated_price_min, estimated_price_max, final_agreed_price, status, cost_lead, rating, comment, badges, completed_at, created_at'
         )
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(60);
 
       if (intvErr) {
         const fb = await supabase

@@ -2,6 +2,7 @@ import { supabase, isSupabaseConfigured } from '../../../lib/supabaseClient';
 import { notify } from '../../../lib/notify';
 import { publishRealtimeEvent } from '../../../lib/ablyRealtimeService';
 import { ABLY_CHANNELS } from '../../../lib/ablyClient';
+import { getCoordinatesFromDistrict } from '../../../lib/geoService';
 import {
   generateUuid,
   isUuid,
@@ -34,24 +35,15 @@ export const useInterventionsService = ({
     description_photo,
     audio_note_url
   }) => {
-    const defaultLat = lat || 33.5883;
-    const defaultLng = lng || -7.6328;
+    const resolvedCoords = getCoordinatesFromDistrict(district, lat, lng);
+    const finalLat = (lat && !isNaN(Number(lat)) && (Number(lat) !== 33.5883 || (district && district.toLowerCase().includes('casablanca'))))
+      ? Number(lat)
+      : resolvedCoords.lat;
+    const finalLng = (lng && !isNaN(Number(lng)) && (Number(lng) !== -7.6328 || (district && district.toLowerCase().includes('casablanca'))))
+      ? Number(lng)
+      : resolvedCoords.lng;
 
-    const defaultPhotosByService = {
-      ELECTRICIAN:
-        'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80',
-      PLUMBING:
-        'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=600&q=80',
-      AUTO_MECHANIC:
-        'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=600&q=80',
-      CLIMATISATION:
-        'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=600&q=80'
-    };
-
-    const finalPhoto =
-      description_photo ||
-      defaultPhotosByService[service_type] ||
-      defaultPhotosByService.PLUMBING;
+    const finalPhoto = description_photo || null;
 
     const validUuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -67,8 +59,8 @@ export const useInterventionsService = ({
       service_type: (service_type || 'PLUMBING').toUpperCase(),
       subcategory: subcategory,
       district: district || 'Casablanca - Maarif',
-      lat: defaultLat,
-      lng: defaultLng,
+      lat: finalLat,
+      lng: finalLng,
       description_photo: finalPhoto,
       audio_note_url: audio_note_url || null,
       estimated_price_min: null,
