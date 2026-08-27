@@ -612,6 +612,9 @@ export const useAblySupabaseSync = ({
     try {
       bc = new BroadcastChannel('bricolemoi_intertab_sync');
       bc.onmessage = (e) => {
+        const payload = e.data;
+        if (!payload) return;
+
         if (payload.type === 'INTERVENTION_ACCEPTED' || payload.type === 'SOS_CLAIMED') {
           const acceptedIntv = payload.intervention || {};
           const intId = String(acceptedIntv.id || payload.intervention_id || '').trim();

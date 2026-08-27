@@ -279,7 +279,13 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
         ) : (
           filteredInterventions.map((item) => {
             const clientPhoneClean = cleanPhone(item.client_phone);
-            const maalemPhoneClean = cleanPhone(item.maalem_phone);
+            const resolvedMaalem = (maalems || []).find((m) => String(m.id).trim() === String(item.maalem_id).trim());
+            const hasMaalemAssigned = Boolean(item.maalem_id || (item.maalem_name && item.maalem_name !== 'Maalem' && item.maalem_name !== 'Artisan Maâlem' && item.maalem_name !== 'Artisan Maalem'));
+            const maalemDisplayName = hasMaalemAssigned
+              ? (item.maalem_name && item.maalem_name !== 'Maalem' && item.maalem_name !== 'Artisan Maâlem' ? item.maalem_name : (resolvedMaalem?.full_name || 'Artisan Maâlem'))
+              : (item.status === 'COMPLETED' || item.status === 'CANCELLED' ? 'Non assigné (Clôturée)' : 'En attente de prise...');
+            const maalemDisplayPhone = item.maalem_phone || resolvedMaalem?.phone || '';
+            const maalemPhoneClean = cleanPhone(maalemDisplayPhone);
 
             return (
               <motion.div
@@ -366,12 +372,12 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
                     {/* Bloc Maâlem */}
                     <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1">
                       <span className="text-[10px] font-mono text-emerald-800 font-bold uppercase">🛠️ Maâlem Assigné</span>
-                      <p className="font-bold text-slate-900 truncate">{item.maalem_name || 'En attente de prise...'}</p>
-                      {item.maalem_phone ? (
+                      <p className="font-bold text-slate-900 truncate">{maalemDisplayName}</p>
+                      {hasMaalemAssigned && maalemDisplayPhone ? (
                         <div className="flex items-center gap-2 pt-1">
-                          <a href={`tel:${item.maalem_phone}`} className="text-[11px] font-mono text-slate-700 hover:text-emerald-700 flex items-center gap-1 font-bold">
+                          <a href={`tel:${maalemDisplayPhone}`} className="text-[11px] font-mono text-slate-700 hover:text-emerald-700 flex items-center gap-1 font-bold">
                             <Phone className="w-3 h-3 text-emerald-600" />
-                            <span>{item.maalem_phone}</span>
+                            <span>{maalemDisplayPhone}</span>
                           </a>
                           {maalemPhoneClean.length >= 9 && (
                             <a
@@ -385,7 +391,9 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
                           )}
                         </div>
                       ) : (
-                        <p className="text-[11px] text-slate-400 italic">Non débloqué</p>
+                        <p className="text-[11px] text-slate-400 italic">
+                          {item.status === 'COMPLETED' || item.status === 'CANCELLED' ? 'Aucun artisan (Clôturée)' : 'Non débloqué'}
+                        </p>
                       )}
                     </div>
                   </div>
