@@ -136,14 +136,19 @@ export const EmergencyFlowProvider = ({ children }) => {
         (i) => String(i.maalem_id || '').trim() === String(user.id).trim() && 
                ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
       );
-      if (activeJob && flowState.state === EMERGENCY_STATES.IDLE) {
-        dispatch({
-          type: ACTIONS.MATCH_SOS,
-          payload: {
-            emergency: activeJob,
-            progressStep: activeJob.progress_step || 'ON_THE_WAY'
-          }
-        });
+      if (activeJob) {
+        if (flowState.state === EMERGENCY_STATES.IDLE || flowState.progressStep !== activeJob.progress_step) {
+          dispatch({
+            type: ACTIONS.MATCH_SOS,
+            payload: {
+              emergency: activeJob,
+              progressStep: activeJob.progress_step || 'ON_THE_WAY'
+            }
+          });
+        }
+      } else if (flowState.state === EMERGENCY_STATES.MATCHED) {
+        // La mission précédente a été clôturée, annulée ou déclarée non réalisable -> Débloquer le Maâlem
+        dispatch({ type: ACTIONS.RESET_TO_IDLE });
       }
     } else {
       // Côté Client : identifier ses interventions créées localement ou via compte
@@ -156,6 +161,11 @@ export const EmergencyFlowProvider = ({ children }) => {
         if (!i) return false;
         if (myCreated.includes(String(i.id).trim())) return true;
         if (user?.id && String(i.client_id || '').trim() === String(user.id).trim()) return true;
+        const userPhoneDigits = String(user?.phone || '').replace(/\D/g, '');
+        const clientPhoneDigits = String(i.client_phone || '').replace(/\D/g, '');
+        if (userPhoneDigits.length >= 8 && clientPhoneDigits.length >= 8 && userPhoneDigits === clientPhoneDigits && userPhoneDigits !== '0661234567') {
+          return true;
+        }
         return false;
       };
 
@@ -193,7 +203,7 @@ export const EmergencyFlowProvider = ({ children }) => {
         });
       }
     }
-  }, [user?.id, user?.role, interventions, maalems, flowState.state, flowState.progressStep]);
+  }, [user?.id, user?.role, user?.phone, interventions, maalems, flowState.state, flowState.progressStep]);
 
   // =========================================================================
   // 2. SOUSCRIPTIONS TEMPS RÉEL ABLY SELON LE RÔLE (CLIENT / MAÂLEM)
@@ -502,8 +512,8 @@ export const EmergencyFlowProvider = ({ children }) => {
   /**
    * VUE 4 -> Soumission du feedback / avis 5★ (Client) & Retour automatique à IDLE
    */
-  const submitClientFeedback = useCallback(async ({ rating, comment, badges, tipDh }) => {
-    const intvId = flowState.activeEmergency?.id;
+  const submitClientFeedback = useCallback(async ({ intervention_id, rating, comment, badges, tipDh }) => {
+    const intvId = intervention_id || flowState.activeEmergency?.id;
     if (intvId) {
       await submitReview({
         intervention_id: intvId,

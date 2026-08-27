@@ -590,14 +590,24 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
 
     const fullComment = `${comment.trim()}${selectedBadges.length > 0 ? ` [Badges: ${selectedBadges.join(', ')}]` : ''}${tipAmount > 0 ? ` [Pourboire: +${tipAmount} DH]` : ''}`;
 
-    await submitReview({
-      intervention_id: targetIntv.id,
-      maalem_id: targetIntv.maalem_id,
-      rating,
-      comment: fullComment,
-      badges: selectedBadges,
-      tip_dh: tipAmount
-    });
+    if (typeof submitClientFeedback === 'function') {
+      await submitClientFeedback({
+        intervention_id: targetIntv.id,
+        rating,
+        comment: fullComment,
+        badges: selectedBadges,
+        tipDh: tipAmount
+      });
+    } else {
+      await submitReview({
+        intervention_id: targetIntv.id,
+        maalem_id: targetIntv.maalem_id,
+        rating,
+        comment: fullComment,
+        badges: selectedBadges,
+        tip_dh: tipAmount
+      });
+    }
 
     setDismissedReviewIds((prev) => Array.from(new Set([...prev, targetIntv.id])));
     setDismissedCompletionIds((prev) => Array.from(new Set([...prev, targetIntv.id])));
@@ -605,12 +615,6 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
     setPendingCompletionModalInt(null);
     setComment('');
     setTipAmount(0);
-
-    if (typeof submitClientFeedback === 'function') {
-      try {
-        await submitClientFeedback({ rating, comment: fullComment, badges: selectedBadges, tipDh: tipAmount });
-      } catch (err) {}
-    }
   };
 
   // L'intervention la plus récente de l'utilisateur

@@ -14,6 +14,17 @@ import { calculateMaalemBalance } from '../utils/balanceUtils';
 
 const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
+const generateUuid = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 const AppContext = createContext();
 
 // Haversine formula — distance en km (équivalent PostGIS ST_DistanceSphere)
@@ -2193,7 +2204,7 @@ export const AppProvider = ({ children }) => {
       const finalPhoto = description_photo || defaultPhotosByService[service_type] || defaultPhotosByService.PLUMBING;
 
       const validUuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      const generatedId = crypto?.randomUUID?.() || ('10000000-0000-0000-0000-' + Date.now());
+      const generatedId = generateUuid();
       const validClientId = user?.id && validUuidPattern.test(user.id) ? user.id : '11111111-1111-1111-1111-111111111111';
 
       const dbPayload = {
@@ -2247,6 +2258,7 @@ export const AppProvider = ({ children }) => {
         bc.postMessage(payload);
       } catch (e) { }
 
+      let insertedRecord = null;
       if (isSupabaseConfigured) {
         try {
           let { data, error } = await supabase.from('interventions').insert([dbPayload]).select();
@@ -2273,22 +2285,22 @@ export const AppProvider = ({ children }) => {
           if (error) {
             console.warn('[Supabase] Intervention insert warning:', error.message);
           } else if (data?.[0]) {
-            const inserted = { ...newIntervention, ...data[0] };
-            setInterventions((prev) => [inserted, ...prev.filter(i => i.id !== inserted.id)]);
+            insertedRecord = { ...newIntervention, ...data[0] };
+            setInterventions((prev) => [insertedRecord, ...prev.filter(i => i.id !== insertedRecord.id)]);
           }
 
           // Broadcast Ably Realtime : JOBS_STREAM + Canaux SOS Géographiques ciblés (<50ms)
           const cityName = String(district || '').split('-')[0]?.trim() || 'Casablanca';
-          publishRealtimeEvent('new_job', newIntervention);
-          publishRealtimeEvent('sos:alert', { intervention: newIntervention }, ABLY_CHANNELS.getSosChannel(cityName, newIntervention.service_type));
-          publishRealtimeEvent('sos:alert', { intervention: newIntervention }, ABLY_CHANNELS.getSosCityChannel(cityName));
+          publishRealtimeEvent('new_job', insertedRecord || newIntervention);
+          publishRealtimeEvent('sos:alert', { intervention: insertedRecord || newIntervention }, ABLY_CHANNELS.getSosChannel(cityName, newIntervention.service_type));
+          publishRealtimeEvent('sos:alert', { intervention: insertedRecord || newIntervention }, ABLY_CHANNELS.getSosCityChannel(cityName));
         } catch (err) {
           console.warn('[Supabase] Intervention insert exception:', err.message);
         }
       }
 
       showToast('🚨 SOS Dépannage envoyé ! Les Maalems sont notifiés en direct sur la carte radar.', 'success');
-      return newIntervention;
+      return insertedRecord || newIntervention;
     };
 
     // Client confirme le devis avant démarrage des travaux
@@ -2472,7 +2484,8 @@ export const AppProvider = ({ children }) => {
       });
 
       // 3. Notifier en temps réel via BroadcastChannel & Ably
-      publishIntertabSync('INTERVENTION_UNFEASIBLE', {
+      broadcastSync({
+        type: 'INTERVENTION_UNFEASIBLE',
         intervention_id: cleanIntId,
         reason,
         notes,
@@ -2553,9 +2566,14 @@ export const AppProvider = ({ children }) => {
       publishRealtimeEvent('new_emergency_job', {
         ...finalJob,
         timestamp: Date.now()
-      }, ABLY_CHANNELS.getCityChannel(cityName, serviceType));
+      }, ABLY_CHANNELS.getSosChannel(cityName, serviceType));
+      publishRealtimeEvent('new_emergency_job', {
+        ...finalJob,
+        timestamp: Date.now()
+      }, ABLY_CHANNELS.getSosCityChannel(cityName));
 
-      publishIntertabSync('INTERVENTION_RELAUNCHED', {
+      broadcastSync({
+        type: 'INTERVENTION_RELAUNCHED',
         intervention: finalJob
       });
 
@@ -2571,7 +2589,7 @@ export const AppProvider = ({ children }) => {
       }
 
       showToast('🚀 Alerte SOS relancée ! Recherche active des artisans disponibles en cours...', 'success');
-      return true;
+      return finalJob;
     };
 
     // Maalem accepte un lead — déblocage 15 DH en Escrow, diffusion Ably (<50ms)
@@ -2827,7 +2845,7 @@ export const AppProvider = ({ children }) => {
       }
 
       showToast('🟢 Contact débloqué avec succès ! Coordonnées complètes et itinéraire GPS disponibles.', 'success');
-      return true;
+      return acceptedItem;
     };
 
     // Maalem déclenche la demande de validation et notation sur place au client

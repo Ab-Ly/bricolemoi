@@ -1240,7 +1240,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
                           type="button"
                           onClick={() => {
                             requestOnSiteReview(lead.id);
-                            flowFinishMission();
+                            flowFinishMission(lead.final_agreed_price || lead.estimated_price_min);
                           }}
                           className="w-full py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs sm:text-sm rounded-2xl shadow-md shadow-purple-600/25 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                         >
