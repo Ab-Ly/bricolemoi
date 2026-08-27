@@ -578,10 +578,24 @@ export const useAblySupabaseSync = ({
   useEffect(() => {
     fetchRealSupabaseData();
 
-    const onFocus = () => fetchRealSupabaseData();
-    window.addEventListener('focus', onFocus);
+    const onFocusOrVisible = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchRealSupabaseData();
+      }
+    };
 
+    const onOnline = () => fetchRealSupabaseData();
+
+    window.addEventListener('focus', onFocusOrVisible);
+    window.addEventListener('online', onOnline);
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onFocusOrVisible);
+    }
+
+    // Polling doux de sécurité (30s uniquement si l'onglet est actif et qu'une mission est en cours)
     const pollInterval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+
       const hasActiveMission = (interventionsRef.current || []).some((i) =>
         [
           'PENDING',
@@ -592,13 +606,13 @@ export const useAblySupabaseSync = ({
           'PENDING_COMPLETION'
         ].includes(i.status)
       );
-      if (
-        hasActiveMission ||
-        (typeof window !== 'undefined' && window.location.pathname.includes('client'))
-      ) {
+
+      // Si Ably est actif, les mises à jour sont déjà poussées en direct (<50ms).
+      // Le polling ne sert que de filet de sécurité à basse consommation.
+      if (hasActiveMission && !isAblyConnected) {
         fetchRealSupabaseData();
       }
-    }, 3500);
+    }, 30000);
 
     let supabaseChannel = null;
     if (isSupabaseConfigured) {
@@ -638,7 +652,11 @@ export const useAblySupabaseSync = ({
     }
 
     return () => {
-      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('focus', onFocusOrVisible);
+      window.removeEventListener('online', onOnline);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', onFocusOrVisible);
+      }
       clearInterval(pollInterval);
       if (supabaseChannel) {
         try {
@@ -646,7 +664,7 @@ export const useAblySupabaseSync = ({
         } catch (e) {}
       }
     };
-  }, []);
+  }, [isAblyConnected]);
 
   return {
     isAblyConnected,

@@ -354,33 +354,13 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
     }
   }, [selectedLat, selectedLng]);
 
-  // 3. Real-time Maalem drift animation
+  // 3. Synchronisation réactive des coordonnées Maâlem (sans boucle CPU artificielle)
   useEffect(() => {
-    const initialCoords = {};
+    const coords = {};
     (maalems || []).forEach((m) => {
-      initialCoords[m.id] = { lat: m.lat, lng: m.lng };
+      coords[m.id] = { lat: m.lat, lng: m.lng };
     });
-    setLiveMaalemCoords(initialCoords);
-
-    const interval = setInterval(() => {
-      setLiveMaalemCoords((prev) => {
-        const next = { ...prev };
-        (maalems || []).forEach((m) => {
-          const current = next[m.id] || { lat: m.lat, lng: m.lng };
-          if (current.lat && current.lng) {
-            const deltaLat = (Math.random() - 0.5) * 0.0002;
-            const deltaLng = (Math.random() - 0.5) * 0.0002;
-            next[m.id] = {
-              lat: current.lat + deltaLat,
-              lng: current.lng + deltaLng
-            };
-          }
-        });
-        return next;
-      });
-    }, 4000);
-
-    return () => clearInterval(interval);
+    setLiveMaalemCoords(coords);
   }, [maalems]);
 
   // 4. Render & Update All Markers (Client GPS, Destination, Maalems, SOS Leads)
