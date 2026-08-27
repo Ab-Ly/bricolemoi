@@ -202,35 +202,36 @@ export const AdminMaalemsView = ({
           </div>
         </div>
 
-        {/* Filtres Villes & Statuts */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mr-2">
-            <Filter className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Ville :</span>
+        {/* Filtres Villes & Statuts (Scrollable sans rupture) */}
+        <div className="space-y-2.5 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 shrink-0">
+              <Filter className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Ville :</span>
+            </div>
+
+            {['ALL', 'Casablanca', 'Rabat', 'Fès', 'Meknès', 'El Hajeb', 'Marrakech', 'Tanger', 'Agadir', 'Kénitra', 'Mohammedia'].map((city) => (
+              <button
+                key={city}
+                type="button"
+                onClick={() => {
+                  setCityFilter(city);
+                  setCurrentPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  cityFilter === city
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
+                }`}
+              >
+                {city === 'ALL' ? 'Toutes' : city}
+              </button>
+            ))}
           </div>
 
-          {['ALL', 'Casablanca', 'Rabat', 'Fès', 'Meknès', 'El Hajeb', 'Marrakech', 'Tanger', 'Agadir', 'Kénitra', 'Mohammedia'].map((city) => (
-            <button
-              key={city}
-              type="button"
-              onClick={() => {
-                setCityFilter(city);
-                setCurrentPage(1);
-              }}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                cityFilter === city
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
-              }`}
-            >
-              {city === 'ALL' ? 'Toutes' : city}
-            </button>
-          ))}
-
-          <div className="h-4 w-[1px] bg-slate-200 mx-2 hidden sm:block" />
-
           {/* Filtre Statut */}
-          <div className="flex items-center gap-1.5 ml-auto">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+            <span className="text-xs font-bold text-slate-400 shrink-0 hidden sm:inline">Statut :</span>
             {['ALL', 'ONLINE', 'LOW_CREDIT', 'SUSPENDED'].map((st) => (
               <button
                 key={st}
@@ -239,13 +240,13 @@ export const AdminMaalemsView = ({
                   setStatusFilter(st);
                   setCurrentPage(1);
                 }}
-                className={`px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   statusFilter === st
                     ? st === 'ONLINE'
-                      ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-xs'
+                      ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-xs font-black'
                       : st === 'LOW_CREDIT'
-                        ? 'bg-amber-50 border border-amber-200 text-amber-800 shadow-xs'
-                        : 'bg-rose-50 border border-rose-200 text-rose-700 shadow-xs'
+                        ? 'bg-amber-50 border border-amber-200 text-amber-800 shadow-xs font-black'
+                        : 'bg-rose-50 border border-rose-200 text-rose-700 shadow-xs font-black'
                     : 'bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
                 }`}
               >

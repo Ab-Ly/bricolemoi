@@ -144,9 +144,9 @@ export const AdminDashboard = () => {
   const pendingRechargesCount = transactions.filter((t) => t.status === 'PENDING').length;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
+    <div className="space-y-6 max-w-7xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4">
       {/* 1. Header Global & KPIs Haute Densité */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-sm relative overflow-hidden text-slate-900">
+      <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-7 shadow-sm relative overflow-hidden text-slate-900">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
             <div className="flex items-center gap-2">
@@ -157,30 +157,30 @@ export const AdminDashboard = () => {
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2 tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-black text-slate-900 mt-2 tracking-tight">
               Tour de Contrôle &amp; Administration
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
               Supervision temps réel des clients, flux d'urgences SOS, partenaires maâlems et arbitrage des litiges.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 w-full md:w-auto">
             {/* Bouton Arbitre d'Audit Invariant */}
             <button
               type="button"
               onClick={() => setShowAuditModal(true)}
-              className={`px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer border ${
+              className={`flex-1 md:flex-none px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs transition-all active:scale-95 cursor-pointer border ${
                 auditReport.healthStatus === 'OPTIMAL'
                   ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200'
                   : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 ring-1 ring-amber-300 animate-pulse'
               }`}
             >
-              <SearchCheck className={`w-4 h-4 ${auditReport.healthStatus === 'OPTIMAL' ? 'text-emerald-600' : 'text-amber-600'}`} />
-              <span>
+              <SearchCheck className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${auditReport.healthStatus === 'OPTIMAL' ? 'text-emerald-600' : 'text-amber-600'}`} />
+              <span className="truncate">
                 {auditReport.healthStatus === 'OPTIMAL'
-                  ? `🛡️ Arbitre Audit : 100% Intègre`
-                  : `🛡️ Audit : ${auditReport.issues.length} Anomalie(s)`}
+                  ? `🛡️ 100% Intègre`
+                  : `🛡️ ${auditReport.issues.length} Anomalie(s)`}
               </span>
             </button>
 
@@ -189,45 +189,45 @@ export const AdminDashboard = () => {
               type="button"
               onClick={handleManualRefresh}
               disabled={isRefreshing}
-              className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-2xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+              className="flex-1 md:flex-none px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 text-purple-600 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>{isRefreshing ? 'Actualisation...' : 'Actualiser les Flux'}</span>
+              <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 shrink-0 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? 'Actualisation...' : 'Actualiser'}</span>
             </button>
           </div>
         </div>
 
-        {/* 4 Compteurs KPI Essentiels & Interactifs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-slate-100">
+        {/* 4 Compteurs KPI Essentiels & Interactifs (2x2 Mobile, 4 Cols Desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-100">
           {/* Card 1 : Total Clients */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab('CLIENTS')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 shadow-xs ${
+            className={`p-3 sm:p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-2 sm:space-y-3 shadow-xs ${
               activeTab === 'CLIENTS'
                 ? 'bg-blue-50/70 border-blue-400 shadow-sm ring-1 ring-blue-400/50'
                 : 'bg-white border-slate-200 hover:border-blue-300'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shadow-xs">
-                <Users className="w-4 h-4 text-blue-600" />
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shadow-xs shrink-0">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
               </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                 {activeClientsCount} actifs
               </span>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
+              <span className="text-[10px] sm:text-[11px] font-mono text-slate-500 uppercase tracking-wider block font-bold truncate">
                 Clients Enregistrés
               </span>
-              <p className="text-3xl font-black text-slate-900 font-mono mt-0.5">{clients.length}</p>
+              <p className="text-xl sm:text-3xl font-black text-slate-900 font-mono mt-0.5">{clients.length}</p>
             </div>
 
-            <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
-              <span>Missions totales :</span>
+            <div className="text-[9px] sm:text-[10px] text-slate-500 pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
+              <span className="truncate">Missions :</span>
               <strong className="text-blue-700 font-black">{interventions.length}</strong>
             </div>
           </motion.div>
@@ -237,68 +237,67 @@ export const AdminDashboard = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab('MISSIONS')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 shadow-xs ${
+            className={`p-3 sm:p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-2 sm:space-y-3 shadow-xs ${
               activeTab === 'MISSIONS'
                 ? 'bg-amber-50/70 border-amber-400 shadow-sm ring-1 ring-amber-400/50'
                 : 'bg-white border-slate-200 hover:border-amber-300'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shadow-xs">
-                <Activity className="w-4 h-4 text-amber-600" />
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shadow-xs shrink-0">
+                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" />
               </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 flex items-center gap-1">
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
                 <span>En Direct</span>
               </span>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono text-amber-800 uppercase tracking-wider block font-bold">
+              <span className="text-[10px] sm:text-[11px] font-mono text-amber-800 font-bold uppercase tracking-wider block truncate">
                 Urgences SOS Actives
               </span>
-              <p className="text-3xl font-black text-slate-900 font-mono mt-0.5">{activeSOSCount}</p>
+              <p className="text-xl sm:text-3xl font-black text-slate-900 font-mono mt-0.5">{activeSOSCount}</p>
             </div>
 
-            <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
-              <span>{pendingSOSCount} en attente</span>
+            <div className="text-[9px] sm:text-[10px] text-slate-500 pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
+              <span className="truncate">{pendingSOSCount} en attente</span>
               <span>•</span>
-              <span className="text-blue-700 font-bold">{inProgressSOSCount} en cours</span>
+              <strong className="text-amber-800 font-bold">{inProgressSOSCount} en cours</strong>
             </div>
           </motion.div>
 
-          {/* Card 3 : Maâlems Connectés */}
+          {/* Card 3 : Total Maâlems */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab('MAALEMS')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 shadow-xs ${
+            className={`p-3 sm:p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-2 sm:space-y-3 shadow-xs ${
               activeTab === 'MAALEMS'
                 ? 'bg-emerald-50/70 border-emerald-400 shadow-sm ring-1 ring-emerald-400/50'
                 : 'bg-white border-slate-200 hover:border-emerald-300'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shadow-xs">
-                <Wrench className="w-4 h-4 text-emerald-600" />
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center shadow-xs shrink-0">
+                <Wrench className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-800" />
               </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800">
-                Ably Live 🟢
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                <span>Ably Live</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               </span>
             </div>
 
             <div>
-              <span className="text-[11px] font-mono text-emerald-800 uppercase tracking-wider block font-bold">
+              <span className="text-[10px] sm:text-[11px] font-mono text-emerald-800 uppercase tracking-wider block font-bold truncate">
                 Maâlems en Ligne
               </span>
-              <p className="text-3xl font-black text-slate-900 font-mono mt-0.5">
-                {onlineMaalemsCount}
-              </p>
+              <p className="text-xl sm:text-3xl font-black text-slate-900 font-mono mt-0.5">{onlineMaalemsCount}</p>
             </div>
 
-            <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
-              <span>Total réseau :</span>
-              <strong className="text-slate-900">{maalems.length} artisans</strong>
+            <div className="text-[9px] sm:text-[10px] text-slate-500 pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
+              <span className="truncate">Total réseau :</span>
+              <strong className="text-slate-900 font-bold">{maalems.length} artisans</strong>
             </div>
           </motion.div>
 
@@ -307,17 +306,17 @@ export const AdminDashboard = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab('DISPUTES')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 shadow-xs ${
+            className={`p-3 sm:p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-2 sm:space-y-3 shadow-xs ${
               activeTab === 'DISPUTES'
                 ? 'bg-rose-50/70 border-rose-400 shadow-sm ring-1 ring-rose-400/50'
                 : 'bg-white border-slate-200 hover:border-rose-300'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shadow-xs">
-                <ShieldAlert className="w-4 h-4 text-rose-600" />
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shadow-xs shrink-0">
+                <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-600" />
               </div>
-              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+              <span className={`text-[9px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full border ${
                 pendingDisputesCount > 0
                   ? 'bg-rose-50 border-rose-200 text-rose-700 animate-pulse'
                   : 'bg-emerald-50 border-emerald-200 text-emerald-800'
@@ -327,34 +326,34 @@ export const AdminDashboard = () => {
             </div>
 
             <div>
-              <span className="text-[11px] font-mono text-rose-700 uppercase tracking-wider block font-bold">
+              <span className="text-[10px] sm:text-[11px] font-mono text-rose-700 uppercase tracking-wider block font-bold truncate">
                 Litiges en Attente
               </span>
-              <p className="text-3xl font-black text-slate-900 font-mono mt-0.5">{pendingDisputesCount}</p>
+              <p className="text-xl sm:text-3xl font-black text-slate-900 font-mono mt-0.5">{pendingDisputesCount}</p>
             </div>
 
-            <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
-              <span>Recharges en attente :</span>
+            <div className="text-[9px] sm:text-[10px] text-slate-500 pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
+              <span className="truncate">Recharges :</span>
               <strong className="text-purple-700 font-bold">{pendingRechargesCount}</strong>
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* 2. Barre de Navigation par Onglets (Segmented Control SaaS Pro) */}
-      <div className="bg-slate-100/90 border border-slate-200 p-1.5 rounded-2xl shadow-xs overflow-x-auto no-scrollbar">
-        <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-1.5 min-w-max sm:min-w-0">
+      {/* 2. Barre de Navigation par Onglets (Segmented Control SaaS Pro : 6 Cols Desktop / Scroll Horizontal Mobile) */}
+      <div className="bg-slate-100/95 border border-slate-200 p-1.5 rounded-2xl shadow-xs overflow-x-auto no-scrollbar">
+        <div className="flex lg:grid lg:grid-cols-6 gap-1.5 min-w-max lg:min-w-0">
           {/* Tab 1: Clients */}
           <button
             type="button"
             onClick={() => setActiveTab('CLIENTS')}
-            className={`py-2.5 px-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer touch-target-44 whitespace-nowrap ${
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'CLIENTS'
                 ? 'bg-white text-blue-700 shadow-sm font-black border border-slate-200/90'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
             }`}
           >
-            <Users className={`w-4 h-4 ${activeTab === 'CLIENTS' ? 'text-blue-600' : 'text-slate-500'}`} />
+            <Users className={`w-4 h-4 shrink-0 ${activeTab === 'CLIENTS' ? 'text-blue-600' : 'text-slate-500'}`} />
             <span>Clients</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
               activeTab === 'CLIENTS' ? 'bg-blue-100 text-blue-800' : 'bg-slate-200/80 text-slate-600'
@@ -367,13 +366,13 @@ export const AdminDashboard = () => {
           <button
             type="button"
             onClick={() => setActiveTab('MISSIONS')}
-            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'MISSIONS'
                 ? 'bg-white text-amber-700 shadow-sm font-black border border-slate-200/90'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
             }`}
           >
-            <Activity className={`w-4 h-4 ${activeTab === 'MISSIONS' ? 'text-amber-600' : 'text-slate-500'}`} />
+            <Activity className={`w-4 h-4 shrink-0 ${activeTab === 'MISSIONS' ? 'text-amber-600' : 'text-slate-500'}`} />
             <span>Tour de Contrôle</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
               activeTab === 'MISSIONS' ? 'bg-amber-100 text-amber-900' : 'bg-slate-200/80 text-slate-600'
@@ -386,13 +385,13 @@ export const AdminDashboard = () => {
           <button
             type="button"
             onClick={() => setActiveTab('MAALEMS')}
-            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'MAALEMS'
-                ? 'bg-white text-emerald-700 shadow-sm font-black border border-slate-200/90'
+                ? 'bg-white text-emerald-800 shadow-sm font-black border border-slate-200/90'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
             }`}
           >
-            <Wrench className={`w-4 h-4 ${activeTab === 'MAALEMS' ? 'text-emerald-600' : 'text-slate-500'}`} />
+            <Wrench className={`w-4 h-4 shrink-0 ${activeTab === 'MAALEMS' ? 'text-emerald-800' : 'text-slate-500'}`} />
             <span>Maâlems Pro</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
               activeTab === 'MAALEMS' ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-200/80 text-slate-600'
@@ -405,13 +404,13 @@ export const AdminDashboard = () => {
           <button
             type="button"
             onClick={() => setActiveTab('DISPUTES')}
-            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer relative ${
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap relative ${
               activeTab === 'DISPUTES'
                 ? 'bg-white text-rose-700 shadow-sm font-black border border-slate-200/90'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
             }`}
           >
-            <ShieldAlert className={`w-4 h-4 ${activeTab === 'DISPUTES' ? 'text-rose-600' : 'text-slate-500'}`} />
+            <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'DISPUTES' ? 'text-rose-600' : 'text-slate-500'}`} />
             <span>Litiges &amp; SAV</span>
             {pendingDisputesCount > 0 ? (
               <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-mono font-black animate-pulse">
@@ -428,13 +427,13 @@ export const AdminDashboard = () => {
           <button
             type="button"
             onClick={() => setActiveTab('RECHARGES')}
-            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'RECHARGES'
                 ? 'bg-white text-purple-700 shadow-sm font-black border border-slate-200/90'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
             }`}
           >
-            <Receipt className={`w-4 h-4 ${activeTab === 'RECHARGES' ? 'text-purple-600' : 'text-slate-500'}`} />
+            <Receipt className={`w-4 h-4 shrink-0 ${activeTab === 'RECHARGES' ? 'text-purple-600' : 'text-slate-500'}`} />
             <span>Recharges</span>
             {pendingRechargesCount > 0 ? (
               <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-mono font-black animate-pulse">
@@ -451,14 +450,14 @@ export const AdminDashboard = () => {
           <button
             type="button"
             onClick={() => setActiveTab('LOYALTY')}
-            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'LOYALTY'
                 ? 'bg-white text-indigo-700 shadow-sm font-black border border-slate-200/90'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
             }`}
           >
-            <Gift className={`w-4 h-4 ${activeTab === 'LOYALTY' ? 'text-indigo-600' : 'text-slate-500'}`} />
-            <span>🎯 Gratuités &amp; Fidélité</span>
+            <Gift className={`w-4 h-4 shrink-0 ${activeTab === 'LOYALTY' ? 'text-indigo-600' : 'text-slate-500'}`} />
+            <span>Fidélité 4/4</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
               activeTab === 'LOYALTY' ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-200/80 text-slate-600'
             }`}>
