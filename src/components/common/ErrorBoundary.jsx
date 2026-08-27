@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, Trash2, Home, ShieldAlert } from 'lucide-react';
+import { sendTerminalLog } from '../../lib/remoteLogger';
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -20,6 +21,12 @@ export class ErrorBoundary extends React.Component {
     const eventId = 'err-' + Date.now();
     this.setState({ errorInfo, eventId });
     console.error('[ErrorBoundary caught error]', error, errorInfo);
+    try {
+      sendTerminalLog('ERROR', 'REACT_BOUNDARY', error?.message || 'Erreur d\'affichage React', {
+        boundaryName: this.props.name || 'GlobalRoot',
+        componentStack: errorInfo?.componentStack?.split('\n')?.slice(0, 4)?.join(' -> ') || null
+      });
+    } catch (e) {}
   }
 
   handleReload = () => {

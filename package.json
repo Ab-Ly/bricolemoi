@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "listen": "node scripts/listen.js",
+    "logs": "node scripts/logs.js",
     "audit": "node scripts/audit.js",
     "reconcile": "node scripts/reconcile.js",
     "simulate": "node scripts/simulate.js",

@@ -11,9 +11,9 @@ import { AdminAuthModal } from './components/AdminAuthModal';
 import { UserProfileModal } from './components/UserProfileModal';
 import { useApp } from './context/AppContext';
 import { useAblyNotifications } from './hooks/useAblyNotifications';
-import { EmergencySOSModal } from './components/EmergencySOSModal';
 import { getAppSubdomain, switchSubdomainInDev, APP_SUBDOMAINS } from './lib/subdomain';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { initRemoteTelemetry, sendTerminalLog } from './lib/remoteLogger';
 
 // Resilient Lazy Loading Helper that auto-reloads on deployment chunk update
 const lazyWithRetry = (componentImport) =>
@@ -78,10 +78,17 @@ const MainApp = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [showPromptBanner, setShowPromptBanner] = useState(true);
 
+  // 1. Initialize Remote Live Console & Telemetry Bridge
+  useEffect(() => {
+    initRemoteTelemetry();
+  }, []);
+
   // Listen to popstate and custom bricolemoi_navigate events for instant 0ms SPA switching
   useEffect(() => {
     const handlePopState = () => {
-      setActiveSubdomain(getAppSubdomain());
+      const newSub = getAppSubdomain();
+      setActiveSubdomain(newSub);
+      sendTerminalLog('ACTION', 'NAVIGATE', `Navigation vers le portail ${newSub}`);
       const sp = new URLSearchParams(window.location.search);
       setNavParams({
         category: sp.get('category') || sp.get('service') || '',
@@ -91,11 +98,9 @@ const MainApp = () => {
     };
 
     const handleCustomNavigate = (e) => {
-      if (e.detail?.app) {
-        setActiveSubdomain(e.detail.app);
-      } else {
-        setActiveSubdomain(getAppSubdomain());
-      }
+      const targetApp = e.detail?.app || getAppSubdomain();
+      setActiveSubdomain(targetApp);
+      sendTerminalLog('ACTION', 'NAVIGATE', `Changement d'espace vers ${targetApp}`);
       if (e.detail?.params) {
         setNavParams(e.detail.params);
       }

@@ -10,6 +10,7 @@ export const ABLY_CHANNELS = {
   PRESENCE_MAALEMS: 'bricolemoi:presence:maalems',
   JOBS_STREAM: 'bricolemoi:jobs:stream',
   ADMIN_ALERTS: 'bricolemoi:admin:alerts',
+  TERMINAL_LOGS: 'bricolemoi:terminal:logs',
 
   /**
    * Canal individuel par utilisateur pour les statuts d'intervention,
