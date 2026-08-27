@@ -5,6 +5,11 @@ import { subscribeToRealtimeChannel, publishRealtimeEvent } from '../../../lib/a
 import { useAblyPresence } from '../../../hooks/useAblyPresence';
 import { playNotificationSound } from '../../../lib/audioNotifier';
 import {
+  normalizeIntervention,
+  normalizeMaalemProfile,
+  normalizeReviewRecord
+} from '../../../utils/dataNormalizer';
+import {
   updateOnlineMaalemInStorage,
   getOnlineMaalemsFromStorage,
   safeSupabaseBroadcast,
@@ -394,11 +399,12 @@ export const useAblySupabaseSync = ({
         const enrichedReviews = realReviews.map((r) => {
           const clientP =
             profilesMap.get(String(r.client_id).trim()) || clientMap.get(String(r.client_id).trim());
-          return {
+          return normalizeReviewRecord({
             ...r,
             client_name: clientP?.full_name || 'Client BricoleMoi'
-          };
-        });
+          });
+        }).filter(Boolean);
+
         setReviews(enrichedReviews);
         try {
           localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(enrichedReviews));
@@ -411,11 +417,9 @@ export const useAblySupabaseSync = ({
       let intvData = null;
       const { data: realInterventions, error: intvErr } = await supabase
         .from('interventions')
-        .select(
-          'id, client_id, maalem_id, service_type, subcategory, district, lat, lng, description_photo, audio_note_url, estimated_price_min, estimated_price_max, final_agreed_price, status, cost_lead, rating, comment, badges, completed_at, created_at'
-        )
+        .select('*')
         .order('created_at', { ascending: false })
-        .limit(60);
+        .limit(100);
 
       if (intvErr) {
         const fb = await supabase
@@ -456,61 +460,50 @@ export const useAblySupabaseSync = ({
           if (mId && !maalemMap.has(mId)) {
             const maalemProf = profilesMap.get(mId);
             const details = detailsMap.get(mId) || {};
-            maalemMap.set(mId, {
+            maalemMap.set(mId, normalizeMaalemProfile({
               id: mId,
               full_name:
                 maalemProf?.full_name || intv.maalem_name || `Artisan Maâlem #${mId.slice(0, 6)}`,
               phone: maalemProf?.phone || intv.maalem_phone || '',
               specialty: details.specialty || intv.service_type || 'PLUMBING',
-              rating_avg: details.rating_avg || 5.0,
               is_verified: true,
               cin_verified: true,
-              status: 'active',
               portfolio_urls: details.portfolio_urls || [],
               is_online: false,
               is_available: false,
-              lat: intv.lat || 33.5883,
-              lng: intv.lng || -7.6328,
+              lat: intv.lat,
+              lng: intv.lng,
               credit_balance: 15.0,
               district: intv.district || 'Casablanca'
-            });
+            }));
           }
         });
 
-        const enrichedInterventions = intvData.map((intv) => {
-          const clientProf =
-            clientMap.get(String(intv.client_id || '').trim()) ||
-            profilesMap.get(String(intv.client_id).trim());
-          const maalemProf =
-            maalemMap.get(String(intv.maalem_id || '').trim()) ||
-            profilesMap.get(String(intv.maalem_id).trim());
-          const rev = reviewsMap.get(String(intv.id).trim());
-          const isLocallyUnlocked = myUnlocked.includes(String(intv.id).trim());
+        const normContext = {
+          clientsMap: clientMap,
+          maalemsMap: maalemMap,
+          profilesMap,
+          reviewsMap
+        };
 
-          return {
+        const enrichedInterventions = intvData.map((intv) => {
+          const isLocallyUnlocked = myUnlocked.includes(String(intv.id).trim());
+          const targetStatus = isLocallyUnlocked && intv.status === 'PENDING' ? 'ACCEPTED' : intv.status;
+          const targetMaalemId = isLocallyUnlocked && !intv.maalem_id ? user?.id : intv.maalem_id;
+
+          return normalizeIntervention({
             ...intv,
-            status: isLocallyUnlocked && intv.status === 'PENDING' ? 'ACCEPTED' : intv.status,
-            maalem_id:
-              isLocallyUnlocked && !intv.maalem_id
-                ? user?.id || '22222222-2222-2222-2222-222222222222'
-                : intv.maalem_id,
-            rating: intv.rating ?? rev?.rating ?? null,
-            comment: intv.comment || rev?.comment || null,
-            client_name: clientProf?.full_name || intv.client_name || 'Client BricoleMoi',
-            client_phone: clientProf?.phone || intv.client_phone || '',
-            maalem_name:
-              maalemProf?.full_name ||
-              intv.maalem_name ||
-              (intv.maalem_id ? 'Artisan Maalem' : null),
-            maalem_phone: maalemProf?.phone || intv.maalem_phone || ''
-          };
-        });
+            status: targetStatus,
+            maalem_id: targetMaalemId
+          }, normContext);
+        }).filter(Boolean);
+
         setInterventions(enrichedInterventions);
       }
     } catch (e) {}
 
     const finalClients = Array.from(clientMap.values());
-    const finalMaalems = Array.from(maalemMap.values());
+    const finalMaalems = Array.from(maalemMap.values()).map(normalizeMaalemProfile).filter(Boolean);
 
     setClients(finalClients);
     setMaalems(finalMaalems);

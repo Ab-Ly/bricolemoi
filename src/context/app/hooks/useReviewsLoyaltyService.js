@@ -84,12 +84,16 @@ export const useReviewsLoyaltyService = ({
 
     await confirmLeadDebit(intervention_id, targetMaalemId);
 
+    let cleanCommentText = String(comment || '').trim();
+    if (cleanCommentText === '""' || cleanCommentText === "''") cleanCommentText = '';
+
+    const alreadyHasBadges = cleanCommentText.includes('[Badges:');
     const fullComment =
-      badges && badges.length > 0
-        ? comment
-          ? `"${comment}" [Badges: ${badges.join(', ')}]`
+      badges && badges.length > 0 && !alreadyHasBadges
+        ? cleanCommentText
+          ? `${cleanCommentText} [Badges: ${badges.join(', ')}]`
           : `[Badges: ${badges.join(', ')}]`
-        : String(comment || '');
+        : cleanCommentText;
 
     const newReview = {
       id: 'rev-' + Date.now(),

@@ -441,6 +441,8 @@ export const AdminDashboard = () => {
             <AdminDisputesView
               adminAlerts={adminAlerts}
               interventions={interventions}
+              maalems={maalems}
+              clients={clients}
               onResolveDispute={resolveDisputeAndRefund}
             />
           </motion.div>

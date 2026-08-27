@@ -16,3 +16,12 @@ Apply these rules strictly to all React + Tailwind CSS code in this PWA (`bricol
 ## 3. Map & Overlay Panels
 - Floating clean glass panels (`bg-white/95 backdrop-blur-xl border border-slate-200 text-slate-800 shadow-xl`).
 - CartoDB Positron / OpenStreetMap Clean Light tiles (`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png` or Positron).
+
+## 4. Règle Fondamentale : Vision Architecturale Totale (Client - Maâlem - Admin)
+**OBLIGATION ABSOLUE SUR CHAQUE DÉVELOPPEMENT / MODIFICATION :**
+Toute modification, ajout de fonctionnalité ou correction doit OBLIGATOIREMENT être pensée, implémentée et synchronisée sur les **3 piliers indissociables de la plateforme** :
+1. **Côté CLIENT** : Demandes SOS, suivi GPS temps réel, validation de fin de travaux, notation 1-5★ avec badges exclusifs, historique avec date/heure et tarification Accord Direct.
+2. **Côté MAÂLEM** : Alerte radar, guidage GPS vers le quartier exact (sans repli Casablanca), déblocage (15 DH), exécution, réception de l'avis et synchronisation du solde de leads.
+3. **Côté ADMIN** : Supervision des missions en direct, fiches Maâlems avec KPI et historique réel de chantiers, centre d'arbitrage/litiges avec recoupement complet Client + Maâlem (noms, téléphones, badges cohérents).
+4. **Zéro Donnée Forcée** : Aucun tarif imposé (Accord Direct), aucune fausse photo stock d'Unsplash, aucun repli GPS arbitraire, aucune note parfaite de 5.0 imposée si 0 avis.
+

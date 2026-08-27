@@ -45,8 +45,7 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
   const myTransactions = (transactions || []).filter((t) => {
     const matchId = mId && String(t.maalem_id || '').trim() === mId;
     const matchPhone = mPhone && mPhone.length > 7 && String(t.maalem_phone || '').replace(/\D/g, '') === mPhone;
-    const isMaalemRole = (maalemOrUser.role?.toUpperCase() === 'MAALEM' || maalemOrUser.specialty) && (!t.maalem_id || t.maalem_id === 'maalem-1' || String(t.maalem_id).trim() === mId);
-    return matchId || matchPhone || isMaalemRole;
+    return matchId || matchPhone;
   });
 
   const totalRechargedSum = myTransactions

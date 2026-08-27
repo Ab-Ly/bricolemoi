@@ -280,8 +280,8 @@ export const AdminMaalemsView = ({
                         const rInfo = getMaalemRating(m);
                         return (
                           <span className="flex items-center text-amber-800 font-mono font-bold bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 shadow-xs">
-                            <Star className="w-3 h-3 text-amber-500 fill-amber-500 mr-1" />
-                            <span>{rInfo.averageRating.toFixed(1)}</span>
+                            <Star className={`w-3 h-3 mr-1 ${rInfo.totalReviews > 0 ? 'text-amber-500 fill-amber-500' : 'text-slate-300'}`} />
+                            <span>{rInfo.totalReviews > 0 ? rInfo.averageRating.toFixed(1) : '-'}</span>
                             {rInfo.totalReviews > 0 && (
                               <span className="ml-1 text-[9px] text-amber-600">({rInfo.totalReviews})</span>
                             )}
@@ -492,7 +492,9 @@ export const AdminMaalemsView = ({
                     <div className="bg-amber-50 border border-amber-200 rounded-2xl p-2.5 text-center shadow-xs">
                       <span className="text-[9px] font-mono text-amber-800 uppercase block font-bold">Note ★</span>
                       <p className="text-base font-black text-amber-800 font-mono mt-0.5">
-                        {getMaalemRating(selectedMaalem).averageRating.toFixed(1)} / 5
+                        {getMaalemRating(selectedMaalem).totalReviews > 0
+                          ? `${getMaalemRating(selectedMaalem).averageRating.toFixed(1)} / 5`
+                          : '- / 5'}
                       </p>
                     </div>
 
@@ -567,11 +569,11 @@ export const AdminMaalemsView = ({
                         <>
                           <h4 className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider mb-2.5 flex items-center justify-between">
                             <span className="flex items-center gap-1.5">
-                              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                              <Star className={`w-3.5 h-3.5 ${selRating.totalReviews > 0 ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`} />
                               <span>Avis &amp; Commentaires Clients ({selRating.totalReviews})</span>
                             </span>
                             <span className="text-amber-800 font-mono font-bold text-xs bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
-                              Moyenne : {selRating.averageRating.toFixed(1)} / 5.0
+                              Moyenne : {selRating.totalReviews > 0 ? `${selRating.averageRating.toFixed(1)} / 5.0` : 'Nouveau Profil'}
                             </span>
                           </h4>
 

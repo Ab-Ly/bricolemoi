@@ -14,6 +14,7 @@ export const ClientReviewCompletionModal = ({
   hoverRating,
   setHoverRating,
   selectedBadges,
+  setSelectedBadges,
   toggleBadge,
   tipAmount,
   setTipAmount,
@@ -68,10 +69,16 @@ export const ClientReviewCompletionModal = ({
                         onMouseLeave={() => setHoverRating(0)}
                         onClick={() => {
                           setRating(star);
-                          if (star <= 3 && selectedBadges.some((b) => POSITIVE_BADGES.includes(b))) {
-                            toggleBadge('⏱️ Retard important');
-                          } else if (star >= 4 && selectedBadges.some((b) => NEGATIVE_BADGES.includes(b))) {
-                            toggleBadge('⏱️ Très Ponctuel');
+                          if (star <= 3) {
+                            setSelectedBadges((prev) => {
+                              const negs = prev.filter((b) => NEGATIVE_BADGES.includes(b));
+                              return negs.length > 0 ? negs : ['⚠️ Communication difficile'];
+                            });
+                          } else {
+                            setSelectedBadges((prev) => {
+                              const pos = prev.filter((b) => POSITIVE_BADGES.includes(b));
+                              return pos.length > 0 ? pos : ['⏱️ Très Ponctuel', '🧹 Chantier Propre'];
+                            });
                           }
                         }}
                         className="p-1 transition-all duration-200 hover:scale-125 active:scale-95 cursor-pointer"

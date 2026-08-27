@@ -318,7 +318,7 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
 
                   {/* Description & Photo */}
                   <div className="flex gap-3 items-start">
-                    {item.description_photo && (
+                    {item.description_photo && !item.description_photo.includes('unsplash.com') && (
                       <img
                         src={item.description_photo}
                         alt="Aperçu urgence"
@@ -394,9 +394,9 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
                 {/* Footer Carte : Coût Lead & Devis */}
                 <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
                   <div>
-                    <span className="text-[10px] text-slate-500 font-mono">Prix convenu :</span>
+                    <span className="text-[10px] text-slate-500 font-mono">Tarification :</span>
                     <p className="font-mono font-black text-slate-900">
-                      {item.final_agreed_price ? `${item.final_agreed_price} DH` : '150 - 250 DH'}
+                      {item.final_agreed_price ? `${item.final_agreed_price} DH` : '🤝 Accord Direct'}
                     </p>
                   </div>
 
@@ -479,7 +479,7 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
                   <p className="font-mono text-emerald-800 font-bold">{selectedMission.maalem_phone || 'N/A'}</p>
                 </div>
 
-                {selectedMission.description_photo && (
+                {selectedMission.description_photo && !selectedMission.description_photo.includes('unsplash.com') && (
                   <div>
                     <p className="font-bold text-slate-700 mb-1">Photo jointe :</p>
                     <img

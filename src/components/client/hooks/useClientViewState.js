@@ -565,8 +565,12 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
     const targetIntv = reviewModalInt || pendingCompletionModalInt || activeOngoingSOS || latestClientIntv;
     if (!targetIntv) return;
 
+    const relevantBadges = selectedBadges.filter((b) =>
+      rating >= 4 ? POSITIVE_BADGES.includes(b) : NEGATIVE_BADGES.includes(b)
+    );
+
     const fullComment = `${comment.trim()}${
-      selectedBadges.length > 0 ? ` [Badges: ${selectedBadges.join(', ')}]` : ''
+      relevantBadges.length > 0 ? ` [Badges: ${relevantBadges.join(', ')}]` : ''
     }${tipAmount > 0 ? ` [Pourboire: +${tipAmount} DH]` : ''}`;
 
     if (typeof submitClientFeedback === 'function') {
@@ -574,7 +578,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
         intervention_id: targetIntv.id,
         rating,
         comment: fullComment,
-        badges: selectedBadges,
+        badges: relevantBadges,
         tipDh: tipAmount
       });
     } else {
@@ -583,7 +587,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
         maalem_id: targetIntv.maalem_id,
         rating,
         comment: fullComment,
-        badges: selectedBadges,
+        badges: relevantBadges,
         tip_dh: tipAmount
       });
     }
@@ -678,6 +682,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
     comment,
     setComment,
     selectedBadges,
+    setSelectedBadges,
     toggleBadge,
     tipAmount,
     setTipAmount,
