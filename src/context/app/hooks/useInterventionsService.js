@@ -476,6 +476,7 @@ export const useInterventionsService = ({
     // Résolution exacte du profil Maâlem actif (sans altération toSafeUUID)
     const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === String(user?.id).trim()) || user?.maalem_details || user;
     const actualMaalemId = String(user?.id || liveMaalem?.id || 'maalem-1').trim();
+    const cleanMaalemId = actualMaalemId;
     const actualMaalemName = user?.full_name || liveMaalem?.full_name || 'Artisan Maâlem';
     const actualMaalemPhone = user?.phone || liveMaalem?.phone || '';
 
