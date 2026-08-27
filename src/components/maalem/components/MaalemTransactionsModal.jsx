@@ -6,19 +6,19 @@ import { isRealRechargeTx, isLeadTx, isBonusTx } from '../../../utils/balanceUti
 import { formatDateTime } from '../../../utils/dateUtils';
 
 export const MaalemTransactionsModal = ({
-  historyModalOpen,
-  setHistoryModalOpen,
-  liveCreditBalance,
-  totalRechargedSum,
-  totalLeadsSpent,
-  totalBonusSum,
-  historyFilter,
-  setHistoryFilter,
-  myTransactions,
-  filteredHistoryTransactions,
-  pendingMyRechargesCount,
-  setPreviewPhotoUrl,
-  generateReceiptPDF
+  historyModalOpen = false,
+  setHistoryModalOpen = () => {},
+  liveCreditBalance = 0,
+  totalRechargedSum = 0,
+  totalLeadsSpent = 0,
+  totalBonusSum = 0,
+  historyFilter = 'ALL',
+  setHistoryFilter = () => {},
+  myTransactions = [],
+  filteredHistoryTransactions = [],
+  pendingMyRechargesCount = 0,
+  setPreviewPhotoUrl = () => {},
+  generateReceiptPDF = () => {}
 }) => {
   return (
     <AnimatePresence>
@@ -49,7 +49,7 @@ export const MaalemTransactionsModal = ({
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-mono font-black text-slate-800">
                   <span>Solde :</span>
-                  <span className="text-amber-700">{liveCreditBalance.toFixed(2)} DH</span>
+                  <span className="text-amber-700">{Number(liveCreditBalance || 0).toFixed(2)} DH</span>
                 </div>
                 <button
                   onClick={() => setHistoryModalOpen(false)}
@@ -65,15 +65,15 @@ export const MaalemTransactionsModal = ({
             <div className="grid grid-cols-3 gap-2.5">
               <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-center">
                 <span className="text-[10px] text-emerald-800 font-bold block uppercase tracking-wider">Rechargé</span>
-                <span className="text-sm font-black text-emerald-700 font-mono">+{totalRechargedSum.toFixed(2)} DH</span>
+                <span className="text-sm font-black text-emerald-700 font-mono">+{Number(totalRechargedSum || 0).toFixed(2)} DH</span>
               </div>
               <div className="p-3 bg-blue-50 rounded-2xl border border-blue-200 text-center">
                 <span className="text-[10px] text-blue-800 font-bold block uppercase tracking-wider">Leads Débloqués</span>
-                <span className="text-sm font-black text-blue-700 font-mono">-{totalLeadsSpent.toFixed(2)} DH</span>
+                <span className="text-sm font-black text-blue-700 font-mono">-{Number(totalLeadsSpent || 0).toFixed(2)} DH</span>
               </div>
               <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-center">
                 <span className="text-[10px] text-amber-800 font-bold block uppercase tracking-wider">Bonus Reçus</span>
-                <span className="text-sm font-black text-amber-700 font-mono">+{totalBonusSum.toFixed(2)} DH</span>
+                <span className="text-sm font-black text-amber-700 font-mono">+{Number(totalBonusSum || 0).toFixed(2)} DH</span>
               </div>
             </div>
 
@@ -270,8 +270,8 @@ export const MaalemTransactionsModal = ({
                           }`}
                         >
                           {isPositive
-                            ? `+${Number(tx.amount_dh).toFixed(2)}`
-                            : `${Number(tx.amount_dh).toFixed(2)}`}{' '}
+                            ? `+${Number(tx.amount_dh || 0).toFixed(2)}`
+                            : `${Number(tx.amount_dh || 0).toFixed(2)}`}{' '}
                           DH
                         </span>
 
