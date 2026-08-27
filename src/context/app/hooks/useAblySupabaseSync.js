@@ -614,6 +614,60 @@ export const useAblySupabaseSync = ({
       }
     }, 30000);
 
+    // Écouteur de synchronisation multi-onglets & multi-appareils
+    let bc = null;
+    try {
+      bc = new BroadcastChannel('bricolemoi_intertab_sync');
+      bc.onmessage = (e) => {
+        const payload = e.data;
+        if (!payload) return;
+
+        if (payload.type === 'INTERVENTION_COMPLETED_WITH_REVIEW' || payload.type === 'INTERVENTION_COMPLETED') {
+          const intId = String(payload.intervention_id || '').trim();
+          const rRating = payload.rating !== undefined && payload.rating !== null ? Number(payload.rating) : null;
+          const rComment = payload.comment || null;
+
+          setInterventions((prev) => {
+            const next = prev.map((item) =>
+              String(item.id).trim() === intId
+                ? {
+                    ...item,
+                    status: 'COMPLETED',
+                    progress_step: 'COMPLETED',
+                    rating: rRating ?? item.rating,
+                    comment: rComment || item.comment
+                  }
+                : item
+            );
+            try {
+              localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+            } catch (err) {}
+            return next;
+          });
+
+          if (rRating !== null) {
+            setReviews((prev) => {
+              const next = [
+                {
+                  id: 'rev-' + Date.now(),
+                  intervention_id: intId,
+                  rating: rRating,
+                  comment: rComment,
+                  badges: payload.badges || [],
+                  created_at: new Date().toISOString()
+                },
+                ...prev.filter((r) => String(r.intervention_id).trim() !== intId)
+              ];
+              try {
+                localStorage.setItem('bricolemoi_reviews_cache', JSON.stringify(next));
+              } catch (err) {}
+              return next;
+            });
+          }
+        }
+      };
+    } catch (e) {}
+
     let supabaseChannel = null;
     if (isSupabaseConfigured) {
       try {

@@ -32,24 +32,26 @@ export const MaalemActiveMissionCard = ({
 
   return (
     <div id="active-unlocked-missions-section" className="space-y-4 scroll-mt-6">
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border-2 border-emerald-500/80 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center shadow-md flex-shrink-0 animate-pulse">
-            <Zap className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-xl font-black text-slate-900 font-sans flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 inline-block" />
-              Missions Actives en Cours ({activeUnlockedLeads.length})
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black tracking-wider uppercase border border-emerald-300">
-                Action Immédiate ⚡
-              </span>
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border-2 border-emerald-500/80 shadow-sm space-y-2">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center shadow-xs flex-shrink-0 animate-pulse">
+              <Zap className="w-5 h-5" />
+            </div>
+            <h3 className="text-base sm:text-lg font-black text-slate-900 font-sans flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Missions Actives ({activeUnlockedLeads.length})</span>
             </h3>
-            <p className="text-xs text-slate-600 font-medium mt-0.5">
-              Prenez contact avec le client sans attendre (WhatsApp ou Appel) et démarrez l'itinéraire GPS.
-            </p>
           </div>
+
+          <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black tracking-wide uppercase border border-emerald-300 shrink-0 shadow-xs">
+            ⚡ Action Immédiate
+          </span>
         </div>
+
+        <p className="text-xs text-slate-600 font-medium pl-0 sm:pl-11.5">
+          Prenez contact avec le client sans attendre (WhatsApp ou Appel) et démarrez l'itinéraire GPS.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -314,7 +316,7 @@ export const MaalemActiveMissionCard = ({
                       type="button"
                       onClick={() => {
                         requestOnSiteReview(lead.id);
-                        flowFinishMission(lead.final_agreed_price || lead.estimated_price_min);
+                        flowFinishMission(lead.final_agreed_price || null);
                       }}
                       className="w-full py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs sm:text-sm rounded-2xl shadow-md shadow-purple-600/25 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                     >

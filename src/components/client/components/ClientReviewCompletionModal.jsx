@@ -246,17 +246,16 @@ export const ClientReviewCompletionModal = ({
 
               <div className="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
-                  Montant Total Convenu :
+                  Tarification de la Prestation :
                 </span>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-slate-600">
                     Règlement direct à l'artisan
                   </span>
-                  <span className="text-lg font-black font-mono text-emerald-800">
-                    {pendingCompletionModalInt.final_agreed_price ||
-                      pendingCompletionModalInt.estimated_price_min ||
-                      150}{' '}
-                    DH
+                  <span className="text-base font-black font-mono text-emerald-800">
+                    {pendingCompletionModalInt.final_agreed_price
+                      ? `${pendingCompletionModalInt.final_agreed_price} DH`
+                      : 'Accord Direct'}
                   </span>
                 </div>
               </div>

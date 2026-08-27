@@ -6,7 +6,6 @@
  * - Vocabulaire Darija marocain (Phonétique / Arabizi avec 3, 7, 9)
  * - Vocabulaire Arabe officiel
  * - Fautes de frappe et variantes fréquentes (Typo tolerance)
- * - Fourchettes de prix indicatifs du marché marocain (DH)
  * - Délais moyens d'intervention d'urgence (< 15-30 min)
  */
 

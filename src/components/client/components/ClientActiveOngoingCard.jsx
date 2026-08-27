@@ -27,7 +27,7 @@ export const ClientActiveOngoingCard = ({
       {/* Header Intervention en Cours */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="flex items-center gap-3.5">
-          <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 flex-shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
             {activeOngoingSOS.status === 'PENDING_COMPLETION' ? (
               <CheckCircle2 className="w-7 h-7 text-white" />
             ) : activeOngoingSOS.progress_step === 'ARRIVED' ? (
@@ -122,7 +122,11 @@ export const ClientActiveOngoingCard = ({
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <span className="flex items-center gap-1 text-amber-600 font-bold">
                 <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                <span>4.9 / 5</span>
+                <span>
+                  {activeOngoingSOS.maalem_rating || matchedMaalem?.rating_avg
+                    ? `${(activeOngoingSOS.maalem_rating || matchedMaalem?.rating_avg).toFixed(1)} / 5`
+                    : '5.0 / 5'}
+                </span>
               </span>
               <span>•</span>
               <span>{activeOngoingSOS.subcategory || 'Dépannage'}</span>

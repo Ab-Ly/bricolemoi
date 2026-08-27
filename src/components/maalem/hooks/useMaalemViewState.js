@@ -368,6 +368,23 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
           item.maalem_id === '22222222-2222-2222-2222-222222222222');
       return isOwner || isFallbackOwner || isLocalUnlocked;
     })
+    .map((item) => {
+      const matchReview = (reviews || []).find(
+        (r) => String(r.intervention_id).trim() === String(item.id).trim()
+      );
+      const finalRating =
+        matchReview?.rating !== undefined && matchReview?.rating !== null
+          ? Number(matchReview.rating)
+          : item.rating !== undefined && item.rating !== null
+          ? Number(item.rating)
+          : null;
+      const finalComment = matchReview?.comment || item.comment || null;
+      return {
+        ...item,
+        rating: finalRating,
+        comment: finalComment
+      };
+    })
     .sort(
       (a, b) =>
         new Date(b.completed_at || b.updated_at || b.created_at || 0) -
@@ -395,14 +412,17 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
         }
       } catch (e) {}
 
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(() => {
         const el =
           document.getElementById('active-unlocked-missions-section') ||
           document.getElementById(`active-lead-${leadId}`);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-      }, 150);
+      }, 100);
     }
   };
 

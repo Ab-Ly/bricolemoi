@@ -117,6 +117,8 @@ export const useReviewsLoyaltyService = ({
         ? {
             ...item,
             status: 'COMPLETED',
+            progress_step: 'COMPLETED',
+            completed_at: new Date().toISOString(),
             rating: Number(rating),
             comment: fullComment,
             badges: badges || item.badges

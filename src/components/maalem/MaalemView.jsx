@@ -3,6 +3,7 @@ import { Compass, MapPin } from 'lucide-react';
 import { useMaalemViewState } from './hooks/useMaalemViewState';
 import { MaalemWelcomeWhatsAppBanner } from './components/MaalemWelcomeWhatsAppBanner';
 import { MaalemRadarHeader } from './components/MaalemRadarHeader';
+import { MaalemLoyaltyGaugeCard } from './components/MaalemLoyaltyGaugeCard';
 import { MaalemActiveMissionCard } from './components/MaalemActiveMissionCard';
 import { MaalemLeadsFeed } from './components/MaalemLeadsFeed';
 import { MaalemWalletModal } from './components/MaalemWalletModal';
@@ -13,19 +14,23 @@ import { InteractiveMap } from '../InteractiveMap';
 
 export const MaalemView = ({ onOpenCINVerification }) => {
   const maalem = useMaalemViewState({ onOpenCINVerification });
+  const hasActiveMissions = maalem.activeUnlockedLeads.length > 0;
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
+    <div className="space-y-6 max-w-4xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
       {/* 1. Message de Bienvenue WhatsApp Automatique */}
       <MaalemWelcomeWhatsAppBanner {...maalem} />
 
-      {/* 2. En-Tête Radar, Solde et Statut EN LIGNE */}
+      {/* 2. Priorité 1 : Missions Actives Débloquées (Au sommet dès qu'un lead est actif) */}
+      {hasActiveMissions && <MaalemActiveMissionCard {...maalem} />}
+
+      {/* 3. En-Tête Radar, Solde et Statut EN LIGNE */}
       <MaalemRadarHeader {...maalem} onOpenCINVerification={onOpenCINVerification} />
 
-      {/* 3. Missions Actives Débloquées (Priorité 1) */}
-      <MaalemActiveMissionCard {...maalem} />
+      {/* 4. Carte Jauge Fidélité : 4 Avis (≥4★) = 5ème Lead OFFERT */}
+      <MaalemLoyaltyGaugeCard {...maalem} />
 
-      {/* 4. Carte Radar Interactive d'Urgence */}
+      {/* 5. Carte Radar Interactive d'Urgence */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 font-sans">

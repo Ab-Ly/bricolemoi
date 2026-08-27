@@ -37,17 +37,6 @@ export const useInterventionsService = ({
     const defaultLat = lat || 33.5883;
     const defaultLng = lng || -7.6328;
 
-    const priceRanges = {
-      PLUMBING: [120, 180],
-      AUTO_MECHANIC: [180, 300],
-      ELECTRICIAN: [150, 250],
-      JARDINAGE: [140, 220],
-      NETTOYAGE: [100, 200],
-      SERRURERIE: [150, 280],
-      CLIMATISATION: [180, 320]
-    };
-    const [minPrice, maxPrice] = priceRanges[service_type] || [120, 180];
-
     const defaultPhotosByService = {
       ELECTRICIAN:
         'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80',
@@ -82,8 +71,9 @@ export const useInterventionsService = ({
       lng: defaultLng,
       description_photo: finalPhoto,
       audio_note_url: audio_note_url || null,
-      estimated_price_min: minPrice,
-      estimated_price_max: maxPrice,
+      estimated_price_min: null,
+      estimated_price_max: null,
+      final_agreed_price: null,
       devis_confirmed: false,
       status: 'PENDING',
       cost_lead: 15.0
@@ -160,9 +150,9 @@ export const useInterventionsService = ({
               : 'PLUMBING',
             district: dbPayload.district,
             description_photo: dbPayload.description_photo,
-            audio_note_url: dbPayload.audio_note_url,
-            estimated_price_min: minPrice,
-            estimated_price_max: maxPrice,
+            estimated_price_min: null,
+            estimated_price_max: null,
+            final_agreed_price: null,
             status: 'PENDING',
             cost_lead: 15.0
           };
@@ -751,7 +741,7 @@ export const useInterventionsService = ({
               ...item,
               status: 'PENDING_COMPLETION',
               final_agreed_price:
-                parsedPrice || item.final_agreed_price || item.estimated_price_min,
+                parsedPrice || item.final_agreed_price || null,
               devis_confirmed: true
             }
           : item
@@ -848,7 +838,7 @@ export const useInterventionsService = ({
               status: 'COMPLETED',
               escrow_status: 'DEBITED',
               final_agreed_price:
-                finalPrice || item.final_agreed_price || item.estimated_price_min
+                finalPrice || item.final_agreed_price || null
             }
           : item
       );

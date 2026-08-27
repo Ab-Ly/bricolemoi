@@ -294,7 +294,7 @@ export const VoiceRecorder = ({ onAudioRecorded, audioUrl, onClearAudio }) => {
             whileHover={{ scale: 1.03 }}
             type="button"
             onClick={startRecording}
-            className="w-13 h-13 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center justify-center shadow-md shadow-blue-500/20 active:scale-90 transition-all cursor-pointer flex-shrink-0"
+            className="w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center justify-center shadow-md shadow-blue-500/20 active:scale-90 transition-all cursor-pointer shrink-0"
             title="Appuyer pour enregistrer votre message vocal"
           >
             <Microphone weight="fill" className="w-6 h-6" />

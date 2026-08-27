@@ -435,11 +435,11 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           )}
 
           {/* Tab Switcher */}
-          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1">
+          <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 gap-1 overflow-x-auto no-scrollbar scroll-smooth">
             <button
               type="button"
               onClick={() => setActiveTab('info')}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer text-center whitespace-nowrap ${
                 activeTab === 'info'
                   ? isMaalem ? 'bg-amber-600 text-white shadow-xs' : 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -451,7 +451,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
               <button
                 type="button"
                 onClick={() => setActiveTab('reviews')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                   activeTab === 'reviews'
                     ? 'bg-amber-600 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -464,7 +464,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             <button
               type="button"
               onClick={() => setActiveTab('edit')}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 ${
+              className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                 activeTab === 'edit'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -476,7 +476,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             <button
               type="button"
               onClick={() => setActiveTab('pin')}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 ${
+              className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                 activeTab === 'pin'
                   ? 'bg-slate-900 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -489,7 +489,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
               <button
                 type="button"
                 onClick={() => setActiveTab('stats')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === 'stats'
                     ? 'bg-blue-600 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -640,7 +640,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                         </div>
                         <div className="flex items-center gap-0.5 text-amber-500 font-mono text-xs font-black">
                           <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                          <span>{Number(rev.rating || 5).toFixed(1)}</span>
+                          <span>{Number(rev.rating !== undefined && rev.rating !== null ? rev.rating : 5).toFixed(1)}</span>
                         </div>
                       </div>
 

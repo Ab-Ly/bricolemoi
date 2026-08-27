@@ -169,12 +169,12 @@ export const EmergencySOSModal = ({ alert, onAccept, onDismiss }) => {
               </div>
             </div>
 
-            {/* Estimated Budget & Access Details */}
+            {/* Tarification & Délai */}
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs">
-                <span className="text-[10px] text-slate-500 block font-bold">Fourchette Devis :</span>
-                <span className="font-mono font-black text-emerald-700 text-sm">
-                  {alert.estimated_price_min || 120} - {alert.estimated_price_max || 180} DH
+                <span className="text-[10px] text-slate-500 block font-bold">Tarification :</span>
+                <span className="font-bold text-blue-700 text-xs flex items-center gap-1">
+                  🤝 Accord Direct
                 </span>
               </div>
 

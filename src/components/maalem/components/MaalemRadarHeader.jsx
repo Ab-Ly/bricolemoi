@@ -71,92 +71,99 @@ export const MaalemRadarHeader = ({
       </div>
 
       {/* 2. Profil Rapide, Note & Badges de Confiance */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-13 h-13 rounded-2xl bg-amber-500 text-white font-black text-xl flex items-center justify-center shadow-xs shrink-0">
-            {(user?.full_name || currentLiveMaalem?.full_name || 'M')[0].toUpperCase()}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-black text-slate-900">
-                {user?.full_name || currentLiveMaalem?.full_name || 'Artisan Maâlem'}
-              </h3>
-              {isCinVerified ? (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                  <span>Artisan Vérifié</span>
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onOpenCINVerification}
-                  className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-bold hover:bg-amber-100 cursor-pointer"
-                >
-                  ⚡ Vérifier ma CIN (+ Badge Pro)
-                </button>
-              )}
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-4 sm:p-5 shadow-xs space-y-4">
+        <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white font-black text-lg flex items-center justify-center shadow-xs shrink-0">
+              {(user?.full_name || currentLiveMaalem?.full_name || 'M')[0].toUpperCase()}
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-              <span className="flex items-center gap-1 text-amber-600 font-black">
-                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                <span>{ratingInfo.averageRating} / 5</span>
-              </span>
-              <span>•</span>
-              <span>{ratingInfo.reviewsCount} avis clients</span>
-              {ratingInfo.consecutiveFiveStars > 0 && (
-                <>
-                  <span>•</span>
-                  <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 flex items-center gap-1">
-                    <Award className="w-3 h-3 text-blue-600" />
-                    <span>{ratingInfo.consecutiveFiveStars}/4 pour prime 100 DH</span>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-black text-slate-900">
+                  {user?.full_name || currentLiveMaalem?.full_name || 'Artisan Maâlem'}
+                </h3>
+                {isCinVerified ? (
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Artisan Vérifié</span>
                   </span>
-                </>
-              )}
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onOpenCINVerification}
+                    className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-bold hover:bg-amber-100 cursor-pointer"
+                  >
+                    ⚡ Vérifier ma CIN (+ Badge Pro)
+                  </button>
+                )}
+              </div>
+
+              {/* Note et avis réels */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 mt-1">
+                <span className="inline-flex items-center gap-1 text-amber-600 font-black whitespace-nowrap">
+                  <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                  <span>{ratingInfo.averageRating} / 5</span>
+                </span>
+                <span>•</span>
+                <span className="whitespace-nowrap font-medium">
+                  {ratingInfo.reviewsCount} avis {ratingInfo.reviewsCount <= 1 ? 'client' : 'clients'}
+                </span>
+                {ratingInfo.consecutiveFiveStars > 0 && (
+                  <>
+                    <span>•</span>
+                    <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 inline-flex items-center gap-1 whitespace-nowrap text-[11px]">
+                      <Award className="w-3 h-3 text-blue-600 shrink-0" />
+                      <span>{((ratingInfo.consecutiveFiveStars - 1) % 4) + 1}/4 pour 1 Lead SOS Offert</span>
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 3. Portefeuille & Solde Disponible */}
-        <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
-          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-right pr-4">
+        {/* 3. Portefeuille & Solde Disponible (Grid responsive mobile) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-slate-100">
+          <div className="sm:col-span-1 p-3 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-center">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
               Solde Disponible
             </span>
-            <div className="flex items-center gap-1.5 justify-end">
-              <span className="text-lg font-black font-mono text-slate-900">
+            <div className="flex items-baseline gap-2 flex-wrap mt-0.5">
+              <span className="text-lg font-black font-mono text-slate-900 whitespace-nowrap">
                 {liveAvailableBalance.toFixed(2)} DH
               </span>
               {totalReservedEscrow > 0 && (
-                <span className="text-[10px] text-amber-800 font-bold font-mono bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                <span className="text-[10px] text-amber-800 font-bold font-mono bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 whitespace-nowrap">
                   ({totalReservedEscrow} DH réservé)
                 </span>
               )}
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setRechargeModalOpen(true)}
-            className="p-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-2xl shadow-xs font-bold text-xs flex flex-col items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer shrink-0"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>Recharger</span>
-          </button>
+          <div className="sm:col-span-2 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setRechargeModalOpen(true)}
+              className="py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-2xl shadow-sm font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+            >
+              <PlusCircle className="w-4 h-4 shrink-0" />
+              <span>Recharger</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setHistoryModalOpen(true)}
-            className="p-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-2xl shadow-xs font-bold text-xs flex flex-col items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer relative shrink-0"
-            title="Historique des transactions"
-          >
-            <ClockCounterClockwise className="w-4 h-4 text-slate-600" />
-            <span>Historique</span>
-            {pendingMyRechargesCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
-                {pendingMyRechargesCount}
-              </span>
-            )}
-          </button>
+            <button
+              type="button"
+              onClick={() => setHistoryModalOpen(true)}
+              className="py-3 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-2xl shadow-xs font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer relative"
+            >
+              <ClockCounterClockwise className="w-4 h-4 text-slate-600 shrink-0" />
+              <span>Historique</span>
+              {pendingMyRechargesCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                  {pendingMyRechargesCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 

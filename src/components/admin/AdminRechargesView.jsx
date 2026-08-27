@@ -269,7 +269,7 @@ export const AdminRechargesView = ({
                         {maalem.full_name || 'Artisan Maâlem'}
                       </h4>
                       <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-mono">
-                        ★ {(maalem.rating_avg || 4.9).toFixed(1)}
+                        ★ {(maalem.rating_avg !== undefined && maalem.rating_avg !== null ? Number(maalem.rating_avg) : 5.0).toFixed(1)}
                       </span>
                     </div>
 
@@ -469,7 +469,13 @@ export const AdminRechargesView = ({
                   <span className="text-[10px] font-mono text-slate-500 uppercase">Note Moyenne :</span>
                   <p className="text-lg font-black text-amber-800 font-mono flex items-center gap-1">
                     <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                    <span>{(selectedMaalemProfile.rating_avg || 4.9).toFixed(1)} / 5.0</span>
+                    <span>
+                      {(selectedMaalemProfile.rating_avg !== undefined && selectedMaalemProfile.rating_avg !== null
+                        ? Number(selectedMaalemProfile.rating_avg)
+                        : 5.0
+                      ).toFixed(1)}{' '}
+                      / 5.0
+                    </span>
                   </p>
                 </div>
 

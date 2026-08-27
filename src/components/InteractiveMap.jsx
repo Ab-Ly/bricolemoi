@@ -593,7 +593,7 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
                 <p class="font-bold text-slate-900">Quartier : <span class="text-blue-600 font-extrabold">${item.district || 'Casablanca'}</span></p>
                 <div class="flex items-center justify-between text-[11px] text-slate-600 font-mono pt-1 whitespace-nowrap">
                   <span>Distance : <strong class="text-slate-900">${distanceKm} km</strong></span>
-                  <span>Budget : <strong class="text-emerald-700 font-bold">${item.estimated_price_min || 120}-${item.estimated_price_max || 180} DH</strong></span>
+                  <span>Tarif : <strong class="text-blue-700 font-bold">Accord Direct</strong></span>
                 </div>
               </div>
             </div>`

@@ -26,29 +26,31 @@ export const MaalemLeadsFeed = ({
     <div className="space-y-8">
       {/* 1. Demandes d'Urgence SOS Disponibles */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-slate-200/90 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-200 shadow-xs flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-200 shadow-xs flex items-center justify-center shrink-0">
               <Zap className="w-5 h-5 text-red-600 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 font-sans tracking-tight flex items-center gap-2">
-                Demandes d'Urgence SOS en Direct
-                <span className="px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-xs font-mono font-bold">
+              <div className="flex items-center justify-between sm:justify-start gap-2 flex-wrap">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 font-sans tracking-tight">
+                  Demandes d'Urgence SOS en Direct
+                </h3>
+                <span className="px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-xs font-mono font-bold shrink-0">
                   {availableLeads.length} actives
                 </span>
-              </h3>
-              <p className="text-[11px] text-slate-500 font-medium">
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
                 Flux instantané Ably Realtime (&lt; 50ms) • Coût déblocage : 15 DH
               </p>
             </div>
           </div>
 
-          <div className="flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200 gap-1">
+          <div className="grid grid-cols-2 p-1 rounded-2xl bg-slate-100 border border-slate-200 gap-1 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setFilterBySpecialtyOnly(true)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
+              className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer text-center ${
                 filterBySpecialtyOnly
                   ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-black'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
@@ -56,15 +58,15 @@ export const MaalemLeadsFeed = ({
             >
               <Target
                 weight="duotone"
-                className={`w-4 h-4 ${filterBySpecialtyOnly ? 'text-white' : 'text-amber-600'}`}
+                className={`w-4 h-4 shrink-0 ${filterBySpecialtyOnly ? 'text-white' : 'text-amber-600'}`}
               />
-              <span>Ma Spécialité</span>
+              <span className="truncate">Ma Spécialité</span>
             </button>
 
             <button
               type="button"
               onClick={() => setFilterBySpecialtyOnly(false)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
+              className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer text-center ${
                 !filterBySpecialtyOnly
                   ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-black'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
@@ -72,9 +74,9 @@ export const MaalemLeadsFeed = ({
             >
               <GlobeHemisphereWest
                 weight="duotone"
-                className={`w-4 h-4 ${!filterBySpecialtyOnly ? 'text-white' : 'text-blue-600'}`}
+                className={`w-4 h-4 shrink-0 ${!filterBySpecialtyOnly ? 'text-white' : 'text-blue-600'}`}
               />
-              <span>Toutes les Demandes</span>
+              <span className="truncate">Toutes les Demandes</span>
             </button>
           </div>
         </div>
@@ -278,7 +280,11 @@ export const MaalemLeadsFeed = ({
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full font-mono font-black text-amber-900 bg-amber-100/90 flex items-center gap-1 border border-amber-200 shadow-xs">
                     <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                    <span>{lead.rating ? `${lead.rating} / 5` : '5 / 5'}</span>
+                    <span>
+                      {lead.rating !== undefined && lead.rating !== null
+                        ? `${lead.rating} / 5`
+                        : 'Clôturé'}
+                    </span>
                   </span>
                 </div>
                 <p className="text-slate-600 font-mono text-[11px]">

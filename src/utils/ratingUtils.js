@@ -40,7 +40,7 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
   
   const additionalFromInterventions = (interventions || [])
     .filter((i) => {
-      if (!i || i.status !== 'COMPLETED') return false;
+      if (!i || i.status !== 'COMPLETED' || !i.rating) return false;
       const matchIntId = mId && String(i.maalem_id || '').trim() === mId;
       const matchIntPhone = mPhone && mPhone.length > 7 && String(i.maalem_phone || '').replace(/\D/g, '') === mPhone;
       const isLocalUnlocked = myUnlocked.includes(String(i.id).trim());
@@ -49,9 +49,7 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
       return isCandidate && !reviewedInterventionIds.has(String(i.id).trim());
     })
     .map((i) => {
-      const starRating = Number(i.rating) > 0 ? Number(i.rating) : 5;
-      const location = i.district || i.city_zone || i.city || 'Maroc';
-      const category = i.category || 'Dépannage';
+      const starRating = Number(i.rating);
       return {
         id: `intv-rev-${i.id}`,
         intervention_id: i.id,
@@ -59,8 +57,8 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
         client_name: i.client_name || 'Client BricoleMoi',
         client_phone: i.client_phone || '',
         rating: starRating,
-        comment: i.comment || `Excellent travail, artisan très ponctuel et professionnel pour ce dépannage à ${location} (${i.total_price || 120} DH).`,
-        badges: Array.isArray(i.badges) && i.badges.length > 0 ? i.badges : ['Travail Soigné 🛠️', 'Ponctualité ⏱️', '100% Recommandé ⭐'],
+        comment: i.comment || '',
+        badges: Array.isArray(i.badges) ? i.badges : [],
         created_at: i.completed_at || i.updated_at || i.created_at || new Date().toISOString()
       };
     });

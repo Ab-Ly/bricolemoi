@@ -4,20 +4,31 @@ import { Clock, MapPin, AlertTriangle, Zap, CheckCircle2, PhoneCall } from 'luci
 import { getServiceDisplay } from '../hooks/useClientViewState';
 
 export const ClientActiveRequestsList = ({
-  activeClientInterventions,
+  activeClientInterventions = [],
+  activeOngoingSOS,
+  activePendingSOS,
   relaunchEmergencyRequest,
   setPendingCompletionModalInt,
   cancelIntervention,
   t
 }) => {
+  const currentFocusedId = String(activeOngoingSOS?.id || activePendingSOS?.id || '').trim();
+  const displayableRequests = currentFocusedId
+    ? activeClientInterventions.filter((item) => String(item.id).trim() !== currentFocusedId)
+    : activeClientInterventions;
+
+  if (currentFocusedId && displayableRequests.length === 0) {
+    return null;
+  }
+
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
         <Clock className="w-5 h-5 text-blue-600" />
-        {t('my_requests')} en cours ({activeClientInterventions.length})
+        {t('my_requests')} en cours ({displayableRequests.length})
       </h3>
 
-      {activeClientInterventions.length === 0 ? (
+      {displayableRequests.length === 0 ? (
         <div className="p-6 bg-white rounded-3xl border border-slate-200 text-center space-y-2 shadow-xs">
           <p className="text-sm font-bold text-slate-700">✨ Vous n'avez aucune demande SOS en cours.</p>
           <p className="text-xs text-slate-500">
@@ -26,7 +37,7 @@ export const ClientActiveRequestsList = ({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {activeClientInterventions.map((item) => {
+          {displayableRequests.map((item) => {
             const serviceInfo = getServiceDisplay(item.service_type);
 
             return (
@@ -146,13 +157,18 @@ export const ClientActiveRequestsList = ({
                             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                             <span>Travaux finalisés par le Maâlem</span>
                           </span>
-                          <span className="text-xs font-black font-mono text-emerald-800 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-xs">
-                            {item.final_agreed_price || item.estimated_price_min || 150} DH
-                          </span>
+                          {item.final_agreed_price ? (
+                            <span className="text-xs font-black font-mono text-emerald-800 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-xs">
+                              {item.final_agreed_price} DH
+                            </span>
+                          ) : (
+                            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-200">
+                              Prêt pour Clôture
+                            </span>
+                          )}
                         </div>
                         <p className="text-[11px] text-slate-700">
-                          Le Maâlem a terminé les travaux pour un montant de{' '}
-                          <strong>{item.final_agreed_price || 150} DH</strong>. Veuillez confirmer pour clôturer et noter.
+                          Le Maâlem a terminé l'intervention{item.final_agreed_price ? ` pour un montant de ${item.final_agreed_price} DH` : ''}. Veuillez confirmer pour clôturer et noter.
                         </p>
                         <button
                           type="button"

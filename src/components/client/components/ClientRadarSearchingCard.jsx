@@ -28,7 +28,7 @@ export const ClientRadarSearchingCard = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="flex items-center gap-3.5">
           <div className="relative flex items-center justify-center">
-            <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
               <Radio className="w-7 h-7 text-white animate-pulse" />
             </div>
             <div className="absolute inset-0 rounded-2xl border-2 border-blue-500 animate-ping opacity-25 pointer-events-none" />

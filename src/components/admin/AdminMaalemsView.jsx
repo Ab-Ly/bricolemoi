@@ -441,7 +441,7 @@ export const AdminMaalemsView = ({
                 <div className="p-6 border-b border-slate-100 bg-slate-50/80 sticky top-0 z-10 backdrop-blur-md">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-13 h-13 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 font-black text-xl flex items-center justify-center shadow-xs">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 font-black text-xl flex items-center justify-center shadow-xs shrink-0">
                         {selectedMaalem.full_name ? selectedMaalem.full_name.charAt(0).toUpperCase() : 'M'}
                       </div>
                       <div>

@@ -205,10 +205,13 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
   const [clientHistoryPage, setClientHistoryPage] = useState(1);
 
   const activeClientInterventions = myClientInterventions
-    .filter((item) =>
-      ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION', 'UNFEASIBLE'].includes(
-        item.status
-      )
+    .filter(
+      (item) =>
+        ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION', 'UNFEASIBLE'].includes(
+          item.status
+        ) &&
+        item.status !== 'COMPLETED' &&
+        item.status !== 'CANCELLED'
     )
     .sort((a, b) => new Date(b.created_at || b.updated_at || 0) - new Date(a.created_at || a.updated_at || 0));
 
@@ -479,6 +482,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
       if (created) {
         flowTriggerSOS(created);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
       setPhotos([]);
@@ -581,28 +585,28 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
   const ongoingFromList = activeClientInterventions.find(
     (i) =>
-      ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status) ||
-      ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(i.progress_step) ||
-      Boolean(i.maalem_id && i.status !== 'CANCELLED' && i.status !== 'COMPLETED')
+      i.status !== 'COMPLETED' &&
+      i.status !== 'CANCELLED' &&
+      i.status !== 'UNFEASIBLE' &&
+      ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
   );
 
   const activeOngoingSOS =
-    ongoingFromList ||
-    (isMatched && activeEmergency && !isCompleted ? activeEmergency : null) ||
-    (activeEmergency &&
-    (['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(activeEmergency.status) ||
-      ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(activeEmergency.progress_step) ||
-      Boolean(activeEmergency.maalem_id)) &&
-    !isCompleted
-      ? activeEmergency
-      : null);
+    (ongoingFromList && ongoingFromList.status !== 'COMPLETED' && ongoingFromList.status !== 'CANCELLED')
+      ? ongoingFromList
+      : (isMatched && activeEmergency && !isCompleted && activeEmergency.status !== 'COMPLETED' && activeEmergency.status !== 'CANCELLED'
+        ? activeEmergency
+        : null);
 
   const pendingFromList = !activeOngoingSOS
-    ? activeClientInterventions.find((i) => i.status === 'PENDING' && !i.maalem_id && !i.progress_step)
+    ? activeClientInterventions.find(
+        (i) => i.status === 'PENDING' && !i.maalem_id && i.progress_step !== 'COMPLETED'
+      )
     : null;
+
   const activePendingSOS = !activeOngoingSOS
     ? pendingFromList ||
-      (isSearching && !isMatched
+      (isSearching && !isMatched && !isCompleted && activeEmergency?.status !== 'COMPLETED'
         ? activeEmergency || {
             id: 'pending-sos',
             service_type: serviceType,

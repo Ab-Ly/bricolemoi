@@ -186,7 +186,7 @@ export const EmergencyFlowProvider = ({ children }) => {
           full_name: myMatched.maalem_name || 'Artisan Maâlem',
           phone: myMatched.maalem_phone || '',
           specialty: myMatched.service_type || 'PLUMBING',
-          rating_avg: 4.9
+          rating_avg: myMatched.maalem_rating ?? 5.0
         };
         dispatch({
           type: ACTIONS.MATCH_SOS,
@@ -225,7 +225,7 @@ export const EmergencyFlowProvider = ({ children }) => {
             id: payload.maalem_id,
             full_name: payload.maalem_name || 'Artisan Maâlem',
             phone: payload.maalem_phone || '',
-            rating_avg: payload.maalem_rating || 4.9,
+            rating_avg: payload.maalem_rating !== undefined && payload.maalem_rating !== null ? Number(payload.maalem_rating) : 5.0,
             specialty: payload.specialty || 'PLUMBING',
             lat: payload.maalem_lat,
             lng: payload.maalem_lng,
@@ -451,7 +451,7 @@ export const EmergencyFlowProvider = ({ children }) => {
         maalem_id: userRef.current?.id,
         maalem_name: userRef.current?.full_name || 'Artisan Maâlem',
         maalem_phone: userRef.current?.phone || '',
-        maalem_rating: userRef.current?.maalem_details?.rating_avg || 4.9,
+        maalem_rating: userRef.current?.maalem_details?.rating_avg ?? userRef.current?.rating_avg ?? 5.0,
         timestamp: Date.now()
       };
 

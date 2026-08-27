@@ -58,8 +58,8 @@ const CLIENT_SCENES = [
     badgeAr: 'سجل أوديو بالدارجة',
     title: 'Vous Envoyez un Message Vocal en Darija (Sans Écrire)',
     titleAr: 'سجل أوديو بالدارجة و التطبيق كيتكلف بالباقي',
-    desc: 'Appuyez sur le micro et parlez naturellement : "عندي روبيني تهرس والما كيعمر الكوزينة". Le système analyse automatiquement la panne, estime le prix (80 à 150 DH) et alerte les plombiers du quartier.',
-    descAr: 'صيفط فوكال عادي كيفما كتهضر، السيستيم كيدير تشخيص فالحين ويحدد الثمن التقريبي باش ما يصيدوكش.',
+    desc: 'Appuyez sur le micro et parlez naturellement : "عندي روبيني تهرس والما كيعمر الكوزينة". Le système analyse instantanément votre demande et diffuse l\'alerte auprès des artisans qualifiés du quartier.',
+    descAr: 'صيفط فوكال عادي كيفما كتهضر، السيستيم كيوصل الطلب ديالك للحرفيين القرابين ليك فالحين.',
     icon: Sparkles,
     themeColor: 'from-blue-500 to-indigo-600',
     accentColor: 'text-blue-400',
@@ -67,8 +67,7 @@ const CLIENT_SCENES = [
     mockupVisual: {
       type: 'REAL_VOICE',
       audioText: '🎙️ "السلام عليكم، عندي روبيني ديال الكوزينة طرطق والما سايل.. عتقونا."',
-      diagnostic: 'Diagnostic Automatique : Remplacement flexible robinetterie',
-      estimatedPrice: '80 - 150 DH (Fourchette constatée)'
+      diagnostic: 'Diagnostic Automatique : Dépannage Plomberie Express'
     }
   },
   {
@@ -431,9 +430,9 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                       <div className="space-y-1 text-left">
                         <p className="text-[9px] text-slate-500 font-bold uppercase">Diagnostic Instantané :</p>
                         <p className="text-[11px] sm:text-xs font-bold text-emerald-700 leading-tight">{currentScene.mockupVisual.diagnostic}</p>
-                        <div className="p-1.5 sm:p-2 bg-slate-50 rounded-xl text-[11px] font-mono font-black text-amber-900 flex items-center justify-between mt-1 border border-slate-200">
-                          <span>Tarif Indicatif :</span>
-                          <span>{currentScene.mockupVisual.estimatedPrice}</span>
+                        <div className="p-1.5 sm:p-2 bg-blue-50 rounded-xl text-[11px] font-bold text-blue-900 flex items-center justify-between mt-1 border border-blue-200">
+                          <span>Tarification :</span>
+                          <span>🤝 Accord Direct Client ↔ Artisan</span>
                         </div>
                       </div>
                     </div>
