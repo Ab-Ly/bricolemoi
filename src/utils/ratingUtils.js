@@ -73,9 +73,12 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
   let badgesMap = {};
 
   allMaalemReviews.forEach((r) => {
-    const star = Math.min(5, Math.max(1, Math.round(Number(r.rating) || 5)));
-    breakdown[star] = (breakdown[star] || 0) + 1;
-    totalScore += Number(r.rating) || 5;
+    const rawVal = Number(r.rating);
+    if (!isNaN(rawVal) && rawVal >= 1 && rawVal <= 5) {
+      const star = Math.round(rawVal);
+      breakdown[star] = (breakdown[star] || 0) + 1;
+      totalScore += rawVal;
+    }
 
     // Badges collection
     if (Array.isArray(r.badges)) {
