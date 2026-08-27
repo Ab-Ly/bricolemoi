@@ -145,7 +145,7 @@ export const AdminDisputesView = ({
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              Tous ({adminAlerts.length})
+              Tous ({allDisputes.length})
             </button>
             <button
               type="button"
@@ -156,7 +156,7 @@ export const AdminDisputesView = ({
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              À Traiter ({adminAlerts.filter((a) => a.status !== 'REFUNDED_RESOLVED' && a.status !== 'REJECTED').length})
+              À Traiter ({allDisputes.filter((a) => a.status !== 'REFUNDED_RESOLVED' && a.status !== 'REJECTED').length})
             </button>
             <button
               type="button"
@@ -167,7 +167,7 @@ export const AdminDisputesView = ({
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              Résolus ({adminAlerts.filter((a) => a.status === 'REFUNDED_RESOLVED' || a.status === 'REJECTED').length})
+              Résolus ({allDisputes.filter((a) => a.status === 'REFUNDED_RESOLVED' || a.status === 'REJECTED').length})
             </button>
           </div>
         </div>

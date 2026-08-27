@@ -92,14 +92,54 @@ export const AdminDashboard = () => {
   const completedSOSCount = interventions.filter((i) => i.status === 'COMPLETED').length;
 
   const onlineMaalemsCount = maalems.filter((m) => m.is_online).length;
-  const activeClientsCount = clients.filter((c) => !c.is_suspended).length;
-  const lowRatingIntvsCount = interventions.filter(
-    (i) => (i.rating && Number(i.rating) <= 2) || i.unreachable_reason || i.unfeasible_reason
-  ).filter((i) => i.status !== 'UNREACHABLE_REFUNDED').length;
-  const pendingDisputesCount = Math.max(
-    adminAlerts.filter((a) => a.status !== 'REFUNDED_RESOLVED' && a.status !== 'REJECTED').length,
-    lowRatingIntvsCount
-  );
+  const resolvedDisputesMap = React.useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('bricolemoi_resolved_disputes') || '{}');
+    } catch (e) {
+      return {};
+    }
+  }, []);
+
+  const pendingDisputesCount = React.useMemo(() => {
+    const map = new Map();
+
+    (adminAlerts || []).forEach((a) => {
+      if (a && (a.intervention_id || a.id)) {
+        map.set(String(a.intervention_id || a.id), a.status);
+      }
+    });
+
+    (interventions || []).forEach((intv) => {
+      if (!intv) return;
+      const intId = String(intv.id);
+      if (map.has(intId)) {
+        if (intv.unfeasible_notes?.startsWith('REJECTED')) {
+          map.set(intId, 'REJECTED');
+        }
+        return;
+      }
+
+      const hasLowRating = intv.rating && Number(intv.rating) <= 2;
+      const hasUnreachable = Boolean(intv.unreachable_reason);
+      const hasUnfeasible = Boolean(intv.unfeasible_reason);
+
+      if (hasLowRating || hasUnreachable || hasUnfeasible) {
+        let status = 'PENDING';
+        if (intv.status === 'UNREACHABLE_REFUNDED' || resolvedDisputesMap[intId] === 'REFUNDED_RESOLVED') {
+          status = 'REFUNDED_RESOLVED';
+        } else if (
+          intv.unfeasible_notes?.startsWith('REJECTED') ||
+          resolvedDisputesMap[intId] === 'REJECTED' ||
+          intv.dispute_status === 'REJECTED'
+        ) {
+          status = 'REJECTED';
+        }
+        map.set(intId, status);
+      }
+    });
+
+    return Array.from(map.values()).filter((st) => st !== 'REFUNDED_RESOLVED' && st !== 'REJECTED').length;
+  }, [adminAlerts, interventions, resolvedDisputesMap]);
   const pendingRechargesCount = transactions.filter((t) => t.status === 'PENDING').length;
 
   return (
