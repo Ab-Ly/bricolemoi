@@ -37,11 +37,11 @@ export const MaalemLeadsFeed = ({
                   Demandes d'Urgence SOS en Direct
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-xs font-mono font-bold shrink-0">
-                  {availableLeads.length} actives
+                  {availableLeads.length} active{availableLeads.length > 1 ? 's' : ''}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                Flux instantané Ably Realtime (&lt; 50ms) • Coût déblocage : 15 DH
+                Alertes d'urgence instantanées dans votre secteur • Coût déblocage : 15.00 DH
               </p>
             </div>
           </div>
@@ -253,15 +253,15 @@ export const MaalemLeadsFeed = ({
       {completedLeads.length > 0 && (
         <div className="space-y-4 pt-4 border-t border-slate-200">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <h3 className="text-lg font-black text-slate-900 flex items-center gap-2 font-sans">
-              <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-              Chantiers Clôturés &amp; Avis Clients
-              <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold font-mono border border-slate-200">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 font-sans flex-wrap">
+              <Star className="w-5 h-5 text-amber-500 fill-amber-500 shrink-0" />
+              <span>Chantiers Clôturés &amp; Avis Clients</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold font-mono border border-slate-200 whitespace-nowrap shrink-0">
                 {completedLeads.length} au total
               </span>
             </h3>
             {totalCompletedPages > 1 && (
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-slate-500 font-medium whitespace-nowrap">
                 Page {completedPage} sur {totalCompletedPages}
               </p>
             )}
@@ -273,12 +273,12 @@ export const MaalemLeadsFeed = ({
                 key={lead.id}
                 className="p-4 bg-emerald-50/70 border border-emerald-200/90 rounded-2xl space-y-2 text-xs shadow-xs hover:shadow-sm transition-all"
               >
-                <div className="flex items-center justify-between font-bold">
-                  <span className="text-emerald-950 font-black">
+                <div className="flex items-center justify-between font-bold gap-2">
+                  <span className="text-emerald-950 font-black truncate">
                     {lead.client_name || 'Client BricoleMoi'} •{' '}
                     {lead.subcategory || 'Dépannage'}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full font-mono font-black text-amber-900 bg-amber-100/90 flex items-center gap-1 border border-amber-200 shadow-xs">
+                  <span className="px-2.5 py-0.5 rounded-full font-mono font-black text-amber-900 bg-amber-100/90 flex items-center gap-1 border border-amber-200 shadow-xs whitespace-nowrap shrink-0">
                     <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                     <span>
                       {lead.rating !== undefined && lead.rating !== null
@@ -290,7 +290,7 @@ export const MaalemLeadsFeed = ({
                 <p className="text-slate-600 font-mono text-[11px]">
                   📍 {lead.district || 'Casablanca'} • Rémunération :{' '}
                   <strong className="text-slate-900 font-black">
-                    {lead.final_agreed_price || 150} DH
+                    {lead.final_agreed_price ? `${lead.final_agreed_price} DH` : 'Accord Direct'}
                   </strong>
                 </p>
                 {lead.comment && (

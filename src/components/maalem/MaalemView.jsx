@@ -17,7 +17,7 @@ export const MaalemView = ({ onOpenCINVerification }) => {
   const hasActiveMissions = maalem.activeUnlockedLeads.length > 0;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-32 md:pb-16 font-sans px-3 sm:px-4 pb-safe">
+    <div className="space-y-6 max-w-4xl mx-auto pb-48 md:pb-24 font-sans px-3 sm:px-4 pb-safe">
       {/* 1. Message de Bienvenue WhatsApp Automatique */}
       <MaalemWelcomeWhatsAppBanner {...maalem} />
 

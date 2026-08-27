@@ -100,7 +100,7 @@ export const AdminMaalemsView = ({
     });
 
     const completed = maalemMissions.filter((m) => m.status === 'COMPLETED');
-    const totalRevenueDh = completed.reduce((sum, m) => sum + (parseFloat(m.final_agreed_price) || 200), 0);
+    const totalRevenueDh = completed.reduce((sum, m) => sum + (parseFloat(m.final_agreed_price) || 0), 0);
 
     return {
       maalemMissions,

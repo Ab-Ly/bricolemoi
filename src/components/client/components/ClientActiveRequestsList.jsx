@@ -208,7 +208,7 @@ export const ClientActiveRequestsList = ({
                       className="px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Valider Fin de Chantier ({item.final_agreed_price || 150} DH)</span>
+                      <span>Valider Fin de Chantier{item.final_agreed_price ? ` (${item.final_agreed_price} DH)` : ''}</span>
                     </button>
                   )}
 

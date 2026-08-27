@@ -69,7 +69,7 @@ export const useAblyNotifications = ({ user, onSosAlert, onSosClaimed, onUserMes
         } else if (event === 'work:completion_requested' && isClient) {
           notify.info(
             'Travaux Finalisés ✨',
-            `L'artisan a terminé l'intervention (${payload.final_agreed_price || 150} DH). Veuillez confirmer.`,
+            `L'artisan a terminé l'intervention${payload.final_agreed_price ? ` (${payload.final_agreed_price} DH)` : ''}. Veuillez confirmer.`,
             { id: `work-completion-${intvId}`, badge: 'Confirmation Requise' }
           );
         } else if ((event === 'credit:added' || event === 'recharge:approved') && isMaalem) {

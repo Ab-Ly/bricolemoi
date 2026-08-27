@@ -12,7 +12,7 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
   const client = useClientViewState({ initialCategory, initialCity, initialDistrict });
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 font-sans pb-16">
+    <div className="max-w-4xl mx-auto space-y-8 font-sans pb-48 md:pb-24 px-3 sm:px-4">
       {/* 1. Intervention active en cours avec le Maâlem */}
       {client.activeOngoingSOS ? (
         <ClientActiveOngoingCard {...client} />
