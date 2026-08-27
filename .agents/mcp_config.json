@@ -7,6 +7,30 @@
         "@modelcontextprotocol/server-postgres",
         "postgresql://postgres.cpvmuthokkspsthpbxrv:Supabase2026SecurePass@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
       ]
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN:-}"
+      }
     }
   }
 }
