@@ -472,15 +472,20 @@ export const useInterventionsService = ({
     const serviceType = targetIntv?.service_type || user?.specialty || 'all';
     const nowIso = new Date().toISOString();
     const cleanIntId = String(interventionId).trim();
-    const cleanMaalemId = toSafeUUID(user?.id);
+    
+    // Résolution exacte du profil Maâlem actif (sans altération toSafeUUID)
+    const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === String(user?.id).trim()) || user?.maalem_details || user;
+    const actualMaalemId = String(user?.id || liveMaalem?.id || 'maalem-1').trim();
+    const actualMaalemName = user?.full_name || liveMaalem?.full_name || 'Artisan Maâlem';
+    const actualMaalemPhone = user?.phone || liveMaalem?.phone || '';
 
     const acceptedItem = {
       id: interventionId,
       status: 'ACCEPTED',
       escrow_status: 'DEBITED',
-      maalem_id: cleanMaalemId,
-      maalem_name: user?.full_name || 'Artisan Maâlem',
-      maalem_phone: user?.phone,
+      maalem_id: actualMaalemId,
+      maalem_name: actualMaalemName,
+      maalem_phone: actualMaalemPhone,
       accepted_at: nowIso,
       progress_step: 'ON_THE_WAY'
     };
@@ -490,9 +495,9 @@ export const useInterventionsService = ({
 
     const newDebitTx = {
       id: `tx-lead-${cleanIntId}-${Date.now()}`,
-      maalem_id: cleanMaalemId,
-      maalem_name: user?.full_name || 'Artisan Maalem',
-      maalem_phone: user?.phone || '',
+      maalem_id: actualMaalemId,
+      maalem_name: actualMaalemName,
+      maalem_phone: actualMaalemPhone,
       amount_dh: -leadCost,
       type: 'LEAD_DEDUCTION',
       payment_method: 'SYSTEM_DEBIT',
@@ -511,20 +516,19 @@ export const useInterventionsService = ({
     });
 
     let newCalculatedBal = 0;
-    if (user?.role === 'MAALEM') {
-      const currentBal = Number(
-        user?.maalem_details?.credit_balance ?? user?.credits ?? leadCost
-      );
-      newCalculatedBal = Math.max(0, currentBal - leadCost);
-      setUser((prev) => ({
-        ...prev,
-        credits: newCalculatedBal,
-        maalem_details: {
-          ...(prev?.maalem_details || {}),
-          credit_balance: newCalculatedBal
-        }
-      }));
-    }
+    const currentBal = Number(
+      user?.maalem_details?.credit_balance ?? user?.credits ?? liveMaalem?.credit_balance ?? leadCost
+    );
+    newCalculatedBal = Math.max(0, currentBal - leadCost);
+    
+    setUser((prev) => ({
+      ...prev,
+      credits: newCalculatedBal,
+      maalem_details: {
+        ...(prev?.maalem_details || {}),
+        credit_balance: newCalculatedBal
+      }
+    }));
 
     setMaalems((prev) =>
       prev.map((m) =>

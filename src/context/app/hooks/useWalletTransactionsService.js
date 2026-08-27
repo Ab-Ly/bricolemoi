@@ -24,16 +24,17 @@ export const useWalletTransactionsService = ({
     amount = 15.0
   ) => {
     const maalemId = customMaalemId || user?.id;
-    const maalemName = user?.full_name || 'Artisan Maalem';
+    const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === String(maalemId).trim()) || user?.maalem_details || user;
+    const maalemName = user?.full_name || liveMaalem?.full_name || 'Artisan Maalem';
     const cleanIntId = String(interventionId).trim();
     const ref = `ESCROW_INT_${cleanIntId}`;
-    const cleanMaalemId = toSafeUUID(maalemId);
+    const cleanMaalemId = String(maalemId || liveMaalem?.id || 'maalem-1').trim();
 
     const newTx = {
       id: `tx-escrow-${cleanIntId}-${Date.now()}`,
       maalem_id: cleanMaalemId,
       maalem_name: maalemName,
-      maalem_phone: user?.phone || '',
+      maalem_phone: user?.phone || liveMaalem?.phone || '',
       amount_dh: -Math.abs(amount),
       type: 'LEAD_ESCROW',
       payment_method: 'SYSTEM_ESCROW',
