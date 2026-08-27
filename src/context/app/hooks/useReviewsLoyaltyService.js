@@ -1,4 +1,6 @@
 import { supabase, isSupabaseConfigured } from '../../../lib/supabaseClient';
+import { ABLY_CHANNELS } from '../../../lib/ablyClient';
+import { publishRealtimeEvent } from '../../../lib/ablyRealtimeService';
 import { playNotificationSound } from '../../../lib/audioNotifier';
 import { calculateMaalemRating } from '../../../utils/ratingUtils';
 import { broadcastSync } from '../helpers/appSyncHelpers';
@@ -25,11 +27,21 @@ export const useReviewsLoyaltyService = ({
   const requestOnSiteReview = async (interventionId) => {
     const cleanId = String(interventionId).trim();
     const targetIntv = interventions.find((i) => String(i.id).trim() === cleanId);
+    const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === String(user?.id).trim());
+    const maalemName = user?.full_name || liveMaalem?.full_name || targetIntv?.maalem_name || 'Votre Artisan Maâlem';
+    const maalemPhone = user?.phone || liveMaalem?.phone || targetIntv?.maalem_phone || '';
 
     setInterventions((prev) => {
       const updated = prev.map((item) =>
         String(item.id).trim() === cleanId
-          ? { ...item, status: 'PENDING_COMPLETION', on_site_review_requested: true }
+          ? {
+              ...item,
+              status: 'PENDING_COMPLETION',
+              on_site_review_requested: true,
+              maalem_id: user?.id || item.maalem_id,
+              maalem_name: maalemName,
+              maalem_phone: maalemPhone || item.maalem_phone
+            }
           : item
       );
       try {
@@ -43,7 +55,9 @@ export const useReviewsLoyaltyService = ({
       intervention_id: cleanId,
       client_id: targetIntv?.client_id,
       maalem_id: user?.id,
-      maalem_name: user?.full_name || 'Votre Artisan Maâlem',
+      maalem_name: maalemName,
+      maalem_phone: maalemPhone,
+      final_agreed_price: targetIntv?.final_agreed_price,
       _ts: Date.now()
     };
 
@@ -52,6 +66,21 @@ export const useReviewsLoyaltyService = ({
       const bc = new BroadcastChannel('bricolemoi_intertab_sync');
       bc.postMessage(payload);
     } catch (e) {}
+
+    if (targetIntv?.client_id) {
+      publishRealtimeEvent(
+        'work:completion_requested',
+        {
+          intervention_id: cleanId,
+          status: 'PENDING_COMPLETION',
+          maalem_id: user?.id,
+          maalem_name: maalemName,
+          maalem_phone: maalemPhone,
+          final_agreed_price: targetIntv?.final_agreed_price
+        },
+        ABLY_CHANNELS.getUserChannel(targetIntv.client_id)
+      );
+    }
 
     if (isSupabaseConfigured) {
       try {

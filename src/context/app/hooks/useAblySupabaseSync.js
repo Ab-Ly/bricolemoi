@@ -662,6 +662,29 @@ export const useAblySupabaseSync = ({
           });
         }
 
+        if (payload.type === 'ON_SITE_REVIEW_REQUESTED' || payload.type === 'WORK_COMPLETION_REQUESTED') {
+          const intId = String(payload.intervention_id || '').trim();
+          setInterventions((prev) => {
+            const next = prev.map((item) =>
+              String(item.id).trim() === intId
+                ? {
+                    ...item,
+                    status: 'PENDING_COMPLETION',
+                    on_site_review_requested: true,
+                    maalem_id: payload.maalem_id || item.maalem_id,
+                    maalem_name: payload.maalem_name || item.maalem_name,
+                    maalem_phone: payload.maalem_phone || item.maalem_phone,
+                    final_agreed_price: payload.final_agreed_price || item.final_agreed_price
+                  }
+                : item
+            );
+            try {
+              localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+            } catch (err) {}
+            return next;
+          });
+        }
+
         if (payload.type === 'INTERVENTION_COMPLETED_WITH_REVIEW' || payload.type === 'INTERVENTION_COMPLETED') {
           const intId = String(payload.intervention_id || '').trim();
           const rRating = payload.rating !== undefined && payload.rating !== null ? Number(payload.rating) : null;
