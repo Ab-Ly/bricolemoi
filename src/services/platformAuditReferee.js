@@ -52,27 +52,48 @@ export const auditPlatformState = ({
   // INVARIANT 2 : Intégrité des Identités (Zéro Anonymat sur Missions Débloquées)
   // ==========================================
   (interventions || []).forEach((item) => {
-    if (['ACCEPTED', 'PENDING_COMPLETION', 'COMPLETED'].includes(item.status)) {
-      const hasMaalemId = Boolean(item.maalem_id);
-      const isGenericName = !item.maalem_name || item.maalem_name === 'Artisan Maâlem' || item.maalem_name === 'Artisan Maalem' || item.maalem_name === 'Maalem';
-      const hasNoPhone = !item.maalem_phone || String(item.maalem_phone).length < 8;
+    // 1. Pour les missions en cours (ACCEPTED, PENDING_COMPLETION)
+    if (['ACCEPTED', 'PENDING_COMPLETION'].includes(item.status)) {
+      const resolvedM = (maalems || []).find((m) => String(m.id).trim() === String(item.maalem_id).trim());
+      const actualName = (item.maalem_name && item.maalem_name !== 'Artisan Maâlem' && item.maalem_name !== 'Artisan Maalem' && item.maalem_name !== 'Maalem')
+        ? item.maalem_name
+        : (resolvedM?.full_name || null);
+      const actualPhone = item.maalem_phone || resolvedM?.phone || null;
 
-      if (!hasMaalemId && isGenericName) {
+      if (!actualName) {
         issues.push({
           level: 'CRITICAL',
           category: 'IDENTITY',
-          title: `Mission #${item.id?.slice(-6)} sans identité artisan`,
-          message: `Mission en statut ${item.status} mais sans maalem_id ni nom spécifique attribué.`,
+          title: `Mission en cours #${item.id?.slice(-6)} sans identité artisan`,
+          message: `Mission en statut ${item.status} mais sans artisan identifié.`,
           intervention_id: item.id
         });
       }
 
-      if (hasNoPhone && isGenericName) {
+      if (!actualPhone || String(actualPhone).replace(/\D/g, '').length < 8) {
         issues.push({
           level: 'WARNING',
           category: 'IDENTITY',
-          title: `Mission #${item.id?.slice(-6)} sans numéro de téléphone artisan`,
-          message: `Les boutons de contact direct (Appel/WhatsApp) risquent d'être masqués pour le client.`,
+          title: `Mission en cours #${item.id?.slice(-6)} sans numéro de contact`,
+          message: `Numéro de téléphone introuvable pour joindre l'artisan.`,
+          intervention_id: item.id
+        });
+      }
+    }
+
+    // 2. Pour les missions clôturées qui avaient un artisan assigné
+    if (item.status === 'COMPLETED' && (item.maalem_id || item.escrow_status === 'DEBITED')) {
+      const resolvedM = (maalems || []).find((m) => String(m.id).trim() === String(item.maalem_id).trim());
+      const actualName = (item.maalem_name && item.maalem_name !== 'Artisan Maâlem' && item.maalem_name !== 'Artisan Maalem' && item.maalem_name !== 'Maalem')
+        ? item.maalem_name
+        : (resolvedM?.full_name || null);
+
+      if (!actualName) {
+        issues.push({
+          level: 'WARNING',
+          category: 'IDENTITY',
+          title: `Mission réalisée #${item.id?.slice(-6)} avec profil artisan non synchronisé`,
+          message: `L'artisan assigné n'a pas pu être résolu dans la liste des Maâlems.`,
           intervention_id: item.id
         });
       }
