@@ -600,7 +600,6 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
     ratingInfo,
     liveTotalBalance,
     liveAvailableBalance,
-    totalReservedEscrow,
     totalBonusSum,
     flowFinishMission,
     updateInterventionProgress,

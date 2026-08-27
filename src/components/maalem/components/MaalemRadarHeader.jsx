@@ -13,7 +13,6 @@ export const MaalemRadarHeader = ({
   isCinVerified,
   onOpenCINVerification,
   liveAvailableBalance,
-  totalReservedEscrow,
   totalBonusSum,
   setRechargeModalOpen,
   setHistoryModalOpen,
