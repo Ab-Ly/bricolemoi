@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { AdminView } from '../components/AdminView';
 import { Navbar } from '../components/Navbar';
 import { BottomNav } from '../components/BottomNav';
 import { Lock, KeyRound, AlertCircle, ShieldCheck, Mail, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { switchSubdomainInDev } from '../lib/subdomain';
+
+const AdminView = lazy(() =>
+  import('../components/AdminView').then((m) => ({ default: m.AdminView }))
+);
 
 export const AdminApp = () => {
   const { user, currentRole, loginAdminWithCredentials } = useAuth();
@@ -162,7 +165,18 @@ export const AdminApp = () => {
             </div>
           </div>
         ) : (
-          <AdminView />
+          <Suspense
+            fallback={
+              <div className="p-8 text-center bg-white rounded-3xl border border-slate-200 shadow-sm space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mx-auto animate-pulse">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <p className="text-sm font-bold text-slate-800">Chargement de la console d'administration...</p>
+              </div>
+            }
+          >
+            <AdminView />
+          </Suspense>
         )}
       </main>
 
