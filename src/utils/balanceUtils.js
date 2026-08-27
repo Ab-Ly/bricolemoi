@@ -75,15 +75,25 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
   );
 
   const totalRechargeAndBonus = totalRechargedSum + totalBonusSum;
-  const baseBalance = totalRechargeAndBonus > 0 ? totalRechargeAndBonus : (fallbackCredits || 0);
+  let liveTotalBalance = 0;
 
-  const liveTotalBalance = Math.max(0, baseBalance - totalValidatedLeadsSpent);
-  const liveAvailableBalance = Math.max(0, liveTotalBalance - totalReservedEscrow);
+  if (totalRechargeAndBonus > 0) {
+    // Calcul comptable exhaustif basé sur le grand livre des recharges
+    liveTotalBalance = Math.max(0, totalRechargeAndBonus - totalValidatedLeadsSpent);
+  } else {
+    // Solde net direct depuis la base de données Supabase (déjà déduit côté serveur)
+    liveTotalBalance = Math.max(0, fallbackCredits);
+  }
+
+  const liveAvailableBalance = Math.max(
+    0,
+    totalRechargeAndBonus > 0 ? liveTotalBalance - totalReservedEscrow : liveTotalBalance
+  );
 
   return {
     totalRechargedSum,
     totalValidatedLeadsSpent,
-    totalReservedEscrow,
+    totalReservedEscrow: totalRechargeAndBonus > 0 ? totalReservedEscrow : 0,
     totalBonusSum,
     liveTotalBalance,
     liveAvailableBalance,

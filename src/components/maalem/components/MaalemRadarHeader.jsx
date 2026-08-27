@@ -106,7 +106,7 @@ export const MaalemRadarHeader = ({
                 </span>
                 <span>•</span>
                 <span className="whitespace-nowrap font-medium">
-                  {ratingInfo.reviewsCount} avis {ratingInfo.reviewsCount <= 1 ? 'client' : 'clients'}
+                  {(ratingInfo.totalReviews ?? ratingInfo.reviewsCount ?? 0)} avis {(ratingInfo.totalReviews ?? ratingInfo.reviewsCount ?? 0) <= 1 ? 'client' : 'clients'}
                 </span>
                 {ratingInfo.consecutiveFiveStars > 0 && (
                   <>
