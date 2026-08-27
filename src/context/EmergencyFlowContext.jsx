@@ -210,93 +210,101 @@ export const EmergencyFlowProvider = ({ children }) => {
   // 2. SOUSCRIPTIONS TEMPS RÉEL ABLY SELON LE RÔLE (CLIENT / MAÂLEM)
   // =========================================================================
 
-  // Écoute du canal personnel utilisateur : notifications:user:[userId]
+  // Écoute universelle (canal utilisateur ET flux global de jobs) pour synchronisation instantanée cross-devices
   useEffect(() => {
-    if (!user?.id) return;
-    const userChannel = ABLY_CHANNELS.getUserChannel(user.id);
+    const handleEmergencyEvent = ({ event, payload }) => {
+      if (!payload) return;
 
-    const unsubscribe = subscribeToRealtimeChannel(
-      userChannel,
-      ({ event, payload }) => {
-        if (!payload) return;
+      const currentApp = getAppSubdomain();
+      const currentRole = (user?.role || 'CLIENT').toUpperCase();
+      if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') {
+        return;
+      }
 
-        if (event === 'job:accepted' || event === 'sos:claimed') {
-          // Un Maâlem a accepté le SOS du client
-          const maalemDetails = {
-            id: payload.maalem_id,
-            full_name: payload.maalem_name || 'Artisan Maâlem',
-            phone: payload.maalem_phone || '',
-            rating_avg: payload.maalem_rating !== undefined && payload.maalem_rating !== null ? Number(payload.maalem_rating) : 5.0,
-            specialty: payload.specialty || 'PLUMBING',
-            lat: payload.maalem_lat,
-            lng: payload.maalem_lng,
-            eta_minutes: payload.eta_minutes || 15
-          };
+      // Vérifier si cet événement concerne l'urgence active du client
+      let myCreated = [];
+      try {
+        myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
+      } catch (e) {}
 
-          const currentApp = getAppSubdomain();
-          const currentRole = (user?.role || 'CLIENT').toUpperCase();
-          if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') {
-            return;
-          }
+      const intId = String(payload.intervention_id || payload.intervention?.id || '').trim();
+      const currentEmergencyId = String(flowState.emergency?.id || '').trim();
+      const isTargetingMyEmergency =
+        (currentEmergencyId && intId === currentEmergencyId) ||
+        (intId && myCreated.includes(intId)) ||
+        (payload.client_id && user?.id && String(payload.client_id).trim() === String(user.id).trim());
 
-          dispatch({
-            type: ACTIONS.MATCH_SOS,
-            payload: {
-              emergency: payload.intervention || { id: payload.intervention_id },
-              maalem: maalemDetails,
-              progressStep: 'ON_THE_WAY'
-            }
-          });
+      if (!isTargetingMyEmergency && event !== 'job:accepted' && event !== 'job_accepted' && event !== 'sos:claimed') {
+        return;
+      }
 
-          notify.success(
-            'Artisan en Route 🛠️',
-            `${maalemDetails.full_name} a pris en charge votre urgence ! Arrivée estimée : ~15 min.`,
-            { id: `job-accepted-${payload.intervention_id || 'active'}`, badge: 'Match Confirmé' }
-          );
-        } else if (event === 'job:progress') {
-          const currentApp = getAppSubdomain();
-          const currentRole = (user?.role || 'CLIENT').toUpperCase();
-          if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') return;
-
-          dispatch({
-            type: ACTIONS.UPDATE_PROGRESS,
-            payload: { step: payload.progress_step }
-          });
-        } else if (event === 'work:completion_requested' || event === 'job:review_requested' || event === 'on_site_review_requested') {
-          const currentApp = getAppSubdomain();
-          const currentRole = (user?.role || 'CLIENT').toUpperCase();
-          if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') return;
-
-          dispatch({
-            type: ACTIONS.COMPLETE_MISSION,
-            payload: { finalPrice: payload.final_agreed_price }
-          });
-        } else if (event === 'job:completed') {
-          const currentApp = getAppSubdomain();
-          const currentRole = (user?.role || 'CLIENT').toUpperCase();
-          if (currentApp === 'CLIENT' && currentRole !== 'ADMIN' && currentRole !== 'MAALEM') {
-            dispatch({ type: ACTIONS.RESET_TO_IDLE });
-          }
-        } else if (event === 'job:unfeasible' || event === 'job:cancelled') {
-          const currentApp = getAppSubdomain();
-          const currentRole = (user?.role || 'CLIENT').toUpperCase();
-          if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') return;
-
-          dispatch({ type: ACTIONS.RESET_TO_IDLE });
-          notify.warning(
-            'Mission Non Réalisée ℹ️',
-            `L'artisan a signalé une impossibilité (${payload.reason || 'imprévu'}). Vous pouvez relancer un SOS immédiatement.`,
-            { id: `job-unfeasible-${payload.intervention_id || 'done'}`, duration: 7000 }
-          );
+      if (event === 'job:accepted' || event === 'job_accepted' || event === 'sos:claimed') {
+        if (!isTargetingMyEmergency && currentEmergencyId && intId && intId !== currentEmergencyId) {
+          return;
         }
-      },
-      user.id
-    );
+
+        const maalemDetails = {
+          id: payload.maalem_id,
+          full_name: payload.maalem_name || 'Artisan Maâlem',
+          phone: payload.maalem_phone || '',
+          rating_avg: payload.maalem_rating !== undefined && payload.maalem_rating !== null ? Number(payload.maalem_rating) : 5.0,
+          specialty: payload.specialty || 'PLUMBING',
+          lat: payload.maalem_lat,
+          lng: payload.maalem_lng,
+          eta_minutes: payload.eta_minutes || 15
+        };
+
+        dispatch({
+          type: ACTIONS.MATCH_SOS,
+          payload: {
+            emergency: payload.intervention || { id: payload.intervention_id || currentEmergencyId },
+            maalem: maalemDetails,
+            progressStep: 'ON_THE_WAY'
+          }
+        });
+
+        notify.success(
+          'Artisan en Route 🛠️',
+          `${maalemDetails.full_name} a pris en charge votre urgence ! Arrivée estimée : ~15 min.`,
+          { id: `job-accepted-${intId || 'active'}`, badge: 'Match Confirmé' }
+        );
+      } else if (event === 'job:progress') {
+        dispatch({
+          type: ACTIONS.UPDATE_PROGRESS,
+          payload: { step: payload.progress_step }
+        });
+      } else if (event === 'work:completion_requested' || event === 'job:review_requested' || event === 'on_site_review_requested') {
+        dispatch({
+          type: ACTIONS.COMPLETE_MISSION,
+          payload: { finalPrice: payload.final_agreed_price }
+        });
+      } else if (event === 'job:completed') {
+        dispatch({ type: ACTIONS.RESET_TO_IDLE });
+      } else if (event === 'job:unfeasible' || event === 'job:cancelled') {
+        dispatch({ type: ACTIONS.RESET_TO_IDLE });
+        notify.warning(
+          'Mission Non Réalisée ℹ️',
+          `L'artisan a signalé une impossibilité (${payload.reason || 'imprévu'}). Vous pouvez relancer un SOS immédiatement.`,
+          { id: `job-unfeasible-${intId || 'done'}`, duration: 7000 }
+        );
+      }
+    };
+
+    const unsubs = [];
+    if (user?.id) {
+      const userChannel = ABLY_CHANNELS.getUserChannel(user.id);
+      unsubs.push(subscribeToRealtimeChannel(userChannel, handleEmergencyEvent, user.id));
+    }
+    unsubs.push(subscribeToRealtimeChannel(ABLY_CHANNELS.JOBS_STREAM, handleEmergencyEvent, user?.id || 'client-anon'));
 
     return () => {
-      unsubscribe();
+      unsubs.forEach((unsub) => {
+        try {
+          unsub();
+        } catch (e) {}
+      });
     };
-  }, [user?.id]);
+  }, [user?.id, user?.role, flowState.emergency?.id]);
 
   // Écoute des alertes SOS géographiques pour les Maâlems en ligne
   useEffect(() => {

@@ -585,7 +585,7 @@ export const useAblySupabaseSync = ({
       document.addEventListener('visibilitychange', onFocusOrVisible);
     }
 
-    // Polling doux de sécurité (30s uniquement si l'onglet est actif et qu'une mission est en cours)
+    // Polling doux de sécurité (5s si une mission est active/en attente, sinon 30s)
     const pollInterval = setInterval(() => {
       if (typeof document !== 'undefined' && document.hidden) return;
 
@@ -600,12 +600,10 @@ export const useAblySupabaseSync = ({
         ].includes(i.status)
       );
 
-      // Si Ably est actif, les mises à jour sont déjà poussées en direct (<50ms).
-      // Le polling ne sert que de filet de sécurité à basse consommation.
-      if (hasActiveMission && !isAblyConnected) {
+      if (hasActiveMission) {
         fetchRealSupabaseData();
       }
-    }, 30000);
+    }, 5000);
 
     // Écouteur de synchronisation multi-onglets & multi-appareils
     let bc = null;
@@ -756,6 +754,54 @@ export const useAblySupabaseSync = ({
       };
     } catch (e) {}
 
+    // Écoute Ably universelle JOBS_STREAM pour diffusion instantanée cross-devices
+    let ablyUnsubJobs = null;
+    try {
+      ablyUnsubJobs = subscribeToRealtimeChannel(
+        ABLY_CHANNELS.JOBS_STREAM,
+        ({ event, payload }) => {
+          if (!payload) return;
+          const intId = String(payload.intervention_id || payload.intervention?.id || '').trim();
+          if (!intId) return;
+
+          if (event === 'job_accepted' || event === 'job:accepted' || event === 'sos:claimed') {
+            setInterventions((prev) => {
+              const next = prev.map((item) =>
+                String(item.id).trim() === intId
+                  ? {
+                      ...item,
+                      status: 'ACCEPTED',
+                      progress_step: 'ON_THE_WAY',
+                      escrow_status: 'DEBITED',
+                      maalem_id: payload.maalem_id || item.maalem_id,
+                      maalem_name: payload.maalem_name || item.maalem_name,
+                      maalem_phone: payload.maalem_phone || item.maalem_phone
+                    }
+                  : item
+              );
+              try {
+                localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+              } catch (e) {}
+              return next;
+            });
+          } else if (event === 'job_progress' || event === 'job:progress') {
+            setInterventions((prev) => {
+              const next = prev.map((item) =>
+                String(item.id).trim() === intId
+                  ? { ...item, progress_step: payload.progress_step || payload.step || item.progress_step }
+                  : item
+              );
+              try {
+                localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+              } catch (e) {}
+              return next;
+            });
+          }
+        },
+        user?.id || 'sync-client'
+      );
+    } catch (e) {}
+
     let supabaseChannel = null;
     if (isSupabaseConfigured) {
       try {
@@ -768,14 +814,22 @@ export const useAblySupabaseSync = ({
               if (payload.new) {
                 const item = payload.new;
                 setInterventions((prev) => {
-                  const exists = prev.some(
+                  const existing = prev.find(
                     (i) => String(i.id).trim() === String(item.id).trim()
                   );
-                  const next = exists
+                  const enriched = {
+                    ...(existing || {}),
+                    ...item,
+                    maalem_name: item.maalem_name || existing?.maalem_name,
+                    maalem_phone: item.maalem_phone || existing?.maalem_phone,
+                    client_name: item.client_name || existing?.client_name,
+                    client_phone: item.client_phone || existing?.client_phone
+                  };
+                  const next = existing
                     ? prev.map((i) =>
-                        String(i.id).trim() === String(item.id).trim() ? { ...i, ...item } : i
+                        String(i.id).trim() === String(item.id).trim() ? enriched : i
                       )
-                    : [item, ...prev];
+                    : [enriched, ...prev];
                   try {
                     localStorage.setItem(
                       'bricolemoi_interventions_cache',
@@ -800,6 +854,11 @@ export const useAblySupabaseSync = ({
         document.removeEventListener('visibilitychange', onFocusOrVisible);
       }
       clearInterval(pollInterval);
+      if (ablyUnsubJobs) {
+        try {
+          ablyUnsubJobs();
+        } catch (e) {}
+      }
       if (supabaseChannel) {
         try {
           supabase.removeChannel(supabaseChannel);
