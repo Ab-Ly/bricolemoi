@@ -18,14 +18,15 @@ import {
   Edit3, 
   Save, 
   Award, 
-  Sparkles,
-  Star,
-  Clock,
-  ChevronRight,
-  ChevronDown,
-  Lock,
-  Globe,
-  AlertCircle
+  Sparkles, 
+  Star, 
+  Clock, 
+  History as HistoryIcon,
+  ChevronRight, 
+  ChevronDown, 
+  Lock, 
+  Globe, 
+  AlertCircle 
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateTime } from '../utils/dateUtils';
@@ -601,7 +602,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
               {!isMaalem && (
                 <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <History className="w-4 h-4 text-emerald-600" />
+                    <HistoryIcon className="w-4 h-4 text-emerald-600" />
                     <div>
                       <span className="text-xs font-bold text-slate-900 block">Historique Demandes</span>
                       <span className="text-[10px] text-slate-500">Total de vos dépannages réalisés</span>
