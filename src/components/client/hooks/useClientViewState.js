@@ -724,6 +724,8 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
     relaunchEmergencyRequest,
     maalems,
     matchedMaalem,
+    reviews,
+    interventions,
     flowCancelSOS,
     pendingCompletionModalInt,
     setPendingCompletionModalInt,

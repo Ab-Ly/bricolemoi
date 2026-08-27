@@ -4,11 +4,14 @@ import { CheckCircle2, MapPin, Car, Star, PhoneCall, MessageSquare } from 'lucid
 import { InteractiveMap } from '../../InteractiveMap';
 import { VoiceAudioPlayer } from '../../VoiceAudioPlayer';
 import { getServiceDisplay } from '../hooks/useClientViewState';
+import { calculateMaalemRating } from '../../../utils/ratingUtils';
 
 export const ClientActiveOngoingCard = ({
   activeOngoingSOS,
   matchedMaalem,
   maalems = [],
+  reviews = [],
+  interventions = [],
   setPendingCompletionModalInt,
   cancelIntervention,
   selectedLat,
@@ -42,6 +45,18 @@ export const ClientActiveOngoingCard = ({
       : (matchedMaalem?.phone || resolvedMaalem?.phone || '');
 
   const maalemCleanPhone = String(maalemDisplayPhone).replace(/\D/g, '');
+
+  const maalemRatingObj = calculateMaalemRating(
+    resolvedMaalem || { id: rawMaalemId, phone: rawMaalemPhone, maalem_details: { rating_avg: activeOngoingSOS.maalem_rating } },
+    reviews,
+    interventions
+  );
+
+  const displayRatingNumber = maalemRatingObj.totalReviews > 0
+    ? maalemRatingObj.averageRating.toFixed(1)
+    : (activeOngoingSOS.maalem_rating !== undefined && activeOngoingSOS.maalem_rating !== null
+      ? Number(activeOngoingSOS.maalem_rating).toFixed(1)
+      : (resolvedMaalem?.rating_avg ? Number(resolvedMaalem.rating_avg).toFixed(1) : '5.0'));
 
   return (
     <motion.div
@@ -138,10 +153,13 @@ export const ClientActiveOngoingCard = ({
               <span className="flex items-center gap-1 text-amber-600 font-bold">
                 <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                 <span>
-                  {activeOngoingSOS.maalem_rating || matchedMaalem?.rating_avg || resolvedMaalem?.rating_avg
-                    ? `${(activeOngoingSOS.maalem_rating || matchedMaalem?.rating_avg || resolvedMaalem?.rating_avg).toFixed(1)} / 5`
-                    : '5.0 / 5'}
+                  {displayRatingNumber} / 5
                 </span>
+                {maalemRatingObj.totalReviews > 0 && (
+                  <span className="text-[11px] text-slate-400 font-normal">
+                    ({maalemRatingObj.totalReviews} avis)
+                  </span>
+                )}
               </span>
               <span>•</span>
               <span>{activeOngoingSOS.subcategory || 'Dépannage'}</span>
