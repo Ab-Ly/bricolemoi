@@ -88,11 +88,50 @@ export const AdminMaalemsView = ({
     const mId = String(selectedMaalem.id || '').trim();
     const mPhone = String(selectedMaalem.phone || '').replace(/\D/g, '');
 
-    const maalemMissions = interventions.filter((intv) => {
+    const rawMissions = interventions.filter((intv) => {
       const matchId = mId && String(intv.maalem_id || '').trim() === mId;
       const matchPhone = mPhone && mPhone.length > 7 && String(intv.maalem_phone || '').replace(/\D/g, '') === mPhone;
       return matchId || matchPhone;
     });
+
+    const maalemMissions = rawMissions.map((intv) => {
+      const matchReview = (reviews || []).find(
+        (r) => String(r.intervention_id || '').trim() === String(intv.id).trim()
+      );
+      const rating = matchReview?.rating !== undefined && matchReview?.rating !== null
+        ? Number(matchReview.rating)
+        : (intv.rating !== undefined && intv.rating !== null ? Number(intv.rating) : null);
+      
+      const rawComment = matchReview?.comment || intv.comment || '';
+      const rawBadges = Array.isArray(matchReview?.badges) && matchReview.badges.length > 0
+        ? matchReview.badges
+        : (Array.isArray(intv.badges) ? intv.badges : []);
+
+      let badges = [...rawBadges];
+      let cleanComment = rawComment;
+      if (cleanComment.includes('[Badges:')) {
+        const badgeMatch = cleanComment.match(/\[Badges:\s*([^\]]+)\]/);
+        if (badgeMatch && badgeMatch[1]) {
+          const parsed = badgeMatch[1].split(',').map((b) => b.trim()).filter(Boolean);
+          badges = Array.from(new Set([...badges, ...parsed]));
+          cleanComment = cleanComment.replace(/\[Badges:[^\]]+\]/g, '').trim();
+        }
+      }
+      if (cleanComment.includes('[Pourboire:')) {
+        cleanComment = cleanComment.replace(/\[Pourboire:[^\]]+\]/g, '').trim();
+      }
+      cleanComment = cleanComment.replace(/^["']|["']$/g, '').trim();
+
+      return {
+        ...intv,
+        rating,
+        comment: cleanComment,
+        badges,
+        reviewed_at: matchReview?.created_at || intv.completed_at || intv.updated_at || intv.created_at
+      };
+    }).sort(
+      (a, b) => new Date(b.completed_at || b.updated_at || b.created_at || 0) - new Date(a.completed_at || a.updated_at || a.created_at || 0)
+    );
 
     const maalemTransactions = transactions.filter((tx) => {
       const matchId = mId && String(tx.maalem_id || '').trim() === mId;
@@ -112,7 +151,7 @@ export const AdminMaalemsView = ({
         totalRevenueDh
       }
     };
-  }, [selectedMaalem, interventions, transactions]);
+  }, [selectedMaalem, interventions, transactions, reviews]);
 
   // Pagination
   const totalPages = Math.ceil(filteredMaalems.length / itemsPerPage) || 1;
@@ -561,72 +600,17 @@ export const AdminMaalemsView = ({
                     </div>
                   </div>
 
-                  {/* Avis & Commentaires Clients */}
-                  <div>
-                    {(() => {
-                      const selRating = getMaalemRating(selectedMaalem);
-                      return (
-                        <>
-                          <h4 className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                            <span className="flex items-center gap-1.5">
-                              <Star className={`w-3.5 h-3.5 ${selRating.totalReviews > 0 ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`} />
-                              <span>Avis &amp; Commentaires Clients ({selRating.totalReviews})</span>
-                            </span>
-                            <span className="text-amber-800 font-mono font-bold text-xs bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
-                              Moyenne : {selRating.totalReviews > 0 ? `${selRating.averageRating.toFixed(1)} / 5.0` : 'Nouveau Profil'}
-                            </span>
-                          </h4>
-
-                          {selRating.maalemReviews.length === 0 ? (
-                            <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
-                              Aucun avis client enregistré pour cet artisan.
-                            </p>
-                          ) : (
-                            <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
-                              {selRating.maalemReviews.map((rev) => (
-                                <div key={rev.id || rev.intervention_id} className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs space-y-1.5 shadow-xs">
-                                  <div className="flex items-center justify-between">
-                                    <span className="font-bold text-slate-900">{rev.client_name || 'Client BricoleMoi'}</span>
-                                    <span className="flex items-center gap-0.5 text-amber-600 font-mono font-bold">
-                                      <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                                      <span>{Number(rev.rating || 5).toFixed(1)}★</span>
-                                    </span>
-                                  </div>
-                                  {rev.comment && (
-                                    <p className="text-slate-700 italic bg-white p-2 rounded-xl border border-slate-100">
-                                      « {rev.comment} »
-                                    </p>
-                                  )}
-                                  {Array.isArray(rev.badges) && rev.badges.length > 0 && (
-                                    <div className="flex flex-wrap gap-1">
-                                      {rev.badges.map((b, i) => (
-                                        <span key={i} className="text-[9px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-100 font-bold">
-                                          🏷️ {b}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                  <span className="text-[10px] text-slate-400 font-mono block">
-                                    {formatDateTime(rev.created_at, 'long')}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
-
                   {/* Portfolio Photos de Réalisations */}
-                  <div>
-                    <h4 className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                      <Images className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Portfolio de Réalisations ({(selectedMaalem.portfolio_urls || []).length} photos)</span>
-                    </h4>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <Images className="w-3.5 h-3.5 text-blue-600" />
+                        <span>Portfolio de Réalisations ({(selectedMaalem.portfolio_urls || []).length})</span>
+                      </h4>
+                    </div>
 
                     {(selectedMaalem.portfolio_urls || []).length === 0 ? (
-                      <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                      <p className="text-xs text-slate-400 italic text-center py-2">
                         Aucune photo de chantier uploadée pour le moment.
                       </p>
                     ) : (
@@ -635,7 +619,7 @@ export const AdminMaalemsView = ({
                           <div 
                             key={idx} 
                             onClick={() => setPreviewPhoto(url)}
-                            className="relative group rounded-xl overflow-hidden border border-slate-200 cursor-pointer h-24 shadow-xs"
+                            className="relative group rounded-xl overflow-hidden border border-slate-200 cursor-pointer h-20 shadow-xs"
                           >
                             <img
                               src={url}
@@ -651,45 +635,131 @@ export const AdminMaalemsView = ({
                     )}
                   </div>
 
-                  {/* Historique des Interventions Réalisées */}
-                  <div>
-                    <h4 className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Historique des Chantiers ({maalemDrawerData.maalemMissions.length})</span>
-                    </h4>
+                  {/* FUSION : Registre Unifié des Chantiers & Évaluations Clients */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Historique des Chantiers & Avis ({maalemDrawerData.maalemMissions.length})</span>
+                      </h4>
+                      {getMaalemRating(selectedMaalem).totalReviews > 0 && (
+                        <span className="text-[11px] font-mono font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
+                          Moyenne : {getMaalemRating(selectedMaalem).averageRating.toFixed(1)} / 5 ★ ({getMaalemRating(selectedMaalem).totalReviews} avis)
+                        </span>
+                      )}
+                    </div>
 
                     {maalemDrawerData.maalemMissions.length === 0 ? (
-                      <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
-                        Aucune intervention assignée à cet artisan.
+                      <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center shadow-xs">
+                        Aucun chantier enregistré pour cet artisan.
                       </p>
                     ) : (
-                      <div className="space-y-2.5">
-                        {maalemDrawerData.maalemMissions.map((m) => (
-                          <div
-                            key={m.id}
-                            className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs space-y-1.5 shadow-xs"
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-bold text-slate-900">{m.subcategory || 'Dépannage'}</span>
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border ${
-                                m.status === 'COMPLETED'
-                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                                  : 'bg-blue-50 border-blue-200 text-blue-800'
-                              }`}>
-                                {m.status === 'COMPLETED' ? 'Clôturée 🟢' : 'En cours 🛠️'}
-                              </span>
-                            </div>
+                      <div className="space-y-3">
+                        {maalemDrawerData.maalemMissions.map((m) => {
+                          const clientPhoneClean = cleanPhone(m.client_phone);
+                          const hasReview = m.rating !== null && m.rating !== undefined;
 
-                            <p className="text-[11px] text-slate-600">
-                              Client : <strong className="text-slate-900">{m.client_name || 'Client BricoleMoi'}</strong> • {m.district}
-                            </p>
+                          return (
+                            <div
+                              key={m.id}
+                              className="bg-white border border-slate-200/90 rounded-2xl p-4 text-xs space-y-2.5 shadow-xs hover:border-slate-300 transition-all"
+                            >
+                              {/* Header Chantier : Métier + Statut */}
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-black text-slate-900 text-sm">
+                                  {m.subcategory || 'Dépannage d\'urgence'}
+                                </span>
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
+                                  m.status === 'COMPLETED'
+                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                                    : m.status === 'CANCELLED'
+                                    ? 'bg-rose-50 border-rose-200 text-rose-700'
+                                    : 'bg-blue-50 border-blue-200 text-blue-800 animate-pulse'
+                                }`}>
+                                  {m.status === 'COMPLETED' ? '✅ Clôturé' : m.status === 'CANCELLED' ? '❌ Annulé' : '🛠️ En cours'}
+                                </span>
+                              </div>
 
-                            <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-200">
-                              <span>Prix : <strong className="text-blue-700">{m.final_agreed_price ? `${m.final_agreed_price} DH` : 'Accord Direct'}</strong></span>
-                              <span>{formatDateTime(m.created_at || Date.now(), 'long')}</span>
+                              {/* Ligne Client & Secteur */}
+                              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between gap-2 flex-wrap text-[11px]">
+                                <div className="flex items-center gap-1.5 text-slate-700">
+                                  <span className="font-bold text-slate-900">👤 {m.client_name || 'Client BricoleMoi'}</span>
+                                  <span>•</span>
+                                  <span className="text-slate-500">📍 {m.district || 'Casablanca'}</span>
+                                </div>
+
+                                {m.client_phone && (
+                                  <div className="flex items-center gap-2">
+                                    <a href={`tel:${m.client_phone}`} className="font-mono text-blue-700 font-bold hover:underline flex items-center gap-1">
+                                      <Phone className="w-3 h-3 text-blue-600" />
+                                      <span>{m.client_phone}</span>
+                                    </a>
+                                    {clientPhoneClean.length >= 9 && (
+                                      <a
+                                        href={`https://wa.me/212${clientPhoneClean.replace(/^0/, '')}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-emerald-700 hover:text-emerald-800 p-0.5"
+                                      >
+                                        <WhatsappLogo weight="fill" className="w-3.5 h-3.5" />
+                                      </a>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Tarification & Date */}
+                              <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 pt-1">
+                                <span>Tarif : <strong className="text-slate-900">{m.final_agreed_price ? `${m.final_agreed_price} DH` : '🤝 Accord Direct'}</strong></span>
+                                <span>Lancé le : {formatDateTime(m.created_at || Date.now(), 'long')}</span>
+                              </div>
+
+                              {/* Bloc Évaluation & Avis Client intégré */}
+                              {hasReview ? (
+                                <div className="mt-2 pt-2 border-t border-slate-100 bg-amber-50/40 rounded-xl p-3 border border-amber-200/60 space-y-1.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-mono font-bold text-amber-900 uppercase flex items-center gap-1">
+                                      <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                                      <span>Avis Client Déposé</span>
+                                    </span>
+                                    <span className="text-xs font-mono font-black text-amber-800">
+                                      {Number(m.rating).toFixed(1)} / 5 ★
+                                    </span>
+                                  </div>
+
+                                  {m.comment && (
+                                    <p className="text-slate-800 text-[11px] italic bg-white p-2 rounded-lg border border-amber-100">
+                                      « {m.comment} »
+                                    </p>
+                                  )}
+
+                                  {Array.isArray(m.badges) && m.badges.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 pt-1">
+                                      {m.badges.map((b, bIdx) => (
+                                        <span
+                                          key={bIdx}
+                                          className={`text-[9px] px-2 py-0.5 rounded-md font-bold border ${
+                                            b.includes('⚠️') || b.includes('💰') || b.includes('⏱️ Retard') || b.includes('🛠️ Travail incomplet') || b.includes('🧹 Saleté')
+                                              ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                              : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                          }`}
+                                        >
+                                          🏷️ {b}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                m.status === 'COMPLETED' && (
+                                  <p className="text-[10px] text-slate-400 italic pt-1 border-t border-slate-100">
+                                    ℹ️ Chantier clôturé sans commentaire client.
+                                  </p>
+                                )
+                              )}
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
