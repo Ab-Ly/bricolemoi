@@ -28,6 +28,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatDateTime } from '../utils/dateUtils';
 import { EnhancedCategoryIcon, getSpecialtyLabel } from './EnhancedCategoryIcon';
 import { SpecialtySelect } from './SpecialtySelect';
 import { COUNTRY_DIAL_CODES, MOROCCAN_CITIES } from '../constants/geo';
@@ -679,8 +680,9 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                         </div>
                       )}
 
-                      <p className="text-[9px] text-slate-400 font-mono">
-                        {rev.created_at ? new Date(rev.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Récemment'}
+                      <p className="text-[10px] text-slate-500 font-mono flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        <span>{formatDateTime(rev.created_at, 'long')}</span>
                       </p>
                     </div>
                   ))

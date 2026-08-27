@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Zap, MapPin, Eye, Play, Pause, CheckCircle2, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Zap, MapPin, Eye, Play, Pause, CheckCircle2, Star, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { Target, GlobeHemisphereWest } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyMeta } from '../../EnhancedCategoryIcon';
+import { formatDateTime } from '../../../utils/dateUtils';
 
 export const MaalemLeadsFeed = ({
   availableLeads,
@@ -293,6 +294,18 @@ export const MaalemLeadsFeed = ({
                     {lead.final_agreed_price ? `${lead.final_agreed_price} DH` : 'Accord Direct'}
                   </strong>
                 </p>
+
+                {/* Date et Heure précises de l'intervention */}
+                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium pt-1.5 border-t border-emerald-100/80">
+                  <span className="flex items-center gap-1 font-mono text-slate-600">
+                    <Calendar className="w-3 h-3 text-emerald-600" />
+                    <span>{formatDateTime(lead.completed_at || lead.updated_at || lead.created_at, 'long')}</span>
+                  </span>
+                  <span className="text-[9px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded border border-emerald-200">
+                    Mission Clôturée ✓
+                  </span>
+                </div>
+
                 {lead.comment && (
                   <p className="text-slate-700 italic bg-white p-2.5 rounded-xl border border-emerald-100 font-medium shadow-xs">
                     "{lead.comment}"

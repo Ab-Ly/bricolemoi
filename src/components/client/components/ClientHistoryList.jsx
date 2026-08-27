@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, MapPin, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getServiceDisplay } from '../hooks/useClientViewState';
+import { formatDateTime } from '../../../utils/dateUtils';
 
 export const ClientHistoryList = ({
   completedClientInterventions,
@@ -71,12 +72,9 @@ export const ClientHistoryList = ({
                     <MapPin className="w-3.5 h-3.5 text-blue-600" />
                     <span>{item.district}</span>
                   </p>
-                  <p className="flex items-center gap-1.5 text-slate-500">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>
-                      {new Date(item.created_at || Date.now()).toLocaleTimeString()} (
-                      {new Date(item.created_at || Date.now()).toLocaleDateString()})
-                    </span>
+                  <p className="flex items-center gap-1.5 text-slate-500 font-mono text-[11px]">
+                    <Clock className="w-3.5 h-3.5 text-blue-600" />
+                    <span>{formatDateTime(item.completed_at || item.created_at, 'long')}</span>
                   </p>
 
                   {item.maalem_name && (

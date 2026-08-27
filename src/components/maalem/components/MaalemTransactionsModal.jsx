@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Coins, Zap, Gift, Clock, Printer } from 'lucide-react';
 import { Receipt } from '@phosphor-icons/react';
 import { isRealRechargeTx, isLeadTx, isBonusTx } from '../../../utils/balanceUtils';
+import { formatDateTime } from '../../../utils/dateUtils';
 
 export const MaalemTransactionsModal = ({
   historyModalOpen,
@@ -228,12 +229,9 @@ export const MaalemTransactionsModal = ({
                           </div>
 
                           <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500">
-                            <span className="font-mono">
-                              {new Date(tx.created_at || Date.now()).toLocaleDateString('fr-FR')} à{' '}
-                              {new Date(tx.created_at || Date.now()).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                            <span className="font-mono flex items-center gap-1 text-slate-600">
+                              <Clock className="w-3 h-3 text-slate-400" />
+                              <span>{formatDateTime(tx.created_at || Date.now(), 'long')}</span>
                             </span>
                             {displayRef && (
                               <span>
