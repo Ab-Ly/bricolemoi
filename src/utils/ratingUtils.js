@@ -19,18 +19,12 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
   const mId = String(maalemOrUser.id || '').trim();
   const mPhone = String(maalemOrUser.phone || '').replace(/\D/g, '');
 
-  let myUnlocked = [];
-  try {
-    myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
-  } catch (e) {}
-
-  // 1. Filtrage précis et strict des avis pour cet artisan
+  // 1. Filtrage précis et strict des avis pour cet artisan (Cloud-First)
   const matchedReviews = (reviews || []).filter((r) => {
     if (!r) return false;
     const matchId = mId && String(r.maalem_id || '').trim() === mId;
     const matchPhone = mPhone && mPhone.length > 7 && String(r.maalem_phone || '').replace(/\D/g, '') === mPhone;
-    const isUnlocked = r.intervention_id && myUnlocked.includes(String(r.intervention_id).trim());
-    return matchId || matchPhone || isUnlocked;
+    return matchId || matchPhone;
   });
 
   // 2. Fusion avec les interventions complétées (Chantiers Clôturés & Évalués)
@@ -41,8 +35,7 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
       if (!i || i.status !== 'COMPLETED' || !i.rating) return false;
       const matchIntId = mId && String(i.maalem_id || '').trim() === mId;
       const matchIntPhone = mPhone && mPhone.length > 7 && String(i.maalem_phone || '').replace(/\D/g, '') === mPhone;
-      const isLocalUnlocked = myUnlocked.includes(String(i.id).trim());
-      const isCandidate = matchIntId || matchIntPhone || isLocalUnlocked;
+      const isCandidate = matchIntId || matchIntPhone;
       return isCandidate && !reviewedInterventionIds.has(String(i.id).trim());
     })
     .map((i) => {
