@@ -540,14 +540,20 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                       <div>
                         <span className="text-xs font-bold text-amber-950 block">Évaluation &amp; Avis Clients</span>
                         <span className="text-[10px] text-amber-800 font-medium">
-                          {ratingInfo.totalReviews} avis vérifié{ratingInfo.totalReviews > 1 ? 's' : ''}
+                          {ratingInfo.totalReviews > 0
+                            ? `${ratingInfo.totalReviews} avis vérifié${ratingInfo.totalReviews > 1 ? 's' : ''}`
+                            : 'Nouveau profil'}
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
                       <span className="text-base font-black text-amber-900 font-mono flex items-center gap-1 justify-end">
                         <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                        <span>{ratingInfo.averageRating.toFixed(1)} / 5.0</span>
+                        <span>
+                          {ratingInfo.totalReviews > 0
+                            ? `${ratingInfo.averageRating.toFixed(1)} / 5.0`
+                            : 'Nouveau'}
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -575,8 +581,11 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
               {!isMaalem && (
                 <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Activity className="w-4 h-4 text-emerald-600" />
-                    <span className="text-xs font-bold text-slate-700">Historique d'Urgences</span>
+                    <History className="w-4 h-4 text-emerald-600" />
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">Historique Demandes</span>
+                      <span className="text-[10px] text-slate-500">Total de vos dépannages réalisés</span>
+                    </div>
                   </div>
                   <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-mono">
                     {myClientInterventions.length} demande{myClientInterventions.length > 1 ? 's' : ''} SOS
@@ -593,24 +602,34 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
               <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="text-2xl font-black text-slate-900 font-mono">
-                    {ratingInfo.averageRating.toFixed(1)}
+                    {ratingInfo.totalReviews > 0 ? ratingInfo.averageRating.toFixed(1) : '-'}
                   </div>
                   <div>
                     <div className="flex items-center gap-0.5 text-amber-500">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star 
                           key={s} 
-                          className={`w-3.5 h-3.5 ${s <= Math.round(ratingInfo.averageRating) ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`} 
+                          className={`w-3.5 h-3.5 ${
+                            ratingInfo.totalReviews > 0 && s <= Math.round(ratingInfo.averageRating)
+                              ? 'fill-amber-500 text-amber-500'
+                              : 'text-slate-300'
+                          }`} 
                         />
                       ))}
                     </div>
                     <p className="text-[10px] text-slate-500 font-bold mt-0.5">
-                      Basé sur {ratingInfo.totalReviews} avis client{ratingInfo.totalReviews > 1 ? 's' : ''}
+                      {ratingInfo.totalReviews > 0
+                        ? `Basé sur ${ratingInfo.totalReviews} avis client${ratingInfo.totalReviews > 1 ? 's' : ''}`
+                        : 'Aucun avis client pour le moment'}
                     </p>
                   </div>
                 </div>
 
-                {ratingInfo.badgesSummary.length > 0 && (
+                {ratingInfo.totalReviews === 0 ? (
+                  <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200">
+                    🌱 Nouveau Profil
+                  </span>
+                ) : ratingInfo.badgesSummary.length > 0 && (
                   <div className="flex flex-wrap gap-1 max-w-[160px] justify-end">
                     {ratingInfo.badgesSummary.slice(0, 3).map((b) => (
                       <span key={b.name} className="text-[9px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-200">
@@ -640,7 +659,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                         </div>
                         <div className="flex items-center gap-0.5 text-amber-500 font-mono text-xs font-black">
                           <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                          <span>{Number(rev.rating !== undefined && rev.rating !== null ? rev.rating : 5).toFixed(1)}</span>
+                          <span>{Number(rev.rating !== undefined && rev.rating !== null ? rev.rating : 0).toFixed(1)}</span>
                         </div>
                       </div>
 
