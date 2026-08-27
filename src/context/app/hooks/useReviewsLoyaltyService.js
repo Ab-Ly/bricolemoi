@@ -77,10 +77,18 @@ export const useReviewsLoyaltyService = ({
     comment,
     badges
   }) => {
-    const currentInt = interventions.find((i) => i.id === intervention_id);
+    const currentInt = interventions.find((i) => String(i.id).trim() === String(intervention_id).trim());
     const targetMaalemId =
-      maalem_id || currentInt?.maalem_id || '22222222-2222-2222-2222-222222222222';
-    const targetMaalemName = currentInt?.maalem_name || 'Maalem';
+      maalem_id || currentInt?.maalem_id;
+    const targetMaalemObj = (maalems || []).find((m) => String(m.id).trim() === String(targetMaalemId).trim());
+    const targetMaalemName =
+      (currentInt?.maalem_name && currentInt?.maalem_name !== 'Maalem' && currentInt?.maalem_name !== 'Artisan Maâlem' && currentInt?.maalem_name !== 'Artisan Maalem')
+        ? currentInt.maalem_name
+        : (targetMaalemObj?.full_name || 'Artisan Maâlem');
+    const targetMaalemPhone =
+      (currentInt?.maalem_phone && currentInt?.maalem_phone !== 'N/A')
+        ? currentInt.maalem_phone
+        : (targetMaalemObj?.phone || '');
 
     await confirmLeadDebit(intervention_id, targetMaalemId);
 
@@ -99,7 +107,7 @@ export const useReviewsLoyaltyService = ({
       id: 'rev-' + Date.now(),
       intervention_id,
       maalem_id: targetMaalemId,
-      client_name: user?.full_name || currentInt?.client_name || 'Client Maroc',
+      client_name: user?.full_name || currentInt?.client_name || 'Client BricoleMoi',
       client_phone: user?.phone || currentInt?.client_phone || '',
       rating: Number(rating),
       comment: fullComment,
@@ -117,7 +125,7 @@ export const useReviewsLoyaltyService = ({
     } catch (e) {}
 
     const updatedInterventions = interventions.map((item) =>
-      item.id === intervention_id
+      String(item.id).trim() === String(intervention_id).trim()
         ? {
             ...item,
             status: 'COMPLETED',
@@ -125,7 +133,10 @@ export const useReviewsLoyaltyService = ({
             completed_at: new Date().toISOString(),
             rating: Number(rating),
             comment: fullComment,
-            badges: badges || item.badges
+            badges: badges || item.badges,
+            maalem_id: targetMaalemId || item.maalem_id,
+            maalem_name: targetMaalemName,
+            maalem_phone: targetMaalemPhone || item.maalem_phone
           }
         : item
     );
@@ -178,6 +189,8 @@ export const useReviewsLoyaltyService = ({
       rating: Number(rating),
       comment: fullComment,
       maalem_id: targetMaalemId,
+      maalem_name: targetMaalemName,
+      maalem_phone: targetMaalemPhone,
       badges: badges || [],
       client_name: user?.full_name || currentInt?.client_name
     });
@@ -200,7 +213,7 @@ export const useReviewsLoyaltyService = ({
               maalem_id: targetMaalemId,
               client_id: user?.id,
               client_name:
-                user?.full_name || currentInt?.client_name || 'Client Maroc',
+                user?.full_name || currentInt?.client_name || 'Client BricoleMoi',
               rating: Number(rating),
               comment: fullComment
             }
@@ -217,10 +230,10 @@ export const useReviewsLoyaltyService = ({
         intervention_id,
         maalem_id: targetMaalemId,
         maalem_name: targetMaalemName,
-        maalem_phone: currentInt?.maalem_phone || '',
-        client_name: user?.full_name || currentInt?.client_name || 'Client Maroc',
+        maalem_phone: targetMaalemPhone,
+        client_name: user?.full_name || currentInt?.client_name || 'Client BricoleMoi',
         client_phone: user?.phone || currentInt?.client_phone || '',
-        district: currentInt?.district || 'Maroc',
+        district: currentInt?.district || 'Casablanca',
         rating: Number(rating),
         comment: fullComment,
         reason_label: `Avis Insatisfaisant (${rating}⭐)`,

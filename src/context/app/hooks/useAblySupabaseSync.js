@@ -612,8 +612,29 @@ export const useAblySupabaseSync = ({
     try {
       bc = new BroadcastChannel('bricolemoi_intertab_sync');
       bc.onmessage = (e) => {
-        const payload = e.data;
-        if (!payload) return;
+        if (payload.type === 'INTERVENTION_ACCEPTED' || payload.type === 'SOS_CLAIMED') {
+          const acceptedIntv = payload.intervention || {};
+          const intId = String(acceptedIntv.id || payload.intervention_id || '').trim();
+          setInterventions((prev) => {
+            const next = prev.map((item) =>
+              String(item.id).trim() === intId
+                ? {
+                    ...item,
+                    status: 'ACCEPTED',
+                    progress_step: acceptedIntv.progress_step || 'ON_THE_WAY',
+                    maalem_id: acceptedIntv.maalem_id || payload.maalem_id || item.maalem_id,
+                    maalem_name: acceptedIntv.maalem_name || payload.maalem_name || item.maalem_name,
+                    maalem_phone: acceptedIntv.maalem_phone || payload.maalem_phone || item.maalem_phone,
+                    accepted_at: acceptedIntv.accepted_at || new Date().toISOString()
+                  }
+                : item
+            );
+            try {
+              localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+            } catch (err) {}
+            return next;
+          });
+        }
 
         if (payload.type === 'INTERVENTION_PROGRESS_UPDATED') {
           const intId = String(payload.intervention_id || '').trim();
@@ -624,7 +645,10 @@ export const useAblySupabaseSync = ({
                 ? {
                     ...item,
                     progress_step: pStep,
-                    status: item.status === 'PENDING' || !item.status ? 'ACCEPTED' : item.status
+                    status: item.status === 'PENDING' || !item.status ? 'ACCEPTED' : item.status,
+                    maalem_id: payload.maalem_id || item.maalem_id,
+                    maalem_name: payload.maalem_name || item.maalem_name,
+                    maalem_phone: payload.maalem_phone || item.maalem_phone
                   }
                 : item
             );

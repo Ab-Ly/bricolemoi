@@ -8,6 +8,7 @@ import { getServiceDisplay } from '../hooks/useClientViewState';
 export const ClientActiveOngoingCard = ({
   activeOngoingSOS,
   matchedMaalem,
+  maalems = [],
   setPendingCompletionModalInt,
   cancelIntervention,
   selectedLat,
@@ -16,6 +17,24 @@ export const ClientActiveOngoingCard = ({
   setShowNewSOSForm
 }) => {
   if (!activeOngoingSOS) return null;
+
+  const resolvedMaalem = (maalems || []).find((m) =>
+    String(m.id).trim() === String(activeOngoingSOS.maalem_id || matchedMaalem?.id).trim()
+  );
+
+  const maalemDisplayName =
+    (activeOngoingSOS.maalem_name && activeOngoingSOS.maalem_name !== 'Artisan Maâlem' && activeOngoingSOS.maalem_name !== 'Artisan Maalem' && activeOngoingSOS.maalem_name !== 'Maalem')
+      ? activeOngoingSOS.maalem_name
+      : (matchedMaalem?.full_name && matchedMaalem?.full_name !== 'Artisan Maâlem'
+        ? matchedMaalem.full_name
+        : (resolvedMaalem?.full_name || 'Artisan Maâlem'));
+
+  const maalemDisplayPhone =
+    (activeOngoingSOS.maalem_phone && activeOngoingSOS.maalem_phone !== 'N/A' && String(activeOngoingSOS.maalem_phone).length >= 8)
+      ? activeOngoingSOS.maalem_phone
+      : (matchedMaalem?.phone || resolvedMaalem?.phone || '');
+
+  const maalemCleanPhone = String(maalemDisplayPhone).replace(/\D/g, '');
 
   return (
     <motion.div
@@ -28,75 +47,64 @@ export const ClientActiveOngoingCard = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
-            {activeOngoingSOS.status === 'PENDING_COMPLETION' ? (
-              <CheckCircle2 className="w-7 h-7 text-white" />
-            ) : activeOngoingSOS.progress_step === 'ARRIVED' ? (
-              <MapPin className="w-7 h-7 text-white" />
-            ) : (
-              <Car className="w-7 h-7 text-white" />
-            )}
+            <Car className="w-6 h-6 animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span
-                className={`w-2.5 h-2.5 rounded-full ${
-                  activeOngoingSOS.status === 'PENDING_COMPLETION'
-                    ? 'bg-purple-500 animate-pulse'
-                    : 'bg-emerald-500 animate-ping'
-                }`}
-              />
-              <span className="text-xs font-black uppercase tracking-wider text-blue-700 font-mono">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 font-mono">
                 {activeOngoingSOS.status === 'PENDING_COMPLETION'
-                  ? 'Clôture de Chantier • Validation Requise'
+                  ? 'Mission Réalisée • Confirmation Requise'
                   : activeOngoingSOS.progress_step === 'ARRIVED'
-                  ? 'Maâlem sur place • Diagnostic & Réparation'
-                  : 'Maâlem en route • Déplacement Live'}
+                  ? 'Maâlem Sur Place • Diagnostic en cours'
+                  : 'Maâlem en Route • Déplacement Live'}
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-sans tracking-tight">
               {activeOngoingSOS.status === 'PENDING_COMPLETION'
-                ? "Travaux Finalisés par l'Artisan"
+                ? 'Travaux Réalisés par votre Maâlem'
                 : activeOngoingSOS.progress_step === 'ARRIVED'
-                ? "L'Artisan est arrivé à votre domicile"
+                ? 'Votre Maâlem est arrivé sur place'
                 : 'Votre Artisan Maâlem est en route'}
             </h2>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-center">
-          <span className="px-3.5 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-mono font-black text-xs shadow-xs">
-            {getServiceDisplay(activeOngoingSOS.service_type).label}
-          </span>
-        </div>
+        <span className="px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs self-start sm:self-auto shadow-2xs">
+          {getServiceDisplay(activeOngoingSOS.service_type).label}
+        </span>
       </div>
 
-      {/* Stepper Dynamique d'Avancement */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        <div className="p-3 rounded-2xl bg-blue-50 border border-blue-200 text-center space-y-1">
-          <span className="text-xs font-black text-blue-800">1. Prise en charge</span>
-          <p className="text-[10px] text-blue-600 font-medium">Validée ✓</p>
+      {/* Étapes d'avancement dynamiques */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+        <div className="p-3 rounded-2xl border bg-blue-50/80 border-blue-200 text-blue-900 shadow-xs">
+          <CheckCircle2 className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+          <span className="text-xs font-black">1. Prise en charge</span>
+          <p className="text-[10px] text-blue-700 font-medium">Validée ✓</p>
         </div>
-        <div
-          className={`p-3 rounded-2xl border text-center space-y-1 transition-all ${
-            activeOngoingSOS.progress_step === 'ARRIVED' || activeOngoingSOS.status === 'PENDING_COMPLETION'
-              ? 'bg-blue-50 border-blue-200 text-blue-800'
-              : 'bg-amber-50 border-amber-300 text-amber-900 animate-pulse'
-          }`}
-        >
+
+        <div className={`p-3 rounded-2xl border transition-all ${
+          activeOngoingSOS.progress_step === 'ARRIVED' || activeOngoingSOS.status === 'PENDING_COMPLETION'
+            ? 'bg-blue-50/80 border-blue-200 text-blue-900 shadow-xs'
+            : 'bg-amber-50/80 border-amber-300 text-amber-900 shadow-xs ring-1 ring-amber-300/50'
+        }`}>
+          <Car className="w-5 h-5 mx-auto mb-1 text-amber-600" />
           <span className="text-xs font-black">2. Déplacement</span>
           <p className="text-[10px] font-medium">
             {activeOngoingSOS.progress_step === 'ARRIVED' || activeOngoingSOS.status === 'PENDING_COMPLETION'
-              ? 'Arrivé sur place ✓'
+              ? 'Sur place ✓'
               : 'En route (~15 min)'}
           </p>
         </div>
-        <div
-          className={`p-3 rounded-2xl border text-center space-y-1 transition-all ${
-            activeOngoingSOS.status === 'PENDING_COMPLETION'
-              ? 'bg-purple-50 border-purple-300 text-purple-900 animate-pulse'
-              : 'bg-slate-50 border-slate-200 text-slate-400'
-          }`}
-        >
+
+        <div className={`p-3 rounded-2xl border transition-all ${
+          activeOngoingSOS.status === 'PENDING_COMPLETION'
+            ? 'bg-purple-50 border-purple-300 text-purple-900 shadow-xs ring-2 ring-purple-400/60 animate-pulse'
+            : 'bg-slate-50 border-slate-200 text-slate-400'
+        }`}>
+          <CheckCircle2 className={`w-5 h-5 mx-auto mb-1 ${
+            activeOngoingSOS.status === 'PENDING_COMPLETION' ? 'text-purple-600' : 'text-slate-400'
+          }`} />
           <span className="text-xs font-black">3. Clôture</span>
           <p className="text-[10px] font-medium">
             {activeOngoingSOS.status === 'PENDING_COMPLETION' ? 'Validation Prix' : 'À venir'}
@@ -108,12 +116,12 @@ export const ClientActiveOngoingCard = ({
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-full bg-blue-600 text-white font-black text-lg flex items-center justify-center shadow-xs flex-shrink-0">
-            {(activeOngoingSOS.maalem_name || matchedMaalem?.full_name || 'M')[0].toUpperCase()}
+            {(maalemDisplayName || 'M')[0].toUpperCase()}
           </div>
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
               <span className="font-black text-slate-900 text-base">
-                {activeOngoingSOS.maalem_name || matchedMaalem?.full_name || 'Artisan Maâlem'}
+                {maalemDisplayName}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold">
                 ✓ Vérifié
@@ -123,8 +131,8 @@ export const ClientActiveOngoingCard = ({
               <span className="flex items-center gap-1 text-amber-600 font-bold">
                 <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                 <span>
-                  {activeOngoingSOS.maalem_rating || matchedMaalem?.rating_avg
-                    ? `${(activeOngoingSOS.maalem_rating || matchedMaalem?.rating_avg).toFixed(1)} / 5`
+                  {activeOngoingSOS.maalem_rating || matchedMaalem?.rating_avg || resolvedMaalem?.rating_avg
+                    ? `${(activeOngoingSOS.maalem_rating || matchedMaalem?.rating_avg || resolvedMaalem?.rating_avg).toFixed(1)} / 5`
                     : '5.0 / 5'}
                 </span>
               </span>
@@ -136,20 +144,18 @@ export const ClientActiveOngoingCard = ({
 
         {/* Boutons d'Appel / WhatsApp */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {activeOngoingSOS.maalem_phone && (
+          {maalemCleanPhone.length >= 8 && (
             <a
-              href={`tel:${activeOngoingSOS.maalem_phone}`}
+              href={`tel:${maalemDisplayPhone}`}
               className="py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 font-bold text-xs shadow-xs flex items-center gap-2 active:scale-95 transition-all"
             >
               <PhoneCall className="w-4 h-4 text-blue-600" />
               <span>Appeler</span>
             </a>
           )}
-          {activeOngoingSOS.maalem_phone && (
+          {maalemCleanPhone.length >= 8 && (
             <a
-              href={`https://wa.me/212${String(activeOngoingSOS.maalem_phone)
-                .replace(/\D/g, '')
-                .replace(/^0/, '')}?text=${encodeURIComponent(
+              href={`https://wa.me/212${maalemCleanPhone.replace(/^0/, '')}?text=${encodeURIComponent(
                 `Bonjour, je suis le client pour l'intervention BricoleMoi (${activeOngoingSOS.subcategory || 'Dépannage'}).`
               )}`}
               target="_blank"
