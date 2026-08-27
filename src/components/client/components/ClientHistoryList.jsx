@@ -62,9 +62,13 @@ export const ClientHistoryList = ({
                 <div className="space-y-1.5 text-xs text-slate-600">
                   <div className="flex items-center justify-between">
                     <p className="font-bold text-slate-900 text-sm">{item.subcategory || 'Dépannage'}</p>
-                    {item.final_agreed_price && (
+                    {item.final_agreed_price ? (
                       <span className="font-mono font-black text-xs text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
                         {item.final_agreed_price} DH
+                      </span>
+                    ) : (
+                      <span className="font-mono font-bold text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
+                        🤝 Accord Direct
                       </span>
                     )}
                   </div>
@@ -93,17 +97,27 @@ export const ClientHistoryList = ({
 
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                 {item.rating ? (
-                  <span className="px-2.5 py-1 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                    <span>Note : {item.rating} / 5</span>
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-black flex items-center gap-1">
+                      <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                      <span>Note : {item.rating} / 5</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setReviewModalInt(item)}
+                      className="text-[10px] text-slate-500 hover:text-blue-600 underline font-medium cursor-pointer"
+                    >
+                      Modifier
+                    </button>
+                  </div>
                 ) : item.status === 'COMPLETED' ? (
                   <button
+                    type="button"
                     onClick={() => setReviewModalInt(item)}
-                    className="px-3.5 py-2 bg-amber-50 border border-amber-200 text-amber-800 font-bold text-xs rounded-xl hover:bg-amber-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                    className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
                   >
                     <Star className="w-3.5 h-3.5 text-amber-600 fill-amber-600" />
-                    <span>Laisser un Avis</span>
+                    <span>Donner mon Avis</span>
                   </button>
                 ) : (
                   <span className="text-[11px] text-slate-400">Demande clôturée</span>

@@ -75,6 +75,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
   const {
     interventions,
     maalems,
+    reviews,
     createIntervention,
     confirmFinalDevis,
     completeIntervention,
@@ -217,6 +218,25 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
   const completedClientInterventions = myClientInterventions
     .filter((item) => item.status === 'COMPLETED' || item.status === 'CANCELLED')
+    .map((item) => {
+      const sId = String(item.id || '').trim();
+      const rev = (reviews || []).find(
+        (r) => String(r.intervention_id || '').trim() === sId
+      );
+      const exactRating =
+        item.rating !== undefined && item.rating !== null && !isNaN(Number(item.rating)) && Number(item.rating) > 0
+          ? Number(item.rating)
+          : (rev && rev.rating !== undefined && rev.rating !== null && !isNaN(Number(rev.rating)) && Number(rev.rating) > 0
+              ? Number(rev.rating)
+              : null);
+
+      return {
+        ...item,
+        rating: exactRating,
+        comment: item.comment || rev?.comment || null,
+        badges: item.badges || rev?.badges || []
+      };
+    })
     .sort(
       (a, b) =>
         new Date(b.completed_at || b.updated_at || b.created_at || 0) -
