@@ -165,28 +165,46 @@ export const unsubscribeUserFromPush = async (user = null) => {
  * Affiche une notification locale au niveau de l'OS (utile quand l'onglet est en arrière-plan)
  */
 export const showLocalPushNotification = async (title, options = {}) => {
-  if (!isPushSupported() || Notification.permission !== 'granted') return null;
+  if (typeof window === 'undefined' || !isPushSupported()) return null;
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return null;
 
   try {
     if ('serviceWorker' in navigator) {
-      const reg = await navigator.serviceWorker.ready;
-      if (reg && reg.showNotification) {
-        return reg.showNotification(title, {
-          icon: '/favicon.svg',
-          badge: '/favicon.svg',
-          vibrate: [500, 150, 500, 150, 500, 200, 700],
-          requireInteraction: true,
-          ...options
-        });
+      try {
+        const reg = await Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('SW ready timeout')), 1000))
+        ]);
+
+        if (reg && typeof reg.showNotification === 'function') {
+          return await reg.showNotification(title, {
+            icon: '/favicon.svg',
+            badge: '/favicon.svg',
+            vibrate: [500, 150, 500, 150, 500, 200, 700],
+            requireInteraction: true,
+            ...options
+          });
+        }
+      } catch (swErr) {
+        console.debug('[Push] SW showNotification bypass:', swErr);
       }
     }
 
-    return new Notification(title, {
-      icon: '/favicon.svg',
-      ...options
-    });
+    // Sur mobile (Android Chrome, iOS Safari), `new Notification()` lance TypeError: Illegal constructor.
+    // On l'exécute uniquement si le constructeur est supporté en toute sécurité.
+    try {
+      if (typeof window.Notification === 'function') {
+        return new window.Notification(title, {
+          icon: '/favicon.svg',
+          ...options
+        });
+      }
+    } catch (constructErr) {
+      console.debug('[Push] Desktop Notification constructor unavailable on mobile:', constructErr);
+    }
+    return null;
   } catch (err) {
-    console.warn('[Push] Erreur lors de l’affichage de la notification:', err);
+    console.debug('[Push] Notice notification non critique:', err);
     return null;
   }
 };
