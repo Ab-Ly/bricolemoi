@@ -24,15 +24,21 @@ export class ErrorBoundary extends React.Component {
 
   handleReload = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
-    window.location.reload();
+    try {
+      sessionStorage.removeItem('bricolemoi_chunk_reload');
+    } catch (e) {}
+    window.location.href = window.location.pathname + '?_t=' + Date.now();
   };
 
   handleResetAndClear = () => {
     try {
       sessionStorage.clear();
       localStorage.removeItem('bricolemoi_sync_payload');
+      localStorage.removeItem('bricolemoi_interventions_cache');
+      localStorage.removeItem('bricolemoi_my_unlocked_leads');
+      localStorage.removeItem('bricolemoi_my_created_leads');
     } catch (e) {}
-    window.location.href = '/';
+    window.location.href = '/?_t=' + Date.now();
   };
 
   render() {

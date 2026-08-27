@@ -15,10 +15,31 @@ import { EmergencySOSModal } from './components/EmergencySOSModal';
 import { getAppSubdomain, switchSubdomainInDev, APP_SUBDOMAINS } from './lib/subdomain';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
+// Resilient Lazy Loading Helper that auto-reloads on deployment chunk update
+const lazyWithRetry = (componentImport) =>
+  lazy(async () => {
+    const pageHasBeenForceRefreshed = JSON.parse(
+      window.sessionStorage.getItem('bricolemoi_chunk_reload') || 'false'
+    );
+
+    try {
+      const component = await componentImport();
+      window.sessionStorage.setItem('bricolemoi_chunk_reload', 'false');
+      return component;
+    } catch (error) {
+      if (!pageHasBeenForceRefreshed) {
+        window.sessionStorage.setItem('bricolemoi_chunk_reload', 'true');
+        window.location.reload();
+        return { default: () => null };
+      }
+      throw error;
+    }
+  });
+
 // Code Splitting & Lazy-loaded Sub-Apps
-const ClientApp = lazy(() => import('./layouts/ClientApp'));
-const MaalemApp = lazy(() => import('./layouts/MaalemApp'));
-const AdminApp = lazy(() => import('./layouts/AdminApp'));
+const ClientApp = lazyWithRetry(() => import('./layouts/ClientApp'));
+const MaalemApp = lazyWithRetry(() => import('./layouts/MaalemApp'));
+const AdminApp = lazyWithRetry(() => import('./layouts/AdminApp'));
 
 // Élégant composant de chargement pour les transitions SPA instantanées
 const AppLoadingFallback = () => (
