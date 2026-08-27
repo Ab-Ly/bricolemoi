@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
+import { formatDateTime } from '../../utils/dateUtils';
 import { calculateMaalemBalance } from '../../utils/balanceUtils';
 import { calculateMaalemRating } from '../../utils/ratingUtils';
 
@@ -603,8 +604,8 @@ export const AdminMaalemsView = ({
                                       ))}
                                     </div>
                                   )}
-                                  <span className="text-[9px] text-slate-400 font-mono block">
-                                    {rev.created_at ? new Date(rev.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Récemment'}
+                                  <span className="text-[10px] text-slate-400 font-mono block">
+                                    {formatDateTime(rev.created_at, 'long')}
                                   </span>
                                 </div>
                               ))}
@@ -682,8 +683,8 @@ export const AdminMaalemsView = ({
                             </p>
 
                             <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-200">
-                              <span>Prix : <strong className="text-blue-700">{m.final_agreed_price ? `${m.final_agreed_price} DH` : '150-250 DH'}</strong></span>
-                              <span>{new Date(m.created_at || Date.now()).toLocaleDateString('fr-FR')}</span>
+                              <span>Prix : <strong className="text-blue-700">{m.final_agreed_price ? `${m.final_agreed_price} DH` : 'Accord Direct'}</strong></span>
+                              <span>{formatDateTime(m.created_at || Date.now(), 'long')}</span>
                             </div>
                           </div>
                         ))}

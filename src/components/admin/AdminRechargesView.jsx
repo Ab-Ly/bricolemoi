@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
+import { formatDateTime } from '../../utils/dateUtils';
 import { calculateMaalemBalance } from '../../utils/balanceUtils';
 
 export const AdminRechargesView = ({ 
@@ -321,8 +322,8 @@ export const AdminRechargesView = ({
                   </div>
 
                   <p className="text-[11px] text-slate-500 font-mono flex items-center gap-2">
-                    <span>Soumis le : {new Date(tx.created_at || Date.now()).toLocaleString('fr-FR')}</span>
-                    {tx.reconciled_at && <span>• Traité le : {new Date(tx.reconciled_at).toLocaleTimeString('fr-FR')}</span>}
+                    <span>Soumis le : {formatDateTime(tx.created_at || Date.now(), 'long')}</span>
+                    {tx.reconciled_at && <span>• Traité le : {formatDateTime(tx.reconciled_at, 'long')}</span>}
                   </p>
 
                   {tx.admin_notes && (

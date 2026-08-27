@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../context/AppContext';
 import { calculateMaalemRating } from '../../utils/ratingUtils';
+import { formatDateTime } from '../../utils/dateUtils';
 import { 
   Gift, 
   Sparkles, 
@@ -341,7 +342,7 @@ export const AdminLoyaltyRewardsView = () => {
                       <p className="text-[10px] font-mono text-slate-400">{rec.maalem_phone}</p>
                     </div>
                     <span className="text-[10px] font-mono text-slate-500">
-                      {new Date(rec.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                      {formatDateTime(rec.created_at, 'long')}
                     </span>
                   </div>
 
@@ -381,12 +382,7 @@ export const AdminLoyaltyRewardsView = () => {
                   {loyaltyRewardsHistory.map((rec) => (
                     <tr key={rec.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="py-3 px-3 font-mono text-[11px] text-slate-600">
-                        {new Date(rec.created_at).toLocaleDateString('fr-FR', {
-                          day: '2-digit',
-                          month: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {formatDateTime(rec.created_at, 'long')}
                       </td>
                       <td className="py-3 px-3 font-bold text-slate-900">
                         <div className="flex items-center gap-1.5">

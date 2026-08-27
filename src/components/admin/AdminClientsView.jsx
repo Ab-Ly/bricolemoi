@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
+import { formatDateTime } from '../../utils/dateUtils';
 
 export const AdminClientsView = ({ clients = [], interventions = [], reviews = [], onToggleSuspension }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -261,7 +262,7 @@ export const AdminClientsView = ({ clients = [], interventions = [], reviews = [
                               {client.full_name || 'Client BricoleMoi'}
                             </p>
                             <p className="text-[10px] text-slate-400 font-mono">
-                              Inscrit le {new Date(client.created_at || Date.now()).toLocaleDateString('fr-FR')}
+                              Inscrit le {formatDateTime(client.created_at || Date.now(), 'long')}
                             </p>
                           </div>
                         </div>
@@ -499,11 +500,11 @@ export const AdminClientsView = ({ clients = [], interventions = [], reviews = [
                               </p>
                               <p className="flex items-center justify-between">
                                 <span>Devis / Prix convenu :</span>
-                                <strong className="text-blue-700 font-mono font-black">{m.final_agreed_price ? `${m.final_agreed_price} DH` : '150 - 250 DH'}</strong>
+                                <strong className="text-blue-700 font-mono font-black">{m.final_agreed_price ? `${m.final_agreed_price} DH` : 'Accord Direct'}</strong>
                               </p>
                               <p className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
                                 <span>Date :</span>
-                                <span>{new Date(m.created_at || Date.now()).toLocaleString('fr-FR')}</span>
+                                <span>{formatDateTime(m.created_at || Date.now(), 'long')}</span>
                               </p>
                             </div>
 

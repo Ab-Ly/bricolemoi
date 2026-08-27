@@ -15,9 +15,11 @@ import {
   Check, 
   X,
   FileText,
-  ShieldCheck
+  ShieldCheck,
+  Calendar
 } from 'lucide-react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
+import { formatDateTime } from '../../utils/dateUtils';
 
 export const AdminDisputesView = ({ adminAlerts = [], interventions = [], onResolveDispute }) => {
   const [filter, setFilter] = useState('ALL'); // 'ALL' | 'PENDING' | 'RESOLVED'
@@ -28,7 +30,9 @@ export const AdminDisputesView = ({ adminAlerts = [], interventions = [], onReso
     if (filter === 'PENDING') return a.status !== 'REFUNDED_RESOLVED' && a.status !== 'REJECTED';
     if (filter === 'RESOLVED') return a.status === 'REFUNDED_RESOLVED' || a.status === 'REJECTED';
     return true;
-  });  return (
+  });
+
+  return (
     <div className="space-y-6 font-sans">
       {/* Header & Explications des Règles Métier */}
       <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4 text-slate-900">
@@ -160,6 +164,19 @@ export const AdminDisputesView = ({ adminAlerts = [], interventions = [], onReso
                   </div>
                 )}
 
+                {/* Date et heure précises du signalement */}
+                <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono pt-1">
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Signalé le : {formatDateTime(alert.created_at || Date.now(), 'long')}</span>
+                  </span>
+                  {alert.resolved_at && (
+                    <span className="text-emerald-700 font-bold">
+                      Résolu le : {formatDateTime(alert.resolved_at, 'long')}
+                    </span>
+                  )}
+                </div>
+
                 {/* Actions d'Arbitrage (Si non clôturé) */}
                 {!isResolved && (
                   <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-3 border-t border-slate-100">
@@ -236,10 +253,11 @@ export const AdminDisputesView = ({ adminAlerts = [], interventions = [], onReso
                   Motif du rejet (transmis à l'artisan) :
                 </label>
                 <textarea
-                  rows="3"
+                  rows={3}
                   value={rejectReasonText}
                   onChange={(e) => setRejectReasonText(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-900 focus:outline-none focus:border-rose-600 shadow-xs"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-rose-400"
+                  placeholder="Expliquez la raison du rejet..."
                 />
               </div>
 
@@ -247,7 +265,7 @@ export const AdminDisputesView = ({ adminAlerts = [], interventions = [], onReso
                 <button
                   type="button"
                   onClick={() => setRejectReasonModalAlert(null)}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
                 >
                   Annuler
                 </button>
@@ -258,12 +276,14 @@ export const AdminDisputesView = ({ adminAlerts = [], interventions = [], onReso
                       onResolveDispute({
                         alertId: rejectReasonModalAlert.id,
                         maalemId: rejectReasonModalAlert.maalem_id,
-                        shouldRefund: false
+                        amount: 0,
+                        shouldRefund: false,
+                        adminNotes: rejectReasonText
                       });
                     }
                     setRejectReasonModalAlert(null);
                   }}
-                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs cursor-pointer"
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer active:scale-95"
                 >
                   Confirmer le Rejet
                 </button>

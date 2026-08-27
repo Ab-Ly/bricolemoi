@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
+import { formatDateTime } from '../../utils/dateUtils';
 import { InteractiveMap } from '../InteractiveMap';
 
 export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIntervention }) => {
@@ -333,7 +334,7 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
                         <span className="truncate">{item.district || 'Casablanca'}</span>
                       </p>
                       <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                        Lancé à {new Date(item.created_at || Date.now()).toLocaleTimeString('fr-FR')} • {new Date(item.created_at || Date.now()).toLocaleDateString('fr-FR')}
+                        Lancé le : {formatDateTime(item.created_at || Date.now(), 'long')}
                       </p>
                     </div>
                   </div>
