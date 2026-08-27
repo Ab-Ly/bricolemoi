@@ -18,16 +18,23 @@ export const ClientActiveOngoingCard = ({
 }) => {
   if (!activeOngoingSOS) return null;
 
-  const resolvedMaalem = (maalems || []).find((m) =>
-    String(m.id).trim() === String(activeOngoingSOS.maalem_id || matchedMaalem?.id).trim()
-  );
+  const rawMaalemId = String(activeOngoingSOS.maalem_id || matchedMaalem?.id || '').trim();
+  const rawMaalemPhone = String(activeOngoingSOS.maalem_phone || matchedMaalem?.phone || '').replace(/\D/g, '');
+
+  const resolvedMaalem = (maalems || []).find((m) => {
+    const mId = String(m.id || '').trim();
+    const mPhone = String(m.phone || '').replace(/\D/g, '');
+    return (rawMaalemId && mId === rawMaalemId) || (rawMaalemPhone && mPhone && mPhone === rawMaalemPhone);
+  });
 
   const maalemDisplayName =
     (activeOngoingSOS.maalem_name && activeOngoingSOS.maalem_name !== 'Artisan Maâlem' && activeOngoingSOS.maalem_name !== 'Artisan Maalem' && activeOngoingSOS.maalem_name !== 'Maalem')
       ? activeOngoingSOS.maalem_name
-      : (matchedMaalem?.full_name && matchedMaalem?.full_name !== 'Artisan Maâlem'
+      : (matchedMaalem?.full_name && matchedMaalem?.full_name !== 'Artisan Maâlem' && matchedMaalem?.full_name !== 'Maalem'
         ? matchedMaalem.full_name
-        : (resolvedMaalem?.full_name || 'Artisan Maâlem'));
+        : (matchedMaalem?.name && matchedMaalem?.name !== 'Maalem'
+          ? matchedMaalem.name
+          : (resolvedMaalem?.full_name || resolvedMaalem?.name || 'Artisan Maâlem')));
 
   const maalemDisplayPhone =
     (activeOngoingSOS.maalem_phone && activeOngoingSOS.maalem_phone !== 'N/A' && String(activeOngoingSOS.maalem_phone).length >= 8)
