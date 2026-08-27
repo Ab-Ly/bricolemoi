@@ -607,13 +607,21 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
       i.status !== 'COMPLETED' &&
       i.status !== 'CANCELLED' &&
       i.status !== 'UNFEASIBLE' &&
-      ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
+      (['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status) ||
+       ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(i.progress_step) ||
+       Boolean(i.maalem_id))
   );
+
+  const isEmergencyMatched = isMatched || (activeEmergency && (
+    ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(activeEmergency.status) ||
+    ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(activeEmergency.progress_step) ||
+    Boolean(activeEmergency.maalem_id)
+  ));
 
   const activeOngoingSOS =
     (ongoingFromList && ongoingFromList.status !== 'COMPLETED' && ongoingFromList.status !== 'CANCELLED')
       ? ongoingFromList
-      : (isMatched && activeEmergency && !isCompleted && activeEmergency.status !== 'COMPLETED' && activeEmergency.status !== 'CANCELLED'
+      : (isEmergencyMatched && activeEmergency && !isCompleted && activeEmergency.status !== 'COMPLETED' && activeEmergency.status !== 'CANCELLED'
         ? activeEmergency
         : null);
 
@@ -625,7 +633,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
   const activePendingSOS = !activeOngoingSOS
     ? pendingFromList ||
-      (isSearching && !isMatched && !isCompleted && activeEmergency?.status !== 'COMPLETED'
+      (isSearching && !isEmergencyMatched && !isCompleted && activeEmergency?.status !== 'COMPLETED' && (!activeEmergency?.maalem_id && activeEmergency?.status === 'PENDING')
         ? activeEmergency || {
             id: 'pending-sos',
             service_type: serviceType,

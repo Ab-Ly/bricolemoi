@@ -159,6 +159,7 @@ export const EmergencyFlowProvider = ({ children }) => {
 
       const isMyIntv = (i) => {
         if (!i) return false;
+        if (flowState.activeEmergency?.id && String(i.id).trim() === String(flowState.activeEmergency.id).trim()) return true;
         if (myCreated.includes(String(i.id).trim())) return true;
         if (user?.id && String(i.client_id || '').trim() === String(user.id).trim()) return true;
         const userPhoneDigits = String(user?.phone || '').replace(/\D/g, '');
