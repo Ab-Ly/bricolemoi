@@ -497,7 +497,7 @@ export const useAblySupabaseSync = ({
             rating: intv.rating ?? rev?.rating ?? null,
             comment: intv.comment || rev?.comment || null,
             client_name: clientProf?.full_name || intv.client_name || 'Client BricoleMoi',
-            client_phone: clientProf?.phone || intv.client_phone || '0661-234567',
+            client_phone: clientProf?.phone || intv.client_phone || '',
             maalem_name:
               maalemProf?.full_name ||
               intv.maalem_name ||
