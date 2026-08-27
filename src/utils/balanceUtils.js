@@ -15,7 +15,7 @@ export const isBonusTx = (t) => {
 export const isLeadTx = (t) => {
   if (!t) return false;
   const typeUpper = String(t.type || '').toUpperCase();
-  return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'LEAD_ESCROW' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
+  return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
 };
 
 export const isRealRechargeTx = (t) => {
@@ -48,29 +48,36 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
     return matchId || matchPhone;
   });
 
-  const totalRechargedSum = myTransactions
-    .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
-    .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
+  // Dédupliquer les transactions de déduction de lead pour la même intervention
+  const validatedLeadTxs = myTransactions.filter((t) => t.status === 'VALIDATED' && isLeadTx(t));
+  const seenInterventionKeys = new Set();
+  let totalValidatedLeadsSpent = 0;
 
-  const totalValidatedLeadsSpent = myTransactions
-    .filter((t) => t.status === 'VALIDATED' && isLeadTx(t))
-    .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
-
-  const totalReservedEscrow = myTransactions
-    .filter((t) => t.status === 'RESERVED' && isLeadTx(t))
-    .reduce((acc, t) => acc + Math.abs(parseFloat(t.amount_dh) || 0), 0);
+  for (const t of validatedLeadTxs) {
+    const ref = String(t.reference_ref || '').trim();
+    const uuidMatch = ref.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    const intvKey = uuidMatch ? uuidMatch[0].toLowerCase() : (t.id || ref);
+    if (!seenInterventionKeys.has(intvKey)) {
+      seenInterventionKeys.add(intvKey);
+      totalValidatedLeadsSpent += Math.abs(parseFloat(t.amount_dh) || 0);
+    }
+  }
 
   const totalBonusSum = myTransactions
     .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
     .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
 
+  const totalRechargedSum = myTransactions
+    .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
+    .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
+
   const fallbackCredits = parseFloat(
-    maalemOrUser?.credits !== undefined && maalemOrUser?.credits !== null
-      ? maalemOrUser.credits
-      : (maalemOrUser?.maalem_details?.credit_balance !== undefined && maalemOrUser?.maalem_details?.credit_balance !== null
-        ? maalemOrUser.maalem_details.credit_balance
-        : (currentLiveMaalem?.credit_balance !== undefined && currentLiveMaalem?.credit_balance !== null
-          ? currentLiveMaalem.credit_balance
+    currentLiveMaalem?.credit_balance !== undefined && currentLiveMaalem?.credit_balance !== null
+      ? currentLiveMaalem.credit_balance
+      : (maalemOrUser?.credits !== undefined && maalemOrUser?.credits !== null
+        ? maalemOrUser.credits
+        : (maalemOrUser?.maalem_details?.credit_balance !== undefined && maalemOrUser?.maalem_details?.credit_balance !== null
+          ? maalemOrUser.maalem_details.credit_balance
           : (maalemOrUser?.role?.toUpperCase() === 'MAALEM' ? 15.00 : 0)))
   );
 
@@ -78,26 +85,23 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
   let liveTotalBalance = 0;
 
   if (totalRechargeAndBonus > 0) {
-    // Calcul comptable exhaustif basé sur le grand livre des recharges
     liveTotalBalance = Math.max(0, totalRechargeAndBonus - totalValidatedLeadsSpent);
   } else {
-    // Solde net direct depuis la base de données Supabase (déjà déduit côté serveur)
     liveTotalBalance = Math.max(0, fallbackCredits);
   }
 
-  const liveAvailableBalance = Math.max(
-    0,
-    totalRechargeAndBonus > 0 ? liveTotalBalance - totalReservedEscrow : liveTotalBalance
-  );
+  if (!isNaN(fallbackCredits) && fallbackCredits > liveTotalBalance && totalRechargedSum === 0) {
+    liveTotalBalance = fallbackCredits;
+  }
 
   return {
     totalRechargedSum,
     totalValidatedLeadsSpent,
-    totalReservedEscrow: totalRechargeAndBonus > 0 ? totalReservedEscrow : 0,
+    totalReservedEscrow: 0,
     totalBonusSum,
     liveTotalBalance,
-    liveAvailableBalance,
-    availableBalance: liveAvailableBalance,
+    liveAvailableBalance: liveTotalBalance,
+    availableBalance: liveTotalBalance,
     myTransactions
   };
 };

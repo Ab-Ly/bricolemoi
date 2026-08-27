@@ -23,56 +23,8 @@ export const useWalletTransactionsService = ({
     customMaalemId = null,
     amount = 15.0
   ) => {
-    const maalemId = customMaalemId || user?.id;
-    const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === String(maalemId).trim()) || user?.maalem_details || user;
-    const maalemName = user?.full_name || liveMaalem?.full_name || 'Artisan Maalem';
-    const cleanIntId = String(interventionId).trim();
-    const ref = `ESCROW_INT_${cleanIntId}`;
-    const cleanMaalemId = String(maalemId || liveMaalem?.id || 'maalem-1').trim();
-
-    const newTx = {
-      id: `tx-escrow-${cleanIntId}-${Date.now()}`,
-      maalem_id: cleanMaalemId,
-      maalem_name: maalemName,
-      maalem_phone: user?.phone || liveMaalem?.phone || '',
-      amount_dh: -Math.abs(amount),
-      type: 'LEAD_ESCROW',
-      payment_method: 'SYSTEM_ESCROW',
-      reference_ref: ref,
-      status: 'RESERVED',
-      admin_notes: `Garantie 15 DH en attente pour mission #${cleanIntId}`,
-      created_at: new Date().toISOString()
-    };
-
-    setTransactions((prev) => [newTx, ...prev.filter((t) => t.reference_ref !== ref)]);
-
-    if (isSupabaseConfigured && maalemId) {
-      try {
-        const { error: insErr } = await supabase.from('transactions').insert([
-          {
-            maalem_id: cleanMaalemId,
-            amount_dh: -Math.abs(amount),
-            type: 'LEAD_ESCROW',
-            payment_method: 'SYSTEM_ESCROW',
-            reference_ref: ref,
-            status: 'RESERVED',
-            admin_notes: `Garantie 15 DH en attente pour mission #${cleanIntId}`
-          }
-        ]);
-        if (insErr) {
-          await supabase
-            .from('transactions')
-            .update({
-              status: 'RESERVED',
-              amount_dh: -Math.abs(amount),
-              admin_notes: `Garantie 15 DH en attente pour mission #${cleanIntId}`
-            })
-            .eq('reference_ref', ref);
-        }
-      } catch (e) {
-        console.warn('[Supabase] reserveLeadCredit warning:', e?.message);
-      }
-    }
+    // Le déblocage direct (LEAD_DEDUCTION 15 DH) est géré directement par acceptLead
+    return true;
   };
 
   const confirmLeadDebit = async (
@@ -80,53 +32,8 @@ export const useWalletTransactionsService = ({
     customMaalemId = null,
     amount = 15.0
   ) => {
-    const cleanIntId = String(interventionId).trim();
-    const ref = `ESCROW_INT_${cleanIntId}`;
-
-    setTransactions((prev) =>
-      prev.map((t) => {
-        if (
-          t.reference_ref === ref ||
-          (t.type === 'LEAD_ESCROW' && t.reference_ref?.includes(cleanIntId))
-        ) {
-          return {
-            ...t,
-            status: 'VALIDATED',
-            type: 'LEAD_DEDUCTION',
-            admin_notes: `Débit confirmé après réalisation des travaux #${cleanIntId}`
-          };
-        }
-        return t;
-      })
-    );
-
-    if (user?.role === 'MAALEM' && user?.maalem_details) {
-      const currentBal = Number(user.maalem_details.credit_balance || user.credits || 0);
-      const newBal = Math.max(0, currentBal - amount);
-      setUser({
-        ...user,
-        credits: newBal,
-        maalem_details: {
-          ...user.maalem_details,
-          credit_balance: newBal
-        }
-      });
-    }
-
-    if (isSupabaseConfigured) {
-      try {
-        await supabase
-          .from('transactions')
-          .update({
-            status: 'VALIDATED',
-            type: 'LEAD_DEDUCTION',
-            admin_notes: `Débit confirmé après réalisation des travaux #${cleanIntId}`
-          })
-          .ilike('reference_ref', ref);
-      } catch (e) {
-        console.warn('[Supabase] confirmLeadDebit warning:', e?.message);
-      }
-    }
+    // La déduction de lead est déjà définitivement validée lors du déblocage
+    return true;
   };
 
   const releaseLeadCredit = async (
@@ -134,33 +41,68 @@ export const useWalletTransactionsService = ({
     reason = 'Mission non réalisable'
   ) => {
     const cleanIntId = String(interventionId).trim();
-    const ref = `ESCROW_INT_${cleanIntId}`;
+    const maalemId = user?.id;
+    const cleanMaalemId = String(maalemId || 'maalem-1').trim();
+    const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === cleanMaalemId) || user?.maalem_details || user;
+    const nowIso = new Date().toISOString();
 
-    setTransactions((prev) =>
-      prev.map((t) => {
-        if (
-          t.reference_ref === ref ||
-          (t.type === 'LEAD_ESCROW' && t.reference_ref?.includes(cleanIntId))
-        ) {
-          return {
-            ...t,
-            status: 'CANCELLED',
-            admin_notes: `Garantie libérée (0 DH débité) - Motif: ${reason}`
-          };
+    const refundTx = {
+      id: `tx-refund-${cleanIntId}-${Date.now()}`,
+      maalem_id: cleanMaalemId,
+      maalem_name: user?.full_name || liveMaalem?.full_name || 'Artisan Maalem',
+      maalem_phone: user?.phone || liveMaalem?.phone || '',
+      amount_dh: 15.0,
+      type: 'RECHARGE',
+      payment_method: 'Remboursement Lead 🛡️',
+      reference_ref: `REFUND_INT_${cleanIntId}`,
+      status: 'VALIDATED',
+      admin_notes: `Remboursement 15 DH suite à mission non réalisable (${reason}) #${cleanIntId}`,
+      created_at: nowIso
+    };
+
+    setTransactions((prev) => [refundTx, ...prev]);
+
+    const currentBal = Number(user?.maalem_details?.credit_balance || user?.credits || liveMaalem?.credit_balance || 0);
+    const newBal = currentBal + 15.0;
+
+    if (user?.role === 'MAALEM') {
+      setUser((prev) => ({
+        ...prev,
+        credits: newBal,
+        maalem_details: {
+          ...(prev?.maalem_details || {}),
+          credit_balance: newBal
         }
-        return t;
-      })
+      }));
+    }
+
+    setMaalems((prev) =>
+      prev.map((m) =>
+        String(m.id).trim() === cleanMaalemId ? { ...m, credit_balance: newBal } : m
+      )
     );
 
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured && maalemId) {
       try {
+        await supabase.from('transactions').insert([
+          {
+            maalem_id: cleanMaalemId,
+            amount_dh: 15.0,
+            type: 'RECHARGE',
+            payment_method: 'Remboursement Lead 🛡️',
+            reference_ref: `REFUND_INT_${cleanIntId}`,
+            status: 'VALIDATED',
+            admin_notes: `Remboursement 15 DH suite à mission non réalisable (${reason}) #${cleanIntId}`
+          }
+        ]);
         await supabase
-          .from('transactions')
-          .update({
-            status: 'CANCELLED',
-            admin_notes: `Garantie libérée (0 DH débité) - Motif: ${reason}`
-          })
-          .ilike('reference_ref', ref);
+          .from('maalem_details')
+          .update({ credit_balance: newBal })
+          .eq('id', cleanMaalemId);
+        await supabase
+          .from('profiles')
+          .update({ credits: newBal })
+          .eq('id', cleanMaalemId);
       } catch (e) {
         console.warn('[Supabase] releaseLeadCredit warning:', e?.message);
       }

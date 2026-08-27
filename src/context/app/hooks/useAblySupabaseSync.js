@@ -318,10 +318,24 @@ export const useAblySupabaseSync = ({
 
       const isThisSelf = user && String(user.id).trim() === String(m.id).trim();
       const storageEntry = onlineMapFromStorage[m.id];
-      const isFreshHeartbeat = Boolean(
-        storageEntry && storageEntry.last_seen_at && Date.now() - storageEntry.last_seen_at < 90000
-      );
-      const onlineStatus = isThisSelf ? Boolean(isMaalemOnline) : isFreshHeartbeat;
+      const directDbCredit = details.credit_balance !== undefined && details.credit_balance !== null
+        ? Number(details.credit_balance)
+        : (m.credits !== undefined && m.credits !== null ? Number(m.credits) : 15.0);
+
+      if (isThisSelf && user && (user.credits === undefined || Number(user.credits) !== directDbCredit)) {
+        const updatedSelf = {
+          ...user,
+          credits: directDbCredit,
+          maalem_details: {
+            ...(user.maalem_details || {}),
+            credit_balance: directDbCredit
+          }
+        };
+        setUser(updatedSelf);
+        try {
+          sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedSelf));
+        } catch (e) {}
+      }
 
       return {
         id: m.id,
@@ -337,18 +351,7 @@ export const useAblySupabaseSync = ({
         is_available: onlineStatus,
         lat: mLat,
         lng: mLng,
-        credit_balance: isThisSelf
-          ? user.credits !== undefined && user.credits !== null
-            ? Number(user.credits)
-            : user.maalem_details?.credit_balance !== undefined &&
-              user.maalem_details?.credit_balance !== null
-            ? Number(user.maalem_details.credit_balance)
-            : details.credit_balance ?? m.credits ?? 15.0
-          : details.credit_balance !== undefined && details.credit_balance !== null
-          ? Number(details.credit_balance)
-          : m.credits !== undefined && m.credits !== null
-          ? Number(m.credits)
-          : 15.0,
+        credit_balance: directDbCredit,
         district: m.city_zone || 'Casablanca'
       };
     });
@@ -708,6 +711,34 @@ export const useAblySupabaseSync = ({
           });
         }
 
+        if (payload.type === 'MAALEM_BALANCE_UPDATED') {
+          const mId = String(payload.maalemId || payload.maalem_id || '').trim();
+          const newBal = Number(payload.newBalance ?? payload.new_balance);
+          if (mId && !isNaN(newBal)) {
+            setMaalems((prev) =>
+              prev.map((m) =>
+                String(m.id).trim() === mId ? { ...m, credit_balance: newBal } : m
+              )
+            );
+            const curr = userRef.current;
+            if (curr && String(curr.id).trim() === mId) {
+              const updatedSelf = {
+                ...curr,
+                credits: newBal,
+                maalem_details: {
+                  ...(curr.maalem_details || {}),
+                  credit_balance: newBal
+                }
+              };
+              setUser(updatedSelf);
+              try {
+                sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedSelf));
+              } catch (e) {}
+            }
+          }
+          fetchRealSupabaseData();
+        }
+
         if (payload.type === 'INTERVENTION_COMPLETED_WITH_REVIEW' || payload.type === 'INTERVENTION_COMPLETED') {
           const intId = String(payload.intervention_id || '').trim();
           const rRating = payload.rating !== undefined && payload.rating !== null ? Number(payload.rating) : null;
@@ -756,57 +787,98 @@ export const useAblySupabaseSync = ({
 
     // Écoute Ably universelle JOBS_STREAM pour diffusion instantanée cross-devices
     let ablyUnsubJobs = null;
+    let ablyUnsubUser = null;
     try {
       ablyUnsubJobs = subscribeToRealtimeChannel(
         ABLY_CHANNELS.JOBS_STREAM,
         ({ event, payload }) => {
           if (!payload) return;
           const intId = String(payload.intervention_id || payload.intervention?.id || '').trim();
-          if (!intId) return;
 
           if (event === 'job_accepted' || event === 'job:accepted' || event === 'sos:claimed') {
-            setInterventions((prev) => {
-              const next = prev.map((item) =>
-                String(item.id).trim() === intId
-                  ? {
-                      ...item,
-                      status: 'ACCEPTED',
-                      progress_step: 'ON_THE_WAY',
-                      escrow_status: 'DEBITED',
-                      maalem_id: payload.maalem_id || item.maalem_id,
-                      maalem_name: payload.maalem_name || item.maalem_name,
-                      maalem_phone: payload.maalem_phone || item.maalem_phone
-                    }
-                  : item
-              );
-              try {
-                localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
-              } catch (e) {}
-              return next;
-            });
+            if (intId) {
+              setInterventions((prev) => {
+                const next = prev.map((item) =>
+                  String(item.id).trim() === intId
+                    ? {
+                        ...item,
+                        status: 'ACCEPTED',
+                        progress_step: 'ON_THE_WAY',
+                        escrow_status: 'DEBITED',
+                        maalem_id: payload.maalem_id || item.maalem_id,
+                        maalem_name: payload.maalem_name || item.maalem_name,
+                        maalem_phone: payload.maalem_phone || item.maalem_phone
+                      }
+                    : item
+                );
+                try {
+                  localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+                } catch (e) {}
+                return next;
+              });
+            }
           } else if (event === 'job_progress' || event === 'job:progress') {
-            setInterventions((prev) => {
-              const next = prev.map((item) =>
-                String(item.id).trim() === intId
-                  ? { ...item, progress_step: payload.progress_step || payload.step || item.progress_step }
-                  : item
-              );
-              try {
-                localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
-              } catch (e) {}
-              return next;
-            });
+            if (intId) {
+              setInterventions((prev) => {
+                const next = prev.map((item) =>
+                  String(item.id).trim() === intId
+                    ? { ...item, progress_step: payload.progress_step || payload.step || item.progress_step }
+                    : item
+                );
+                try {
+                  localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+                } catch (e) {}
+                return next;
+              });
+            }
           }
         },
         user?.id || 'sync-client'
       );
+
+      // Écoute des notifications personnelles Maâlem (crédits / cadeaux / recharges)
+      if (user?.id) {
+        ablyUnsubUser = subscribeToRealtimeChannel(
+          ABLY_CHANNELS.getUserChannel(user.id),
+          ({ event, payload }) => {
+            if (!payload) return;
+            if (event === 'credit:added' || event === 'recharge:approved') {
+              const newBal = Number(payload.new_balance ?? payload.newBalance);
+              if (!isNaN(newBal)) {
+                setMaalems((prev) =>
+                  prev.map((m) =>
+                    String(m.id).trim() === String(user.id).trim()
+                      ? { ...m, credit_balance: newBal }
+                      : m
+                  )
+                );
+                setUser((prev) => ({
+                  ...prev,
+                  credits: newBal,
+                  maalem_details: {
+                    ...(prev?.maalem_details || {}),
+                    credit_balance: newBal
+                  }
+                }));
+              }
+              playNotificationSound('SUCCESS');
+              showToast(
+                `🎁 Crédit actualisé : +${payload.amount || 15} DH (${payload.reason || "Crédit Admin"})`,
+                'success'
+              );
+              fetchRealSupabaseData();
+            }
+          },
+          user.id
+        );
+      }
     } catch (e) {}
 
     let supabaseChannel = null;
     if (isSupabaseConfigured) {
       try {
         supabaseChannel = supabase
-          .channel('public:interventions_realtime_sync')
+          .channel('public:platform_realtime_sync')
           .on(
             'postgres_changes',
             { event: '*', schema: 'public', table: 'interventions' },
@@ -841,6 +913,44 @@ export const useAblySupabaseSync = ({
               }
             }
           )
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'maalem_details' },
+            (payload) => {
+              if (payload.new) {
+                const mDetail = payload.new;
+                const mId = String(mDetail.id || '').trim();
+                const newBal = Number(mDetail.credit_balance);
+                if (mId && !isNaN(newBal)) {
+                  setMaalems((prev) =>
+                    prev.map((m) =>
+                      String(m.id).trim() === mId
+                        ? { ...m, credit_balance: newBal }
+                        : m
+                    )
+                  );
+                  const curr = userRef.current;
+                  if (curr && String(curr.id).trim() === mId) {
+                    setUser((prev) => ({
+                      ...prev,
+                      credits: newBal,
+                      maalem_details: {
+                        ...(prev?.maalem_details || {}),
+                        credit_balance: newBal
+                      }
+                    }));
+                  }
+                }
+              }
+            }
+          )
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'transactions' },
+            () => {
+              fetchRealSupabaseData();
+            }
+          )
           .subscribe();
       } catch (e) {
         console.warn('[Supabase Realtime Sync Warning]:', e);
@@ -857,6 +967,11 @@ export const useAblySupabaseSync = ({
       if (ablyUnsubJobs) {
         try {
           ablyUnsubJobs();
+        } catch (e) {}
+      }
+      if (ablyUnsubUser) {
+        try {
+          ablyUnsubUser();
         } catch (e) {}
       }
       if (supabaseChannel) {

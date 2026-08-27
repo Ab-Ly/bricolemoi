@@ -40,7 +40,7 @@ import { updateProfilePin } from '../lib/infobipAuthService';
 
 export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfile }) => {
   const { user, setUser, logout } = useAuth();
-  const { interventions = [], transactions = [], maalems = [], reviews = [] } = useApp();
+  const { interventions = [], transactions = [], maalems = [], setMaalems, reviews = [], refreshData } = useApp();
 
   const balanceInfo = calculateMaalemBalance(user, transactions, maalems);
   const ratingInfo = calculateMaalemRating(user, reviews, interventions);
@@ -80,7 +80,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
     }
   });
 
-  const [specialty, setSpecialty] = useState(user?.maalem_details?.specialty || 'PLUMBING');
+  const [specialty, setSpecialty] = useState(user?.maalem_details?.specialty || user?.specialty || 'PLUMBING');
   const [saving, setSaving] = useState(false);
   const [detectingGps, setDetectingGps] = useState(false);
   const [showLogoutWarning, setShowLogoutWarning] = useState(false);
@@ -88,6 +88,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
   useEffect(() => {
     if (user) {
       setFullName(user.full_name || '');
+      setSpecialty(user?.maalem_details?.specialty || user?.specialty || 'PLUMBING');
       if (user.phone) {
         // Détecter indicatif existant si présent
         const matchingCountry = COUNTRY_DIAL_CODES.find(c => user.phone.startsWith(c.dial));
@@ -113,7 +114,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
         setActiveTab('edit');
       }
     }
-  }, [user, isMissingPhone]);
+  }, [user, isMissingPhone, isOpen]);
 
   // Fermer dropdown pays lors d'un clic extérieur
   useEffect(() => {
@@ -249,46 +250,64 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
         full_name: fullName.trim() || user.full_name,
         phone: formattedPhone,
         city_zone: fullCityZone,
-      };
-
-      if (isMaalem) {
-        updatedUser.maalem_details = {
+        specialty: isMaalem ? specialty : user.specialty,
+        maalem_details: isMaalem ? {
           ...(user?.maalem_details || {}),
           specialty: specialty
-        };
-      }
+        } : user.maalem_details
+      };
 
       // Sync Supabase `profiles` & `maalem_details`
       if (isSupabaseConfigured && user?.id) {
         const { error: profileErr } = await supabase
           .from('profiles')
-          .upsert([{
-            id: user.id,
+          .update({
             full_name: updatedUser.full_name,
             phone: formattedPhone,
-            role: user.role || 'CLIENT',
             city_zone: fullCityZone
-          }])
-          .select();
+          })
+          .eq('id', user.id);
 
         if (profileErr) {
-          console.warn('[Supabase Profile Upsert Error]:', profileErr);
+          console.warn('[Supabase Profile Update Error]:', profileErr);
         }
 
         if (isMaalem) {
-          await supabase
+          const { error: maalemErr } = await supabase
             .from('maalem_details')
-            .upsert([{
-              id: user.id,
+            .update({
               specialty: specialty
-            }])
-            .select()
-            .catch(() => {});
+            })
+            .eq('id', user.id);
+
+          if (maalemErr) {
+            console.warn('[Supabase maalem_details Update Error]:', maalemErr);
+          }
         }
       }
 
       setUser(updatedUser);
       sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+      try {
+        localStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+      } catch (e) {}
+
+      if (isMaalem) {
+        setMaalems((prev) =>
+          prev.map((m) =>
+            String(m.id).trim() === String(user.id).trim()
+              ? {
+                  ...m,
+                  specialty: specialty,
+                  full_name: updatedUser.full_name,
+                  phone: formattedPhone,
+                  city_zone: fullCityZone,
+                  district: fullCityZone
+                }
+              : m
+          )
+        );
+      }
 
       // Broadcast temps réel vers le dashboard admin et les autres onglets
       try {
@@ -297,7 +316,11 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
         bc.close();
       } catch (e) {}
 
-      toast.success('✨ Vos coordonnées ont été enregistrées avec succès !');
+      if (refreshData) {
+        refreshData();
+      }
+
+      toast.success('✨ Vos coordonnées et spécialité ont été enregistrées avec succès !');
       setActiveTab('info');
     } catch (err) {
       console.error('Erreur sauvegarde profil:', err);
@@ -565,11 +588,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                       <CreditCard className="w-4 h-4 text-emerald-600" />
                       <div>
                         <span className="text-xs font-bold text-emerald-950 block">Solde de Crédits Leads</span>
-                        {balanceInfo.totalReservedEscrow > 0 && (
-                          <span className="text-[10px] text-emerald-800 font-medium">
-                            {balanceInfo.totalReservedEscrow.toFixed(2)} DH en garantie (Total : {balanceInfo.liveTotalBalance.toFixed(2)} DH)
-                          </span>
-                        )}
+                        <span className="text-[10px] text-emerald-800 font-medium">Disponible pour débloquer des chantiers</span>
                       </div>
                     </div>
                     <span className="text-sm font-black text-emerald-900 font-mono">

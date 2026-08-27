@@ -50,8 +50,7 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
   const myTransactions = balanceInfo.myTransactions;
   const totalRechargedSum = balanceInfo.totalRechargedSum;
   const totalValidatedLeadsSpent = balanceInfo.totalValidatedLeadsSpent;
-  const totalReservedEscrow = balanceInfo.totalReservedEscrow;
-  const totalLeadsSpent = totalValidatedLeadsSpent + totalReservedEscrow;
+  const totalLeadsSpent = totalValidatedLeadsSpent;
   const totalBonusSum = balanceInfo.totalBonusSum;
   const liveTotalBalance = balanceInfo.liveTotalBalance;
   const liveAvailableBalance = balanceInfo.liveAvailableBalance;
@@ -61,7 +60,6 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
     specialty: currentLiveMaalem?.specialty || 'PLUMBING',
     credit_balance: liveAvailableBalance,
     total_balance: liveTotalBalance,
-    reserved_escrow: totalReservedEscrow,
     is_verified: currentLiveMaalem?.is_verified ?? true,
     rating_avg: ratingInfo.averageRating,
     consecutive_five_stars: ratingInfo.consecutiveFiveStars,

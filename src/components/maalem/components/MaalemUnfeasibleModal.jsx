@@ -28,7 +28,7 @@ export const MaalemUnfeasibleModal = ({
               <div className="flex items-center gap-2 text-amber-700">
                 <ShieldCheck className="w-5 h-5" />
                 <h3 className="font-extrabold text-sm text-slate-900">
-                  Garantie Escrow &amp; Clôture Sans Frais
+                  Clôture Sans Frais &amp; Remboursement
                 </h3>
               </div>
               <button
@@ -50,11 +50,11 @@ export const MaalemUnfeasibleModal = ({
               </p>
               <div className="text-[11px] text-emerald-900 bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 space-y-1">
                 <p className="font-bold flex items-center gap-1 text-emerald-800">
-                  <span>🛡️ Garantie Zéro Risque BricoleMoi :</span>
+                  <span>🛡️ Remboursement Intégral Garanti :</span>
                 </p>
                 <p>
-                  • Les <strong>15.00 DH</strong> placés en garantie sont{' '}
-                  <strong>restitués immédiatement</strong> sur votre solde disponible.
+                  • Les <strong>15.00 DH</strong> du lead vous sont{' '}
+                  <strong>restitués immédiatement</strong> sur votre solde.
                 </p>
                 <p>• Aucun frais n'est prélevé. Vous pouvez accepter une autre mission immédiatement.</p>
                 <p>• Le client sera notifié pour pouvoir relancer sa recherche sans délai.</p>

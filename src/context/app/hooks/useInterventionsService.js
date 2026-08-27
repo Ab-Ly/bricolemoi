@@ -412,24 +412,18 @@ export const useInterventionsService = ({
         (t) => t.status === 'VALIDATED' && (t.type === 'LEAD_DEDUCTION' || Number(t.amount_dh) < 0)
       )
       .reduce((sum, t) => sum + Math.abs(parseFloat(t.amount_dh) || 0), 0);
-    const reservedEscrow = myTxs
-      .filter((t) => t.status === 'RESERVED')
-      .reduce((sum, t) => sum + Math.abs(parseFloat(t.amount_dh) || 0), 0);
-
     const computedLedgerBalance = totalRecharges + totalBonus - totalValidatedLeads;
-    const totalBalance =
+    const availableBalance =
       myTxs.length > 0
         ? Math.max(0, computedLedgerBalance)
         : Number(user?.maalem_details?.credit_balance ?? user?.credits ?? 15.0);
 
-    const availableBalance = Math.max(0, totalBalance - reservedEscrow);
-
     if (availableBalance < 15) {
       notify.error(
-        'Solde Disponible Insuffisant 💳',
-        `Votre solde disponible est de ${availableBalance.toFixed(
+        'Solde Insuffisant 💳',
+        `Votre solde actuel est de ${availableBalance.toFixed(
           2
-        )} DH (15.00 DH requis en garantie temporaire). Veuillez recharger votre compte.`,
+        )} DH (15.00 DH requis pour débloquer ce contact). Veuillez recharger votre compte.`,
         { id: `insufficient-credit-${interventionId}` }
       );
       return false;
