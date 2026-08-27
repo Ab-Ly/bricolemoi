@@ -8,7 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "listen": "node scripts/listen.js"
+    "listen": "node scripts/listen.js",
+    "audit": "node scripts/audit.js",
+    "reconcile": "node scripts/reconcile.js",
+    "simulate": "node scripts/simulate.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1116.0",
