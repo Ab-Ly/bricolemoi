@@ -74,10 +74,10 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
           : (maalemOrUser?.role?.toUpperCase() === 'MAALEM' ? 15.00 : 0)))
   );
 
-  const liveTotalBalance = myTransactions.length > 0
-    ? Math.max(0, totalRechargedSum + totalBonusSum - totalValidatedLeadsSpent)
-    : fallbackCredits;
+  const totalRechargeAndBonus = totalRechargedSum + totalBonusSum;
+  const baseBalance = totalRechargeAndBonus > 0 ? totalRechargeAndBonus : (fallbackCredits || 0);
 
+  const liveTotalBalance = Math.max(0, baseBalance - totalValidatedLeadsSpent);
   const liveAvailableBalance = Math.max(0, liveTotalBalance - totalReservedEscrow);
 
   return {

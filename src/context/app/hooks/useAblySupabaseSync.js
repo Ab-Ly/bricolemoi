@@ -618,6 +618,9 @@ export const useAblySupabaseSync = ({
         if (payload.type === 'INTERVENTION_ACCEPTED' || payload.type === 'SOS_CLAIMED') {
           const acceptedIntv = payload.intervention || {};
           const intId = String(acceptedIntv.id || payload.intervention_id || '').trim();
+          const targetMaalemId = String(acceptedIntv.maalem_id || payload.maalem_id || '').trim();
+          const newBal = payload.new_balance;
+
           setInterventions((prev) => {
             const next = prev.map((item) =>
               String(item.id).trim() === intId
@@ -637,6 +640,28 @@ export const useAblySupabaseSync = ({
             } catch (err) {}
             return next;
           });
+
+          if (payload.transaction) {
+            setTransactions((prev) => {
+              const alreadyExists = prev.some((t) => String(t.id).trim() === String(payload.transaction.id).trim());
+              if (alreadyExists) return prev;
+              const nextTxs = [payload.transaction, ...prev];
+              try {
+                localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(nextTxs));
+              } catch (err) {}
+              return nextTxs;
+            });
+          }
+
+          if (targetMaalemId && newBal !== undefined) {
+            setMaalems((prev) =>
+              prev.map((m) =>
+                String(m.id).trim() === targetMaalemId
+                  ? { ...m, credit_balance: newBal }
+                  : m
+              )
+            );
+          }
         }
 
         if (payload.type === 'INTERVENTION_PROGRESS_UPDATED') {

@@ -508,19 +508,26 @@ export const useInterventionsService = ({
       created_at: nowIso
     };
 
-    setTransactions((prev) => [newDebitTx, ...prev]);
+    setTransactions((prev) => {
+      const nextTxs = [newDebitTx, ...prev];
+      try {
+        localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(nextTxs));
+      } catch (e) {}
+      return nextTxs;
+    });
 
+    let newCalculatedBal = 0;
     if (user?.role === 'MAALEM') {
       const currentBal = Number(
         user?.maalem_details?.credit_balance ?? user?.credits ?? leadCost
       );
-      const newBal = Math.max(0, currentBal - leadCost);
+      newCalculatedBal = Math.max(0, currentBal - leadCost);
       setUser((prev) => ({
         ...prev,
-        credits: newBal,
+        credits: newCalculatedBal,
         maalem_details: {
           ...(prev?.maalem_details || {}),
-          credit_balance: newBal
+          credit_balance: newCalculatedBal
         }
       }));
     }
@@ -583,6 +590,9 @@ export const useInterventionsService = ({
     const payload = {
       type: 'INTERVENTION_ACCEPTED',
       intervention: acceptedItem,
+      transaction: newDebitTx,
+      maalem_id: cleanMaalemId,
+      new_balance: newCalculatedBal,
       _ts: Date.now()
     };
     try {
