@@ -56,7 +56,8 @@ export const MaalemActiveMissionCard = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {activeUnlockedLeads.map((lead) => {
-          const rawPhone = lead.client_phone || lead.phone || '+212661001122';
+          const rawPhone = lead.client_phone || lead.phone || '';
+          const hasPhone = Boolean(rawPhone && String(rawPhone).replace(/\D/g, '').length >= 8);
           const cleanDigits = String(rawPhone).replace(/\D/g, '');
           const formattedWaDigits = cleanDigits.startsWith('212')
             ? cleanDigits
@@ -64,11 +65,13 @@ export const MaalemActiveMissionCard = ({
             ? '212' + cleanDigits.substring(1)
             : '212' + cleanDigits;
 
-          const waLink = `https://wa.me/${formattedWaDigits}?text=${encodeURIComponent(
-            `السلام عليكم ${lead.client_name || ''}، أنا المعلم الخاص بك من منصة BricoleMoi بخصوص طلبك (${
-              lead.subcategory || 'Dépannage'
-            }). أنا في الطريق إليك.`
-          )}`;
+          const waLink = hasPhone
+            ? `https://wa.me/${formattedWaDigits}?text=${encodeURIComponent(
+                `السلام عليكم ${lead.client_name || ''}، أنا المعلم الخاص بك من منصة BricoleMoi بخصوص طلبك (${
+                  lead.subcategory || 'Dépannage'
+                }). أنا في الطريق إليك.`
+              )}`
+            : '#';
           const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lead.lat || 33.5883},${
             lead.lng || -7.6328
           }`;
@@ -188,29 +191,53 @@ export const MaalemActiveMissionCard = ({
               <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-slate-500 font-bold">Client Joignable :</span>
-                  <span className="text-xs font-mono font-black text-slate-900 dir-ltr">+{formattedWaDigits}</span>
+                  <span className="text-xs font-mono font-black text-slate-900 dir-ltr">
+                    {hasPhone ? `+${formattedWaDigits}` : <span className="text-amber-700 italic">En attente</span>}
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                  <a
-                    href={`tel:+${formattedWaDigits}`}
-                    className="py-2.5 px-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all flex items-center justify-center gap-1.5 text-xs font-bold shadow-xs"
-                    title="Appeler le client directement par téléphone GSM"
-                  >
-                    <PhoneCall className="w-4 h-4 text-blue-600" />
-                    <span>Appeler</span>
-                  </a>
+                  {hasPhone ? (
+                    <a
+                      href={`tel:+${formattedWaDigits}`}
+                      className="py-2.5 px-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all flex items-center justify-center gap-1.5 text-xs font-bold shadow-xs active:scale-95"
+                      title="Appeler le client directement par téléphone GSM"
+                    >
+                      <PhoneCall className="w-4 h-4 text-blue-600" />
+                      <span>Appeler</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="py-2.5 px-2 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 flex items-center justify-center gap-1.5 text-xs font-bold opacity-60 cursor-not-allowed"
+                    >
+                      <PhoneCall className="w-4 h-4 text-slate-400" />
+                      <span>Appeler</span>
+                    </button>
+                  )}
 
-                  <a
-                    href={waLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all"
-                    title="Ouvrir la discussion WhatsApp avec message pré-rempli"
-                  >
-                    <WhatsappLogo weight="fill" className="w-4 h-4" />
-                    <span>WhatsApp</span>
-                  </a>
+                  {hasPhone ? (
+                    <a
+                      href={waLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                      title="Ouvrir la discussion WhatsApp avec message pré-rempli"
+                    >
+                      <WhatsappLogo weight="fill" className="w-4 h-4" />
+                      <span>WhatsApp</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="py-2.5 px-2 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 flex items-center justify-center gap-1.5 text-xs font-bold opacity-60 cursor-not-allowed"
+                    >
+                      <WhatsappLogo weight="fill" className="w-4 h-4 text-slate-400" />
+                      <span>WhatsApp</span>
+                    </button>
+                  )}
 
                   <a
                     href={mapsUrl}
