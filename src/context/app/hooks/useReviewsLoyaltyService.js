@@ -3,7 +3,7 @@ import { ABLY_CHANNELS } from '../../../lib/ablyClient';
 import { publishRealtimeEvent } from '../../../lib/ablyRealtimeService';
 import { playNotificationSound } from '../../../lib/audioNotifier';
 import { calculateMaalemRating } from '../../../utils/ratingUtils';
-import { broadcastSync } from '../helpers/appSyncHelpers';
+import { broadcastSync, isUuid } from '../helpers/appSyncHelpers';
 
 export const useReviewsLoyaltyService = ({
   user,
@@ -236,18 +236,24 @@ export const useReviewsLoyaltyService = ({
           .eq('id', String(intervention_id).trim());
 
         try {
-          await supabase.from('reviews').insert([
-            {
-              intervention_id,
-              maalem_id: targetMaalemId,
-              client_id: user?.id,
-              client_name:
-                user?.full_name || currentInt?.client_name || 'Client BricoleMoi',
-              rating: Number(rating),
-              comment: fullComment
-            }
-          ]);
-        } catch (revErr) {}
+          const validIntId = isUuid(intervention_id) ? intervention_id : null;
+          const validMaalemId = isUuid(targetMaalemId) ? targetMaalemId : null;
+          const validClientId = (user?.id && isUuid(user.id))
+            ? user.id
+            : (currentInt?.client_id && isUuid(currentInt.client_id) ? currentInt.client_id : null);
+
+          const reviewPayload = {
+            rating: Number(rating),
+            comment: fullComment
+          };
+          if (validIntId) reviewPayload.intervention_id = validIntId;
+          if (validMaalemId) reviewPayload.maalem_id = validMaalemId;
+          if (validClientId) reviewPayload.client_id = validClientId;
+
+          await supabase.from('reviews').insert([reviewPayload]);
+        } catch (revErr) {
+          console.warn('[Supabase] reviews insert warning:', revErr.message);
+        }
       } catch (e) {
         console.warn('[Supabase] submitReview BDD notice:', e.message);
       }

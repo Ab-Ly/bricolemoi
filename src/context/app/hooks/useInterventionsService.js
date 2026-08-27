@@ -294,7 +294,6 @@ export const useInterventionsService = ({
       maalem_id: null,
       maalem_name: null,
       maalem_phone: null,
-      accepted_at: null,
       progress_step: 'SEARCHING',
       escrow_status: null,
       unfeasible_reason: null,
