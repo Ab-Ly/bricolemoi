@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1787862261.3447556,
-    "seen": 1787863242.61449,
-    "ast_hash": "83ebedb43ade6b1d6ebbcb70ab60e60b",
+    "mtime": 1787864129.6904743,
+    "seen": 1787865045.896471,
+    "ast_hash": "3fcf8787ff758de7b0528d266a611a1a",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -270,9 +270,9 @@
     "semantic_hash": ""
   },
   "src/components/UserProfileModal.jsx": {
-    "mtime": 1787859255.9468617,
-    "seen": 1787859424.43003,
-    "ast_hash": "509b0363aba33d1c348ea38cb3635f47",
+    "mtime": 1787864913.4002385,
+    "seen": 1787865045.902556,
+    "ast_hash": "ccfd80c1ae2ae1ff1c93e5a54e9be072",
     "semantic_hash": ""
   },
   "src/components/VoiceRecorder.jsx": {
@@ -438,10 +438,10 @@
     "semantic_hash": ""
   },
   "src/lib/pushNotificationService.js": {
-    "mtime": 1787330629.4210556,
-    "seen": 1787856220.055616,
-    "ast_hash": "98d965972f87e69868bc98fe631ce0cc",
-    "semantic_hash": "98d965972f87e69868bc98fe631ce0cc"
+    "mtime": 1787864759.4742658,
+    "seen": 1787865045.911744,
+    "ast_hash": "57654ab620f841032bcee4e5569741b7",
+    "semantic_hash": ""
   },
   "src/lib/r2StorageService.js": {
     "mtime": 1787695857.9130824,
@@ -954,9 +954,9 @@
     "semantic_hash": ""
   },
   "src/components/maalem/components/MaalemTransactionsModal.jsx": {
-    "mtime": 1787856065.7025692,
-    "seen": 1787856220.055532,
-    "ast_hash": "3d8d00205b7891878bd0079da685492a",
+    "mtime": 1787863428.104013,
+    "seen": 1787865045.906786,
+    "ast_hash": "5707e1c006953122b0cd912446e2de97",
     "semantic_hash": ""
   },
   "src/components/maalem/components/MaalemUnfeasibleModal.jsx": {
@@ -978,9 +978,9 @@
     "semantic_hash": ""
   },
   "src/components/maalem/hooks/useMaalemViewState.js": {
-    "mtime": 1787860228.2856464,
-    "seen": 1787863242.623457,
-    "ast_hash": "51c6a343a99a967a434aa034bde13673",
+    "mtime": 1787863408.7221918,
+    "seen": 1787865045.907058,
+    "ast_hash": "14df50d23e3f9de63d70c572ce56bb68",
     "semantic_hash": ""
   },
   "src/constants/badges.js": {
@@ -1071,6 +1071,12 @@
     "mtime": 1787862253.351215,
     "seen": 1787863242.615751,
     "ast_hash": "d2bb5f0529192be01044f06c5a624176",
+    "semantic_hash": ""
+  },
+  "scripts/watch-deploy.js": {
+    "mtime": 1787864212.648857,
+    "seen": 1787865045.89957,
+    "ast_hash": "2c4f9a7cec7941f856ed9132c22319e9",
     "semantic_hash": ""
   }
 }
