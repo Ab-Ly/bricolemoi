@@ -323,12 +323,7 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
   // 2. Chantiers Actifs Débloqués
   const activeUnlockedLeads = interventions
     .filter((item) => {
-      if (
-        !['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(
-          item.status
-        )
-      )
-        return false;
+      if (item.status === 'COMPLETED' || item.status === 'CANCELLED') return false;
       let myUnlocked = [];
       try {
         myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
@@ -342,7 +337,8 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
         (!item.maalem_id ||
           item.maalem_id === 'maalem-1' ||
           item.maalem_id === '22222222-2222-2222-2222-222222222222');
-      return isOwner || isFallbackOwner || isLocalUnlocked;
+      const isEligible = isOwner || isFallbackOwner || isLocalUnlocked;
+      return isEligible && (item.status !== 'PENDING' || isLocalUnlocked);
     })
     .sort(
       (a, b) =>

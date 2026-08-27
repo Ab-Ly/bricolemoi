@@ -622,6 +622,26 @@ export const useAblySupabaseSync = ({
         const payload = e.data;
         if (!payload) return;
 
+        if (payload.type === 'INTERVENTION_PROGRESS_UPDATED') {
+          const intId = String(payload.intervention_id || '').trim();
+          const pStep = payload.progress_step;
+          setInterventions((prev) => {
+            const next = prev.map((item) =>
+              String(item.id).trim() === intId
+                ? {
+                    ...item,
+                    progress_step: pStep,
+                    status: item.status === 'PENDING' || !item.status ? 'ACCEPTED' : item.status
+                  }
+                : item
+            );
+            try {
+              localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+            } catch (err) {}
+            return next;
+          });
+        }
+
         if (payload.type === 'INTERVENTION_COMPLETED_WITH_REVIEW' || payload.type === 'INTERVENTION_COMPLETED') {
           const intId = String(payload.intervention_id || '').trim();
           const rRating = payload.rating !== undefined && payload.rating !== null ? Number(payload.rating) : null;

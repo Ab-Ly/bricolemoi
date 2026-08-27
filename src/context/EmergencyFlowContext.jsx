@@ -477,20 +477,20 @@ export const EmergencyFlowProvider = ({ children }) => {
   /**
    * Progression de l'intervention (Maâlem)
    */
-  const setProgressStep = useCallback(async (step) => {
-    const intvId = flowState.activeEmergency?.id;
-    if (!intvId) return;
-
-    await updateInterventionProgress(intvId, step);
+  const setProgressStep = useCallback(async (step, optionalIntvId) => {
+    const intvId = optionalIntvId || flowState.activeEmergency?.id;
+    if (intvId) {
+      await updateInterventionProgress(intvId, step);
+    }
     dispatch({
       type: ACTIONS.UPDATE_PROGRESS,
-      payload: { step }
+      payload: { step, intervention_id: intvId }
     });
 
     if (step === 'ON_THE_WAY') {
-      notify.progress('ON_THE_WAY', 'En Route', 'Votre statut est désormais : En déplacement vers le client.', { id: `prog-${intvId}` });
+      notify.progress('ON_THE_WAY', 'En Route', 'Votre statut est désormais : En déplacement vers le client.', { id: `prog-${intvId || 'now'}` });
     } else if (step === 'ARRIVED') {
-      notify.progress('ARRIVED', 'Arrivé sur Place', 'Statut : Diagnostic en cours chez le client.', { id: `prog-${intvId}` });
+      notify.progress('ARRIVED', 'Arrivé sur Place', 'Statut : Diagnostic en cours chez le client.', { id: `prog-${intvId || 'now'}` });
     }
   }, [flowState.activeEmergency?.id, updateInterventionProgress]);
 

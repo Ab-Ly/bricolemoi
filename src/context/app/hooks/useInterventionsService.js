@@ -658,18 +658,14 @@ export const useInterventionsService = ({
   };
 
   const updateInterventionProgress = async (interventionId, progressStep) => {
+    const sId = String(interventionId || '').trim();
     setInterventions((prev) => {
       const updated = prev.map((item) =>
-        item.id === interventionId
+        String(item.id).trim() === sId
           ? {
               ...item,
               progress_step: progressStep,
-              status:
-                item.status === 'PENDING' || !item.status
-                  ? progressStep === 'ARRIVED'
-                    ? 'ARRIVED'
-                    : 'ACCEPTED'
-                  : item.status
+              status: item.status === 'PENDING' || !item.status ? 'ACCEPTED' : item.status
             }
           : item
       );
