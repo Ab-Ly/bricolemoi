@@ -544,32 +544,68 @@ export const useReviewsLoyaltyService = ({
     alertId,
     maalemId,
     amount = 15,
-    shouldRefund = true
+    shouldRefund = true,
+    adminNotes = ''
   }) => {
     const statusToSet = shouldRefund ? 'REFUNDED_RESOLVED' : 'REJECTED';
     const cleanAlertId = String(alertId || '').trim();
+    const targetIntId = cleanAlertId.replace(/^dispute-/, '');
 
     if (shouldRefund && maalemId) {
       await quickCreditMaalem(maalemId, amount);
     }
 
-    let targetInterventionId = null;
+    // Persistance immédiate dans Supabase
+    if (targetIntId) {
+      try {
+        const patchData = {
+          updated_at: new Date().toISOString(),
+          unfeasible_notes: `${statusToSet}: ${adminNotes || (shouldRefund ? 'Remboursement accordé' : 'Réclamation rejetée')}`
+        };
+        if (shouldRefund) {
+          patchData.status = 'UNREACHABLE_REFUNDED';
+        }
+        await supabase
+          .from('interventions')
+          .update(patchData)
+          .eq('id', targetIntId);
+      } catch (err) {
+        console.warn('Supabase dispute update warning:', err);
+      }
+    }
+
     setAdminAlerts((prev) => {
+      let found = false;
       const next = prev.map((a) => {
         if (
           String(a.id).trim() === cleanAlertId ||
-          String(a.intervention_id).trim() === cleanAlertId
+          String(a.intervention_id).trim() === cleanAlertId ||
+          String(a.intervention_id).trim() === targetIntId
         ) {
-          targetInterventionId = a.intervention_id || a.id;
+          found = true;
           return {
             ...a,
             status: statusToSet,
             resolved_at: new Date().toISOString(),
-            resolution_type: statusToSet
+            resolution_type: statusToSet,
+            admin_notes: adminNotes
           };
         }
         return a;
       });
+
+      if (!found) {
+        next.push({
+          id: cleanAlertId,
+          intervention_id: targetIntId,
+          maalem_id: maalemId,
+          status: statusToSet,
+          resolved_at: new Date().toISOString(),
+          resolution_type: statusToSet,
+          admin_notes: adminNotes
+        });
+      }
+
       try {
         localStorage.setItem('bricolemoi_admin_alerts', JSON.stringify(next));
       } catch (e) {}
@@ -581,40 +617,38 @@ export const useReviewsLoyaltyService = ({
         localStorage.getItem('bricolemoi_resolved_disputes') || '{}'
       );
       resolvedMap[cleanAlertId] = statusToSet;
-      if (targetInterventionId) {
-        resolvedMap[String(targetInterventionId).trim()] = statusToSet;
-      }
+      resolvedMap[targetIntId] = statusToSet;
       localStorage.setItem(
         'bricolemoi_resolved_disputes',
         JSON.stringify(resolvedMap)
       );
     } catch (e) {}
 
-    if (targetInterventionId) {
-      setInterventions((prev) => {
-        const next = prev.map((item) =>
-          String(item.id).trim() === String(targetInterventionId).trim()
-            ? {
-                ...item,
-                dispute_status: statusToSet,
-                dispute_resolved_at: new Date().toISOString()
-              }
-            : item
+    setInterventions((prev) => {
+      const next = prev.map((item) =>
+        String(item.id).trim() === String(targetIntId).trim()
+          ? {
+              ...item,
+              dispute_status: statusToSet,
+              unfeasible_notes: `${statusToSet}: ${adminNotes}`,
+              dispute_resolved_at: new Date().toISOString(),
+              status: shouldRefund ? 'UNREACHABLE_REFUNDED' : item.status
+            }
+          : item
+      );
+      try {
+        localStorage.setItem(
+          'bricolemoi_interventions_cache',
+          JSON.stringify(next)
         );
-        try {
-          localStorage.setItem(
-            'bricolemoi_interventions_cache',
-            JSON.stringify(next)
-          );
-        } catch (e) {}
-        return next;
-      });
-    }
+      } catch (e) {}
+      return next;
+    });
 
     broadcastSync({
       type: 'DISPUTE_RESOLVED',
       alertId: cleanAlertId,
-      interventionId: targetInterventionId,
+      interventionId: targetIntId,
       status: statusToSet,
       _ts: Date.now()
     });

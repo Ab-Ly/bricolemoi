@@ -35,6 +35,14 @@ export const AdminDisputesView = ({
   const allDisputes = React.useMemo(() => {
     const map = new Map();
 
+    const resolvedMap = (() => {
+      try {
+        return JSON.parse(localStorage.getItem('bricolemoi_resolved_disputes') || '{}');
+      } catch (e) {
+        return {};
+      }
+    })();
+
     (adminAlerts || []).forEach((a) => {
       if (a && (a.intervention_id || a.id)) {
         map.set(String(a.intervention_id || a.id), a);
@@ -44,7 +52,13 @@ export const AdminDisputesView = ({
     (interventions || []).forEach((intv) => {
       if (!intv) return;
       const intId = String(intv.id);
-      if (map.has(intId)) return;
+      if (map.has(intId)) {
+        const existing = map.get(intId);
+        if (intv.unfeasible_notes?.startsWith('REJECTED') && existing.status !== 'REJECTED') {
+          map.set(intId, { ...existing, status: 'REJECTED', resolution_type: 'REJECTED' });
+        }
+        return;
+      }
 
       const hasLowRating = intv.rating && Number(intv.rating) <= 2;
       const hasUnreachable = Boolean(intv.unreachable_reason);
@@ -52,6 +66,18 @@ export const AdminDisputesView = ({
 
       if (hasLowRating || hasUnreachable || hasUnfeasible) {
         const maalem = (maalems || []).find((m) => String(m.id).trim() === String(intv.maalem_id).trim());
+
+        let initialStatus = 'PENDING';
+        if (intv.status === 'UNREACHABLE_REFUNDED' || resolvedMap[intId] === 'REFUNDED_RESOLVED') {
+          initialStatus = 'REFUNDED_RESOLVED';
+        } else if (
+          intv.unfeasible_notes?.startsWith('REJECTED') ||
+          resolvedMap[intId] === 'REJECTED' ||
+          intv.dispute_status === 'REJECTED'
+        ) {
+          initialStatus = 'REJECTED';
+        }
+
         map.set(intId, {
           id: `dispute-${intId}`,
           intervention_id: intId,
@@ -72,7 +98,8 @@ export const AdminDisputesView = ({
             : (hasUnfeasible
               ? `Chantier Infaisable : ${intv.unfeasible_reason}`
               : `Alerte Qualité Client (${intv.rating}⭐)`),
-          status: intv.status === 'UNREACHABLE_REFUNDED' ? 'REFUNDED_RESOLVED' : 'PENDING',
+          status: initialStatus,
+          admin_notes: intv.unfeasible_notes?.replace(/^REJECTED:\s*/, '') || '',
           created_at: intv.completed_at || intv.updated_at || intv.created_at || new Date().toISOString()
         });
       }
