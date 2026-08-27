@@ -76,8 +76,8 @@ export const useInterventionsService = ({
       subcategory,
       client_name: user?.full_name || 'Client Maroc',
       client_phone: user?.phone || '',
-      lat: defaultLat,
-      lng: defaultLng,
+      lat: finalLat,
+      lng: finalLng,
       created_at: new Date().toISOString()
     };
 
