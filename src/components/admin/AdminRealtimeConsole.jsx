@@ -16,10 +16,11 @@ import {
   Pause,
   Play,
   Shield,
-  Wifi
+  Wifi,
+  Users,
+  Smartphone
 } from 'lucide-react';
 import { subscribeToRealtimeChannel, publishRealtimeEvent } from '../../lib/ablyRealtimeService';
-import { isCentrifugoConfigured } from '../../lib/centrifugoClient';
 
 export const AdminRealtimeConsole = () => {
   const [events, setEvents] = useState([]);
@@ -154,95 +155,124 @@ export const AdminRealtimeConsole = () => {
     return true;
   });
 
-  const getRoleStyle = (role) => {
+  const getRoleBadge = (role, user) => {
+    const name = user?.name || user?.full_name || 'Anonyme';
+    const phone = user?.phone ? ` (${user.phone})` : '';
+
     switch (role) {
       case 'CLIENT':
-        return { bg: 'bg-blue-600/20 text-blue-300 border-blue-500/40', tag: '👤 CLIENT' };
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+            <Users className="w-3 h-3 text-blue-600" />
+            <span>CLIENT • {name}{phone}</span>
+          </span>
+        );
       case 'MAALEM':
-        return { bg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', tag: '🛠️ MAÂLEM' };
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+            <Shield className="w-3 h-3 text-amber-600" />
+            <span>MAÂLEM • {name}{phone}</span>
+          </span>
+        );
       case 'ADMIN':
-        return { bg: 'bg-purple-600/20 text-purple-300 border-purple-500/40', tag: '🛡️ ADMIN' };
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+            <Radio className="w-3 h-3 text-purple-600" />
+            <span>ADMIN • {name}</span>
+          </span>
+        );
       default:
-        return { bg: 'bg-slate-700/40 text-slate-300 border-slate-600/40', tag: '⚙️ SYSTÈME' };
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+            <Server className="w-3 h-3 text-slate-500" />
+            <span>SYSTÈME • {name}</span>
+          </span>
+        );
     }
   };
 
-  const getLevelStyle = (level) => {
+  const getLevelBadge = (level) => {
     switch (level) {
       case 'ERROR':
-        return 'bg-red-500/20 text-red-400 border-red-500/40 font-bold';
+        return <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">ERROR</span>;
       case 'WARN':
-        return 'bg-amber-500/20 text-yellow-400 border-yellow-500/40 font-bold';
+        return <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">WARN</span>;
       case 'ACTION':
-        return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-bold';
+        return <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-cyan-50 text-cyan-700 border border-cyan-200">ACTION</span>;
       case 'GPS':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/40 font-bold';
+        return <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">GPS</span>;
       case 'SOS':
-        return 'bg-red-600/30 text-rose-300 border-rose-500/50 font-black animate-pulse';
+        return <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-red-100 text-red-700 border border-red-300 animate-pulse">🚨 SOS</span>;
       case 'INFO':
       default:
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 font-semibold';
+        return <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">INFO</span>;
     }
   };
 
   return (
-    <div className="space-y-4 font-sans text-slate-100">
-      {/* 1. Barres KPIs Haute Densité */}
+    <div className="space-y-4 font-sans text-slate-900">
+      {/* 1. Barres KPIs Modern Clean & Trust */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block font-bold">Total Événements</span>
-            <p className="text-xl font-black font-mono text-white">{stats.total}</p>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block font-bold">Total Événements</span>
+            <p className="text-2xl font-black font-mono text-slate-900">{stats.total}</p>
           </div>
-          <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-            <Activity className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shadow-xs">
+            <Activity className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block font-bold">Urgences SOS</span>
-            <p className="text-xl font-black font-mono text-rose-400">{stats.sosCount}</p>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-rose-600 block font-bold">Urgences SOS</span>
+            <p className="text-2xl font-black font-mono text-rose-600">{stats.sosCount}</p>
           </div>
-          <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
-            <Zap className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shadow-xs">
+            <Zap className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block font-bold">Déblocages Artisans</span>
-            <p className="text-xl font-black font-mono text-amber-400">{stats.maalemCount}</p>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-amber-600 block font-bold">Déblocages Maâlems</span>
+            <p className="text-2xl font-black font-mono text-amber-600">{stats.maalemCount}</p>
           </div>
-          <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-            <Shield className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shadow-xs">
+            <Shield className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block font-bold">Latence VPS</span>
-            <p className="text-xl font-black font-mono text-emerald-400">{stats.lastPing}</p>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-600 block font-bold">Latence VPS</span>
+            <p className="text-2xl font-black font-mono text-emerald-600">{stats.lastPing}</p>
           </div>
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-            <Wifi className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shadow-xs">
+            <Wifi className="w-5 h-5" />
           </div>
         </div>
       </div>
 
-      {/* 2. Fenêtre Terminal Dark Obsidian (Style CLI Haute Définition) */}
-      <div className="rounded-3xl bg-slate-950 border border-slate-800 shadow-2xl overflow-hidden font-mono text-xs">
-        {/* Header Mac-Style & Commandes */}
-        <div className="bg-slate-900/90 border-b border-slate-800/80 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none">
+      {/* 2. Fenêtre Console Pro Blanche & Lumineuse */}
+      <div className="rounded-3xl bg-white border border-slate-200 shadow-sm overflow-hidden text-xs">
+        {/* Header Console & Boutons d'Action */}
+        <div className="bg-slate-50 border-b border-slate-200 px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
-              <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
-              <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs">
+              <Radio className="w-4 h-4 animate-pulse" />
             </div>
-            <div className="flex items-center gap-2 text-slate-300 font-bold text-xs truncate">
-              <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-              <span>bricolemoi@vps-51.255.46.206: ~ centrifugo-v5.4.9 (TLS WSS)</span>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-black text-slate-900 text-sm tracking-tight">Console Temps Réel Live</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold font-mono">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                  VPS Centrifugo v5 Actif
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Serveur : <span className="font-mono text-slate-700 font-bold">51.255.46.206:8800</span> • WSS TLS Sécurisé
+              </p>
             </div>
           </div>
 
@@ -250,13 +280,13 @@ export const AdminRealtimeConsole = () => {
             <button
               type="button"
               onClick={() => setIsPaused(!isPaused)}
-              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs cursor-pointer ${
+              className={`px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs cursor-pointer border ${
                 isPaused
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                  ? 'bg-amber-50 text-amber-700 border-amber-300'
+                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs'
               }`}
             >
-              {isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
+              {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
               <span>{isPaused ? 'Reprendre' : 'Pause'}</span>
             </button>
 
@@ -264,40 +294,40 @@ export const AdminRealtimeConsole = () => {
               type="button"
               onClick={handleSendTestPing}
               disabled={isTestSending}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50 text-xs"
             >
-              <Zap className="w-3 h-3" />
-              <span>{isTestSending ? 'Test...' : 'Tester le Flux'}</span>
+              <Zap className="w-3.5 h-3.5" />
+              <span>{isTestSending ? 'Envoi...' : 'Tester le Flux'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setEvents([])}
-              className="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-700 transition-all cursor-pointer"
+              className="p-2 rounded-xl bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 transition-all cursor-pointer shadow-xs"
               title="Vider la console"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Barre de Recherche et Filtres */}
-        <div className="bg-slate-900/40 border-b border-slate-800/60 p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+        <div className="bg-slate-50/60 border-b border-slate-200 p-3 sm:px-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {[
-              { id: 'ALL', label: 'Tous' },
-              { id: 'SOS', label: '🚨 SOS' },
+              { id: 'ALL', label: 'Tous les flux' },
+              { id: 'SOS', label: '🚨 SOS Urgences' },
               { id: 'MAALEM', label: '🛠️ Maâlems' },
-              { id: 'GPS', label: '🚗 GPS' }
+              { id: 'GPS', label: '🚗 GPS Tracking' }
             ].map((f) => (
               <button
                 key={f.id}
                 type="button"
                 onClick={() => setFilterCategory(f.id)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   filterCategory === f.id
                     ? 'bg-blue-600 text-white shadow-xs'
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shadow-xs'
                 }`}
               >
                 {f.label}
@@ -305,42 +335,41 @@ export const AdminRealtimeConsole = () => {
             ))}
           </div>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <div className="relative w-full sm:w-72">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher nom, tel, message..."
-              className="w-full pl-8 pr-3 py-1 bg-slate-900 border border-slate-800 rounded-xl text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              placeholder="Filtrer nom, tél, quartier, message..."
+              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs"
             />
           </div>
         </div>
 
-        {/* ASCII Banner Style CLI */}
-        <div className="p-3.5 border-b border-slate-900 bg-slate-950 text-cyan-400 text-[11px] leading-relaxed select-none">
-          <div className="text-slate-500">╔════════════════════════════════════════════════════════════════════════════════╗</div>
-          <div className="text-emerald-400 font-bold">║  📟 BRICOLEMOI LIVE CONSOLE &amp; TELEMETRY STREAM 3.0 (CENTRIFUGO VPS)            ║</div>
-          <div className="text-slate-400">║  Flux temps réel &amp; télémétrie souveraine sur VPS 51.255.46.206 🇲🇦              ║</div>
-          <div className="text-slate-500">╚════════════════════════════════════════════════════════════════════════════════╝</div>
-          <div className="text-slate-500 pt-1">📡 Canaux actifs : <span className="text-slate-300 font-bold">jobs:stream | admin:alerts | tracking:all | presence:maalems</span></div>
-          <div className="text-emerald-400 font-bold">✓ Connecté à Centrifugo v5 VPS Gateway. Écoute permanente active...</div>
+        {/* Bandeau d'état réseau clair */}
+        <div className="px-4 sm:px-6 py-2.5 bg-emerald-50/50 border-b border-emerald-100/60 text-emerald-800 text-[11px] font-mono flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="font-bold">✓ Passerelle Centrifugo VPS connectée en direct</span>
+          </div>
+          <span className="text-slate-500 font-sans">Canaux : <strong className="font-mono text-slate-700">jobs:stream • admin:alerts • tracking:all</strong></span>
         </div>
 
-        {/* Liste des Lignes de Logs Formatées Style CLI */}
-        <div className="p-3 space-y-2 max-h-[520px] overflow-y-auto pr-2">
+        {/* Liste des Événements Formatés Propres (Modern Clean & Trust) */}
+        <div className="p-3 sm:p-6 space-y-2.5 max-h-[540px] overflow-y-auto pr-2 bg-slate-50/30">
           {filteredEvents.length === 0 ? (
-            <div className="py-12 text-center text-slate-500 space-y-2">
-              <Terminal className="w-8 h-8 text-slate-600 mx-auto animate-pulse" />
-              <p className="font-bold text-slate-400">En attente d'événements temps réel...</p>
-              <p className="text-[11px] text-slate-600">
-                Cliquez sur <strong>« Tester le Flux »</strong> ou réalisez une action dans l'application.
+            <div className="py-14 text-center text-slate-400 space-y-2">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 mx-auto flex items-center justify-center">
+                <Radio className="w-6 h-6 animate-pulse" />
+              </div>
+              <p className="font-bold text-slate-700 text-sm">En attente d'événements temps réel...</p>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Cliquez sur <strong>« Tester le Flux »</strong> ou réalisez une action dans l'application pour voir les lignes défiler.
               </p>
             </div>
           ) : (
             filteredEvents.map((evt) => {
-              const roleStyle = getRoleStyle(evt.user?.role);
-              const levelStyle = getLevelStyle(evt.level);
               const isExpanded = expandedId === evt.id;
               const hasDetails = evt.payload && Object.keys(evt.payload).length > 0;
 
@@ -348,45 +377,44 @@ export const AdminRealtimeConsole = () => {
                 <div
                   key={evt.id}
                   onClick={() => setExpandedId(isExpanded ? null : evt.id)}
-                  className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer select-none bg-white ${
                     isExpanded 
-                      ? 'bg-slate-900/90 border-blue-500/50 shadow-md' 
-                      : 'bg-slate-900/40 hover:bg-slate-900/80 border-slate-800/80'
+                      ? 'border-blue-300 shadow-sm ring-1 ring-blue-500/20' 
+                      : 'border-slate-200/90 hover:border-slate-300 hover:shadow-xs'
                   }`}
                 >
-                  {/* Ligne 1 : Timestamp + Niveau + Rôle Acteur + Nom/Tel */}
-                  <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                    <span className="text-slate-500 font-bold shrink-0 font-mono">[{evt.timestamp}]</span>
-                    
-                    <span className={`px-2 py-0.2 rounded border text-[10px] shrink-0 font-mono ${levelStyle}`}>
-                      {evt.level}
-                    </span>
+                  {/* Ligne 1 : Horodatage + Niveau + Badges Acteurs */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-1.5 border-b border-slate-100">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-slate-400 font-bold font-mono text-[11px]">
+                        [{evt.timestamp}]
+                      </span>
+                      
+                      {getLevelBadge(evt.level)}
+                      {getRoleBadge(evt.user?.role, evt.user)}
+                    </div>
 
-                    <span className={`px-2 py-0.2 rounded border text-[10px] shrink-0 font-bold ${roleStyle.bg}`}>
-                      {roleStyle.tag} {evt.user?.name || 'Anonyme'} {evt.user?.phone ? `(${evt.user.phone})` : ''}
-                    </span>
-
-                    <span className="text-slate-500 font-mono text-[10px] hidden sm:inline ml-auto truncate">
-                      [{evt.channel}]
+                    <span className="text-slate-400 font-mono text-[10px] bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200/60">
+                      {evt.channel}
                     </span>
                   </div>
 
-                  {/* Ligne 2 : Message Explicite + Device + Flèche Dépliage */}
-                  <div className="pt-1.5 flex items-start justify-between gap-2 text-xs">
-                    <div className="text-slate-200 font-bold leading-snug">
-                      <span className="text-emerald-400 mr-1 font-black">»</span>
-                      <span>{evt.message}</span>
+                  {/* Ligne 2 : Message clair & Device */}
+                  <div className="pt-2 flex items-start justify-between gap-3 text-xs">
+                    <div className="text-slate-800 font-medium leading-relaxed flex-1">
+                      <span className="text-blue-600 font-black mr-1.5">»</span>
+                      <strong className="text-slate-900 font-bold">{evt.message}</strong>
                       {evt.device?.summary && (
-                        <span className="text-slate-500 text-[10px] font-normal ml-2 font-mono">
+                        <span className="text-slate-500 text-[11px] ml-2 font-mono">
                           • {evt.device.summary}
                         </span>
                       )}
                     </div>
 
                     {hasDetails && (
-                      <div className="flex items-center gap-1.5 shrink-0 text-slate-500 text-[10px]">
-                        <span>Détails</span>
-                        {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-blue-400" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                      <div className="flex items-center gap-1 shrink-0 text-slate-400 hover:text-blue-600 text-[11px] font-bold">
+                        <span>{isExpanded ? 'Masquer' : 'Détails'}</span>
+                        {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-blue-600" /> : <ChevronRight className="w-3.5 h-3.5" />}
                       </div>
                     )}
                   </div>
@@ -398,17 +426,17 @@ export const AdminRealtimeConsole = () => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="mt-2 pt-2 border-t border-slate-800 relative"
+                        className="mt-3 pt-2.5 border-t border-slate-100 relative"
                       >
-                        <div className="p-3 rounded-lg bg-slate-950 border border-slate-800/80 text-emerald-300 font-mono text-[11px] overflow-x-auto shadow-inner">
-                          <pre>{JSON.stringify(evt.payload, null, 2)}</pre>
+                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-mono text-[11px] overflow-x-auto shadow-inner">
+                          <pre className="text-slate-700">{JSON.stringify(evt.payload, null, 2)}</pre>
                         </div>
                         <button
                           type="button"
                           onClick={(e) => handleCopyJson(evt, e)}
-                          className="absolute top-4 right-3 px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] flex items-center gap-1 font-bold border border-slate-700 transition-all cursor-pointer"
+                          className="absolute top-4 right-3 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-[11px] flex items-center gap-1.5 font-bold border border-slate-200 shadow-xs transition-all cursor-pointer"
                         >
-                          {copiedId === evt.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          {copiedId === evt.id ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3 text-slate-500" />}
                           <span>{copiedId === evt.id ? 'Copié !' : 'Copier JSON'}</span>
                         </button>
                       </motion.div>
