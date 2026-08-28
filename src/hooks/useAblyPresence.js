@@ -1,14 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { getAblyClient, ABLY_CHANNELS, isAblyConfigured } from '../lib/ablyClient';
+import { centrifugo, isCentrifugoConfigured } from '../lib/centrifugoClient';
+import { REALTIME_CHANNELS } from '../lib/ablyClient';
 
 /**
- * Hook React personnalisé pour la gestion de Présence Temps Réel Ably
- *
- * Fonctionnalités clés :
- * - Bascule En Ligne / Hors Ligne instantanée pour les Maâlems sans solliciter la BDD
- * - Streaming de la géolocalisation GPS en direct (watchPosition + presence.update)
- * - Résilience aux micro-coupures réseau & reconnexion automatique
- * - Synchronisation en temps réel de tous les artisans connectés pour les Clients & Cartes
+ * Hook React pour la gestion de Présence & Tracking GPS Temps Réel
+ * 100% propulsé par Centrifugo v5 (Open Source sur VPS).
  *
  * @param {object} options
  * @param {object} options.user - Profil utilisateur actuel
@@ -17,13 +13,13 @@ import { getAblyClient, ABLY_CHANNELS, isAblyConfigured } from '../lib/ablyClien
  */
 export const useAblyPresence = ({ user, isOnline, onPresenceChange } = {}) => {
   const [onlineMaalemsMap, setOnlineMaalemsMap] = useState({});
-  const [connectionState, setConnectionState] = useState('initialized');
-  const [isAblyConnected, setIsAblyConnected] = useState(false);
+  const [connectionState, setConnectionState] = useState('connected');
+  const [isCentrifugoConnected, setIsCentrifugoConnected] = useState(isCentrifugoConfigured);
   const [presenceError, setPresenceError] = useState(null);
 
   const geoWatchIdRef = useRef(null);
+  const heartbeatTimerRef = useRef(null);
   const lastLocationUpdateRef = useRef({ lat: null, lng: null, timestamp: 0 });
-  const presenceChannelRef = useRef(null);
   const isOnlineRef = useRef(isOnline);
   const userRef = useRef(user);
 
@@ -85,100 +81,54 @@ export const useAblyPresence = ({ user, isOnline, onPresenceChange } = {}) => {
     };
   }, [getUserCoordinates]);
 
-  // Synchronisation de la présence Maalem (Enter / Update / Leave)
-  const syncSelfPresence = useCallback(async () => {
+  // Diffusion de la présence sur le canal Centrifugo
+  const broadcastSelfPresence = useCallback(async (customCoords = null, action = 'update') => {
     const currUser = userRef.current;
     const isUserMaalem = Boolean(currUser && String(currUser.role || '').toUpperCase() === 'MAALEM');
-    const channel = presenceChannelRef.current;
 
-    if (!channel || !isAblyConfigured) return;
+    if (!isUserMaalem || !isCentrifugoConfigured) return;
 
     try {
-      if (isUserMaalem && isOnlineRef.current) {
-        const payload = buildMaalemPresencePayload();
+      if (isOnlineRef.current && action !== 'leave') {
+        const payload = buildMaalemPresencePayload(customCoords);
         if (payload) {
-          // Entrée ou mise à jour automatique sur le canal de présence Ably
-          await channel.presence.update(payload).catch(async () => {
-            await channel.presence.enter(payload);
+          await centrifugo.publish(REALTIME_CHANNELS.PRESENCE_MAALEMS, {
+            action: 'update',
+            maalem: payload,
+            timestamp: Date.now()
           });
         }
-      } else if (isUserMaalem && !isOnlineRef.current) {
-        await channel.presence.leave();
+      } else if (!isOnlineRef.current || action === 'leave') {
+        await centrifugo.publish(REALTIME_CHANNELS.PRESENCE_MAALEMS, {
+          action: 'leave',
+          maalemId: currUser.id,
+          timestamp: Date.now()
+        });
       }
     } catch (err) {
-      console.warn('[Ably Presence] Erreur de synchronisation présence:', err);
+      console.warn('[Centrifugo Presence] Erreur publication présence:', err);
     }
   }, [buildMaalemPresencePayload]);
 
-  // 1. Initialisation de la connexion Ably et abonnement au canal de présence
+  // 1. Souscription au canal de présence Centrifugo
   useEffect(() => {
-    if (!isAblyConfigured) {
-      setIsAblyConnected(false);
-      setConnectionState('disabled_no_key');
-      return;
-    }
+    if (!isCentrifugoConfigured) return;
 
-    const clientId = user?.id || null;
-    const client = getAblyClient(clientId);
-    if (!client) return;
+    setIsCentrifugoConnected(true);
+    setConnectionState('connected');
 
-    // Suivi de l'état de la connexion
-    const onStateChange = (stateChange) => {
-      const current = stateChange.current;
-      setConnectionState(current);
-      setIsAblyConnected(current === 'connected');
-
-      // En cas de reconnexion après coupure, ré-inscrire la présence
-      if (current === 'connected') {
-        syncSelfPresence();
-      }
-    };
-
-    client.connection.on(onStateChange);
-    setIsAblyConnected(client.connection.state === 'connected');
-    setConnectionState(client.connection.state);
-
-    const channel = client.channels.get(ABLY_CHANNELS.PRESENCE_MAALEMS);
-    presenceChannelRef.current = channel;
-
-    // Fonction de rafraîchissement global de la map de présence
-    const refreshPresenceSnapshot = async () => {
-      try {
-        const presenceMembers = await channel.presence.get();
-        const map = {};
-        presenceMembers.forEach((member) => {
-          if (member.data && member.data.id) {
-            map[member.data.id] = {
-              ...member.data,
-              clientId: member.clientId,
-              last_seen_at: member.data.last_seen_at || Date.now()
-            };
-          }
-        });
-        setOnlineMaalemsMap(map);
-        if (typeof onPresenceChange === 'function') {
-          onPresenceChange(map);
-        }
-      } catch (e) {
-        console.warn('[Ably Presence] Impossible de récupérer le snapshot:', e);
-      }
-    };
-
-    // Écouteurs d'événements de présence Ably (Enter, Update, Leave, Present)
-    const handlePresenceMessage = (presenceMsg) => {
-      const { action, data, clientId: memberClientId } = presenceMsg;
-      if (!data && action !== 'leave') return;
+    const unsubscribe = centrifugo.subscribe(REALTIME_CHANNELS.PRESENCE_MAALEMS, (data) => {
+      if (!data) return;
 
       setOnlineMaalemsMap((prev) => {
         const updated = { ...prev };
-        const memberId = data?.id || memberClientId;
+        const { action, maalem, maalemId } = data;
 
-        if (action === 'leave') {
-          delete updated[memberId];
-        } else if (data) {
-          updated[memberId] = {
-            ...data,
-            clientId: memberClientId,
+        if (action === 'leave' && maalemId) {
+          delete updated[maalemId];
+        } else if (maalem && maalem.id) {
+          updated[maalem.id] = {
+            ...maalem,
             last_seen_at: Date.now()
           };
         }
@@ -188,47 +138,68 @@ export const useAblyPresence = ({ user, isOnline, onPresenceChange } = {}) => {
         }
         return updated;
       });
-    };
-
-    channel.presence.subscribe(handlePresenceMessage);
-
-    // Récupérer la liste des personnes déjà présentes au moment de la connexion
-    channel.attach((err) => {
-      if (err) {
-        setPresenceError(err.message);
-        return;
-      }
-      refreshPresenceSnapshot();
-      syncSelfPresence();
     });
 
+    // Nettoyage régulier des artisans inactifs (> 60s sans heartbeat)
+    const cleanupInterval = setInterval(() => {
+      const now = Date.now();
+      setOnlineMaalemsMap((prev) => {
+        let changed = false;
+        const updated = { ...prev };
+        Object.keys(updated).forEach((id) => {
+          if (now - (updated[id].last_seen_at || 0) > 60000 && id !== userRef.current?.id) {
+            delete updated[id];
+            changed = true;
+          }
+        });
+        if (changed && typeof onPresenceChange === 'function') {
+          onPresenceChange(updated);
+        }
+        return changed ? updated : prev;
+      });
+    }, 20000);
+
     return () => {
-      try {
-        channel.presence.unsubscribe(handlePresenceMessage);
-      } catch (e) {}
-      try {
-        client.connection.off(onStateChange);
-      } catch (e) {}
+      if (typeof unsubscribe === 'function') unsubscribe();
+      clearInterval(cleanupInterval);
     };
-  }, [user?.id, syncSelfPresence, onPresenceChange]);
+  }, [onPresenceChange]);
 
-  // 2. Gestion de la bascule En Ligne / Hors Ligne
+  // 2. Gestion du Heartbeat de présence et de la bascule En Ligne / Hors Ligne
   useEffect(() => {
-    syncSelfPresence();
-  }, [isOnline, syncSelfPresence]);
+    broadcastSelfPresence();
 
-  // 3. Suivi de la géolocalisation live en continu (GPS Watcher avec throttling)
+    if (isOnline) {
+      if (heartbeatTimerRef.current) clearInterval(heartbeatTimerRef.current);
+      heartbeatTimerRef.current = setInterval(() => {
+        broadcastSelfPresence();
+      }, 25000);
+    } else {
+      if (heartbeatTimerRef.current) {
+        clearInterval(heartbeatTimerRef.current);
+        heartbeatTimerRef.current = null;
+      }
+      broadcastSelfPresence(null, 'leave');
+    }
+
+    return () => {
+      if (heartbeatTimerRef.current) {
+        clearInterval(heartbeatTimerRef.current);
+        heartbeatTimerRef.current = null;
+      }
+    };
+  }, [isOnline, broadcastSelfPresence]);
+
+  // 3. Suivi de la géolocalisation live en continu (GPS Watcher)
   useEffect(() => {
     const isUserMaalem = Boolean(user && String(user.role || '').toUpperCase() === 'MAALEM');
 
-    // On active le tracking GPS temps réel uniquement si le Maalem est En Ligne
     if (isUserMaalem && isOnline && typeof window !== 'undefined' && 'geolocation' in navigator) {
       const handlePositionSuccess = (pos) => {
         const { latitude, longitude } = pos.coords;
         const now = Date.now();
         const last = lastLocationUpdateRef.current;
 
-        // Seuil d'optimisation : au moins 5 secondes d'intervalle ou déplacement notable (~15m)
         const timeDiff = now - last.timestamp;
         const latDiff = Math.abs((last.lat || 0) - latitude);
         const lngDiff = Math.abs((last.lng || 0) - longitude);
@@ -236,19 +207,12 @@ export const useAblyPresence = ({ user, isOnline, onPresenceChange } = {}) => {
 
         if (timeDiff >= 5000 || hasMoved) {
           lastLocationUpdateRef.current = { lat: latitude, lng: longitude, timestamp: now };
-
-          const channel = presenceChannelRef.current;
-          if (channel && isAblyConfigured) {
-            const updatedPayload = buildMaalemPresencePayload({ lat: latitude, lng: longitude });
-            if (updatedPayload) {
-              channel.presence.update(updatedPayload).catch(() => {});
-            }
-          }
+          broadcastSelfPresence({ lat: latitude, lng: longitude });
         }
       };
 
       const handlePositionError = (err) => {
-        console.warn('[Ably GPS Watcher] Erreur géolocalisation:', err.message);
+        console.warn('[Centrifugo GPS Watcher] Erreur géolocalisation:', err.message);
       };
 
       geoWatchIdRef.current = navigator.geolocation.watchPosition(
@@ -260,53 +224,26 @@ export const useAblyPresence = ({ user, isOnline, onPresenceChange } = {}) => {
           maximumAge: 5000
         }
       );
-    } else {
-      if (geoWatchIdRef.current !== null && typeof navigator !== 'undefined' && navigator.geolocation) {
-        navigator.geolocation.clearWatch(geoWatchIdRef.current);
-        geoWatchIdRef.current = null;
-      }
+
+      return () => {
+        if (geoWatchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(geoWatchIdRef.current);
+          geoWatchIdRef.current = null;
+        }
+      };
     }
-
-    return () => {
-      if (geoWatchIdRef.current !== null && typeof navigator !== 'undefined' && navigator.geolocation) {
-        navigator.geolocation.clearWatch(geoWatchIdRef.current);
-        geoWatchIdRef.current = null;
-      }
-    };
-  }, [user, isOnline, buildMaalemPresencePayload]);
-
-  // 4. Gestion de la visibilité & réveil de l'écran (retour d'arrière-plan mobile)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && isAblyConfigured) {
-        syncSelfPresence();
-      }
-    };
-
-    const handleWindowOnline = () => {
-      if (isAblyConfigured) {
-        syncSelfPresence();
-      }
-    };
-
-    window.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('online', handleWindowOnline);
-
-    return () => {
-      window.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('online', handleWindowOnline);
-    };
-  }, [syncSelfPresence]);
-
-  const onlineMaalemsList = Object.values(onlineMaalemsMap);
+  }, [user, isOnline, broadcastSelfPresence]);
 
   return {
-    isAblyConnected,
-    connectionState,
-    presenceError,
     onlineMaalemsMap,
-    onlineMaalems: onlineMaalemsList,
-    onlineMaalemsCount: onlineMaalemsList.length,
-    syncSelfPresence
+    onlineMaalemsList: Object.values(onlineMaalemsMap),
+    onlineMaalemsCount: Object.keys(onlineMaalemsMap).length,
+    connectionState,
+    isAblyConnected: isCentrifugoConnected,
+    isCentrifugoConnected,
+    presenceError,
+    refreshPresence: broadcastSelfPresence
   };
 };
+
+export const useCentrifugoPresence = useAblyPresence;

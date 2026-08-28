@@ -210,83 +210,83 @@ export const AdminRealtimeConsole = () => {
   };
 
   return (
-    <div className="space-y-4 font-sans text-slate-900">
+    <div className="space-y-3.5 sm:space-y-4 font-sans text-slate-900">
       {/* 1. Barres KPIs Modern Clean & Trust */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+        <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block font-bold">Total Événements</span>
-            <p className="text-2xl font-black font-mono text-slate-900">{stats.total}</p>
+            <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-slate-500 block font-bold truncate">Total Événements</span>
+            <p className="text-lg sm:text-2xl font-black font-mono text-slate-900">{stats.total}</p>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shadow-xs">
-            <Activity className="w-5 h-5" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shadow-xs shrink-0">
+            <Activity className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-rose-600 block font-bold">Urgences SOS</span>
-            <p className="text-2xl font-black font-mono text-rose-600">{stats.sosCount}</p>
+            <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-rose-600 block font-bold truncate">Urgences SOS</span>
+            <p className="text-lg sm:text-2xl font-black font-mono text-rose-600">{stats.sosCount}</p>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shadow-xs">
-            <Zap className="w-5 h-5" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shadow-xs shrink-0">
+            <Zap className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-amber-600 block font-bold">Déblocages Maâlems</span>
-            <p className="text-2xl font-black font-mono text-amber-600">{stats.maalemCount}</p>
+            <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-amber-600 block font-bold truncate">Déblocages</span>
+            <p className="text-lg sm:text-2xl font-black font-mono text-amber-600">{stats.maalemCount}</p>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shadow-xs">
-            <Shield className="w-5 h-5" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shadow-xs shrink-0">
+            <Shield className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-600 block font-bold">Latence VPS</span>
-            <p className="text-2xl font-black font-mono text-emerald-600">{stats.lastPing}</p>
+            <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-emerald-600 block font-bold truncate">Latence VPS</span>
+            <p className="text-lg sm:text-2xl font-black font-mono text-emerald-600">{stats.lastPing}</p>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shadow-xs">
-            <Wifi className="w-5 h-5" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shadow-xs shrink-0">
+            <Wifi className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
           </div>
         </div>
       </div>
 
       {/* 2. Fenêtre Console Pro Blanche & Lumineuse */}
-      <div className="rounded-3xl bg-white border border-slate-200 shadow-sm overflow-hidden text-xs">
+      <div className="rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-sm overflow-hidden text-xs">
         {/* Header Console & Boutons d'Action */}
-        <div className="bg-slate-50 border-b border-slate-200 px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs">
-              <Radio className="w-4 h-4 animate-pulse" />
+        <div className="bg-slate-50 border-b border-slate-200 px-3 sm:px-6 py-2.5 sm:py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 select-none">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs shrink-0">
+              <Radio className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-pulse" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-black text-slate-900 text-sm tracking-tight">Console Temps Réel Live</span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold font-mono">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight">Console Temps Réel</span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] sm:text-[10px] font-bold font-mono">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                  VPS Centrifugo v5 Actif
+                  VPS v5 Actif
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">
-                Serveur : <span className="font-mono text-slate-700 font-bold">51.255.46.206:8800</span> • WSS TLS Sécurisé
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium">
+                Serveur : <span className="font-mono text-slate-700 font-bold">51.255.46.206:8800</span> • WSS TLS
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto justify-end">
             <button
               type="button"
               onClick={() => setIsPaused(!isPaused)}
-              className={`px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs cursor-pointer border ${
+              className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold flex items-center justify-center gap-1 sm:gap-1.5 transition-all text-[11px] sm:text-xs cursor-pointer border ${
                 isPaused
                   ? 'bg-amber-50 text-amber-700 border-amber-300'
                   : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs'
               }`}
             >
-              {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+              {isPaused ? <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Pause className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
               <span>{isPaused ? 'Reprendre' : 'Pause'}</span>
             </button>
 
@@ -294,19 +294,19 @@ export const AdminRealtimeConsole = () => {
               type="button"
               onClick={handleSendTestPing}
               disabled={isTestSending}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50 text-xs"
+              className="flex-1 sm:flex-initial px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold flex items-center justify-center gap-1 sm:gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50 text-[11px] sm:text-xs"
             >
-              <Zap className="w-3.5 h-3.5" />
+              <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               <span>{isTestSending ? 'Envoi...' : 'Tester le Flux'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setEvents([])}
-              className="p-2 rounded-xl bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 transition-all cursor-pointer shadow-xs"
+              className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 transition-all cursor-pointer shadow-xs"
               title="Vider la console"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>

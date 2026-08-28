@@ -23,7 +23,6 @@
     "@aws-sdk/client-s3": "^3.1116.0",
     "@phosphor-icons/react": "^2.1.10",
     "@supabase/supabase-js": "^2.45.0",
-    "ably": "^2.27.0",
     "firebase": "^12.17.1",
     "framer-motion": "^13.1.0",
     "lucide-react": "^0.378.0",

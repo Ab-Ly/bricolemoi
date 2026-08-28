@@ -1,45 +1,20 @@
-import { getAblyClient, ABLY_CHANNELS, isAblyConfigured } from './ablyClient';
+import { REALTIME_CHANNELS } from './ablyClient';
 import { centrifugo, isCentrifugoConfigured } from './centrifugoClient';
 
 /**
  * Service Universel de Messagerie et d'Événements Temps Réel pour BricoleMoi
- * Supporte : Centrifugo (VPS Open Source) > Ably (SaaS) > Local BroadcastChannel
+ * 100% propulsé par Centrifugo v5 (Open Source sur VPS) avec fallback BroadcastChannel local.
  */
 
-// Cache des canaux Ably actifs
-let lastClientInstance = null;
-const activeChannels = new Map();
-
-const getOrCreateAblyChannel = (channelName, clientId = null) => {
-  const client = getAblyClient(clientId);
-  if (!client) return null;
-
-  if (client !== lastClientInstance) {
-    activeChannels.clear();
-    lastClientInstance = client;
-  }
-
-  if (!activeChannels.has(channelName)) {
-    try {
-      const channel = client.channels.get(channelName);
-      activeChannels.set(channelName, channel);
-    } catch (err) {
-      console.warn(`[Realtime] Erreur accès canal Ably ${channelName}:`, err);
-      return null;
-    }
-  }
-  return activeChannels.get(channelName);
-};
-
 /**
- * Diffuse un événement temps réel (Centrifugo VPS en priorité ou Ably)
+ * Diffuse un événement temps réel sur Centrifugo VPS
  *
  * @param {string} eventName - Nom de l'événement ('new_job', 'job_progress_updated', etc.)
  * @param {object} payload - Données de l'événement
- * @param {string} [channelName=ABLY_CHANNELS.JOBS_STREAM] - Canal cible
+ * @param {string} [channelName=REALTIME_CHANNELS.JOBS_STREAM] - Canal cible
  * @param {string} [clientId=null] - Identifiant de l'émetteur
  */
-export const publishRealtimeEvent = async (eventName, payload, channelName = ABLY_CHANNELS.JOBS_STREAM, clientId = null) => {
+export const publishRealtimeEvent = async (eventName, payload, channelName = REALTIME_CHANNELS.JOBS_STREAM, clientId = null) => {
   const fullMessage = {
     event: eventName,
     payload,
@@ -47,48 +22,36 @@ export const publishRealtimeEvent = async (eventName, payload, channelName = ABL
     timestamp: Date.now()
   };
 
-  // 1. Centrifugo VPS (Open Source Prioritaire)
+  // 1. Centrifugo VPS (Open Source Principal)
   if (isCentrifugoConfigured) {
     try {
       const ok = await centrifugo.publish(channelName, fullMessage);
       if (ok) return true;
     } catch (err) {
-      console.warn('[Centrifugo] Erreur publication, bascule Ably/Broadcast:', err);
+      console.warn('[Centrifugo] Erreur publication, bascule BroadcastChannel local:', err);
     }
   }
 
-  // 2. Ably Realtime Fallback
-  if (isAblyConfigured) {
-    try {
-      const channel = getOrCreateAblyChannel(channelName, clientId);
-      if (channel) {
-        await channel.publish(eventName, payload);
-        return true;
-      }
-    } catch (error) {
-      console.warn(`[Ably] Erreur de publication de l’événement ${eventName}:`, error);
-    }
-  }
-
-  // 3. BroadcastChannel Local Multi-onglets
+  // 2. BroadcastChannel Local Multi-onglets
   try {
     const bc = new BroadcastChannel(`bricolemoi_rt_${channelName}`);
     bc.postMessage(fullMessage);
     bc.close();
+    return true;
   } catch (e) {}
 
   return false;
 };
 
 /**
- * S'abonne aux événements d'un canal temps réel (Centrifugo VPS ou Ably)
+ * S'abonne aux événements d'un canal temps réel Centrifugo VPS
  *
  * @param {string} channelName - Nom du canal
  * @param {Function} onMessage - Callback déclenché à la réception d'un message ({ event, payload, timestamp })
- * @param {string} [clientId=null] - Identifiant utilisateur
+ * @param {string} [_clientId=null] - Identifiant utilisateur optionnel
  * @returns {Function} - Fonction d'annulation d'abonnement (unsubscribe)
  */
-export const subscribeToRealtimeChannel = (channelName, onMessage, clientId = null) => {
+export const subscribeToRealtimeChannel = (channelName, onMessage, _clientId = null) => {
   const unsubs = [];
 
   // 1. Souscription Centrifugo VPS
@@ -106,39 +69,7 @@ export const subscribeToRealtimeChannel = (channelName, onMessage, clientId = nu
     unsubs.push(unsubCentrifugo);
   }
 
-  // 2. Souscription Ably
-  if (isAblyConfigured) {
-    try {
-      const channel = getOrCreateAblyChannel(channelName, clientId);
-      if (channel) {
-        const handler = (message) => {
-          if (typeof onMessage === 'function') {
-            try {
-              onMessage({
-                event: message.name,
-                payload: message.data,
-                clientId: message.clientId,
-                timestamp: message.timestamp
-              });
-            } catch (handlerErr) {
-              console.warn('[Ably Handler Error]:', handlerErr);
-            }
-          }
-        };
-
-        channel.subscribe(handler);
-        unsubs.push(() => {
-          try {
-            channel.unsubscribe(handler);
-          } catch (e) {}
-        });
-      }
-    } catch (err) {
-      console.warn(`[Ably] Exception abonnement ${channelName}:`, err);
-    }
-  }
-
-  // 3. Écouteur BroadcastChannel local
+  // 2. Écouteur BroadcastChannel local
   try {
     const bc = new BroadcastChannel(`bricolemoi_rt_${channelName}`);
     bc.onmessage = (e) => {
@@ -146,7 +77,11 @@ export const subscribeToRealtimeChannel = (channelName, onMessage, clientId = nu
         onMessage(e.data);
       }
     };
-    unsubs.push(() => bc.close());
+    unsubs.push(() => {
+      try {
+        bc.close();
+      } catch (e) {}
+    });
   } catch (e) {}
 
   return () => {

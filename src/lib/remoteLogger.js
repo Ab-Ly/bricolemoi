@@ -2,7 +2,6 @@
  * Service de Télémesure & Live Console Logs en Temps Réel pour BricoleMoi CLI
  * Version 2.0 : Offline Queue Buffer, Auto-Flush, Console Interceptor & Network Health
  */
-import { getAblyClient, ABLY_CHANNELS, isAblyConfigured } from './ablyClient';
 import { centrifugo, isCentrifugoConfigured } from './centrifugoClient';
 import { getAppSubdomain } from './subdomain';
 
@@ -66,17 +65,6 @@ const flushOfflineLogs = async () => {
           await centrifugo.publish('admin:alerts', item);
         }
       }
-    } else {
-      const ably = getAblyClient();
-      if (ably && ably.connection.state === 'connected') {
-        const channel = ably.channels.get(ABLY_CHANNELS.TERMINAL_LOGS);
-        while (offlineLogsQueue.length > 0) {
-          const item = offlineLogsQueue.shift();
-          if (item) {
-            await channel.publish('client_log', item);
-          }
-        }
-      }
     }
   } catch (err) {
     // Silencieux sur échec flush
@@ -130,16 +118,6 @@ export const sendTerminalLog = async (level = 'INFO', category = 'APP', message 
       return;
     }
 
-    const ably = getAblyClient();
-    if (ably && ably.connection.state === 'connected') {
-      const channel = ably.channels.get(ABLY_CHANNELS.TERMINAL_LOGS);
-      await channel.publish('client_log', payload);
-      if (offlineLogsQueue.length > 0) {
-        flushOfflineLogs();
-      }
-      return;
-    }
-
     if (offlineLogsQueue.length >= MAX_OFFLINE_QUEUE_SIZE) {
       offlineLogsQueue.shift();
     }
@@ -166,16 +144,6 @@ export const initRemoteTelemetry = () => {
       sendTerminalLog('INFO', 'REALTIME', '🟢 Gateway Centrifugo VPS connectée et synchronisée');
       flushOfflineLogs();
     }, 1000);
-  } else if (isAblyConfigured) {
-    try {
-      const ably = getAblyClient();
-      if (ably && ably.connection) {
-        ably.connection.on('connected', () => {
-          sendTerminalLog('INFO', 'REALTIME', '🟢 Gateway Ably connectée et synchronisée');
-          flushOfflineLogs();
-        });
-      }
-    } catch (e) {}
   }
 
   // 2. Capture des erreurs runtime JS non interceptées

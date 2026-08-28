@@ -1,16 +1,15 @@
-import Ably from 'ably';
+/**
+ * Configuration et constantes des canaux temps réel (Centrifugo VPS)
+ * Découplé d'Ably pour un fonctionnement 100% autonome et open source.
+ */
 
-// Clé API Ably depuis les variables d'environnement Vite
-const ABLY_API_KEY = import.meta.env.VITE_ABLY_API_KEY || '';
-
-export const isAblyConfigured = Boolean(ABLY_API_KEY && ABLY_API_KEY.includes(':'));
-
-// Constantes des Canaux Ably Haute Performance pour BricoleMoi
-export const ABLY_CHANNELS = {
-  PRESENCE_MAALEMS: 'bricolemoi:presence:maalems',
-  JOBS_STREAM: 'bricolemoi:jobs:stream',
-  ADMIN_ALERTS: 'bricolemoi:admin:alerts',
-  TERMINAL_LOGS: 'bricolemoi:terminal:logs',
+// Constantes des Canaux Temps Réel pour BricoleMoi (Centrifugo v5)
+export const REALTIME_CHANNELS = {
+  PRESENCE_MAALEMS: 'presence:maalems',
+  JOBS_STREAM: 'jobs:stream',
+  ADMIN_ALERTS: 'admin:alerts',
+  TERMINAL_LOGS: 'terminal:logs',
+  TRACKING_ALL: 'tracking:all',
 
   /**
    * Canal individuel par utilisateur pour les statuts d'intervention,
@@ -56,119 +55,7 @@ export const ABLY_CHANNELS = {
   }
 };
 
-// Singleton Ably Realtime Client
-let ablyInstance = null;
-let currentClientId = null;
-
-const getStableAnonymousClientId = () => {
-  try {
-    let id = sessionStorage.getItem('bricolemoi_anon_client_id');
-    if (!id) {
-      id = 'anon-' + Math.random().toString(36).substring(2, 9);
-      sessionStorage.setItem('bricolemoi_anon_client_id', id);
-    }
-    return id;
-  } catch (e) {
-    return 'anon-user';
-  }
-};
-
-/**
- * Initialise ou retourne l'instance unique du client Ably Realtime
- * avec gestion de la persistance de session et récupération de connexion.
- *
- * @param {string} clientId - Identifiant unique de l'utilisateur (Maalem ou Client)
- * @returns {Ably.Realtime | null}
- */
-export const getAblyClient = (clientId = null) => {
-  if (!isAblyConfigured) {
-    if (import.meta.env.DEV) {
-      console.info('[Ably] ℹ️ VITE_ABLY_API_KEY non configurée. Le mode temps réel bascule sur le broadcast local.');
-    }
-    return null;
-  }
-
-  const targetClientId = clientId || currentClientId || getStableAnonymousClientId();
-
-  // Si l'instance existe déjà et est active, la réutiliser
-  if (ablyInstance) {
-    if (currentClientId === targetClientId || (targetClientId.startsWith('anon-') && currentClientId?.startsWith('anon-'))) {
-      return ablyInstance;
-    }
-    try {
-      ablyInstance.close();
-    } catch (e) {}
-  }
-
-  currentClientId = targetClientId;
-
-  try {
-    const clientOptions = {
-      key: ABLY_API_KEY,
-      clientId: targetClientId,
-      autoConnect: true,
-      // Récupération de connexion intelligente pour micro-coupures réseau (3G/4G Maroc)
-      recover: (lastConnectionDetails, cb) => {
-        try {
-          const savedRecoveryKey = sessionStorage.getItem('bricolemoi_ably_recovery_key');
-          cb(savedRecoveryKey || null);
-        } catch (e) {
-          cb(null);
-        }
-      },
-      // Timeout optimisé pour mobile
-      disconnectedRetryTimeout: 3000,
-      suspendedRetryTimeout: 10000,
-      transportParams: {
-        heartbeatInterval: 15000
-      }
-    };
-
-    ablyInstance = new Ably.Realtime(clientOptions);
-
-    ablyInstance.connection.on((stateChange) => {
-      if (stateChange.current === 'connected') {
-        try {
-          const key = typeof ablyInstance.connection.createRecoveryKey === 'function'
-            ? ablyInstance.connection.createRecoveryKey()
-            : ablyInstance.connection.recoveryKey;
-          if (key) {
-            sessionStorage.setItem('bricolemoi_ably_recovery_key', key);
-          }
-        } catch (e) {}
-      }
-
-      if (stateChange.reason && (stateChange.reason.code === 80018 || stateChange.reason.statusCode === 400)) {
-        console.warn('[Ably] Clé de session expirée, reconnexion propre...');
-        try {
-          sessionStorage.removeItem('bricolemoi_ably_recovery_key');
-        } catch (e) {}
-        setTimeout(() => {
-          if (ablyInstance && ablyInstance.connection.state !== 'connected') {
-            try {
-              ablyInstance.connect();
-            } catch (err) {}
-          }
-        }, 500);
-      }
-    });
-
-    return ablyInstance;
-  } catch (error) {
-    console.error('[Ably] ❌ Erreur d’initialisation:', error);
-    return null;
-  }
-};
-
-/**
- * Ferme et nettoie la connexion Ably Realtime
- */
-export const disconnectAbly = () => {
-  if (ablyInstance) {
-    try {
-      ablyInstance.close();
-    } catch (e) {}
-    ablyInstance = null;
-    currentClientId = null;
-  }
-};
+// Alias de rétrocompatibilité pour éviter les cassures d'importation
+export const ABLY_CHANNELS = REALTIME_CHANNELS;
+export const isAblyConfigured = false;
+export const getAblyClient = () => null;
