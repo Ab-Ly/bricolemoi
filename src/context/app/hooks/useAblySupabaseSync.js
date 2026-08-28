@@ -494,28 +494,10 @@ export const useAblySupabaseSync = ({
         };
 
         const enrichedInterventions = intvData.map((intv) => {
-          const isLocallyUnlocked = myUnlocked.includes(String(intv.id).trim());
-          const targetStatus = isLocallyUnlocked && intv.status === 'PENDING' ? 'ACCEPTED' : intv.status;
-          const targetMaalemId = isLocallyUnlocked && !intv.maalem_id ? user?.id : intv.maalem_id;
-
-          return normalizeIntervention({
-            ...intv,
-            status: targetStatus,
-            maalem_id: targetMaalemId
-          }, normContext);
+          return normalizeIntervention(intv, normContext);
         }).filter(Boolean);
 
         setInterventions(enrichedInterventions);
-        try {
-          localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(enrichedInterventions));
-          
-          // Purger les chantiers clôturés des leads débloqués locaux
-          const activeUnlocked = myUnlocked.filter(id => {
-            const match = enrichedInterventions.find(i => String(i.id).trim() === id);
-            return match && match.status !== 'COMPLETED' && match.status !== 'CANCELLED';
-          });
-          localStorage.setItem('bricolemoi_my_unlocked_leads', JSON.stringify(activeUnlocked));
-        } catch (e) {}
       }
     } catch (e) {}
 
@@ -524,49 +506,26 @@ export const useAblySupabaseSync = ({
 
     setClients(finalClients);
     setMaalems(finalMaalems);
-    try {
-      localStorage.setItem('bricolemoi_clients_cache', JSON.stringify(finalClients));
-      localStorage.setItem('bricolemoi_maalems_cache', JSON.stringify(finalMaalems));
-    } catch (e) {}
 
     try {
       const { data: realTransactions } = await supabase
         .from('transactions')
         .select(
-          'id, maalem_id, amount_dh, type, payment_method, reference_ref, status, created_at'
+          'id, maalem_id, amount_dh, type, payment_method, reference_ref, status, created_at, admin_notes'
         )
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (realTransactions) {
-        let cachedMap = new Map();
-        try {
-          const cachedRaw = localStorage.getItem('bricolemoi_transactions_cache');
-          if (cachedRaw) {
-            const parsed = JSON.parse(cachedRaw);
-            (parsed || []).forEach((c) => {
-              if (c.id) cachedMap.set(String(c.id).trim(), c);
-              if (c.reference_ref)
-                cachedMap.set(String(c.reference_ref).trim().toLowerCase(), c);
-            });
-          }
-        } catch (e) {}
-
         const enrichedTx = realTransactions.map((tx) => {
           const p =
             profilesMap.get(String(tx.maalem_id).trim()) ||
             maalemMap.get(String(tx.maalem_id).trim());
-          const cachedMatch =
-            cachedMap.get(String(tx.id).trim()) ||
-            (tx.reference_ref && cachedMap.get(String(tx.reference_ref).trim().toLowerCase()));
-          const effectiveStatus =
-            cachedMatch && cachedMatch.status !== 'PENDING' ? cachedMatch.status : tx.status;
-          const effectiveNotes = cachedMatch?.admin_notes || tx.admin_notes;
 
           return {
             ...tx,
-            status: effectiveStatus,
-            admin_notes: effectiveNotes,
+            status: tx.status,
+            admin_notes: tx.admin_notes,
             maalem_name:
               p?.full_name ||
               tx.maalem_name ||
@@ -578,9 +537,6 @@ export const useAblySupabaseSync = ({
           };
         });
         setTransactions(enrichedTx);
-        try {
-          localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(enrichedTx));
-        } catch (e) {}
       }
     } catch (e) {}
   };
@@ -650,9 +606,6 @@ export const useAblySupabaseSync = ({
                   }
                 : item
             );
-            try {
-              localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
-            } catch (err) {}
             return next;
           });
 
@@ -661,9 +614,6 @@ export const useAblySupabaseSync = ({
               const alreadyExists = prev.some((t) => String(t.id).trim() === String(payload.transaction.id).trim());
               if (alreadyExists) return prev;
               const nextTxs = [payload.transaction, ...prev];
-              try {
-                localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(nextTxs));
-              } catch (err) {}
               return nextTxs;
             });
           }

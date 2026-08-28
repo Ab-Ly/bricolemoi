@@ -17,73 +17,18 @@ export const AppProvider = ({ children }) => {
     userRef.current = user;
   }, [user]);
 
-  // États globaux
-  const [interventions, setInterventions] = useState(() => {
-    try {
-      const cached = localStorage.getItem('bricolemoi_interventions_cache');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [maalems, setMaalems] = useState(() => {
-    try {
-      const cached = localStorage.getItem('bricolemoi_maalems_cache');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [clients, setClients] = useState(() => {
-    try {
-      const cached = localStorage.getItem('bricolemoi_clients_cache');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [transactions, setTransactions] = useState(() => {
-    try {
-      const cached = localStorage.getItem('bricolemoi_transactions_cache');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [reviews, setReviews] = useState(() => {
-    try {
-      const cached = localStorage.getItem('bricolemoi_reviews_cache');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
+  // États globaux (Cloud-First 100% synchronisés avec Supabase)
+  const [interventions, setInterventions] = useState([]);
+  const [maalems, setMaalems] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
   const [adminNotifications, setAdminNotifications] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
   const [whatsappMsg, setWhatsappMsg] = useState(null);
-
-  const [adminAlerts, setAdminAlerts] = useState(() => {
-    try {
-      const cached = localStorage.getItem('bricolemoi_admin_alerts');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [loyaltyRewardsHistory, setLoyaltyRewardsHistory] = useState(() => {
-    try {
-      const cached = localStorage.getItem('bricolemoi_loyalty_rewards_cache');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [adminAlerts, setAdminAlerts] = useState([]);
+  const [loyaltyRewardsHistory, setLoyaltyRewardsHistory] = useState([]);
 
   const [isMaalemOnline, setIsMaalemOnline] = useState(() => {
     try {

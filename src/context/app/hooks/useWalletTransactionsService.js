@@ -331,9 +331,6 @@ export const useWalletTransactionsService = ({
           : t
       );
       const nextTxs = bonusTx ? [bonusTx, ...updated] : updated;
-      try {
-        localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(nextTxs));
-      } catch (e) {}
       return nextTxs;
     });
 
@@ -474,9 +471,6 @@ export const useWalletTransactionsService = ({
             }
           : t
       );
-      try {
-        localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(updated));
-      } catch (e) {}
       return updated;
     });
 
@@ -551,9 +545,6 @@ export const useWalletTransactionsService = ({
 
     setTransactions((prev) => {
       const updated = [newTx, ...prev];
-      try {
-        localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(updated));
-      } catch (e) {}
       return updated;
     });
 

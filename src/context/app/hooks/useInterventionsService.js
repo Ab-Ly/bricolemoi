@@ -521,9 +521,6 @@ export const useInterventionsService = ({
 
     setTransactions((prev) => {
       const nextTxs = [newDebitTx, ...prev];
-      try {
-        localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(nextTxs));
-      } catch (e) {}
       return nextTxs;
     });
 
