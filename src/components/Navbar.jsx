@@ -42,50 +42,6 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
   const liveCreditBalance = balanceInfo.liveAvailableBalance;
 
   const handleRefresh = async () => {
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
-import { useApp } from '../context/AppContext';
-import { switchSubdomainInDev } from '../lib/subdomain';
-import { 
-  Wrench, 
-  Globe, 
-  Download,
-  Zap,
-  RefreshCw,
-  Sparkles
-} from 'lucide-react';
-import { 
-  LockKey, 
-  Coins, 
-  CheckCircle, 
-  WarningCircle, 
-  SignOut, 
-  ShieldCheck as PhosphorShieldCheck, 
-  User as PhosphorUser,
-  WhatsappLogo
-} from '@phosphor-icons/react';
-
-import { calculateMaalemBalance } from '../utils/balanceUtils';
-
-export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appMode = 'CLIENT' }) => {
-  const { 
-    lang, 
-    toggleLanguage, 
-    t, 
-    user, 
-    setAuthModalOpen, 
-    setProfileModalOpen, 
-    logout 
-  } = useAuth();
-  const isAr = lang === 'ar';
-  const { refreshData, maalems, transactions, isAblyConnected, isAblyConfigured } = useApp();
-  const [refreshing, setRefreshing] = useState(false);
-
-  const balanceInfo = calculateMaalemBalance(user, transactions, maalems);
-  const liveCreditBalance = balanceInfo.liveAvailableBalance;
-
-  const handleRefresh = async () => {
     setRefreshing(true);
     await refreshData();
     setTimeout(() => setRefreshing(false), 800);
