@@ -13,7 +13,8 @@ export const ClientRadarSearchingCard = ({
   flowCancelSOS,
   cancelIntervention,
   selectedLat,
-  selectedLng
+  selectedLng,
+  setShowNewSOSForm
 }) => {
   if (!activePendingSOS) return null;
 
@@ -103,6 +104,19 @@ export const ClientRadarSearchingCard = ({
           filterCategory={activePendingSOS.service_type || serviceType}
         />
       </div>
+
+      {/* Option discrète pour lancer une autre demande */}
+      {setShowNewSOSForm && (
+        <div className="pt-2 border-t border-slate-200 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowNewSOSForm(true)}
+            className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            <span>+ Besoin d'un autre dépannage en parallèle ?</span>
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 };

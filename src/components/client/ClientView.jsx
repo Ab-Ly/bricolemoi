@@ -14,9 +14,9 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
   return (
     <div className="max-w-4xl mx-auto space-y-8 font-sans pb-48 md:pb-24 px-3 sm:px-4">
       {/* 1. Intervention active en cours avec le Maâlem */}
-      {client.activeOngoingSOS ? (
+      {client.activeOngoingSOS && !client.showNewSOSForm ? (
         <ClientActiveOngoingCard {...client} />
-      ) : client.activePendingSOS ? (
+      ) : client.activePendingSOS && !client.showNewSOSForm ? (
         /* 2. Recherche radar en direct d'un Maâlem */
         <ClientRadarSearchingCard {...client} />
       ) : (
