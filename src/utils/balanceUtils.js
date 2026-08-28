@@ -24,6 +24,70 @@ export const isRealRechargeTx = (t) => {
   return (typeUpper === 'RECHARGE' || typeUpper === 'CREDIT') && !isBonusTx(t) && !isLeadTx(t);
 };
 
+export const RECHARGE_PACKS = [
+  {
+    id: 'pack_50',
+    amount: '50',
+    amountNum: 50,
+    bonusDh: 0,
+    totalCredits: 50,
+    leadsCount: 3,
+    badgeFr: 'Découverte',
+    badgeAr: 'تجربة',
+    popular: false,
+    color: 'slate'
+  },
+  {
+    id: 'pack_100',
+    amount: '100',
+    amountNum: 100,
+    bonusDh: 15,
+    totalCredits: 115,
+    leadsCount: 7,
+    freeLeads: 1,
+    badgeFr: '⭐ Recommandé (+1 Lead Offert)',
+    badgeAr: '⭐ الأكثر طلباً (+1 ليد كادو)',
+    popular: true,
+    color: 'amber'
+  },
+  {
+    id: 'pack_200',
+    amount: '200',
+    amountNum: 200,
+    bonusDh: 30,
+    totalCredits: 230,
+    leadsCount: 15,
+    freeLeads: 2,
+    badgeFr: '👑 Pro Master (+2 Leads Offerts)',
+    badgeAr: '👑 أفضل قيمة (+2 ليد كادو)',
+    popular: false,
+    color: 'emerald'
+  },
+  {
+    id: 'pack_500',
+    amount: '500',
+    amountNum: 500,
+    bonusDh: 90,
+    totalCredits: 590,
+    leadsCount: 39,
+    freeLeads: 6,
+    badgeFr: '🚀 Volume Entreprise (+6 Leads Offerts)',
+    badgeAr: '🚀 للمحترفين (+6 ليد كادو)',
+    popular: false,
+    color: 'indigo'
+  }
+];
+
+export const getRechargePackBonus = (amount) => {
+  const num = parseFloat(amount) || 0;
+  const pack = RECHARGE_PACKS.find((p) => p.amountNum === num);
+  if (pack) return pack.bonusDh;
+  if (num >= 500) return 90.0;
+  if (num >= 200) return 30.0;
+  if (num >= 100) return 15.0;
+  return 0;
+};
+
 export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems = []) => {
   if (!maalemOrUser) {
     return {

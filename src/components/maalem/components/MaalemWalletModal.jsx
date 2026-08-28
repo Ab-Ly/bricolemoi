@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Wallet, CreditCard, Camera } from 'lucide-react';
+import { X, Wallet, CreditCard, Camera, Sparkles, Check, Gift } from 'lucide-react';
 import {
   CreditCard as PhosphorCreditCard,
   Coins,
@@ -8,6 +8,8 @@ import {
   Bank
 } from '@phosphor-icons/react';
 import { CustomDropdown } from '../../CustomDropdown';
+import { RECHARGE_PACKS, getRechargePackBonus } from '../../../utils/balanceUtils';
+import { useAuth } from '../../../context/AuthContext';
 
 export const MaalemWalletModal = ({
   rechargeModalOpen,
@@ -24,6 +26,12 @@ export const MaalemWalletModal = ({
   setPreviewPhotoUrl,
   handleRechargeSubmit
 }) => {
+  const { lang } = useAuth();
+  const isAr = lang === 'ar';
+
+  const selectedBonus = getRechargePackBonus(amountDh);
+  const selectedTotalCredits = (parseFloat(amountDh) || 0) + selectedBonus;
+
   return (
     <AnimatePresence>
       {rechargeModalOpen && (
@@ -38,83 +46,152 @@ export const MaalemWalletModal = ({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.94, opacity: 0, y: 15 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative text-slate-900 max-h-[92dvh] overflow-y-auto modal-scroll pb-safe"
+            dir={isAr ? 'rtl' : 'ltr'}
+            className={`bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl relative text-slate-900 max-h-[92dvh] overflow-y-auto modal-scroll pb-safe ${
+              isAr ? 'font-arabic' : 'font-sans'
+            }`}
           >
+            {/* Bouton Fermer */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setRechargeModalOpen(false)}
-              className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer touch-target-44 active:scale-95 z-20"
-              title="Fermer"
+              className={`absolute top-3 ${isAr ? 'left-3' : 'right-3'} text-slate-400 hover:text-slate-700 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer touch-target-44 active:scale-95 z-20`}
+              title={isAr ? 'إغلاق' : 'Fermer'}
             >
               <X className="w-4 h-4" />
             </motion.button>
 
-            <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
-                <Wallet className="w-7 h-7 text-amber-600" />
+            {/* Header Modal */}
+            <div className="text-center mb-5">
+              <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto mb-2.5 shadow-xs">
+                <Wallet className="w-6 h-6 text-amber-600" />
               </div>
-              <h3 className="text-2xl font-black text-slate-900 font-sans">Module de Recharge Solde</h3>
-              <p className="text-xs text-slate-500 mt-1">Choisissez votre pack et créditez votre compte</p>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900">
+                {isAr ? 'شحن رصيد المهام (Leads SOS)' : 'Recharge Solde Leads SOS'}
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {isAr
+                  ? 'اختر الباقة المناسبة واستفد من عروض الليدات المجانية'
+                  : 'Choisissez votre pack incitatif et bénéficiez de leads offerts'}
+              </p>
             </div>
 
-            {/* Boutons Rapides 50 DH, 100 DH, 200 DH, 500 DH */}
+            {/* 4 Packs de Recharge avec Bonus Incitatifs */}
             <div className="mb-5">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                Packs de Recharge Solde
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {['50', '100', '200', '500'].map((val) => (
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    key={val}
-                    type="button"
-                    onClick={() => setAmountDh(val)}
-                    className={`py-3 rounded-xl border text-xs sm:text-sm font-black transition-all cursor-pointer ${
-                      amountDh === val
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-600 shadow-md shadow-amber-500/20'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    {val} DH
-                  </motion.button>
-                ))}
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  {isAr ? 'باقات الشحن مع بونيس كادو 🎁' : 'Packs de Recharge avec Bonus 🎁'}
+                </label>
+                <span className="text-[10px] text-amber-700 font-bold bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                  {isAr ? '1 ليد = 15 درهم' : '1 Lead SOS = 15 DH'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {RECHARGE_PACKS.map((pack) => {
+                  const isSelected = String(amountDh) === pack.amount;
+                  return (
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      key={pack.id}
+                      type="button"
+                      onClick={() => setAmountDh(pack.amount)}
+                      className={`relative p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected
+                          ? 'bg-gradient-to-br from-amber-50/90 via-white to-amber-50/50 border-amber-500 shadow-md shadow-amber-500/15 ring-2 ring-amber-500/30'
+                          : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/80 shadow-xs'
+                      }`}
+                    >
+                      {/* Badge Pack */}
+                      <div className="flex items-center justify-between gap-1 mb-1.5 w-full">
+                        <span
+                          className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                            pack.popular
+                              ? 'bg-amber-500 text-white shadow-xs'
+                              : pack.bonusDh > 0
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          {isAr ? pack.badgeAr : pack.badgeFr}
+                        </span>
+
+                        {isSelected && (
+                          <span className="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Montant Payé */}
+                      <div className="flex items-baseline gap-1.5 mt-1">
+                        <span className="text-xl sm:text-2xl font-black text-slate-900 font-mono">
+                          {pack.amount}
+                        </span>
+                        <span className="text-xs font-bold text-slate-500">DH</span>
+
+                        {pack.bonusDh > 0 && (
+                          <span className="text-xs font-black text-emerald-600 font-mono flex items-center gap-0.5 mr-auto">
+                            <Gift className="w-3 h-3 inline" /> +{pack.bonusDh} DH {isAr ? 'كادو' : 'Offerts'}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Résumé Crédit Total & Nombre de Leads */}
+                      <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-500 font-medium">
+                          {isAr ? 'الرصيد المحصل :' : 'Solde crédité :'}
+                        </span>
+                        <span className="font-black text-slate-900 font-mono">
+                          {pack.totalCredits} DH{' '}
+                          <span className="text-amber-700 font-sans font-bold">
+                            (~{pack.leadsCount} {isAr ? 'مهام' : 'leads'})
+                          </span>
+                        </span>
+                      </div>
+                    </motion.button>
+                  );
+                })}
               </div>
             </div>
 
+            {/* Formulaire de validation */}
             <form onSubmit={handleRechargeSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Mode de Paiement au Maroc</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  {isAr ? 'طريقة الأداء بالمغرب' : 'Mode de Paiement au Maroc'}
+                </label>
                 <CustomDropdown
                   value={paymentMethod}
                   onChange={setPaymentMethod}
                   options={[
                     {
                       value: 'CB / Instant',
-                      label: 'Paiement Immédiat (Carte Bancaire)',
+                      label: isAr ? 'أداء فوري (بطاقة بنكية CMI)' : 'Paiement Immédiat (Carte Bancaire)',
                       icon: PhosphorCreditCard,
                       iconColor: 'text-emerald-600'
                     },
                     {
                       value: 'Cash Plus',
-                      label: 'Cash Plus (Code Agence)',
+                      label: isAr ? 'كاش بلوس (وكالة قريبة)' : 'Cash Plus (Code Agence)',
                       icon: Coins,
                       iconColor: 'text-amber-600'
                     },
                     {
                       value: 'Wafacash',
-                      label: 'Wafacash (Transfert Express)',
+                      label: isAr ? 'وفاكاش (تحويل فوري)' : 'Wafacash (Transfert Express)',
                       icon: Coins,
                       iconColor: 'text-rose-600'
                     },
                     {
                       value: 'Barid Cash',
-                      label: 'Barid Cash (Reçu Agence)',
+                      label: isAr ? 'بريد كاش / بريد بنك' : 'Barid Cash (Reçu Agence)',
                       icon: EnvelopeSimple,
                       iconColor: 'text-yellow-600'
                     },
                     {
                       value: 'Virement Bancaire',
-                      label: 'Virement RIB (CIH / Attijari / BMCE)',
+                      label: isAr ? 'تحويل بنكي RIB (CIH / التجاري / BMCE)' : 'Virement RIB (CIH / Attijari / BMCE)',
                       icon: Bank,
                       iconColor: 'text-blue-600'
                     }
@@ -122,14 +199,18 @@ export const MaalemWalletModal = ({
                 />
               </div>
 
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-2 text-slate-700">
+              {/* Instructions de paiement */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-2 text-slate-700">
                 {paymentMethod === 'CB / Instant' && (
                   <>
-                    <p className="font-black text-emerald-800 flex items-center gap-1">
-                      <CreditCard className="w-4 h-4 text-emerald-600" /> Crédit Instantané :
+                    <p className="font-black text-emerald-800 flex items-center gap-1.5">
+                      <CreditCard className="w-4 h-4 text-emerald-600" />
+                      <span>{isAr ? 'شحن فوري ومباشر :' : 'Crédit Instantané Automatique :'}</span>
                     </p>
                     <p className="text-slate-600">
-                      Votre solde sera immédiatement crédité de <strong className="text-slate-900">{amountDh} DH</strong> dès validation.
+                      {isAr
+                        ? `سيتم شحن حسابك بـ ${selectedTotalCredits} درهم (${amountDh} درهم + ${selectedBonus} درهم بونيس كادو) فوراً.`
+                        : `Votre solde sera immédiatement crédité de ${selectedTotalCredits} DH (${amountDh} DH payés + ${selectedBonus} DH bonus offert) dès validation.`}
                     </p>
                   </>
                 )}
@@ -137,10 +218,13 @@ export const MaalemWalletModal = ({
                   <>
                     <p className="font-black text-amber-800 flex items-center gap-1.5">
                       <Coins className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Instructions Cash Plus :</span>
+                      <span>{isAr ? 'تعليمات كاش بلوس :' : 'Instructions Cash Plus :'}</span>
                     </p>
                     <p className="text-slate-600">
-                      Rendez-vous en agence Cash Plus avec le code : <strong className="text-slate-900 font-mono">CP-BRICOLEMOI-88</strong>
+                      {isAr
+                        ? 'توجه لأقرب وكالة كاش بلوس وأدلِ برمز الحساب :'
+                        : 'Rendez-vous en agence Cash Plus avec le code :'}{' '}
+                      <strong className="text-slate-900 font-mono">CP-BRICOLEMOI-88</strong>
                     </p>
                   </>
                 )}
@@ -148,10 +232,11 @@ export const MaalemWalletModal = ({
                   <>
                     <p className="font-black text-rose-800 flex items-center gap-1.5">
                       <Coins className="w-3.5 h-3.5 text-rose-600" />
-                      <span>Instructions Wafacash :</span>
+                      <span>{isAr ? 'تعليمات وفاكاش :' : 'Instructions Wafacash :'}</span>
                     </p>
                     <p className="text-slate-600">
-                      Mandat express au nom de : <strong className="text-slate-900">BricoleMoi SARL (+212661000000)</strong>
+                      {isAr ? 'حوالة سريعة باسم :' : 'Mandat express au nom de :'}{' '}
+                      <strong className="text-slate-900">BricoleMoi SARL (+212661000000)</strong>
                     </p>
                   </>
                 )}
@@ -159,16 +244,19 @@ export const MaalemWalletModal = ({
                   <>
                     <p className="font-black text-yellow-800 flex items-center gap-1.5">
                       <EnvelopeSimple className="w-3.5 h-3.5 text-yellow-600" />
-                      <span>Instructions Barid Cash :</span>
+                      <span>{isAr ? 'تعليمات بريد كاش :' : 'Instructions Barid Cash :'}</span>
                     </p>
                     <p className="text-slate-600">
-                      Guichet Poste Maroc / Barid Cash sous le compte : <strong className="text-slate-900 font-mono">BC-998811</strong>
+                      {isAr ? 'شباك بريد بنك / بريد كاش رقم :' : 'Guichet Poste Maroc / Barid Cash sous le compte :'}{' '}
+                      <strong className="text-slate-900 font-mono">BC-998811</strong>
                     </p>
                   </>
                 )}
                 {paymentMethod === 'Virement Bancaire' && (
                   <>
-                    <p className="font-black text-blue-800">🏦 Instructions Virement RIB Bancaire :</p>
+                    <p className="font-black text-blue-800">
+                      🏦 {isAr ? 'تحويل بنكي RIB :' : 'Instructions Virement RIB Bancaire :'}
+                    </p>
                     <p className="text-slate-600 font-mono text-[11px]">RIB CIH : 230 780 0001234567890123 45</p>
                   </>
                 )}
@@ -178,7 +266,7 @@ export const MaalemWalletModal = ({
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      Numéro de Référence du Reçu (Recommandé)
+                      {isAr ? 'رقم وصل الأداء (مرجع التحويل)' : 'Numéro de Référence du Reçu (Recommandé)'}
                     </label>
                     <input
                       type="text"
@@ -191,9 +279,11 @@ export const MaalemWalletModal = ({
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
-                      <span>📸 Photo du Reçu / Ticket Papier :</span>
+                      <span>{isAr ? '📸 صورة الوصل الورقي :' : '📸 Photo du Reçu / Ticket Papier :'}</span>
                       {receiptPhotoUrl && (
-                        <span className="text-[10px] text-emerald-700 font-mono font-bold">✓ Photo Attachée</span>
+                        <span className="text-[10px] text-emerald-700 font-mono font-bold">
+                          ✓ {isAr ? 'تم إرفاق الصورة' : 'Photo Attachée'}
+                        </span>
                       )}
                     </label>
 
@@ -207,15 +297,19 @@ export const MaalemWalletModal = ({
                             onClick={() => setPreviewPhotoUrl(receiptPhotoUrl)}
                           />
                           <div>
-                            <p className="text-xs font-bold text-emerald-900">Ticket Reçu Prêt</p>
-                            <p className="text-[10px] text-emerald-700">Cliquez pour agrandir HD</p>
+                            <p className="text-xs font-bold text-emerald-900">
+                              {isAr ? 'الوصل جاهز' : 'Ticket Reçu Prêt'}
+                            </p>
+                            <p className="text-[10px] text-emerald-700">
+                              {isAr ? 'اضغط للمعاينة HD' : 'Cliquez pour agrandir HD'}
+                            </p>
                           </div>
                         </div>
                         <button
                           type="button"
                           onClick={() => setReceiptPhotoUrl(null)}
                           className="p-2 text-rose-600 hover:text-rose-800 hover:bg-rose-100/50 rounded-xl transition-colors cursor-pointer"
-                          title="Supprimer la photo"
+                          title={isAr ? 'حذف الصورة' : 'Supprimer la photo'}
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -223,7 +317,9 @@ export const MaalemWalletModal = ({
                     ) : (
                       <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-300 hover:border-amber-500 rounded-2xl bg-slate-50 cursor-pointer transition-colors group">
                         <Camera className="w-6 h-6 text-amber-600 group-hover:scale-110 transition-transform mb-1" />
-                        <span className="text-xs font-bold text-slate-700">Prendre en photo le ticket papier</span>
+                        <span className="text-xs font-bold text-slate-700">
+                          {isAr ? 'تصوير الوصل بالكاميرا أو إرفاق ملف' : 'Prendre en photo le ticket papier'}
+                        </span>
                         <span className="text-[10px] text-slate-400 mt-0.5">JPG, PNG ou capture d'écran</span>
                         <input
                           type="file"
@@ -238,12 +334,20 @@ export const MaalemWalletModal = ({
                 </div>
               )}
 
+              {/* Bouton de Soumission */}
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm rounded-xl shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                className="w-full py-3.5 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white font-black text-sm rounded-xl shadow-md shadow-amber-500/25 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                Payer &amp; Recharger ({amountDh} DH)
+                <span>
+                  {isAr ? `أداء وتعبئة (${amountDh} درهم)` : `Payer & Recharger (${amountDh} DH)`}
+                </span>
+                {selectedBonus > 0 && (
+                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs text-amber-100">
+                    +{selectedBonus} DH {isAr ? 'كادو 🎁' : 'Offerts 🎁'}
+                  </span>
+                )}
               </motion.button>
             </form>
           </motion.div>

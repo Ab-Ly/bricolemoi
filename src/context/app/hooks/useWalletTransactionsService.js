@@ -7,6 +7,7 @@ import {
   broadcastSync,
   isCurrentUserMaalemOfTransaction
 } from '../helpers/appSyncHelpers';
+import { getRechargePackBonus } from '../../../utils/balanceUtils';
 
 export const useWalletTransactionsService = ({
   user,
@@ -117,6 +118,8 @@ export const useWalletTransactionsService = ({
     instant = false
   }) => {
     const rechargeAmount = parseFloat(amount_dh) || 100;
+    const bonusAmount = getRechargePackBonus(rechargeAmount);
+    const totalCredited = rechargeAmount + bonusAmount;
     const maalemId = user?.id;
     const maalemName = user?.full_name || 'Artisan Maalem';
     const status = instant ? 'VALIDATED' : 'PENDING';
@@ -139,12 +142,28 @@ export const useWalletTransactionsService = ({
       created_at: new Date().toISOString()
     };
 
-    setTransactions((prev) => [newTx, ...prev]);
+    const nextTxs = [newTx];
+    if (instant && bonusAmount > 0) {
+      nextTxs.unshift({
+        id: 'tx-bonus-pack-' + Date.now(),
+        maalem_id: maalemId,
+        maalem_name: maalemName,
+        amount_dh: bonusAmount,
+        type: 'BONUS',
+        payment_method: 'PACK_BONUS_CREDIT',
+        reference_ref: `BONUS-PACK-${rechargeAmount}DH-${Date.now()}`,
+        status: 'VALIDATED',
+        admin_notes: `Bonus incitatif +${bonusAmount} DH offert avec le Pack ${rechargeAmount} DH 🎁`,
+        created_at: new Date().toISOString()
+      });
+    }
+
+    setTransactions((prev) => [...nextTxs, ...prev]);
 
     if (instant) {
       const currentBalance =
         parseFloat(user?.maalem_details?.credit_balance || user?.credits || 0) +
-        rechargeAmount;
+        totalCredited;
       const updatedUser = {
         ...user,
         credits: currentBalance,
@@ -174,6 +193,8 @@ export const useWalletTransactionsService = ({
         maalemId,
         maalemName,
         rechargeAmount,
+        bonusAmount,
+        totalCredited,
         paymentMethod: payment_method,
         receipt_photo_url
       });
@@ -206,17 +227,31 @@ export const useWalletTransactionsService = ({
         }
 
         if (instant) {
+          if (bonusAmount > 0) {
+            await supabase.from('transactions').insert([
+              {
+                maalem_id: cleanMaalemId,
+                amount_dh: bonusAmount,
+                type: 'BONUS',
+                payment_method: 'PACK_BONUS_CREDIT',
+                reference_ref: `BONUS-PACK-${rechargeAmount}DH-${Date.now()}`,
+                status: 'VALIDATED',
+                admin_notes: `Bonus incitatif +${bonusAmount} DH offert avec le Pack ${rechargeAmount} DH 🎁`
+              }
+            ]);
+          }
+
           await supabase
             .from('maalem_details')
             .update({
               credit_balance:
-                (user?.maalem_details?.credit_balance || 0) + rechargeAmount
+                (user?.maalem_details?.credit_balance || 0) + totalCredited
             })
             .eq('id', cleanMaalemId);
           await supabase
             .from('profiles')
             .update({
-              credits: (user?.credits || 0) + rechargeAmount
+              credits: (user?.credits || 0) + totalCredited
             })
             .eq('id', cleanMaalemId);
         }
@@ -224,11 +259,13 @@ export const useWalletTransactionsService = ({
         await supabase.from('admin_notifications').insert([
           {
             type: 'RECHARGE',
-            title: `💳 Demande de Recharge (${rechargeAmount} DH)`,
+            title: `💳 Demande de Recharge (${rechargeAmount} DH${bonusAmount > 0 ? ` +${bonusAmount} DH Offerts` : ''})`,
             message: `L'artisan ${maalemName} a demandé une recharge de ${rechargeAmount} DH via ${payment_method} (Réf: ${newTx.reference_ref}).`,
             data: {
               maalem_id: maalemId,
               amount_dh: rechargeAmount,
+              bonus_dh: bonusAmount,
+              total_credited: totalCredited,
               payment_method,
               reference_ref: newTx.reference_ref
             }
@@ -259,9 +296,25 @@ export const useWalletTransactionsService = ({
     const cleanRef = tx?.reference_ref;
     const targetMaalemId = tx?.maalem_id;
     const amountDh = parseFloat(tx?.amount_dh || 0);
+    const bonusDh = getRechargePackBonus(amountDh);
+    const totalCredited = amountDh + bonusDh;
     const targetMaalem = maalems.find(
       (m) => String(m.id).trim() === String(targetMaalemId).trim()
     );
+
+    const bonusTx = bonusDh > 0 ? {
+      id: `tx-bonus-approval-${Date.now()}`,
+      maalem_id: targetMaalemId,
+      maalem_name: tx?.maalem_name || 'Artisan Maalem',
+      maalem_phone: tx?.maalem_phone || '',
+      amount_dh: bonusDh,
+      type: 'BONUS',
+      payment_method: 'PACK_BONUS_CREDIT',
+      reference_ref: `BONUS-APPROVAL-${cleanRef || Date.now()}`,
+      status: 'VALIDATED',
+      admin_notes: `Prime incitative +${bonusDh} DH accordée avec le Pack ${amountDh} DH 🎁`,
+      created_at: new Date().toISOString()
+    } : null;
 
     setTransactions((prev) => {
       const updated = prev.map((t) =>
@@ -277,17 +330,18 @@ export const useWalletTransactionsService = ({
             }
           : t
       );
+      const nextTxs = bonusTx ? [bonusTx, ...updated] : updated;
       try {
-        localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(updated));
+        localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(nextTxs));
       } catch (e) {}
-      return updated;
+      return nextTxs;
     });
 
     if (targetMaalemId) {
       setMaalems((prev) =>
         prev.map((m) => {
           if (String(m.id).trim() === String(targetMaalemId).trim()) {
-            const newBal = (parseFloat(m.credit_balance) || 0) + amountDh;
+            const newBal = (parseFloat(m.credit_balance) || 0) + totalCredited;
             return { ...m, credit_balance: newBal };
           }
           return m;
@@ -303,7 +357,7 @@ export const useWalletTransactionsService = ({
     ) {
       const currentBalance =
         (parseFloat(curr.maalem_details?.credit_balance || curr.credits || 0)) +
-        amountDh;
+        totalCredited;
       const updatedUser = {
         ...curr,
         credits: currentBalance,
@@ -316,7 +370,7 @@ export const useWalletTransactionsService = ({
       try {
         sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
       } catch (e) {}
-      notify.credit(amountDh, currentBalance, "Recharge Validée par l'Admin 💳", {
+      notify.credit(totalCredited, currentBalance, `Recharge Validée (+${amountDh} DH${bonusDh > 0 ? ` +${bonusDh} DH Cadeau 🎁` : ''}) 💳`, {
         id: `recharge-ok-${targetId}`
       });
     }
@@ -326,10 +380,10 @@ export const useWalletTransactionsService = ({
       transactionId: targetId,
       reference_ref: cleanRef,
       maalemId: targetMaalemId,
-      amount: amountDh,
-      newBalance: (parseFloat(targetMaalem?.credit_balance || 0)) + amountDh,
+      amount: totalCredited,
+      newBalance: (parseFloat(targetMaalem?.credit_balance || 0)) + totalCredited,
       txType: 'RECHARGE',
-      notes: "Recharge validée par l'administrateur"
+      notes: `Recharge validée (+${amountDh} DH${bonusDh > 0 ? ` +${bonusDh} DH Offerts` : ''})`
     });
 
     if (targetMaalemId) {
@@ -337,9 +391,10 @@ export const useWalletTransactionsService = ({
         'credit:added',
         {
           maalem_id: targetMaalemId,
-          amount: amountDh,
-          new_balance: (parseFloat(targetMaalem?.credit_balance || 0)) + amountDh,
-          reason: "Recharge validée par l'Admin 💳",
+          amount: totalCredited,
+          bonus_amount: bonusDh,
+          new_balance: (parseFloat(targetMaalem?.credit_balance || 0)) + totalCredited,
+          reason: `Recharge validée par l'Admin (+${amountDh} DH${bonusDh > 0 ? ` +${bonusDh} DH Cadeau 🎁` : ''})`,
           timestamp: Date.now()
         },
         ABLY_CHANNELS.getUserChannel(targetMaalemId)
