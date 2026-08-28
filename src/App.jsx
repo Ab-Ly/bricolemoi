@@ -9,6 +9,7 @@ import { LandingPage } from './components/LandingPage';
 import { AuthModal } from './components/AuthModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { UserProfileModal } from './components/UserProfileModal';
+import { EmergencySOSModal } from './components/EmergencySOSModal';
 import { useApp } from './context/AppContext';
 import { useAblyNotifications } from './hooks/useAblyNotifications';
 import { getAppSubdomain, switchSubdomainInDev, APP_SUBDOMAINS } from './lib/subdomain';
