@@ -2,7 +2,7 @@
 
 /**
  * 📟 BricoleMoi Live Console & Telemetry CLI
- * Version 3.0 : Centrifugo v5 VPS Native WebSocket & Realtime Stream
+ * Version 3.0 : Centrifugo v5 VPS Native WebSocket & Resilient Keep-Alive
  *
  * Usage :
  *   npm run logs
@@ -64,7 +64,7 @@ console.log(`${C.cyan}║${C.reset}  ${C.bold}${C.green}📟 BRICOLEMOI LIVE CON
 console.log(`${C.cyan}║${C.reset}  ${C.dim}Flux temps réel & télémétrie souveraine sur VPS 51.255.46.206 🇲🇦${C.reset}           ${C.cyan}║${C.reset}`);
 console.log(`${C.cyan}╚════════════════════════════════════════════════════════════════════════════╝${C.reset}`);
 console.log(`${C.dim}📡 Canaux actifs : jobs:stream | admin:alerts | tracking:all | presence:maalems${C.reset}`);
-console.log(`${C.green}✓ Connecté à Centrifugo v5 VPS Gateway. En attente d'événements...${C.reset}\n`);
+console.log(`${C.green}✓ Connecté à Centrifugo v5 VPS Gateway. Écoute permanente active...${C.reset}\n`);
 
 const formatTime = (isoString) => {
   const date = isoString ? new Date(isoString) : new Date();
@@ -105,67 +105,92 @@ const getLevelBadge = (level) => {
   }
 };
 
-try {
-  const ws = new WebSocket(directWsUrl);
+let ws = null;
+let pingTimer = null;
 
-  ws.on('open', () => {
-    ws.send(JSON.stringify({ id: 1, connect: { token: '' } }));
-  });
+function startConnection() {
+  try {
+    ws = new WebSocket(directWsUrl);
 
-  ws.on('message', (raw) => {
-    try {
-      const lines = raw.toString().split('\n').filter(Boolean);
-      for (const line of lines) {
-        const msg = JSON.parse(line);
+    ws.on('open', () => {
+      ws.send(JSON.stringify({ id: 1, connect: { token: '' } }));
 
-        if (msg.id === 1 || msg.connect || msg.result?.client) {
-          const channels = ['jobs:stream', 'admin:alerts', 'tracking:all', 'presence:maalems'];
-          channels.forEach((ch, idx) => {
-            ws.send(JSON.stringify({ id: 10 + idx, subscribe: { channel: ch } }));
-          });
+      if (pingTimer) clearInterval(pingTimer);
+      pingTimer = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send('{}');
         }
+      }, 25000);
+    });
 
-        if (msg.pub) {
-          const ch = msg.channel;
-          const data = msg.pub.data || {};
-          const isTeleLog = Boolean(data.level && (data.message || data.category));
+    ws.on('message', (raw) => {
+      try {
+        const lines = raw.toString().split('\n').filter(Boolean);
+        for (const line of lines) {
+          const msg = JSON.parse(line);
 
-          if (isTeleLog) {
-            const time = formatTime(data.timestamp);
-            const levelBadge = getLevelBadge(data.level);
-            const roleBadge = getRoleBadge(data.user?.role || 'ANONYMOUS', data.user);
-            const queuedBadge = data.isQueued ? ` ${C.yellow}[RATTRAPÉ HORS-LIGNE]${C.reset}` : '';
-            const deviceSummary = data.device?.summary ? ` ${C.dim}• ${data.device.summary}${C.reset}` : '';
-            const catBadge = data.category ? ` ${C.dim}• [${data.category}]${C.reset}` : '';
+          if (msg.id === 1 || msg.connect || msg.result?.client) {
+            const channels = ['jobs:stream', 'admin:alerts', 'tracking:all', 'presence:maalems'];
+            channels.forEach((ch, idx) => {
+              ws.send(JSON.stringify({ id: 10 + idx, subscribe: { channel: ch } }));
+            });
+          }
 
-            console.log(`${time} ${levelBadge}  ${roleBadge}${queuedBadge}`);
-            console.log(`   » ${C.bold}${data.message}${C.reset}${deviceSummary}${catBadge}`);
+          if (msg.pub) {
+            const ch = msg.channel;
+            const data = msg.pub.data || {};
+            const isTeleLog = Boolean(data.level && (data.message || data.category));
 
-            if (data.data && Object.keys(data.data).length > 0) {
-              const details = JSON.stringify(data.data);
-              if (details !== '{}') {
-                console.log(`   ↳ ${C.dim}Détails : ${details}${C.reset}`);
+            if (isTeleLog) {
+              const time = formatTime(data.timestamp);
+              const levelBadge = getLevelBadge(data.level);
+              const roleBadge = getRoleBadge(data.user?.role || 'ANONYMOUS', data.user);
+              const queuedBadge = data.isQueued ? ` ${C.yellow}[RATTRAPÉ HORS-LIGNE]${C.reset}` : '';
+              const deviceSummary = data.device?.summary ? ` ${C.dim}• ${data.device.summary}${C.reset}` : '';
+              const catBadge = data.category ? ` ${C.dim}• [${data.category}]${C.reset}` : '';
+
+              console.log(`${time} ${levelBadge}  ${roleBadge}${queuedBadge}`);
+              console.log(`   » ${C.bold}${data.message}${C.reset}${deviceSummary}${catBadge}`);
+
+              if (data.data && Object.keys(data.data).length > 0) {
+                const details = JSON.stringify(data.data);
+                if (details !== '{}') {
+                  console.log(`   ↳ ${C.dim}Détails : ${details}${C.reset}`);
+                }
               }
+              console.log('');
+            } else {
+              const time = formatTime();
+              const eventName = data.event || data.name || 'UPDATE';
+              console.log(`${time} ${C.green}[${ch}]${C.reset} ${C.bold}⚡ ${eventName}${C.reset} :`, typeof data.payload === 'object' ? JSON.stringify(data.payload) : JSON.stringify(data));
             }
-            console.log('');
-          } else {
-            const time = formatTime();
-            const eventName = data.event || data.name || 'UPDATE';
-            console.log(`${time} ${C.green}[${ch}]${C.reset} ${C.bold}⚡ ${eventName}${C.reset} :`, typeof data.payload === 'object' ? JSON.stringify(data.payload) : JSON.stringify(data));
           }
         }
-      }
-    } catch (e) {}
-  });
+      } catch (e) {}
+    });
 
-  ws.on('error', (err) => {
-    console.warn(`${formatTime()} ${C.yellow}[Centrifugo Warning] Erreur WebSocket :${C.reset}`, err.message);
-  });
-} catch (err) {
-  console.warn('[Centrifugo] Erreur initialisation WebSocket:', err);
+    ws.on('close', () => {
+      if (pingTimer) clearInterval(pingTimer);
+      setTimeout(startConnection, 2000);
+    });
+
+    ws.on('error', () => {
+      // Reconnexion gérée par onclose
+    });
+  } catch (err) {
+    setTimeout(startConnection, 3000);
+  }
 }
 
+startConnection();
+
+// Maintenir le process indéfiniment en vie
+const keepAliveInterval = setInterval(() => {}, 1000 * 60 * 60);
+
 process.on('SIGINT', () => {
+  clearInterval(keepAliveInterval);
+  if (pingTimer) clearInterval(pingTimer);
+  if (ws) ws.close();
   console.log(`\n${C.yellow}Fermeture de la Console Live BricoleMoi.${C.reset}`);
   process.exit(0);
 });
