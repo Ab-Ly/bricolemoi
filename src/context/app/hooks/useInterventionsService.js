@@ -432,6 +432,23 @@ export const useInterventionsService = ({
     const targetIntv = interventions.find(
       (i) => String(i.id).trim() === String(interventionId).trim()
     );
+
+    // Verrou Anti-Collision : Vérifier si la mission a déjà été prise par un autre Maâlem
+    if (
+      targetIntv &&
+      targetIntv.status &&
+      targetIntv.status !== 'PENDING' &&
+      targetIntv.status !== 'SEARCHING' &&
+      String(targetIntv.maalem_id || '').trim() !== String(user?.id || '').trim()
+    ) {
+      notify.info(
+        'Chantier Déjà Attribué ⚡',
+        'Cette mission vient d\'être débloquée et prise en charge par un autre Maâlem. Votre solde reste intact (0 DH débité).',
+        { id: `already-claimed-${interventionId}`, duration: 6000 }
+      );
+      return false;
+    }
+
     const maalemSpec = String(
       user?.maalem_details?.specialty || user?.specialty || ''
     ).toUpperCase();

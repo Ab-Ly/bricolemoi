@@ -811,6 +811,15 @@ export const useAblySupabaseSync = ({
 
           if (event === 'job_accepted' || event === 'job:accepted' || event === 'sos:claimed') {
             if (intId) {
+              const currentUserId = String(userRef?.current?.id || user?.id || '').trim();
+              const claimerId = String(payload.maalem_id || '').trim();
+
+              if (userRef?.current?.role === 'MAALEM' && claimerId && claimerId !== currentUserId) {
+                const cityName = payload.district || payload.city || 'votre secteur';
+                const sType = payload.service_type || 'SOS';
+                showToast(`⚡ Un confrère vient de débloquer la mission ${sType} à ${cityName}.`, 'info');
+              }
+
               setInterventions((prev) => {
                 const next = prev.map((item) =>
                   String(item.id).trim() === intId
