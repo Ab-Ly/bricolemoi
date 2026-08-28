@@ -265,9 +265,14 @@ export const initRemoteTelemetry = () => {
         return res;
       } catch (networkErr) {
         const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'API';
-        if (!url.includes('ably.net')) {
+        const errMsg = String(networkErr?.message || '');
+        const isAborted = errMsg.includes('abort') || networkErr?.name === 'AbortError';
+        const isMapTile = url.includes('.png') || url.includes('tile.openstreetmap') || url.includes('cartocdn') || url.includes('arcgisonline');
+
+        // Ne pas polluer les logs avec les annulations normales de zoom/déplacement de carte
+        if (!isAborted && !isMapTile && !url.includes('ably.net') && !url.includes('centrifugo')) {
           sendTerminalLog('ERROR', 'NETWORK', `Coupure ou échec réseau sur : ${url.split('?')[0]}`, {
-            error: networkErr?.message || 'NetworkError'
+            error: errMsg || 'NetworkError'
           });
         }
         throw networkErr;
