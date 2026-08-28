@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, MapPin, Car, Star, PhoneCall, MessageSquare } from 'lucide-react';
+import { CheckCircle2, MapPin, Car, Star, PhoneCall, MessageSquare, Navigation, Clock } from 'lucide-react';
 import { InteractiveMap } from '../../InteractiveMap';
 import { VoiceAudioPlayer } from '../../VoiceAudioPlayer';
 import { getServiceDisplay } from '../hooks/useClientViewState';
 import { calculateMaalemRating } from '../../../utils/ratingUtils';
+import { fetchRoadRoute } from '../../../lib/routingService';
 
 export const ClientActiveOngoingCard = ({
   activeOngoingSOS,
@@ -20,6 +21,8 @@ export const ClientActiveOngoingCard = ({
   setShowNewSOSForm
 }) => {
   if (!activeOngoingSOS) return null;
+
+  const [routeInfo, setRouteInfo] = useState(null);
 
   const rawMaalemId = String(activeOngoingSOS.maalem_id || matchedMaalem?.id || '').trim();
   const rawMaalemPhone = String(activeOngoingSOS.maalem_phone || matchedMaalem?.phone || '').replace(/\D/g, '');
@@ -57,6 +60,27 @@ export const ClientActiveOngoingCard = ({
     : (activeOngoingSOS.maalem_rating !== undefined && activeOngoingSOS.maalem_rating !== null
       ? Number(activeOngoingSOS.maalem_rating).toFixed(1)
       : (resolvedMaalem?.rating_avg ? Number(resolvedMaalem.rating_avg).toFixed(1) : '5.0'));
+
+  // Calcul du tracé routier réel entre le Maâlem et le Client
+  useEffect(() => {
+    let isCancelled = false;
+    const clientLat = parseFloat(activeOngoingSOS.lat || selectedLat);
+    const clientLng = parseFloat(activeOngoingSOS.lng || selectedLng);
+    const maalemLat = parseFloat(resolvedMaalem?.lat || activeOngoingSOS.maalem_lat || 33.5883);
+    const maalemLng = parseFloat(resolvedMaalem?.lng || activeOngoingSOS.maalem_lng || -7.6328);
+
+    if (!isNaN(clientLat) && !isNaN(clientLng) && !isNaN(maalemLat) && !isNaN(maalemLng)) {
+      fetchRoadRoute([maalemLat, maalemLng], [clientLat, clientLng]).then((res) => {
+        if (!isCancelled && res) {
+          setRouteInfo(res);
+        }
+      });
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeOngoingSOS.lat, activeOngoingSOS.lng, selectedLat, selectedLng, resolvedMaalem?.lat, resolvedMaalem?.lng]);
 
   return (
     <motion.div
@@ -241,8 +265,12 @@ export const ClientActiveOngoingCard = ({
           <div className="flex items-center gap-2.5">
             <Car className="w-5 h-5 text-amber-600 animate-pulse shrink-0" />
             <div>
-              <p className="text-xs font-bold text-amber-950">Artisan en déplacement</p>
-              <p className="text-[11px] text-slate-600">Arrivée estimée à votre domicile dans ~15 min.</p>
+              <p className="text-xs font-bold text-amber-950">Artisan en déplacement vers votre adresse</p>
+              <p className="text-[11px] text-slate-600">
+                {routeInfo
+                  ? `Arrivée estimée dans ~${routeInfo.durationMin} min (${routeInfo.distanceKm} km par la route).`
+                  : 'Arrivée estimée à votre domicile dans ~10 à 15 min.'}
+              </p>
             </div>
           </div>
           <button
@@ -264,20 +292,26 @@ export const ClientActiveOngoingCard = ({
         <VoiceAudioPlayer audioUrl={activeOngoingSOS.audio_note_url} title="Votre Note Vocale Envoyée au Maâlem" />
       )}
 
-      {/* Carte Interactive Live */}
+      {/* Carte Interactive Live avec Tracé Routier */}
       <div className="space-y-2">
         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-blue-600" />
-            <span>Position géolocalisée du chantier</span>
+            <Navigation className="w-4 h-4 text-blue-600 animate-pulse" />
+            <span>Itinéraire &amp; Suivi en Temps Réel</span>
           </span>
-          <span className="text-[11px] text-blue-600 font-mono font-bold">Suivi Live</span>
+          {routeInfo && (
+            <span className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-mono font-bold">
+              ~{routeInfo.durationMin} min • {routeInfo.distanceKm} km
+            </span>
+          )}
         </label>
         <InteractiveMap
           mode="CLIENT_PICKER"
           selectedLat={parseFloat(activeOngoingSOS.lat || selectedLat)}
           selectedLng={parseFloat(activeOngoingSOS.lng || selectedLng)}
           filterCategory={activeOngoingSOS.service_type || serviceType}
+          activeRouteCoords={routeInfo?.coordinates}
+          etaSummary={routeInfo?.summary}
         />
       </div>
 

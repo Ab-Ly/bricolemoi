@@ -254,7 +254,17 @@ const getMapIconSvg = (specType) => {
   return SVG_ICONS.PLUMBING;
 };
 
-export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLng, onLocationSelect, filterCategory }) => {
+export const InteractiveMap = ({
+  mode = 'CLIENT_PICKER',
+  selectedLat,
+  selectedLng,
+  onLocationSelect,
+  filterCategory,
+  activeRouteCoords,
+  trackingMaalemPos,
+  trackingClientPos,
+  etaSummary
+}) => {
   const { user } = useAuth();
   const { interventions, maalems, calculateDistanceInKm, showToast, isMaalemOnline, toggleMaalemOnlineStatus } = useApp();
 
@@ -613,6 +623,86 @@ export const InteractiveMap = ({ mode = 'CLIENT_PICKER', selectedLat, selectedLn
     }
 
   }, [mapLoaded, user, userGPSPos, selectedLat, selectedLng, liveMaalemCoords, filterCategory, maalems, interventions, activeStyleKey]);
+
+  // 5. Rendu du Tracé Routier OSRM & Guidage en Temps Réel
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded) return;
+
+    const sourceId = 'route-source';
+    const casingLayerId = 'route-casing-layer';
+    const lineLayerId = 'route-line-layer';
+
+    if (!activeRouteCoords || activeRouteCoords.length < 2) {
+      if (map.getLayer(lineLayerId)) map.removeLayer(lineLayerId);
+      if (map.getLayer(casingLayerId)) map.removeLayer(casingLayerId);
+      if (map.getSource(sourceId)) map.removeSource(sourceId);
+      return;
+    }
+
+    const geojsonData = {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: activeRouteCoords
+      }
+    };
+
+    if (map.getSource(sourceId)) {
+      map.getSource(sourceId).setData(geojsonData);
+    } else {
+      map.addSource(sourceId, {
+        type: 'geojson',
+        data: geojsonData
+      });
+
+      // Halo externe
+      map.addLayer({
+        id: casingLayerId,
+        type: 'line',
+        source: sourceId,
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#1d4ed8',
+          'line-width': 8,
+          'line-opacity': 0.4
+        }
+      });
+
+      // Ligne principale Bleue dynamique
+      map.addLayer({
+        id: lineLayerId,
+        type: 'line',
+        source: sourceId,
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#3b82f6',
+          'line-width': 5,
+          'line-opacity': 0.95
+        }
+      });
+    }
+
+    // Auto-cadrage doux pour englober tout le trajet
+    try {
+      const bounds = new maplibregl.LngLatBounds();
+      activeRouteCoords.forEach((pt) => {
+        if (Array.isArray(pt) && pt.length >= 2 && !isNaN(pt[0]) && !isNaN(pt[1])) {
+          bounds.extend(pt);
+        }
+      });
+      if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { padding: 60, maxZoom: 16 });
+      }
+    } catch (e) {}
+  }, [activeRouteCoords, mapLoaded]);
 
   // Accurate Geolocation Handler with Automatic 2-Stage Fallback
   const handleGeolocateUser = () => {
