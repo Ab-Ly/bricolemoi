@@ -4,45 +4,103 @@
   "admin_password": "BricoleMoi2026_AdminSecretKey!",
   "admin_secret": "BricoleMoi2026_AdminJwtSecretToken!",
   "api_key": "bricolemoi_http_api_key_v5_secret",
+  "allow_anonymous_connect_without_token": true,
   "allowed_origins": [
     "*"
   ],
-  "client": {
-    "allowed_origins": [
-      "*"
-    ],
-    "history_max_publication_limit": 100,
-    "max_message_size": 65536
-  },
   "namespaces": [
     {
       "name": "jobs",
+      "allow_subscribe_for_client": true,
+      "allow_publish_for_client": true,
+      "allow_presence_for_client": true,
+      "allow_history_for_client": true,
       "allow_subscribe_for_anonymous": true,
       "allow_publish_for_anonymous": true,
+      "allow_presence_for_anonymous": true,
+      "allow_history_for_anonymous": true,
       "history_size": 50,
       "history_ttl": "300s",
       "force_recovery": true
     },
     {
-      "name": "tracking",
+      "name": "admin",
+      "allow_subscribe_for_client": true,
+      "allow_publish_for_client": true,
+      "allow_presence_for_client": true,
+      "allow_history_for_client": true,
       "allow_subscribe_for_anonymous": true,
       "allow_publish_for_anonymous": true,
-      "history_size": 10,
-      "history_ttl": "60s"
+      "allow_presence_for_anonymous": true,
+      "allow_history_for_anonymous": true,
+      "history_size": 100,
+      "history_ttl": "86400s"
     },
     {
-      "name": "user",
+      "name": "tracking",
+      "allow_subscribe_for_client": true,
+      "allow_publish_for_client": true,
+      "allow_presence_for_client": true,
+      "allow_history_for_client": true,
       "allow_subscribe_for_anonymous": true,
       "allow_publish_for_anonymous": true,
+      "allow_presence_for_anonymous": true,
+      "allow_history_for_anonymous": true,
+      "history_size": 20,
+      "history_ttl": "300s"
+    },
+    {
+      "name": "presence",
+      "allow_subscribe_for_client": true,
+      "allow_publish_for_client": true,
+      "allow_presence_for_client": true,
+      "allow_history_for_client": true,
+      "allow_subscribe_for_anonymous": true,
+      "allow_publish_for_anonymous": true,
+      "allow_presence_for_anonymous": true,
+      "allow_history_for_anonymous": true,
       "history_size": 20,
       "history_ttl": "3600s",
       "presence": true
     },
     {
-      "name": "admin",
+      "name": "user",
+      "allow_subscribe_for_client": true,
+      "allow_publish_for_client": true,
+      "allow_presence_for_client": true,
+      "allow_history_for_client": true,
       "allow_subscribe_for_anonymous": true,
       "allow_publish_for_anonymous": true,
+      "allow_presence_for_anonymous": true,
+      "allow_history_for_anonymous": true,
       "history_size": 50,
+      "history_ttl": "86400s",
+      "presence": true
+    },
+    {
+      "name": "terminal",
+      "allow_subscribe_for_client": true,
+      "allow_publish_for_client": true,
+      "allow_presence_for_client": true,
+      "allow_history_for_client": true,
+      "allow_subscribe_for_anonymous": true,
+      "allow_publish_for_anonymous": true,
+      "allow_presence_for_anonymous": true,
+      "allow_history_for_anonymous": true,
+      "history_size": 100,
+      "history_ttl": "86400s"
+    },
+    {
+      "name": "bricolemoi",
+      "allow_subscribe_for_client": true,
+      "allow_publish_for_client": true,
+      "allow_presence_for_client": true,
+      "allow_history_for_client": true,
+      "allow_subscribe_for_anonymous": true,
+      "allow_publish_for_anonymous": true,
+      "allow_presence_for_anonymous": true,
+      "allow_history_for_anonymous": true,
+      "history_size": 100,
       "history_ttl": "86400s"
     }
   ]

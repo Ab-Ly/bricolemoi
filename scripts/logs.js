@@ -136,9 +136,11 @@ function startConnection() {
             });
           }
 
-          if (msg.pub) {
-            const ch = msg.channel;
-            const data = msg.pub.data || {};
+          const pub = msg.pub || msg.push?.pub;
+          const ch = msg.channel || msg.push?.channel;
+
+          if (pub && ch) {
+            const data = pub.data || {};
             const isTeleLog = Boolean(data.level && (data.message || data.category));
 
             if (isTeleLog) {

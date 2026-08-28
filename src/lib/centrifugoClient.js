@@ -74,11 +74,11 @@ class CentrifugoClient {
   }
 
   handleIncomingMessage(msg) {
-    // 1. Réponse de connexion
-    if (msg.connect) {
+    // 1. Réponse de connexion Centrifugo v5
+    if (msg.connect || msg.result?.client || (msg.id === 1 && !msg.error)) {
       this.isConnected = true;
       this.isConnecting = false;
-      this.clientId = msg.connect.client;
+      this.clientId = msg.connect?.client || msg.result?.client || 'client-v5';
       console.info('[Centrifugo] 🟢 Connecté au VPS temps réel (Client ID:', this.clientId, ')');
 
       // Démarrage du ping régulier (heartbeat 25s)
@@ -90,10 +90,12 @@ class CentrifugoClient {
       });
     }
 
-    // 2. Publication reçue sur un canal
-    if (msg.pub) {
-      const channel = msg.channel;
-      const data = msg.pub.data;
+    // 2. Publication reçue sur un canal (format push v5 ou direct)
+    const pub = msg.pub || msg.push?.pub;
+    const channel = msg.channel || msg.push?.channel;
+
+    if (pub && channel) {
+      const data = pub.data;
       const listeners = this.channelListeners.get(channel);
       if (listeners) {
         listeners.forEach((callback) => {

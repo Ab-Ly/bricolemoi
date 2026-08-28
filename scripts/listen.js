@@ -128,9 +128,11 @@ try {
           });
         }
 
-        if (msg.pub) {
-          const ch = msg.channel;
-          const data = msg.pub.data || {};
+        const pub = msg.pub || msg.push?.pub;
+        const ch = msg.channel || msg.push?.channel;
+
+        if (pub && ch) {
+          const data = pub.data || {};
           const event = data.event || data.name || 'UPDATE';
           console.log(
             `${formatTime()} \x1b[32m[CENTRIFUGO_VPS:${ch}]\x1b[0m \x1b[1m⚡ ${event}\x1b[0m :`,
