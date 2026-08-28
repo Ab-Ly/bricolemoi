@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Coins, Zap, Gift, Clock, Printer } from 'lucide-react';
 import { Receipt } from '@phosphor-icons/react';
 import { isRealRechargeTx, isLeadTx, isBonusTx } from '../../../utils/balanceUtils';
 import { formatDateTime } from '../../../utils/dateUtils';
+import { paginateArray } from '../../../utils/paginationUtils';
+import { PaginationControls } from '../../common/PaginationControls';
 
 export const MaalemTransactionsModal = ({
   historyModalOpen = false,
@@ -20,6 +22,16 @@ export const MaalemTransactionsModal = ({
   setPreviewPhotoUrl = () => {},
   generateReceiptPDF = () => {}
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset page lors du changement de filtre
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [historyFilter, historyModalOpen]);
+
+  const pagination = useMemo(() => {
+    return paginateArray(filteredHistoryTransactions, currentPage, 6);
+  }, [filteredHistoryTransactions, currentPage]);
   return (
     <AnimatePresence>
       {historyModalOpen && (
@@ -144,13 +156,13 @@ export const MaalemTransactionsModal = ({
 
             {/* Transactions Scrollable List */}
             <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 max-h-[48vh]">
-              {filteredHistoryTransactions.length === 0 ? (
+              {pagination.items.length === 0 ? (
                 <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl text-slate-500 text-xs space-y-2">
                   <p className="text-sm font-bold text-slate-800">Aucune transaction trouvée pour ce filtre.</p>
                   <p className="text-[11px] text-slate-400">Toutes vos opérations apparaîtront ici automatiquement.</p>
                 </div>
               ) : (
-                filteredHistoryTransactions.map((tx) => {
+                pagination.items.map((tx) => {
                   const statusUpper = String(tx.status || 'PENDING').trim().toUpperCase();
                   const isRecharge = isRealRechargeTx(tx);
                   const isLead = isLeadTx(tx);
@@ -293,10 +305,23 @@ export const MaalemTransactionsModal = ({
               )}
             </div>
 
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                startIndex={pagination.startIndex}
+                endIndex={pagination.endIndex}
+                onPageChange={(p) => setCurrentPage(p)}
+                itemLabel="transactions"
+              />
+            )}
+
             {/* Modal Footer */}
             <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
               <span className="text-[11px] text-slate-500">
-                Affichage de {filteredHistoryTransactions.length} transaction(s)
+                Total : {filteredHistoryTransactions.length} transaction(s)
               </span>
               <button
                 type="button"

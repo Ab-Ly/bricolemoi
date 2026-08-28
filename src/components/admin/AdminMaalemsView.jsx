@@ -30,6 +30,8 @@ import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../En
 import { formatDateTime } from '../../utils/dateUtils';
 import { calculateMaalemBalance } from '../../utils/balanceUtils';
 import { calculateMaalemRating } from '../../utils/ratingUtils';
+import { paginateArray } from '../../utils/paginationUtils';
+import { PaginationControls } from '../common/PaginationControls';
 
 export const AdminMaalemsView = ({ 
   maalems = [], 
@@ -46,7 +48,7 @@ export const AdminMaalemsView = ({
   const [selectedMaalem, setSelectedMaalem] = useState(null);
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const [pageSize, setPageSize] = useState(8);
 
   // Calcul infaillible du solde pour chaque Maâlem basé sur le grand livre des transactions
   const getMaalemCreditBalance = (m) => {
@@ -154,11 +156,9 @@ export const AdminMaalemsView = ({
   }, [selectedMaalem, interventions, transactions, reviews]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredMaalems.length / itemsPerPage) || 1;
-  const paginatedMaalems = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredMaalems.slice(start, start + itemsPerPage);
-  }, [filteredMaalems, currentPage]);
+  const pagination = useMemo(() => {
+    return paginateArray(filteredMaalems, currentPage, pageSize);
+  }, [filteredMaalems, currentPage, pageSize]);
 
   const cleanPhone = (phone) => (phone || '').replace(/\D/g, '');  return (
     <div className="space-y-6 font-sans">
@@ -259,12 +259,12 @@ export const AdminMaalemsView = ({
 
       {/* Grille des Cartes Maâlems avec Accès Direct à la Fiche */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {paginatedMaalems.length === 0 ? (
+        {pagination.items.length === 0 ? (
           <div className="col-span-full text-center py-12 bg-white border border-slate-200 rounded-3xl text-slate-400 text-sm shadow-xs">
             Aucun artisan correspondant aux critères de recherche.
           </div>
         ) : (
-          paginatedMaalems.map((m) => {
+          pagination.items.map((m) => {
             const isOnline = Boolean(m.is_online);
             const isSuspended = Boolean(m.is_suspended);
             const creditBal = getMaalemCreditBalance(m);
@@ -428,32 +428,22 @@ export const AdminMaalemsView = ({
         )}
       </div>
 
-      {/* Pagination Bar */}
-      {totalPages > 1 && (
-        <div className="p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between text-xs text-slate-500 shadow-xs">
-          <span>
-            Page <strong className="text-slate-900">{currentPage}</strong> sur <strong className="text-slate-900">{totalPages}</strong>
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
-            >
-              Précédent
-            </button>
-            <button
-              type="button"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
-            >
-              Suivant
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Contrôles de pagination */}
+      <PaginationControls
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        totalItems={pagination.totalItems}
+        startIndex={pagination.startIndex}
+        endIndex={pagination.endIndex}
+        onPageChange={(page) => setCurrentPage(page)}
+        pageSize={pageSize}
+        onPageSizeChange={(newSize) => {
+          setPageSize(newSize);
+          setCurrentPage(1);
+        }}
+        pageSizeOptions={[8, 16, 24, 48]}
+        itemLabel="artisans"
+      />
 
       {/* ========================================================================= */}
       {/* Slide-over Drawer : FICHE MAÂLEM COMPLÈTE & HISTORIQUE                     */}

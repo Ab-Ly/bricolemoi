@@ -1,7 +1,8 @@
 import React from 'react';
-import { Star, MapPin, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, MapPin, Clock } from 'lucide-react';
 import { getServiceDisplay } from '../hooks/useClientViewState';
 import { formatDateTime } from '../../../utils/dateUtils';
+import { PaginationControls } from '../../common/PaginationControls';
 
 export const ClientHistoryList = ({
   completedClientInterventions,
@@ -134,52 +135,15 @@ export const ClientHistoryList = ({
 
       {/* Pagination Controls Client */}
       {totalClientHistoryPages > 1 && (
-        <div className="flex items-center justify-between pt-3 border-t border-slate-200">
-          <button
-            type="button"
-            onClick={() => setClientHistoryPage((p) => Math.max(1, p - 1))}
-            disabled={clientHistoryPage === 1}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 border transition-all ${
-              clientHistoryPage === 1
-                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-xs active:scale-95 cursor-pointer'
-            }`}
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span>Précédent</span>
-          </button>
-
-          <div className="flex items-center gap-1">
-            {Array.from({ length: totalClientHistoryPages }, (_, i) => i + 1).map((pageNum) => (
-              <button
-                key={pageNum}
-                type="button"
-                onClick={() => setClientHistoryPage(pageNum)}
-                className={`w-8 h-8 rounded-xl text-xs font-black transition-all flex items-center justify-center cursor-pointer ${
-                  clientHistoryPage === pageNum
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
-                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
-                }`}
-              >
-                {pageNum}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setClientHistoryPage((p) => Math.min(totalClientHistoryPages, p + 1))}
-            disabled={clientHistoryPage === totalClientHistoryPages}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 border transition-all ${
-              clientHistoryPage === totalClientHistoryPages
-                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-xs active:scale-95 cursor-pointer'
-            }`}
-          >
-            <span>Suivant</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+        <PaginationControls
+          currentPage={clientHistoryPage}
+          totalPages={totalClientHistoryPages}
+          totalItems={completedClientInterventions.length}
+          startIndex={(clientHistoryPage - 1) * 4 + 1}
+          endIndex={Math.min(clientHistoryPage * 4, completedClientInterventions.length)}
+          onPageChange={(p) => setClientHistoryPage(p)}
+          itemLabel="interventions"
+        />
       )}
     </div>
   );

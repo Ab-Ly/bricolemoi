@@ -26,6 +26,8 @@ import {
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
 import { formatDateTime } from '../../utils/dateUtils';
+import { paginateArray } from '../../utils/paginationUtils';
+import { PaginationControls } from '../common/PaginationControls';
 
 export const AdminClientsView = ({ clients = [], interventions = [], reviews = [], onToggleSuspension }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,7 +35,7 @@ export const AdminClientsView = ({ clients = [], interventions = [], reviews = [
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'SUSPENDED'
   const [selectedClient, setSelectedClient] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const [pageSize, setPageSize] = useState(8);
 
   // Calcul des statistiques par client (Demandes SOS lancées, terminées, note moyenne attribuée)
   const clientStatsMap = useMemo(() => {
@@ -83,11 +85,9 @@ export const AdminClientsView = ({ clients = [], interventions = [], reviews = [
   }, [clients, searchTerm, cityFilter, statusFilter]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredClients.length / itemsPerPage) || 1;
-  const paginatedClients = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredClients.slice(start, start + itemsPerPage);
-  }, [filteredClients, currentPage]);
+  const pagination = useMemo(() => {
+    return paginateArray(filteredClients, currentPage, pageSize);
+  }, [filteredClients, currentPage, pageSize]);
 
   // Récupération de l'historique et des avis pour le client sélectionné dans le Slide-Over Drawer
   const clientDrawerData = useMemo(() => {
@@ -237,7 +237,7 @@ export const AdminClientsView = ({ clients = [], interventions = [], reviews = [
                   </td>
                 </tr>
               ) : (
-                paginatedClients.map((client) => {
+                pagination.items.map((client) => {
                   const stats = clientStatsMap.get(String(client.id)) || 
                                clientStatsMap.get(cleanPhone(client.phone)) || 
                                { totalSOS: 0, completedSOS: 0 };
@@ -344,32 +344,24 @@ export const AdminClientsView = ({ clients = [], interventions = [], reviews = [
           </table>
         </div>
 
-        {/* Pagination Bar */}
-        {totalPages > 1 && (
-          <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-            <span>
-              Page <strong className="text-slate-900">{currentPage}</strong> sur <strong className="text-slate-900">{totalPages}</strong>
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
-              >
-                Précédent
-              </button>
-              <button
-                type="button"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
-              >
-                Suivant
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Contrôles de pagination */}
+        <div className="p-3 bg-slate-50/50 border-t border-slate-200">
+          <PaginationControls
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            startIndex={pagination.startIndex}
+            endIndex={pagination.endIndex}
+            onPageChange={(page) => setCurrentPage(page)}
+            pageSize={pageSize}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            pageSizeOptions={[8, 15, 30, 50]}
+            itemLabel="clients"
+          />
+        </div>
       </div>
 
       {/* ========================================================================= */}

@@ -1,0 +1,1 @@
+const m=(r=[],g=1,h=10)=>{const c=Array.isArray(r)?r:[],e=Math.max(1,parseInt(h,10)||10),t=c.length,s=Math.max(1,Math.ceil(t/e)),a=Math.min(Math.max(1,parseInt(g,10)||1),s),n=(a-1)*e,o=Math.min(n+e,t);return{items:c.slice(n,o),totalItems:t,totalPages:s,currentPage:a,startIndex:t===0?0:n+1,endIndex:o,hasNextPage:a<s,hasPrevPage:a>1}};export{m as p};

@@ -24,6 +24,8 @@ import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
 import { formatDateTime } from '../../utils/dateUtils';
 import { InteractiveMap } from '../InteractiveMap';
+import { paginateArray } from '../../utils/paginationUtils';
+import { PaginationControls } from '../common/PaginationControls';
 
 export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIntervention }) => {
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'UNREACHABLE_REFUNDED'
@@ -32,6 +34,8 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
   const [showMap, setShowMap] = useState(true);
   const [selectedMission, setSelectedMission] = useState(null);
   const [focusedCoords, setFocusedCoords] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Statistiques de la tour de contrôle avec exclusion mutuelle stricte
   const stats = useMemo(() => {
@@ -66,6 +70,11 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
       return queryOk && serviceOk && statusOk;
     });
   }, [interventions, searchTerm, serviceFilter, statusFilter]);
+
+  // Pagination calculée
+  const pagination = useMemo(() => {
+    return paginateArray(filteredInterventions, currentPage, pageSize);
+  }, [filteredInterventions, currentPage, pageSize]);
 
   const cleanPhone = (p) => (p || '').replace(/\D/g, '');
   return (
@@ -272,12 +281,12 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
 
       {/* 4. Grille des Fiches de Missions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredInterventions.length === 0 ? (
+        {pagination.items.length === 0 ? (
           <div className="col-span-full text-center py-12 bg-white border border-slate-200 rounded-3xl text-slate-400 text-sm shadow-xs">
             Aucune intervention ne correspond aux filtres appliqués.
           </div>
         ) : (
-          filteredInterventions.map((item) => {
+          pagination.items.map((item) => {
             const clientPhoneClean = cleanPhone(item.client_phone);
             const resolvedMaalem = (maalems || []).find((m) => String(m.id).trim() === String(item.maalem_id).trim());
             const hasMaalemAssigned = Boolean(item.maalem_id || (item.maalem_name && item.maalem_name !== 'Maalem' && item.maalem_name !== 'Artisan Maâlem' && item.maalem_name !== 'Artisan Maalem'));
@@ -298,9 +307,9 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
                 <div>
                   {/* Header Carte : Métier + Statut */}
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 ${getSpecialtyMeta(item.service_type).bgClass}`}>
-                      <EnhancedCategoryIcon type={item.service_type} className="w-4 h-4" />
-                      <span>{getSpecialtyMeta(item.service_type).label}</span>
+                    <span className="px-3 py-1.5 rounded-xl text-xs font-black bg-blue-50 text-blue-900 border border-blue-200 flex items-center gap-1.5 shadow-2xs">
+                      <EnhancedCategoryIcon category={item.service_type} size="sm" />
+                      <span>{getSpecialtyLabel(item.service_type)}</span>
                     </span>
 
                     <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold border ${
@@ -435,6 +444,23 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
           })
         )}
       </div>
+
+      {/* Contrôles de pagination */}
+      <PaginationControls
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        totalItems={pagination.totalItems}
+        startIndex={pagination.startIndex}
+        endIndex={pagination.endIndex}
+        onPageChange={(page) => setCurrentPage(page)}
+        pageSize={pageSize}
+        onPageSizeChange={(newSize) => {
+          setPageSize(newSize);
+          setCurrentPage(1);
+        }}
+        pageSizeOptions={[6, 10, 20, 50]}
+        itemLabel="missions"
+      />
 
       {/* Modal Détail Mission */}
       <AnimatePresence>

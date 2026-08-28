@@ -26,6 +26,8 @@ import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
 import { formatDateTime } from '../../utils/dateUtils';
 import { calculateMaalemBalance } from '../../utils/balanceUtils';
+import { paginateArray } from '../../utils/paginationUtils';
+import { PaginationControls } from '../common/PaginationControls';
 
 export const AdminRechargesView = ({ 
   transactions = [], 
@@ -42,6 +44,8 @@ export const AdminRechargesView = ({
   const [rejectModalTx, setRejectModalTx] = useState(null);
   const [rejectReason, setRejectReason] = useState('Bordereau illisible ou référence introuvable');
   const [previewReceiptImage, setPreviewReceiptImage] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Map des Maâlems pour accès direct
   const maalemsMap = useMemo(() => {
@@ -68,6 +72,11 @@ export const AdminRechargesView = ({
       return queryOk && statusOk && methodOk;
     });
   }, [transactions, searchTerm, statusFilter, methodFilter]);
+
+  // Pagination calculée
+  const pagination = useMemo(() => {
+    return paginateArray(filteredTransactions, currentPage, pageSize);
+  }, [filteredTransactions, currentPage, pageSize]);
 
   // Statistiques de rapprochement
   const stats = useMemo(() => {
@@ -224,12 +233,12 @@ export const AdminRechargesView = ({
 
       {/* 3. Liste des Transactions & Fiches Maâlem */}
       <div className="space-y-3.5">
-        {filteredTransactions.length === 0 ? (
+        {pagination.items.length === 0 ? (
           <div className="text-center py-12 bg-white border border-slate-200 rounded-3xl text-slate-400 text-sm shadow-xs">
             Aucun enregistrement ne correspond à vos filtres.
           </div>
         ) : (
-          filteredTransactions.map((tx) => {
+          pagination.items.map((tx) => {
             const maalem = maalemsMap.get(String(tx.maalem_id || '').trim()) || 
                           maalemsMap.get(cleanPhone(tx.maalem_phone)) || 
                           { full_name: tx.maalem_name || 'Artisan Maâlem', phone: tx.maalem_phone, specialty: 'PLUMBING', credit_balance: 0 };
@@ -414,6 +423,23 @@ export const AdminRechargesView = ({
           })
         )}
       </div>
+
+      {/* Contrôles de pagination */}
+      <PaginationControls
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        totalItems={pagination.totalItems}
+        startIndex={pagination.startIndex}
+        endIndex={pagination.endIndex}
+        onPageChange={(page) => setCurrentPage(page)}
+        pageSize={pageSize}
+        onPageSizeChange={(newSize) => {
+          setPageSize(newSize);
+          setCurrentPage(1);
+        }}
+        pageSizeOptions={[10, 25, 50, 100]}
+        itemLabel="transactions"
+      />
 
       {/* ========================================================================= */}
       {/* Modal 1 : Fiche Complète Maâlem & Portefeuille                             */}
