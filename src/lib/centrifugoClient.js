@@ -168,6 +168,10 @@ class CentrifugoClient {
   async publish(channel, data) {
     if (!this.isConnected) {
       this.connect();
+      for (let i = 0; i < 25; i++) {
+        if (this.isConnected && this.ws && this.ws.readyState === WebSocket.OPEN) break;
+        await new Promise((r) => setTimeout(r, 100));
+      }
     }
 
     return new Promise((resolve) => {

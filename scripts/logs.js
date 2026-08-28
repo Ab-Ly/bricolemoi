@@ -130,7 +130,18 @@ function startConnection() {
           const msg = JSON.parse(line);
 
           if (msg.id === 1 || msg.connect || msg.result?.client) {
-            const channels = ['jobs:stream', 'admin:alerts', 'tracking:all', 'presence:maalems'];
+            const channels = [
+              'jobs:stream',
+              'bricolemoi:jobs:stream',
+              'admin:alerts',
+              'bricolemoi:admin:alerts',
+              'tracking:all',
+              'bricolemoi:tracking:all',
+              'presence:maalems',
+              'bricolemoi:presence:maalems',
+              'terminal:logs',
+              'bricolemoi:terminal:logs'
+            ];
             channels.forEach((ch, idx) => {
               ws.send(JSON.stringify({ id: 10 + idx, subscribe: { channel: ch } }));
             });
