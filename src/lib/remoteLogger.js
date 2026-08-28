@@ -3,6 +3,7 @@
  * Version 2.0 : Offline Queue Buffer, Auto-Flush, Console Interceptor & Network Health
  */
 import { getAblyClient, ABLY_CHANNELS, isAblyConfigured } from './ablyClient';
+import { centrifugo, isCentrifugoConfigured } from './centrifugoClient';
 import { getAppSubdomain } from './subdomain';
 
 let isTelemetryInitialized = false;
@@ -58,43 +59,45 @@ const flushOfflineLogs = async () => {
   isFlushingQueue = true;
 
   try {
-    const ably = getAblyClient();
-    if (!ably || ably.connection.state !== 'connected') {
-      isFlushingQueue = false;
-      return;
-    }
-
-    const channel = ably.channels.get(ABLY_CHANNELS.TERMINAL_LOGS);
-    while (offlineLogsQueue.length > 0) {
-      const item = offlineLogsQueue.shift();
-      if (item) {
-        await channel.publish('client_log', item);
+    if (isCentrifugoConfigured) {
+      while (offlineLogsQueue.length > 0) {
+        const item = offlineLogsQueue.shift();
+        if (item) {
+          await centrifugo.publish('admin:alerts', item);
+        }
+      }
+    } else {
+      const ably = getAblyClient();
+      if (ably && ably.connection.state === 'connected') {
+        const channel = ably.channels.get(ABLY_CHANNELS.TERMINAL_LOGS);
+        while (offlineLogsQueue.length > 0) {
+          const item = offlineLogsQueue.shift();
+          if (item) {
+            await channel.publish('client_log', item);
+          }
+        }
       }
     }
   } catch (err) {
-    // Si échec pendant le flush, on arrête
+    // Silencieux sur échec flush
   } finally {
     isFlushingQueue = false;
   }
 };
 
 /**
- * Diffuse un événement de log ou télémétrie vers le terminal développeur
- * @param {'INFO' | 'ACTION' | 'GPS' | 'SOS' | 'WARN' | 'ERROR' | 'AUTH' | 'STATE' | 'NETWORK'} level
- * @param {string} category 
- * @param {string} message 
- * @param {object} metadata 
+ * Envoie un log technique vers le terminal CLI et la console de supervision
  */
 export const sendTerminalLog = async (level = 'INFO', category = 'APP', message = '', metadata = {}) => {
-  if (!isAblyConfigured || typeof window === 'undefined') return;
+  if (typeof window === 'undefined') return;
 
-  // Déduplication anti-spam (max 1 log identique par 800ms)
-  const logKey = `${level}:${category}:${message}`;
+  // Anti-spam / déduplication
   const now = Date.now();
-  if (logKey === lastLogPayloadKey && now - lastLogTimestamp < 800) {
+  const payloadKey = `${level}:${category}:${message}`;
+  if (payloadKey === lastLogPayloadKey && now - lastLogTimestamp < 1500) {
     return;
   }
-  lastLogPayloadKey = logKey;
+  lastLogPayloadKey = payloadKey;
   lastLogTimestamp = now;
 
   let userSession = null;
@@ -119,27 +122,30 @@ export const sendTerminalLog = async (level = 'INFO', category = 'APP', message 
   };
 
   try {
-    const ably = getAblyClient();
-    
-    // Si la connexion Ably est active, envoyer immédiatement
-    if (ably && ably.connection.state === 'connected') {
-      const channel = ably.channels.get(ABLY_CHANNELS.TERMINAL_LOGS);
-      await channel.publish('client_log', payload);
-      // Flush toute file d'attente résiduelle
+    if (isCentrifugoConfigured) {
+      await centrifugo.publish('admin:alerts', payload);
       if (offlineLogsQueue.length > 0) {
         flushOfflineLogs();
       }
       return;
     }
 
-    // Sinon, stocker dans la file d'attente pour envoi différé dès reconnexion
+    const ably = getAblyClient();
+    if (ably && ably.connection.state === 'connected') {
+      const channel = ably.channels.get(ABLY_CHANNELS.TERMINAL_LOGS);
+      await channel.publish('client_log', payload);
+      if (offlineLogsQueue.length > 0) {
+        flushOfflineLogs();
+      }
+      return;
+    }
+
     if (offlineLogsQueue.length >= MAX_OFFLINE_QUEUE_SIZE) {
-      offlineLogsQueue.shift(); // Éviter la saturation mémoire
+      offlineLogsQueue.shift();
     }
     payload.isQueued = true;
     offlineLogsQueue.push(payload);
   } catch (err) {
-    // Les logs de télémétrie ne doivent jamais faire planter l'application
     if (offlineLogsQueue.length < MAX_OFFLINE_QUEUE_SIZE) {
       payload.isQueued = true;
       offlineLogsQueue.push(payload);
@@ -154,43 +160,23 @@ export const initRemoteTelemetry = () => {
   if (isTelemetryInitialized || typeof window === 'undefined') return;
   isTelemetryInitialized = true;
 
-  // 1. Surveillance des états de connexion Ably & flush automatique
-  try {
-    const ably = getAblyClient();
-    if (ably && ably.connection) {
-      ably.connection.on('connected', () => {
-        sendTerminalLog('INFO', 'REALTIME', '🟢 Gateway Ably connectée et synchronisée');
-        flushOfflineLogs();
-      });
-
-      ably.connection.on('disconnected', () => {
-        // Enregistré dans le buffer hors-ligne
-        offlineLogsQueue.push({
-          timestamp: new Date().toISOString(),
-          level: 'WARN',
-          category: 'REALTIME',
-          message: '⚠️ Déconnexion temporaire du flux temps réel (tentative de reconnexion...)',
-          app: getAppSubdomain() || 'PORTAL',
-          user: { role: 'SYSTEM' },
-          device: getDeviceInfo(),
-          isQueued: true
+  // 1. Annonce de connexion Centrifugo VPS
+  if (isCentrifugoConfigured) {
+    setTimeout(() => {
+      sendTerminalLog('INFO', 'REALTIME', '🟢 Gateway Centrifugo VPS connectée et synchronisée');
+      flushOfflineLogs();
+    }, 1000);
+  } else if (isAblyConfigured) {
+    try {
+      const ably = getAblyClient();
+      if (ably && ably.connection) {
+        ably.connection.on('connected', () => {
+          sendTerminalLog('INFO', 'REALTIME', '🟢 Gateway Ably connectée et synchronisée');
+          flushOfflineLogs();
         });
-      });
-
-      ably.connection.on('failed', (err) => {
-        offlineLogsQueue.push({
-          timestamp: new Date().toISOString(),
-          level: 'ERROR',
-          category: 'REALTIME',
-          message: `❌ Échec de connexion temps réel : ${err?.reason?.message || 'Erreur inconnue'}`,
-          app: getAppSubdomain() || 'PORTAL',
-          user: { role: 'SYSTEM' },
-          device: getDeviceInfo(),
-          isQueued: true
-        });
-      });
-    }
-  } catch (e) {}
+      }
+    } catch (e) {}
+  }
 
   // 2. Capture des erreurs runtime JS non interceptées
   window.addEventListener('error', (event) => {
