@@ -2,14 +2,14 @@
 
 /**
  * 📟 BricoleMoi Live Console & Telemetry CLI
- * Version 2.0 : Offline Queue Catch-up, Network Health & Deep Error Monitoring
+ * Version 3.0 : Centrifugo v5 VPS Native WebSocket & Realtime Stream
  *
  * Usage :
  *   npm run logs
  *   node scripts/logs.js
  */
 
-import Ably from 'ably';
+import WebSocket from 'ws';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -34,12 +34,10 @@ if (fs.existsSync(envPath)) {
   });
 }
 
-const ABLY_API_KEY = envVars.VITE_ABLY_API_KEY || process.env.VITE_ABLY_API_KEY;
-
-if (!ABLY_API_KEY) {
-  console.error('\x1b[31m%s\x1b[0m', '❌ ERREUR: VITE_ABLY_API_KEY absente du fichier .env');
-  process.exit(1);
-}
+const CENTRIFUGO_WS_URL = envVars.VITE_CENTRIFUGO_WS_URL || 'ws://51.255.46.206:8800/connection/websocket';
+const directWsUrl = CENTRIFUGO_WS_URL.startsWith('wss://')
+  ? 'ws://51.255.46.206:8800/connection/websocket'
+  : CENTRIFUGO_WS_URL;
 
 // Couleurs ANSI
 const C = {
@@ -62,106 +60,112 @@ const C = {
 
 console.clear();
 console.log(`${C.cyan}╔════════════════════════════════════════════════════════════════════════════╗${C.reset}`);
-console.log(`${C.cyan}║${C.reset}  ${C.bold}${C.green}📟 BRICOLEMOI LIVE CONSOLE & TELEMETRY STREAM 2.0${C.reset}                         ${C.cyan}║${C.reset}`);
-console.log(`${C.cyan}║${C.reset}  ${C.dim}Flux temps réel & rattrapage hors-ligne des téléphones & navigateurs 🇲🇦${C.reset}    ${C.cyan}║${C.reset}`);
+console.log(`${C.cyan}║${C.reset}  ${C.bold}${C.green}📟 BRICOLEMOI LIVE CONSOLE & TELEMETRY STREAM 3.0 (CENTRIFUGO VPS)${C.reset}       ${C.cyan}║${C.reset}`);
+console.log(`${C.cyan}║${C.reset}  ${C.dim}Flux temps réel & télémétrie souveraine sur VPS 51.255.46.206 🇲🇦${C.reset}           ${C.cyan}║${C.reset}`);
 console.log(`${C.cyan}╚════════════════════════════════════════════════════════════════════════════╝${C.reset}`);
-console.log(`${C.dim}📡 Canaux actifs : bricolemoi:terminal:logs | bricolemoi:jobs:stream | bricolemoi:admin:alerts${C.reset}`);
-console.log(`${C.green}✓ Connecté à Ably Realtime Gateway. En attente d'événements...${C.reset}\n`);
-
-const ably = new Ably.Realtime({
-  key: ABLY_API_KEY,
-  clientId: 'cli-live-logger'
-});
+console.log(`${C.dim}📡 Canaux actifs : jobs:stream | admin:alerts | tracking:all | presence:maalems${C.reset}`);
+console.log(`${C.green}✓ Connecté à Centrifugo v5 VPS Gateway. En attente d'événements...${C.reset}\n`);
 
 const formatTime = (isoString) => {
   const date = isoString ? new Date(isoString) : new Date();
   return `${C.dim}[${date.toLocaleTimeString('fr-FR')}.${String(date.getMilliseconds()).padStart(3, '0')}]${C.reset}`;
 };
 
-const getRoleBadge = (role) => {
-  switch (String(role || '').toUpperCase()) {
-    case 'MAALEM':
-      return `${C.bgAmber} 🛠️ MAÂLEM ${C.reset}`;
+const getRoleBadge = (role, user) => {
+  const name = user?.name || user?.full_name || 'Anonyme';
+  const phone = user?.phone ? ` (${user.phone})` : '';
+
+  switch (role) {
     case 'CLIENT':
-      return `${C.bgBlue} 👤 CLIENT ${C.reset}`;
+      return `${C.bgBlue} 👤 CLIENT ${C.reset}  ${C.bold}${name}${C.reset}${C.dim}${phone}${C.reset}`;
+    case 'MAALEM':
+      return `${C.bgAmber} 🛠️ MAÂLEM ${C.reset}  ${C.bold}${name}${C.reset}${C.dim}${phone}${C.reset}`;
     case 'ADMIN':
-      return `${C.bgPurple} 🛡️ ADMIN ${C.reset}`;
-    case 'SYSTEM':
-      return `${C.bgGray} ⚙️ SYSTÈME ${C.reset}`;
+      return `${C.bgPurple} 🛡️ ADMIN ${C.reset}  ${C.bold}${name}${C.reset}${C.dim}${phone}${C.reset}`;
     default:
-      return `${C.dim}[VISITEUR]${C.reset}`;
+      return `${C.bgGray} ⚙️ SYSTÈME ${C.reset}  ${C.bold}${name}${C.reset}`;
   }
 };
 
 const getLevelBadge = (level) => {
-  switch (String(level || '').toUpperCase()) {
+  switch (level) {
     case 'ERROR':
       return `${C.bgRed} ERROR ${C.reset}`;
     case 'WARN':
-      return `${C.yellow}${C.bold}⚠ WARN${C.reset}`;
+      return `${C.yellow}⚠ WARN ${C.reset}`;
     case 'ACTION':
-      return `${C.cyan}${C.bold}⚡ ACTION${C.reset}`;
+      return `${C.cyan}⚡ ACTION${C.reset}`;
     case 'GPS':
-      return `${C.green}${C.bold}📍 GPS${C.reset}`;
+      return `${C.blue}🚗 GPS   ${C.reset}`;
     case 'SOS':
-      return `${C.red}${C.bold}🚨 SOS${C.reset}`;
-    case 'NETWORK':
-      return `${C.magenta}${C.bold}🌐 RÉSEAU${C.reset}`;
+      return `${C.red}🚨 SOS   ${C.reset}`;
+    case 'INFO':
     default:
-      return `${C.blue}${C.bold}ℹ INFO${C.reset}`;
+      return `${C.green}ℹ INFO  ${C.reset}`;
   }
 };
 
-// 1. Écoute du canal Télémesure / Logs Frontend
-const logsChannel = ably.channels.get('bricolemoi:terminal:logs');
-logsChannel.subscribe('client_log', (message) => {
-  const p = message.data || {};
-  const time = formatTime(p.timestamp);
-  const roleBadge = getRoleBadge(p.user?.role);
-  const levelBadge = getLevelBadge(p.level);
-  const userLabel = p.user?.name ? `${C.bold}${p.user.name}${C.reset}` : `${C.dim}Anonyme${C.reset}`;
-  const phoneLabel = p.user?.phone ? `${C.dim}(${p.user.phone})${C.reset}` : '';
-  const device = p.device?.summary || `${C.dim}Web Browser${C.reset}`;
-  const queuedBadge = p.isQueued ? ` ${C.yellow}[RATTRAPÉ HORS-LIGNE]${C.reset}` : '';
+try {
+  const ws = new WebSocket(directWsUrl);
 
-  console.log(`${time} ${levelBadge} ${roleBadge} ${userLabel} ${phoneLabel}${queuedBadge}`);
-  console.log(`   ${C.bold}» ${p.message}${C.reset} ${C.dim}• ${device} • [${p.category || 'APP'}]${C.reset}`);
+  ws.on('open', () => {
+    ws.send(JSON.stringify({ id: 1, connect: { token: '' } }));
+  });
 
-  if (p.data && Object.keys(p.data).length > 0) {
-    const serialized = JSON.stringify(p.data);
-    if (serialized !== '{}') {
-      console.log(`   ${C.dim}↳ Détails : ${serialized}${C.reset}`);
-    }
-  }
-  console.log('');
-});
+  ws.on('message', (raw) => {
+    try {
+      const lines = raw.toString().split('\n').filter(Boolean);
+      for (const line of lines) {
+        const msg = JSON.parse(line);
 
-// 2. Écoute des SOS et Chantiers en Direct
-const jobsChannel = ably.channels.get('bricolemoi:jobs:stream');
-jobsChannel.subscribe((msg) => {
-  const time = formatTime();
-  const lead = msg.data?.intervention || msg.data || {};
-  const eventName = msg.name || 'job_event';
+        if (msg.id === 1 || msg.connect || msg.result?.client) {
+          const channels = ['jobs:stream', 'admin:alerts', 'tracking:all', 'presence:maalems'];
+          channels.forEach((ch, idx) => {
+            ws.send(JSON.stringify({ id: 10 + idx, subscribe: { channel: ch } }));
+          });
+        }
 
-  console.log(`${time} ${C.bgRed} 🚨 FLUX SOS ${C.reset} ${C.bold}${eventName.toUpperCase()}${C.reset}`);
-  console.log(`   ${C.bold}Service : ${lead.service_type || lead.subcategory || 'Dépannage'}${C.reset} à ${C.yellow}${lead.district || lead.city || 'Maroc'}${C.reset} (ID: ${lead.id || 'N/A'})`);
-  if (lead.client_name) {
-    console.log(`   ${C.dim}Client : ${lead.client_name} (${lead.client_phone || 'N/A'})${C.reset}`);
-  }
-  console.log('');
-});
+        if (msg.pub) {
+          const ch = msg.channel;
+          const data = msg.pub.data || {};
+          const isTeleLog = Boolean(data.level && (data.message || data.category));
 
-// 3. Écoute des alertes Admin
-const adminChannel = ably.channels.get('bricolemoi:admin:alerts');
-adminChannel.subscribe((msg) => {
-  const time = formatTime();
-  console.log(`${time} ${C.bgPurple} 🛡️ ADMIN EVENT ${C.reset} ${C.bold}${msg.name}${C.reset}`);
-  console.log(`   ${C.dim}${JSON.stringify(msg.data)}${C.reset}\n`);
-});
+          if (isTeleLog) {
+            const time = formatTime(data.timestamp);
+            const levelBadge = getLevelBadge(data.level);
+            const roleBadge = getRoleBadge(data.user?.role || 'ANONYMOUS', data.user);
+            const queuedBadge = data.isQueued ? ` ${C.yellow}[RATTRAPÉ HORS-LIGNE]${C.reset}` : '';
+            const deviceSummary = data.device?.summary ? ` ${C.dim}• ${data.device.summary}${C.reset}` : '';
+            const catBadge = data.category ? ` ${C.dim}• [${data.category}]${C.reset}` : '';
 
-// Gestion propre de l'arrêt (Ctrl + C)
+            console.log(`${time} ${levelBadge}  ${roleBadge}${queuedBadge}`);
+            console.log(`   » ${C.bold}${data.message}${C.reset}${deviceSummary}${catBadge}`);
+
+            if (data.data && Object.keys(data.data).length > 0) {
+              const details = JSON.stringify(data.data);
+              if (details !== '{}') {
+                console.log(`   ↳ ${C.dim}Détails : ${details}${C.reset}`);
+              }
+            }
+            console.log('');
+          } else {
+            const time = formatTime();
+            const eventName = data.event || data.name || 'UPDATE';
+            console.log(`${time} ${C.green}[${ch}]${C.reset} ${C.bold}⚡ ${eventName}${C.reset} :`, typeof data.payload === 'object' ? JSON.stringify(data.payload) : JSON.stringify(data));
+          }
+        }
+      }
+    } catch (e) {}
+  });
+
+  ws.on('error', (err) => {
+    console.warn(`${formatTime()} ${C.yellow}[Centrifugo Warning] Erreur WebSocket :${C.reset}`, err.message);
+  });
+} catch (err) {
+  console.warn('[Centrifugo] Erreur initialisation WebSocket:', err);
+}
+
 process.on('SIGINT', () => {
-  console.log(`\n${C.yellow}🛑 Fermeture de la console de logs BricoleMoi...${C.reset}`);
-  ably.close();
+  console.log(`\n${C.yellow}Fermeture de la Console Live BricoleMoi.${C.reset}`);
   process.exit(0);
 });
