@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "supabase:status": "node scripts/supabase-status.js",
     "listen": "node scripts/listen.js",
     "logs": "node scripts/logs.js",
     "audit": "node scripts/audit.js",
