@@ -1,4 +1,7 @@
 {
+  "framework": "vite",
+  "buildCommand": "vite build",
+  "outputDirectory": "dist",
   "headers": [
     {
       "source": "/(.*)",
@@ -35,6 +38,24 @@
       ]
     },
     {
+      "source": "/((?!assets/|.*\\.[\\w]+$).*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/index.html",
       "headers": [
         {
@@ -59,7 +80,7 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|.*\\.[\\w]+$).*)",
       "destination": "/index.html"
     }
   ]

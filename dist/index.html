@@ -2,6 +2,31 @@
 <html lang="fr" dir="ltr">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      /* Protection anti-écran blanc & auto-guérison sur nouveau déploiement */
+      window.addEventListener('error', function (e) {
+        var isScriptOrLink = e.target && (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK');
+        var msg = (e.message || '').toLowerCase();
+        var isChunkError = msg.includes('module script') || msg.includes('loading chunk') || msg.includes('failed to fetch') || msg.includes('mime type');
+        if (isScriptOrLink || isChunkError) {
+          var key = 'bm_chunk_heal';
+          var last = sessionStorage.getItem(key);
+          var now = Date.now();
+          if (!last || now - parseInt(last, 10) > 12000) {
+            sessionStorage.setItem(key, String(now));
+            if ('caches' in window) {
+              caches.keys().then(function (names) {
+                return Promise.all(names.map(function (n) { return caches.delete(n); }));
+              }).then(function () {
+                window.location.reload();
+              });
+            } else {
+              window.location.reload();
+            }
+          }
+        }
+      }, true);
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#F8FAFC" />
