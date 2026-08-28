@@ -150,33 +150,43 @@ export const AdminDashboard = () => {
 
   // --- 💼 Bilan Financier & Trésorerie Haute Précision ---
   const financialMetrics = useMemo(() => {
-    // 1. CA Brut Encaissé (Recharges Validées)
+    // 1. CA Brut Encaissé (Recharges Bancaires réelles payées par les artisans, hors remboursements et hors bonus)
     const grossRevenueEncaissed = (transactions || [])
       .filter((t) => (t.status === 'VALIDATED' || t.status === 'APPROVED' || t.status === 'COMPLETED') && isRealRechargeTx(t))
       .reduce((sum, t) => sum + (parseFloat(t.amount_dh) || 0), 0);
 
-    // 2. CA Net Consommé / Commissions Débloquées (15 DH par mission débloquée / lead réel)
-    const leadTransactions = (transactions || []).filter((t) => isLeadTx(t));
-    const netCommissionConsumedFromTx = leadTransactions.reduce((sum, t) => sum + Math.abs(parseFloat(t.amount_dh) || 0), 0);
-    
-    const unlockedMissionsCount = (interventions || []).filter(
+    // 2. Déblocages et Missions Réalisées (15 DH par mission débloquée)
+    const unlockedMissions = (interventions || []).filter(
       (i) => i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.status === 'COMPLETED'
-    ).length;
-    const netEarnedCommissions = Math.max(netCommissionConsumedFromTx, unlockedMissionsCount * 15);
+    );
+    const unlockedMissionsCount = unlockedMissions.length;
+    const netEarnedCommissions = unlockedMissionsCount * 15;
 
-    // 3. Soldes Non Consommés Détenus par les Maâlems (Séquestre / Portefeuilles flottants)
-    const unspentMaalemBalances = (maalems || []).reduce((sum, m) => sum + (parseFloat(m.credit_balance) || 0), 0);
+    // 3. Soldes Détenus par les Maâlems (Total, Avances Réelles en Séquestre et Bonus)
+    const totalMaalemCredits = (maalems || []).reduce((sum, m) => sum + (parseFloat(m.credit_balance) || 0), 0);
+    const unspentRealCash = Math.max(0, grossRevenueEncaissed - netEarnedCommissions);
+    const unspentBonusCredits = Math.max(0, totalMaalemCredits - unspentRealCash);
 
     // 4. Volume d'Affaires Global Chantiers Accord Direct (Montant total des travaux réalisés)
-    const directChantiersVolume = (interventions || [])
-      .filter((i) => i.status === 'COMPLETED')
-      .reduce((sum, i) => sum + (parseFloat(i.final_agreed_price) || parseFloat(i.price) || 0), 0);
+    const completedMissions = (interventions || []).filter((i) => i.status === 'COMPLETED');
+    const directChantiersVolume = completedMissions.reduce(
+      (sum, i) => sum + (parseFloat(i.final_agreed_price) || parseFloat(i.price) || 0), 0
+    );
+
+    // 5. Total des Remboursements Litiges (Avoirs SAV)
+    const totalRefundsDh = (transactions || [])
+      .filter((t) => isRefundTx(t) && (t.status === 'VALIDATED' || t.status === 'APPROVED'))
+      .reduce((sum, t) => sum + (parseFloat(t.amount_dh) || 0), 0);
 
     return {
       grossRevenueEncaissed,
       netEarnedCommissions,
-      unspentMaalemBalances,
+      totalMaalemCredits,
+      unspentRealCash,
+      unspentBonusCredits,
       directChantiersVolume,
+      completedMissionsCount: completedMissions.length,
+      totalRefundsDh,
       unlockedMissionsCount
     };
   }, [transactions, interventions, maalems]);
@@ -412,7 +422,9 @@ export const AdminDashboard = () => {
               <p className="text-lg sm:text-2xl font-black font-mono text-slate-900">
                 {financialMetrics.grossRevenueEncaissed.toLocaleString('fr-FR')} <span className="text-xs font-normal text-slate-500 font-sans">DH</span>
               </p>
-              <span className="text-[9px] sm:text-[10px] text-slate-400 font-mono block truncate">Recharges validées reçues</span>
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-mono block truncate">
+                Recharges réelles payées
+              </span>
             </div>
 
             {/* 2. CA Net Réalisé */}
@@ -423,7 +435,9 @@ export const AdminDashboard = () => {
               <p className="text-lg sm:text-2xl font-black font-mono text-emerald-700">
                 {financialMetrics.netEarnedCommissions.toLocaleString('fr-FR')} <span className="text-xs font-normal text-emerald-600 font-sans">DH</span>
               </p>
-              <span className="text-[9px] sm:text-[10px] text-emerald-600 font-mono block truncate">{financialMetrics.unlockedMissionsCount} déblocages consommés</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-600 font-mono block truncate">
+                {financialMetrics.unlockedMissionsCount} mission{financialMetrics.unlockedMissionsCount > 1 ? 's' : ''} débloquée{financialMetrics.unlockedMissionsCount > 1 ? 's' : ''} (15 DH/u)
+              </span>
             </div>
 
             {/* 3. Solde Non Consommé Maâlems */}
@@ -432,9 +446,11 @@ export const AdminDashboard = () => {
                 Crédits Non Consommés
               </span>
               <p className="text-lg sm:text-2xl font-black font-mono text-amber-800">
-                {financialMetrics.unspentMaalemBalances.toLocaleString('fr-FR')} <span className="text-xs font-normal text-amber-700 font-sans">DH</span>
+                {financialMetrics.totalMaalemCredits.toLocaleString('fr-FR')} <span className="text-xs font-normal text-amber-700 font-sans">DH</span>
               </p>
-              <span className="text-[9px] sm:text-[10px] text-amber-600 font-mono block truncate">Séquestre comptes artisans</span>
+              <span className="text-[9px] sm:text-[10px] text-amber-700 font-mono block truncate">
+                {financialMetrics.unspentRealCash} DH avances + {financialMetrics.unspentBonusCredits} DH bonus
+              </span>
             </div>
 
             {/* 4. Volume Global Chantiers */}
@@ -445,7 +461,11 @@ export const AdminDashboard = () => {
               <p className="text-lg sm:text-2xl font-black font-mono text-blue-700">
                 {financialMetrics.directChantiersVolume.toLocaleString('fr-FR')} <span className="text-xs font-normal text-blue-600 font-sans">DH</span>
               </p>
-              <span className="text-[9px] sm:text-[10px] text-blue-500 font-mono block truncate">Total accords directs artisans</span>
+              <span className="text-[9px] sm:text-[10px] text-blue-500 font-mono block truncate">
+                {financialMetrics.completedMissionsCount > 0
+                  ? `${financialMetrics.completedMissionsCount} chantier${financialMetrics.completedMissionsCount > 1 ? 's' : ''} en Accord Direct`
+                  : 'Accords directs à convenir'}
+              </span>
             </div>
           </div>
         </div>

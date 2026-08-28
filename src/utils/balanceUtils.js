@@ -18,10 +18,18 @@ export const isLeadTx = (t) => {
   return typeUpper === 'LEAD_DEDUCTION' || typeUpper === 'DEBIT' || typeUpper === 'LEAD' || Number(t.amount_dh) < 0;
 };
 
+export const isRefundTx = (t) => {
+  if (!t) return false;
+  const typeUpper = String(t.type || '').toUpperCase();
+  const methodUpper = String(t.payment_method || '').toUpperCase();
+  const refUpper = String(t.reference_ref || '').toUpperCase();
+  return typeUpper === 'REFUND' || methodUpper.includes('REMBOURSEMENT') || methodUpper.includes('REFUND') || refUpper.startsWith('REFUND_') || refUpper.includes('REFUND');
+};
+
 export const isRealRechargeTx = (t) => {
   if (!t) return false;
   const typeUpper = String(t.type || '').toUpperCase();
-  return (typeUpper === 'RECHARGE' || typeUpper === 'CREDIT') && !isBonusTx(t) && !isLeadTx(t);
+  return (typeUpper === 'RECHARGE' || typeUpper === 'CREDIT') && !isBonusTx(t) && !isLeadTx(t) && !isRefundTx(t);
 };
 
 export const RECHARGE_PACKS = [
