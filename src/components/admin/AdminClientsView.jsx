@@ -228,7 +228,7 @@ export const AdminClientsView = ({ clients = [], interventions = [], reviews = [
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
-              {paginatedClients.length === 0 ? (
+              {pagination.items.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-12 text-slate-400">
                     <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
