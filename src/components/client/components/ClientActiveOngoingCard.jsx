@@ -323,6 +323,7 @@ export const ClientActiveOngoingCard = ({
           selectedLng={clientLng}
           filterCategory={activeOngoingSOS.service_type || serviceType}
           activeRouteCoords={routeInfo?.coordinates}
+          trackingMaalemPos={[maalemLat, maalemLng]}
           etaSummary={routeInfo?.summary}
         />
       </div>

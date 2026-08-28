@@ -300,6 +300,7 @@ export const InteractiveMap = ({
   const emergencyMarkersRef = useRef({});
   const clientMarkerRef = useRef(null);
   const destinationMarkerRef = useRef(null);
+  const trackingMaalemMarkerRef = useRef(null);
   const lastRouteSigRef = useRef('');
 
   // 1. Initialize MapLibre Canvas with Full Street & Place Names Tile Layer
@@ -309,6 +310,10 @@ export const InteractiveMap = ({
     // Reset marker refs for fresh map instance
     clientMarkerRef.current = null;
     destinationMarkerRef.current = null;
+    if (trackingMaalemMarkerRef.current) {
+      trackingMaalemMarkerRef.current.remove();
+      trackingMaalemMarkerRef.current = null;
+    }
     maalemMarkersRef.current = {};
     emergencyMarkersRef.current = {};
 
@@ -559,10 +564,54 @@ export const InteractiveMap = ({
           .setLngLat([mLng, mLat])
           .setPopup(popup)
           .addTo(map);
+      } else {
+        maalemMarkersRef.current[m.id].setLngLat([mLng, mLat]);
+        if (!maalemMarkersRef.current[m.id].getElement().parentNode) {
+          maalemMarkersRef.current[m.id].addTo(map);
+        }
       }
     });
 
-    // D. Emergency SOS Leads
+    // D. Véhicule Maâlem en Route (Suivi GPS Direct le long du trajet)
+    if (trackingMaalemPos && Array.isArray(trackingMaalemPos) && trackingMaalemPos.length >= 2) {
+      const tLat = parseFloat(trackingMaalemPos[0]);
+      const tLng = parseFloat(trackingMaalemPos[1]);
+      if (!isNaN(tLat) && !isNaN(tLng) && tLat > 20 && tLat < 38) {
+        if (!trackingMaalemMarkerRef.current) {
+          const el = document.createElement('div');
+          el.style.width = '48px';
+          el.style.height = '48px';
+          el.className = 'relative flex items-center justify-center cursor-pointer transition-all duration-700 ease-out z-40';
+          el.innerHTML = `
+            <div class="absolute w-12 h-12 rounded-2xl bg-amber-500/30 animate-ping"></div>
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 border-2 border-white shadow-xl flex items-center justify-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+            </div>
+            <span class="absolute -bottom-1 px-1.5 py-0.2 bg-slate-900 text-[8px] font-black text-white rounded-full border border-white shadow-xs">MAÂLEM</span>
+          `;
+          const popup = new maplibregl.Popup({ offset: 25, className: 'clean-trust-popup' }).setHTML(
+            `<div class="bg-white/95 backdrop-blur-xl border border-amber-300 p-3 rounded-2xl text-center shadow-xl font-sans">
+              <p class="text-xs font-black text-slate-900">Artisan Maâlem en Route</p>
+              <p class="text-[10px] text-amber-700 font-bold mt-0.5">En déplacement direct vers vous</p>
+            </div>`
+          );
+          trackingMaalemMarkerRef.current = new maplibregl.Marker({ element: el })
+            .setLngLat([tLng, tLat])
+            .setPopup(popup)
+            .addTo(map);
+        } else {
+          trackingMaalemMarkerRef.current.setLngLat([tLng, tLat]);
+          if (!trackingMaalemMarkerRef.current.getElement().parentNode) {
+            trackingMaalemMarkerRef.current.addTo(map);
+          }
+        }
+      }
+    } else if (trackingMaalemMarkerRef.current) {
+      trackingMaalemMarkerRef.current.remove();
+      trackingMaalemMarkerRef.current = null;
+    }
+
+    // E. Emergency SOS Leads
     if (!isMaalemOrAdmin) {
       Object.keys(emergencyMarkersRef.current).forEach((id) => {
         emergencyMarkersRef.current[id].remove();
@@ -649,7 +698,7 @@ export const InteractiveMap = ({
       });
     }
 
-  }, [mapLoaded, user, userGPSPos, selectedLat, selectedLng, liveMaalemCoords, filterCategory, maalems, interventions, activeStyleKey]);
+  }, [mapLoaded, user, userGPSPos, selectedLat, selectedLng, liveMaalemCoords, trackingMaalemPos, filterCategory, maalems, interventions, activeStyleKey]);
 
   // 5. Rendu du Tracé Routier OSRM & Guidage en Temps Réel
   useEffect(() => {
