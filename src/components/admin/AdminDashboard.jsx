@@ -19,7 +19,8 @@ import {
   Gift,
   SearchCheck,
   Zap,
-  X
+  X,
+  Radio
 } from 'lucide-react';
 import { AdminClientsView } from './AdminClientsView';
 import { AdminLiveMissions } from './AdminLiveMissions';
@@ -27,6 +28,7 @@ import { AdminMaalemsView } from './AdminMaalemsView';
 import { AdminDisputesView } from './AdminDisputesView';
 import { AdminRechargesView } from './AdminRechargesView';
 import { AdminLoyaltyRewardsView } from './AdminLoyaltyRewardsView';
+import { AdminRealtimeConsole } from './AdminRealtimeConsole';
 import { auditPlatformState, healPlatformState } from '../../services/platformAuditReferee';
 
 export const AdminDashboard = () => {
@@ -339,9 +341,9 @@ export const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* 2. Barre de Navigation par Onglets (Segmented Control SaaS Pro : 6 Cols Desktop / Scroll Horizontal Mobile) */}
+      {/* 2. Barre de Navigation par Onglets (Segmented Control SaaS Pro : 7 Cols Desktop / Scroll Horizontal Mobile) */}
       <div className="bg-slate-100/95 border border-slate-200 p-1.5 rounded-2xl shadow-xs overflow-x-auto no-scrollbar">
-        <div className="flex lg:grid lg:grid-cols-6 gap-1.5 min-w-max lg:min-w-0">
+        <div className="flex lg:grid lg:grid-cols-7 gap-1.5 min-w-max lg:min-w-0">
           {/* Tab 1: Clients */}
           <button
             type="button"
@@ -463,11 +465,36 @@ export const AdminDashboard = () => {
               {loyaltyRewardsHistory.length}
             </span>
           </button>
+
+          {/* Tab 7: Console Temps Réel Live (Ably-Style Stream) */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('REALTIME')}
+            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap ${
+              activeTab === 'REALTIME'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm font-black'
+                : 'text-blue-700 hover:text-blue-900 hover:bg-blue-50 font-bold border border-blue-200/60 bg-white'
+            }`}
+          >
+            <Radio className={`w-4 h-4 shrink-0 animate-pulse ${activeTab === 'REALTIME' ? 'text-white' : 'text-blue-600'}`} />
+            <span>Console Live</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          </button>
         </div>
       </div>
 
       {/* 3. Contenu de l'Onglet Actif */}
       <AnimatePresence mode="wait">
+        {activeTab === 'REALTIME' && (
+          <motion.div
+            key="realtime"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <AdminRealtimeConsole />
+          </motion.div>
+        )}
         {activeTab === 'CLIENTS' && (
           <motion.div
             key="clients"
