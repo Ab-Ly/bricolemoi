@@ -78,20 +78,33 @@ export const AdminRechargesView = ({
     return paginateArray(filteredTransactions, currentPage, pageSize);
   }, [filteredTransactions, currentPage, pageSize]);
 
-  // Statistiques de rapprochement
+  // Statistiques de rapprochement et trésorerie détaillée
   const stats = useMemo(() => {
+    const validatedTxs = transactions.filter((t) => t.status === 'VALIDATED');
+    const totalVolumeDh = validatedTxs.reduce((sum, t) => sum + (parseFloat(t.amount_dh) || 0), 0);
+    const unspentBalanceTotal = (maalems || []).reduce((sum, m) => sum + (parseFloat(m.credit_balance) || 0), 0);
+    
+    const leadTxs = transactions.filter((t) => isLeadTx(t));
+    const leadsSpentDh = leadTxs.reduce((sum, t) => sum + Math.abs(parseFloat(t.amount_dh) || 0), 0);
+
+    const bonusTxs = transactions.filter((t) => isBonusTx(t));
+    const bonusGrantedDh = bonusTxs.reduce((sum, t) => sum + (parseFloat(t.amount_dh) || 0), 0);
+
     return {
       total: transactions.length,
       pending: transactions.filter((t) => t.status === 'PENDING').length,
-      validated: transactions.filter((t) => t.status === 'VALIDATED').length,
+      validated: validatedTxs.length,
       rejected: transactions.filter((t) => t.status === 'REJECTED').length,
-      totalVolumeDh: transactions
-        .filter((t) => t.status === 'VALIDATED')
-        .reduce((sum, t) => sum + (parseFloat(t.amount_dh) || 0), 0)
+      totalVolumeDh,
+      unspentBalanceTotal,
+      leadsSpentDh,
+      bonusGrantedDh
     };
-  }, [transactions]);
+  }, [transactions, maalems]);
 
-  const cleanPhone = (p) => (p || '').replace(/\D/g, '');  return (
+  const cleanPhone = (p) => (p || '').replace(/\D/g, '');
+
+  return (
     <div className="space-y-6 font-sans">
       {/* 1. Baromètre Rapprochement Bancaire */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -158,15 +171,70 @@ export const AdminRechargesView = ({
           <p className="text-2xl font-black text-rose-700 font-mono">{stats.rejected}</p>
         </motion.button>
 
-        {/* Volume Total */}
-        <div className="p-3.5 sm:p-4 rounded-2xl border border-blue-200 bg-blue-50/50 text-left flex flex-col justify-between space-y-2 shadow-xs">
+        {/* Tous les flux */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          type="button"
+          onClick={() => setStatusFilter('ALL')}
+          className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 shadow-xs ${
+            statusFilter === 'ALL'
+              ? 'bg-blue-50/80 border-blue-400 ring-1 ring-blue-400/50 shadow-sm'
+              : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono uppercase tracking-wider block font-bold text-blue-700">Volume Encaissé</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider block font-bold text-blue-700">Toutes les Pièces</span>
             <div className="w-6 h-6 rounded-lg bg-blue-100 border border-blue-200 flex items-center justify-center">
-              <Coins className="w-3.5 h-3.5 text-blue-600" />
+              <Receipt className="w-3.5 h-3.5 text-blue-600" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900 font-mono">{stats.totalVolumeDh.toFixed(2)} DH</p>
+          <p className="text-2xl font-black text-slate-900 font-mono">{stats.total}</p>
+        </motion.button>
+      </div>
+
+      {/* 💼 Grand Livre & Trésorerie Déposée (Chiffre d'Affaires Brut, Net & Séquestre) */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4 text-slate-900">
+        <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center shadow-xs">
+              <Coins className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-900 tracking-tight">
+                Grand Livre des Soldes &amp; Trésorerie BricoleMoi
+              </h3>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Réconciliation directe : Encaissé brut = Commissions nettes acquises + Crédits non consommés en séquestre
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-mono font-bold bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200 shadow-xs">
+            Solde Séquestre : {stats.unspentBalanceTotal.toLocaleString('fr-FR')} DH
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Card 1 : CA Brut Total */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+            <span className="text-[10px] font-mono uppercase text-slate-500 font-bold block">1. CA Brut Encaissé</span>
+            <p className="text-2xl font-black font-mono text-slate-900">{stats.totalVolumeDh.toFixed(2)} <span className="text-xs font-normal text-slate-500">DH</span></p>
+            <p className="text-[10px] text-slate-500 font-medium">Total des virements &amp; dépôts bancaires validés</p>
+          </div>
+
+          {/* Card 2 : Crédits Non Consommés */}
+          <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-1">
+            <span className="text-[10px] font-mono uppercase text-amber-800 font-bold block">2. Solde Non Consommé (Séquestre)</span>
+            <p className="text-2xl font-black font-mono text-amber-800">{stats.unspentBalanceTotal.toFixed(2)} <span className="text-xs font-normal text-amber-700">DH</span></p>
+            <p className="text-[10px] text-amber-700 font-medium">Avances détenues sur les comptes Maâlems actifs</p>
+          </div>
+
+          {/* Card 3 : Commissions Acquises */}
+          <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-1">
+            <span className="text-[10px] font-mono uppercase text-emerald-800 font-bold block">3. CA Net Consommé (15 DH/Lead)</span>
+            <p className="text-2xl font-black font-mono text-emerald-800">{stats.leadsSpentDh.toFixed(2)} <span className="text-xs font-normal text-emerald-700">DH</span></p>
+            <p className="text-[10px] text-emerald-700 font-medium">Commissions définitivement acquises par la plateforme</p>
+          </div>
         </div>
       </div>
 
