@@ -87,7 +87,7 @@ export const AdminDashboard = () => {
   // Calcul des métriques globales en direct et détaillées
   const pendingSOSCount = interventions.filter((i) => i.status === 'PENDING').length;
   const inProgressSOSCount = interventions.filter(
-    (i) => i.status === 'ACCEPTED' || i.progress_step === 'ON_THE_WAY' || i.progress_step === 'ARRIVED'
+    (i) => i.status !== 'COMPLETED' && i.status !== 'CANCELLED' && (i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.progress_step === 'ON_THE_WAY' || i.progress_step === 'ARRIVED')
   ).length;
   const activeSOSCount = pendingSOSCount + inProgressSOSCount;
   const completedSOSCount = interventions.filter((i) => i.status === 'COMPLETED').length;
@@ -376,9 +376,9 @@ export const AdminDashboard = () => {
             <Activity className={`w-4 h-4 shrink-0 ${activeTab === 'MISSIONS' ? 'text-amber-600' : 'text-slate-500'}`} />
             <span>Tour de Contrôle</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
-              activeTab === 'MISSIONS' ? 'bg-amber-100 text-amber-900' : 'bg-slate-200/80 text-slate-600'
+              activeSOSCount > 0 ? 'bg-amber-100 text-amber-900 animate-pulse' : 'bg-slate-200/80 text-slate-600'
             }`}>
-              {interventions.length}
+              {activeSOSCount}
             </span>
           </button>
 
