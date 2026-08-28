@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { centrifugo, isCentrifugoConfigured } from '../lib/centrifugoClient';
 import { REALTIME_CHANNELS } from '../lib/ablyClient';
+import { supabase } from '../lib/supabaseClient';
 
 /**
  * Hook React pour la gestion de Présence & Tracking GPS Temps Réel
@@ -208,6 +209,16 @@ export const useAblyPresence = ({ user, isOnline, onPresenceChange } = {}) => {
         if (timeDiff >= 5000 || hasMoved) {
           lastLocationUpdateRef.current = { lat: latitude, lng: longitude, timestamp: now };
           broadcastSelfPresence({ lat: latitude, lng: longitude });
+
+          if (user?.id && String(user.role || '').toUpperCase() === 'MAALEM') {
+            try {
+              supabase
+                .from('maalem_details')
+                .update({ lat: latitude, lng: longitude })
+                .eq('id', user.id)
+                .then(() => {});
+            } catch (e) {}
+          }
         }
       };
 

@@ -57,6 +57,8 @@ export const useAblySupabaseSync = ({
     isMaalemOnlineRef.current = isMaalemOnline;
   }, [isMaalemOnline]);
 
+  const latestPresenceCoordsRef = useRef(new Map());
+
   const handleAblyPresenceUpdate = useCallback((presenceMap) => {
     setMaalems((prev) => {
       const maalemMap = new Map(prev.map((m) => [String(m.id).trim(), { ...m }]));
@@ -64,6 +66,13 @@ export const useAblySupabaseSync = ({
 
       Object.entries(presenceMap).forEach(([id, member]) => {
         const cleanId = String(id).trim();
+        if (member && member.lat !== undefined && member.lng !== undefined) {
+          const pLat = parseFloat(member.lat);
+          const pLng = parseFloat(member.lng);
+          if (!isNaN(pLat) && !isNaN(pLng) && pLat > 20 && pLat < 38) {
+            latestPresenceCoordsRef.current.set(cleanId, { lat: pLat, lng: pLng });
+          }
+        }
         const existing = maalemMap.get(cleanId);
 
         if (existing) {
@@ -288,14 +297,30 @@ export const useAblySupabaseSync = ({
       return r === 'maalem';
     });
 
-    const formattedMaalems = maalemProfiles.map((m) => {
-      const details = detailsMap.get(String(m.id).trim()) || {};
-      const zone = (m.city_zone || '').toLowerCase();
-      let mLat = parseFloat(m.lat || details.lat);
-      let mLng = parseFloat(m.lng || details.lng);
+    const maalemMapFromPrev = new Map((maalemsRef.current || []).map((m) => [String(m.id).trim(), m]));
 
-      if (isNaN(mLat) || isNaN(mLng) || mLng >= 0 || mLat < 20 || mLat > 38) {
-        if (zone.includes('fès') || zone.includes('fes')) {
+    const formattedMaalems = maalemProfiles.map((m) => {
+      const cleanId = String(m.id).trim();
+      const details = detailsMap.get(cleanId) || {};
+      const zone = (m.city_zone || '').toLowerCase();
+
+      // 1. Priorité absolue : Position GPS en direct reçue par Centrifugo / WebSocket
+      const livePresence = latestPresenceCoordsRef.current?.get(cleanId);
+      // 2. Position existante déjà en mémoire si elle était valide
+      const existingMaalem = maalemMapFromPrev.get(cleanId);
+
+      let mLat = livePresence && !isNaN(livePresence.lat)
+        ? livePresence.lat
+        : parseFloat(m.lat || details.lat);
+      let mLng = livePresence && !isNaN(livePresence.lng)
+        ? livePresence.lng
+        : parseFloat(m.lng || details.lng);
+
+      if (isNaN(mLat) || isNaN(mLng) || mLng >= 0 || mLat < 20 || mLat > 38 || (mLat === 33.5883 && !zone.includes('casablanca'))) {
+        if (existingMaalem && !isNaN(existingMaalem.lat) && existingMaalem.lat !== 33.5883 && existingMaalem.lat !== 34.0331) {
+          mLat = existingMaalem.lat;
+          mLng = existingMaalem.lng;
+        } else if (zone.includes('fès') || zone.includes('fes')) {
           mLat = 34.0331;
           mLng = -5.0003;
         } else if (zone.includes('rabat')) {
