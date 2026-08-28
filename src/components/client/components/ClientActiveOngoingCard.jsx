@@ -71,11 +71,13 @@ export const ClientActiveOngoingCard = ({
     ? Number(activeOngoingSOS.lng)
     : Number(selectedLng);
 
+  // Coordonnées Maâlem
+  const maalemLat = parseFloat(resolvedMaalem?.lat || activeOngoingSOS.maalem_lat || 33.5883);
+  const maalemLng = parseFloat(resolvedMaalem?.lng || activeOngoingSOS.maalem_lng || -7.6328);
+
   // Calcul du tracé routier réel entre le Maâlem et le Client (sans recalculs intempestifs)
   useEffect(() => {
     let isCancelled = false;
-    const maalemLat = parseFloat(resolvedMaalem?.lat || activeOngoingSOS.maalem_lat || 33.5883);
-    const maalemLng = parseFloat(resolvedMaalem?.lng || activeOngoingSOS.maalem_lng || -7.6328);
 
     if (!isNaN(clientLat) && !isNaN(clientLng) && !isNaN(maalemLat) && !isNaN(maalemLng)) {
       const sig = `${maalemLat.toFixed(4)},${maalemLng.toFixed(4)}_${clientLat.toFixed(4)},${clientLng.toFixed(4)}`;
