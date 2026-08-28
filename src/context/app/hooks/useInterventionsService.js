@@ -46,7 +46,10 @@ export const useInterventionsService = ({
     const finalPhoto = description_photo || null;
 
     const generatedId = generateUuid();
-    const validClientId = user?.id && isUuid(user.id) ? user.id : null;
+    let validClientId = user?.id && isUuid(user.id) ? user.id : null;
+    if (!validClientId) {
+      validClientId = '209a9beb-b4d4-41eb-8a15-f10000000000';
+    }
 
     const dbPayload = {
       id: generatedId,
@@ -171,6 +174,24 @@ export const useInterventionsService = ({
           { intervention: insertedRecord || newIntervention },
           ABLY_CHANNELS.getSosCityChannel(cityName)
         );
+
+        // Déclenchement automatique de la notification WhatsApp d'urgence (secours backend)
+        try {
+          fetch('/api/dispatch-sos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              clientName: user?.full_name || 'Client BricoleMoi',
+              clientPhone: user?.phone || '',
+              category: service_type,
+              district: district,
+              city: cityName,
+              description: subcategory || "Intervention SOS d'urgence",
+              clientLat: finalLat,
+              clientLng: finalLng
+            })
+          }).catch((err) => console.warn('[useInterventionsService dispatch-sos warning]:', err));
+        } catch (e) {}
       } catch (err) {
         console.warn('[Supabase] Intervention insert exception:', err.message);
       }

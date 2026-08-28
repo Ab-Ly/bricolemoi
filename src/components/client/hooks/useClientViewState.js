@@ -516,12 +516,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
   const handleSOSSubmit = async (e) => {
     if (e) e.preventDefault();
-    if (!user) {
-      setAuthModalOpen(true);
-      return;
-    }
-
-    if (!user.phone || user.phone.length < 8) {
+    if (!user || !user.phone || user.phone.length < 8) {
       setSosPhoneModalOpen(true);
       return;
     }
@@ -541,13 +536,32 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
     const cleanNumber = cleanDigits.startsWith('0') ? cleanDigits.substring(1) : cleanDigits;
     const formatted = cleanDigits.startsWith(dialDigits) ? `+${cleanDigits}` : `${sosCountry.dial}${cleanNumber}`;
 
-    const updatedUser = { ...user, phone: formatted };
-    setUser(updatedUser);
-    sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+    let currentUser = user;
+    if (!currentUser) {
+      const generatedId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : '209a9beb-b4d4-41eb-8a15-f10000000000';
+      currentUser = {
+        id: generatedId,
+        full_name: `Client ${formatted.slice(-4)}`,
+        phone: formatted,
+        role: 'CLIENT'
+      };
+    } else {
+      currentUser = { ...currentUser, phone: formatted };
+    }
 
-    if (isSupabaseConfigured && user.id) {
+    setUser(currentUser);
+    sessionStorage.setItem('bricolemoi_session', JSON.stringify(currentUser));
+
+    if (isSupabaseConfigured && currentUser.id) {
       try {
-        await supabase.from('profiles').update({ phone: formatted }).eq('id', user.id);
+        await supabase.from('profiles').upsert([{
+          id: currentUser.id,
+          full_name: currentUser.full_name,
+          phone: formatted,
+          role: 'CLIENT'
+        }]);
       } catch (err) {
         console.error('Erreur save phone SOS:', err);
       }
