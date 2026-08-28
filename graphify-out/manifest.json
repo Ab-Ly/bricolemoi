@@ -858,9 +858,9 @@
     "semantic_hash": ""
   },
   "src/components/client/ClientView.jsx": {
-    "mtime": 1787856065.6899915,
-    "seen": 1787945447.712917,
-    "ast_hash": "03fa7a4aea7fa493cf4498bf67653867",
+    "mtime": 1787949105.206783,
+    "seen": 1787949400.099592,
+    "ast_hash": "3576f5a4b2c3dc5df657cafb169968ec",
     "semantic_hash": ""
   },
   "src/components/client/components/ClientActiveOngoingCard.jsx": {
@@ -888,9 +888,9 @@
     "semantic_hash": ""
   },
   "src/components/client/components/ClientRadarSearchingCard.jsx": {
-    "mtime": 1787856065.6948247,
-    "seen": 1787945447.712928,
-    "ast_hash": "88c85b310e6d1fc01be8684ea0cdfd11",
+    "mtime": 1787949161.4679723,
+    "seen": 1787949400.100115,
+    "ast_hash": "fa3afe17c2e8a0ffcde9a92290f7f35f",
     "semantic_hash": ""
   },
   "src/components/client/components/ClientReviewCompletionModal.jsx": {
