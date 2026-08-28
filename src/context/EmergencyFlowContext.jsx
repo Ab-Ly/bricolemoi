@@ -400,7 +400,7 @@ export const EmergencyFlowProvider = ({ children }) => {
           category: targetCat,
           district: emergencyData.district || 'Maârif',
           city: emergencyData.city || 'Casablanca',
-          budget: String(emergencyData.price_dh || emergencyData.budget || '250'),
+          pricingModel: 'ACCORD_DIRECT',
           description: emergencyData.subcategory || emergencyData.description || 'Intervention Urgente SOS 🚨',
           clientLat,
           clientLng,

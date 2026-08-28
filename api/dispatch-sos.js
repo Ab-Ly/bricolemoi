@@ -54,7 +54,6 @@ export default async function handler(req, res) {
       category = "PLUMBING",
       district = "Maârif",
       city = "Casablanca",
-      budget = "250",
       description = "Intervention Urgente SOS 🚨",
       clientLat = 33.5898,
       clientLng = -7.6038,
@@ -96,7 +95,7 @@ export default async function handler(req, res) {
     // 3. Envoi direct WhatsApp à chaque Maâlem qualifié via Evolution API
     for (const maalem of qualifiedMaalems) {
       try {
-        const messageText = `🚨 *URGENCE SOS DISPONIBLE (${maalem.distanceKm} km de vous)* 🚨\n\nBonjour *${maalem.name || "Maâlem"}*,\nUne mission urgente correspond à votre métier :\n\n🔧 *Métier* : ${targetCategory}\n📍 *Secteur* : ${district}, ${city}\n📏 *Distance* : *${maalem.distanceKm} km*\n💰 *Budget proposé* : *${budget} DH*\n📝 *Détails* : ${description}\n👤 *Client* : ${clientName}\n\n⚡ *Accepter la mission :*\n👉 https://bricolemoi.vercel.app`;
+        const messageText = `🚨 *URGENCE SOS DISPONIBLE (${maalem.distanceKm} km de vous)* 🚨\n\nBonjour *${maalem.name || "Maâlem"}*,\nUne mission urgente correspond à votre métier :\n\n🔧 *Métier* : ${targetCategory}\n📍 *Secteur* : ${district}, ${city}\n📏 *Distance* : *${maalem.distanceKm} km*\n🤝 *Tarification* : *Accord Direct* (Négociation libre sans intermédiaire)\n📝 *Détails* : ${description}\n👤 *Client* : ${clientName}\n\n⚡ *Ouvrir le Radar & Débloquer la mission (15 DH) :*\n👉 https://bricolemoi.vercel.app?app=maalem`;
 
         const evoRes = await fetch(`${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
           method: "POST",
