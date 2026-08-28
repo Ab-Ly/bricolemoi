@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { createClient } from '@supabase/supabase-js';
 import WebSocket from 'ws';
 import fs from 'fs';

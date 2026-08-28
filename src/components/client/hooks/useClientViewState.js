@@ -71,7 +71,7 @@ export const POSITIVE_BADGES = ['⏱️ Très Ponctuel', '🧹 Chantier Propre',
 export const NEGATIVE_BADGES = ['⏱️ Retard important', '💰 Prix plus cher que prévu', '🛠️ Travail incomplet', '🧹 Saleté laissée sur place', '⚠️ Communication difficile'];
 
 export const useClientViewState = ({ initialCategory, initialCity, initialDistrict }) => {
-  const { t, user, setUser, setAuthModalOpen } = useAuth();
+  const { t, user, setUser, setAuthModalOpen, lang } = useAuth();
   const {
     interventions,
     maalems,
@@ -650,6 +650,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
   return {
     t,
     user,
+    lang,
     setUser,
     serviceType,
     setServiceType,
