@@ -631,11 +631,14 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
        Boolean(i.maalem_id))
   );
 
-  const isEmergencyMatched = isMatched || (activeEmergency && (
-    ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(activeEmergency.status) ||
-    ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(activeEmergency.progress_step) ||
-    Boolean(activeEmergency.maalem_id)
-  ));
+  const isEmergencyMatched = isMatched || (activeEmergency && 
+    activeEmergency.status !== 'COMPLETED' &&
+    activeEmergency.status !== 'CANCELLED' && (
+      ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(activeEmergency.status) ||
+      ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(activeEmergency.progress_step) ||
+      Boolean(activeEmergency.maalem_id)
+    )
+  );
 
   const activeOngoingSOS =
     (ongoingFromList && ongoingFromList.status !== 'COMPLETED' && ongoingFromList.status !== 'CANCELLED')

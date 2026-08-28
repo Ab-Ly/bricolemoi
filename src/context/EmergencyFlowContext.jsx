@@ -172,9 +172,11 @@ export const EmergencyFlowProvider = ({ children }) => {
 
       const myMatched = interventions?.find(
         (i) => isMyIntv(i) && 
+               i.status !== 'COMPLETED' &&
+               i.status !== 'CANCELLED' &&
                (['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status) ||
                 ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(i.progress_step) ||
-                Boolean(i.maalem_id && i.status !== 'CANCELLED' && i.status !== 'COMPLETED'))
+                Boolean(i.maalem_id))
       );
 
       const myPending = interventions?.find(

@@ -300,6 +300,7 @@ export const InteractiveMap = ({
   const emergencyMarkersRef = useRef({});
   const clientMarkerRef = useRef(null);
   const destinationMarkerRef = useRef(null);
+  const lastRouteSigRef = useRef('');
 
   // 1. Initialize MapLibre Canvas with Full Street & Place Names Tile Layer
   useEffect(() => {
@@ -337,7 +338,8 @@ export const InteractiveMap = ({
     }, 200);
 
     map.on('click', (e) => {
-      if (onLocationSelect) {
+      // Ne pas écouter les clics de sélection d'adresse si un trajet en direct est actif
+      if (onLocationSelect && (!activeRouteCoords || activeRouteCoords.length < 2)) {
         onLocationSelect(e.lngLat.lat, e.lngLat.lng);
       }
     });
@@ -353,8 +355,11 @@ export const InteractiveMap = ({
     };
   }, [activeStyleKey]);
 
-  // 2. Smooth map center update
+  // 2. Smooth map center update (uniquement si aucun trajet routier actif n'est affiché)
   useEffect(() => {
+    // Si un itinéraire actif est affiché, laisser fitBounds cadrer le trajet et ne pas forcer flyTo sur le point unique
+    if (activeRouteCoords && activeRouteCoords.length >= 2) return;
+
     if (mapRef.current && selectedLat && selectedLng) {
       mapRef.current.flyTo({
         center: [selectedLng, selectedLat],
@@ -362,7 +367,7 @@ export const InteractiveMap = ({
         speed: 1.2
       });
     }
-  }, [selectedLat, selectedLng]);
+  }, [selectedLat, selectedLng, activeRouteCoords]);
 
   // 3. Synchronisation réactive des coordonnées Maâlem (sans boucle CPU artificielle)
   useEffect(() => {
@@ -378,36 +383,45 @@ export const InteractiveMap = ({
     const map = mapRef.current;
     if (!map || !mapLoaded) return;
 
-    // A. Client GPS Pulsing Dot Marker
-    if (!clientMarkerRef.current) {
-      const el = document.createElement('div');
-      el.style.width = '36px';
-      el.style.height = '36px';
-      el.className = 'relative flex items-center justify-center cursor-pointer';
-      el.innerHTML = `
-        <div class="absolute w-10 h-10 rounded-full bg-blue-500/25 animate-ping"></div>
-        <div class="w-5 h-5 rounded-full bg-blue-600 border-2 border-white shadow-md shadow-blue-500/40"></div>
-      `;
+    const isRouteActive = Boolean(activeRouteCoords && activeRouteCoords.length >= 2);
 
-      const popup = new maplibregl.Popup({ offset: 25, className: 'clean-trust-popup' }).setHTML(
-        `<div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 p-3 rounded-2xl text-center shadow-xl font-sans">
-          <p class="font-black text-slate-900 text-xs">Votre Position GPS</p>
-          <p class="text-[10px] text-slate-500 font-mono mt-0.5">${userGPSPos.lat.toFixed(4)}, ${userGPSPos.lng.toFixed(4)}</p>
-        </div>`
-      );
-
-      clientMarkerRef.current = new maplibregl.Marker({ element: el })
-        .setLngLat([userGPSPos.lng, userGPSPos.lat])
-        .setPopup(popup)
-        .addTo(map);
+    // A. Client GPS Pulsing Dot Marker (Masqué si un itinéraire actif affiche déjà le point d'arrivée)
+    if (isRouteActive) {
+      if (clientMarkerRef.current) {
+        clientMarkerRef.current.remove();
+        clientMarkerRef.current = null;
+      }
     } else {
-      clientMarkerRef.current.setLngLat([userGPSPos.lng, userGPSPos.lat]);
-      if (!clientMarkerRef.current.getElement().parentNode) {
-        clientMarkerRef.current.addTo(map);
+      if (!clientMarkerRef.current) {
+        const el = document.createElement('div');
+        el.style.width = '36px';
+        el.style.height = '36px';
+        el.className = 'relative flex items-center justify-center cursor-pointer';
+        el.innerHTML = `
+          <div class="absolute w-10 h-10 rounded-full bg-blue-500/25 animate-ping"></div>
+          <div class="w-5 h-5 rounded-full bg-blue-600 border-2 border-white shadow-md shadow-blue-500/40"></div>
+        `;
+
+        const popup = new maplibregl.Popup({ offset: 25, className: 'clean-trust-popup' }).setHTML(
+          `<div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 p-3 rounded-2xl text-center shadow-xl font-sans">
+            <p class="font-black text-slate-900 text-xs">Votre Position GPS</p>
+            <p class="text-[10px] text-slate-500 font-mono mt-0.5">${userGPSPos.lat.toFixed(4)}, ${userGPSPos.lng.toFixed(4)}</p>
+          </div>`
+        );
+
+        clientMarkerRef.current = new maplibregl.Marker({ element: el })
+          .setLngLat([userGPSPos.lng, userGPSPos.lat])
+          .setPopup(popup)
+          .addTo(map);
+      } else {
+        clientMarkerRef.current.setLngLat([userGPSPos.lng, userGPSPos.lat]);
+        if (!clientMarkerRef.current.getElement().parentNode) {
+          clientMarkerRef.current.addTo(map);
+        }
       }
     }
 
-    // B. Selected Destination Breakdown Pin Marker (Draggable)
+    // B. Selected Destination Breakdown Pin Marker (Point d'arrivée fixe durant le trajet)
     const destLat = parseFloat(selectedLat || userGPSPos?.lat || 33.5883);
     const destLng = parseFloat(selectedLng || userGPSPos?.lng || -7.6328);
 
@@ -416,7 +430,7 @@ export const InteractiveMap = ({
         const el = document.createElement('div');
         el.style.width = '44px';
         el.style.height = '52px';
-        el.className = 'cursor-move transform -translate-y-full transition-transform hover:scale-110 z-30';
+        el.className = `${isRouteActive ? '' : 'cursor-move'} transform -translate-y-full transition-transform hover:scale-110 z-30`;
         el.innerHTML = `
           <div class="relative flex flex-col items-center">
             <div class="w-11 h-11 rounded-2xl bg-white text-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25 border-2 border-blue-600">
@@ -428,24 +442,27 @@ export const InteractiveMap = ({
 
         const popup = new maplibregl.Popup({ offset: 25, className: 'clean-trust-popup' }).setHTML(
           `<div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 p-3 rounded-2xl text-center shadow-xl font-sans">
-            <p class="text-xs font-black text-slate-900">Point d'Intervention</p>
-            <p class="text-[10px] text-slate-500 mt-0.5">Glissez le marqueur pour affiner</p>
+            <p class="text-xs font-black text-slate-900">${isRouteActive ? "Point d'Arrivée (Votre Adresse)" : "Point d'Intervention"}</p>
+            <p class="text-[10px] text-slate-500 mt-0.5">${isRouteActive ? "Adresse confirmée de l'intervention" : "Glissez le marqueur pour affiner"}</p>
           </div>`
         );
 
-        destinationMarkerRef.current = new maplibregl.Marker({ element: el, draggable: true })
+        destinationMarkerRef.current = new maplibregl.Marker({ element: el, draggable: !isRouteActive })
           .setLngLat([destLng, destLat])
           .setPopup(popup)
           .addTo(map);
 
-        destinationMarkerRef.current.on('dragend', () => {
-          const lngLat = destinationMarkerRef.current.getLngLat();
-          if (onLocationSelect) {
-            onLocationSelect(lngLat.lat, lngLat.lng);
-          }
-        });
+        if (!isRouteActive) {
+          destinationMarkerRef.current.on('dragend', () => {
+            const lngLat = destinationMarkerRef.current.getLngLat();
+            if (onLocationSelect) {
+              onLocationSelect(lngLat.lat, lngLat.lng);
+            }
+          });
+        }
       } else {
         destinationMarkerRef.current.setLngLat([destLng, destLat]);
+        destinationMarkerRef.current.setDraggable(!isRouteActive);
         if (!destinationMarkerRef.current.getElement().parentNode) {
           destinationMarkerRef.current.addTo(map);
         }
@@ -700,18 +717,25 @@ export const InteractiveMap = ({
       });
     }
 
-    // Auto-cadrage doux pour englober tout le trajet
-    try {
-      const bounds = new maplibregl.LngLatBounds();
-      activeRouteCoords.forEach((pt) => {
-        if (Array.isArray(pt) && pt.length >= 2 && !isNaN(pt[0]) && !isNaN(pt[1])) {
-          bounds.extend(pt);
+    // Auto-cadrage doux pour englober tout le trajet (uniquement au premier affichage ou si le tracé change)
+    const startPt = activeRouteCoords[0];
+    const endPt = activeRouteCoords[activeRouteCoords.length - 1];
+    const routeSignature = `${startPt[0].toFixed(3)},${startPt[1].toFixed(3)}_${endPt[0].toFixed(3)},${endPt[1].toFixed(3)}`;
+
+    if (lastRouteSigRef.current !== routeSignature) {
+      lastRouteSigRef.current = routeSignature;
+      try {
+        const bounds = new maplibregl.LngLatBounds();
+        activeRouteCoords.forEach((pt) => {
+          if (Array.isArray(pt) && pt.length >= 2 && !isNaN(pt[0]) && !isNaN(pt[1])) {
+            bounds.extend(pt);
+          }
+        });
+        if (!bounds.isEmpty()) {
+          map.fitBounds(bounds, { padding: 60, maxZoom: 16 });
         }
-      });
-      if (!bounds.isEmpty()) {
-        map.fitBounds(bounds, { padding: 60, maxZoom: 16 });
-      }
-    } catch (e) {}
+      } catch (e) {}
+    }
   }, [activeRouteCoords, mapLoaded]);
 
   // Accurate Geolocation Handler with Automatic 2-Stage Fallback

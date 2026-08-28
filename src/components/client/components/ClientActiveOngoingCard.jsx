@@ -61,15 +61,27 @@ export const ClientActiveOngoingCard = ({
       ? Number(activeOngoingSOS.maalem_rating).toFixed(1)
       : (resolvedMaalem?.rating_avg ? Number(resolvedMaalem.rating_avg).toFixed(1) : '5.0'));
 
-  // Calcul du tracé routier réel entre le Maâlem et le Client
+  const lastRouteSigRef = useRef('');
+
+  // Coordonnées client ultra-stables (priorité absolue à l'intervention enregistrée)
+  const clientLat = (activeOngoingSOS.lat && !isNaN(Number(activeOngoingSOS.lat)))
+    ? Number(activeOngoingSOS.lat)
+    : Number(selectedLat);
+  const clientLng = (activeOngoingSOS.lng && !isNaN(Number(activeOngoingSOS.lng)))
+    ? Number(activeOngoingSOS.lng)
+    : Number(selectedLng);
+
+  // Calcul du tracé routier réel entre le Maâlem et le Client (sans recalculs intempestifs)
   useEffect(() => {
     let isCancelled = false;
-    const clientLat = parseFloat(activeOngoingSOS.lat || selectedLat);
-    const clientLng = parseFloat(activeOngoingSOS.lng || selectedLng);
     const maalemLat = parseFloat(resolvedMaalem?.lat || activeOngoingSOS.maalem_lat || 33.5883);
     const maalemLng = parseFloat(resolvedMaalem?.lng || activeOngoingSOS.maalem_lng || -7.6328);
 
     if (!isNaN(clientLat) && !isNaN(clientLng) && !isNaN(maalemLat) && !isNaN(maalemLng)) {
+      const sig = `${maalemLat.toFixed(4)},${maalemLng.toFixed(4)}_${clientLat.toFixed(4)},${clientLng.toFixed(4)}`;
+      if (lastRouteSigRef.current === sig) return;
+      lastRouteSigRef.current = sig;
+
       fetchRoadRoute([maalemLat, maalemLng], [clientLat, clientLng]).then((res) => {
         if (!isCancelled && res) {
           setRouteInfo(res);
@@ -80,7 +92,7 @@ export const ClientActiveOngoingCard = ({
     return () => {
       isCancelled = true;
     };
-  }, [activeOngoingSOS.lat, activeOngoingSOS.lng, selectedLat, selectedLng, resolvedMaalem?.lat, resolvedMaalem?.lng]);
+  }, [clientLat, clientLng, resolvedMaalem?.lat, resolvedMaalem?.lng, activeOngoingSOS.maalem_lat, activeOngoingSOS.maalem_lng]);
 
   return (
     <motion.div
@@ -307,8 +319,8 @@ export const ClientActiveOngoingCard = ({
         </label>
         <InteractiveMap
           mode="CLIENT_PICKER"
-          selectedLat={parseFloat(activeOngoingSOS.lat || selectedLat)}
-          selectedLng={parseFloat(activeOngoingSOS.lng || selectedLng)}
+          selectedLat={clientLat}
+          selectedLng={clientLng}
           filterCategory={activeOngoingSOS.service_type || serviceType}
           activeRouteCoords={routeInfo?.coordinates}
           etaSummary={routeInfo?.summary}

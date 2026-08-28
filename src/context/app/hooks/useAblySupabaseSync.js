@@ -296,23 +296,23 @@ export const useAblySupabaseSync = ({
 
       if (isNaN(mLat) || isNaN(mLng) || mLng >= 0 || mLat < 20 || mLat > 38) {
         if (zone.includes('fès') || zone.includes('fes')) {
-          mLat = 34.0331 + (Math.random() - 0.5) * 0.015;
-          mLng = -5.0003 + (Math.random() - 0.5) * 0.015;
+          mLat = 34.0331;
+          mLng = -5.0003;
         } else if (zone.includes('rabat')) {
-          mLat = 34.0209 + (Math.random() - 0.5) * 0.015;
-          mLng = -6.8416 + (Math.random() - 0.5) * 0.015;
+          mLat = 34.0209;
+          mLng = -6.8416;
         } else if (zone.includes('marrakech')) {
-          mLat = 31.6295 + (Math.random() - 0.5) * 0.015;
-          mLng = -7.9811 + (Math.random() - 0.5) * 0.015;
+          mLat = 31.6295;
+          mLng = -7.9811;
         } else if (zone.includes('tanger')) {
-          mLat = 35.7595 + (Math.random() - 0.5) * 0.015;
-          mLng = -5.834 + (Math.random() - 0.5) * 0.015;
+          mLat = 35.7595;
+          mLng = -5.834;
         } else if (zone.includes('agadir')) {
-          mLat = 30.4278 + (Math.random() - 0.5) * 0.015;
-          mLng = -9.5981 + (Math.random() - 0.5) * 0.015;
+          mLat = 30.4278;
+          mLng = -9.5981;
         } else {
-          mLat = 33.5883 + (Math.random() - 0.5) * 0.015;
-          mLng = -7.6328 + (Math.random() - 0.5) * 0.015;
+          mLat = 33.5883;
+          mLng = -7.6328;
         }
       }
 
