@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 import { 
   Play, 
   Pause, 
@@ -197,6 +198,8 @@ const MAALEM_SCENES = [
 ];
 
 export const PromoVideoPlayer = ({ onSelectJourney }) => {
+  const { lang } = useAuth();
+  const isAr = lang === 'ar';
   const [track, setTrack] = useState('CLIENT'); // 'CLIENT' | 'MAALEM'
   const [currentSceneIdx, setCurrentSceneIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -249,15 +252,15 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 font-sans">
+    <div dir={isAr ? 'rtl' : 'ltr'} className={`w-full max-w-5xl mx-auto space-y-6 ${isAr ? 'font-arabic' : 'font-sans'}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-black text-blue-600 tracking-wider uppercase flex items-center gap-2">
             <VideoCamera weight="duotone" className="w-4 h-4 text-blue-600" />
-            <span>Spot Vidéo Démonstratif • Cas Réels &amp; Concrets au Maroc</span>
+            <span>{isAr ? 'عرض توضيحي تفاعلي • حالات واقعية فالمغرب 🇲🇦' : 'Démonstration Interactive • Cas Réels au Maroc 🇲🇦'}</span>
           </span>
           <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
-            Découvrez BricoleMoi en Vidéo Animée
+            {isAr ? 'كيفاش كيخدم بريكول موي خطوة بخطوة ؟' : 'Comment fonctionne BricoleMoi en Pratique ?'}
           </h3>
         </div>
 
@@ -272,7 +275,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
             }`}
           >
             <Zap className="w-3.5 h-3.5" />
-            <span>Spot Client (Urgence)</span>
+            <span>{isAr ? 'فضاء الزبون (طلب عاجل)' : 'Parcours Client (Urgence)'}</span>
           </button>
 
           <button
@@ -285,7 +288,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
             }`}
           >
             <Wrench className="w-3.5 h-3.5" />
-            <span>Spot Artisan (Maâlem)</span>
+            <span>{isAr ? 'فضاء الحرفي (المعلّم)' : 'Parcours Artisan (Maâlem)'}</span>
           </button>
         </div>
       </div>
