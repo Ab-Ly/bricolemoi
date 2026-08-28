@@ -3,7 +3,9 @@
  * Gère la connexion résiliente, les souscriptions multi-canaux et la publication d'événements.
  */
 
-const CENTRIFUGO_WS_URL = import.meta.env.VITE_CENTRIFUGO_WS_URL || '';
+const CENTRIFUGO_WS_URL =
+  import.meta.env.VITE_CENTRIFUGO_WS_URL ||
+  'wss://centrifugo.51.255.46.206.sslip.io/connection/websocket';
 const CENTRIFUGO_TOKEN = import.meta.env.VITE_CENTRIFUGO_TOKEN || '';
 
 export const isCentrifugoConfigured = Boolean(CENTRIFUGO_WS_URL && CENTRIFUGO_WS_URL.startsWith('ws'));
