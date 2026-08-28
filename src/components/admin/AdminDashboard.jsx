@@ -245,8 +245,91 @@ export const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* 4 Compteurs KPI Essentiels & Interactifs (2x2 Mobile, 4 Cols Desktop) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-100">
+        {/* 💼 1. Bilan Financier & Trésorerie Haute Visibilité (Tout en Haut) */}
+        <div className="mt-4 sm:mt-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-50 via-blue-50/30 to-slate-50 border border-slate-200 shadow-xs">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs">
+                <Coins className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-xs sm:text-sm font-black text-slate-900 tracking-tight block">
+                  Bilan Financier &amp; Trésorerie Plateforme
+                </span>
+                <span className="text-[10px] text-slate-500 font-medium">
+                  Suivi en direct des encaissements, commissions nettes réalisées et soldes en séquestre
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('RECHARGES')}
+              className="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-white hover:bg-blue-50 px-3 py-1 rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer flex items-center gap-1"
+            >
+              <span>Gérer les Recharges</span>
+              <TrendingUp className="w-3 h-3" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+            {/* 1. CA Brut Encaissé */}
+            <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-xs space-y-1">
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-slate-500 font-bold block truncate">
+                CA Brut Encaissé
+              </span>
+              <p className="text-lg sm:text-2xl font-black font-mono text-slate-900">
+                {financialMetrics.grossRevenueEncaissed.toLocaleString('fr-FR')} <span className="text-xs font-normal text-slate-500 font-sans">DH</span>
+              </p>
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-mono block truncate">
+                Recharges réelles payées
+              </span>
+            </div>
+
+            {/* 2. CA Net Réalisé */}
+            <div className="p-3.5 rounded-xl bg-white border border-emerald-200/90 shadow-xs space-y-1 ring-1 ring-emerald-500/10">
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-emerald-700 font-bold block truncate">
+                CA Net Réalisé (Gagné)
+              </span>
+              <p className="text-lg sm:text-2xl font-black font-mono text-emerald-700">
+                {financialMetrics.netEarnedCommissions.toLocaleString('fr-FR')} <span className="text-xs font-normal text-emerald-600 font-sans">DH</span>
+              </p>
+              <span className="text-[9px] sm:text-[10px] text-emerald-600 font-mono block truncate">
+                {financialMetrics.unlockedMissionsCount} mission{financialMetrics.unlockedMissionsCount > 1 ? 's' : ''} débloquée{financialMetrics.unlockedMissionsCount > 1 ? 's' : ''} (15 DH/u)
+              </span>
+            </div>
+
+            {/* 3. Solde Non Consommé Maâlems */}
+            <div className="p-3.5 rounded-xl bg-white border border-amber-200/90 shadow-xs space-y-1 ring-1 ring-amber-500/10">
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-amber-800 font-bold block truncate">
+                Crédits Non Consommés
+              </span>
+              <p className="text-lg sm:text-2xl font-black font-mono text-amber-800">
+                {financialMetrics.totalMaalemCredits.toLocaleString('fr-FR')} <span className="text-xs font-normal text-amber-700 font-sans">DH</span>
+              </p>
+              <span className="text-[9px] sm:text-[10px] text-amber-700 font-mono block truncate">
+                {financialMetrics.unspentRealCash} DH avances + {financialMetrics.unspentBonusCredits} DH bonus
+              </span>
+            </div>
+
+            {/* 4. Volume Global Chantiers */}
+            <div className="p-3.5 rounded-xl bg-white border border-blue-200/90 shadow-xs space-y-1 ring-1 ring-blue-500/10">
+              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-blue-700 font-bold block truncate">
+                Volume Chantiers Réel
+              </span>
+              <p className="text-lg sm:text-2xl font-black font-mono text-blue-700">
+                {financialMetrics.directChantiersVolume.toLocaleString('fr-FR')} <span className="text-xs font-normal text-blue-600 font-sans">DH</span>
+              </p>
+              <span className="text-[9px] sm:text-[10px] text-blue-500 font-mono block truncate">
+                {financialMetrics.completedMissionsCount > 0
+                  ? `${financialMetrics.completedMissionsCount} chantier${financialMetrics.completedMissionsCount > 1 ? 's' : ''} en Accord Direct`
+                  : 'Accords directs à convenir'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. 4 Compteurs KPI Essentiels & Interactifs (2x2 Mobile, 4 Cols Desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-slate-100">
           {/* Card 1 : Total Clients */}
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -385,89 +468,6 @@ export const AdminDashboard = () => {
               <strong className="text-purple-700 font-bold">{pendingRechargesCount}</strong>
             </div>
           </motion.div>
-        </div>
-
-        {/* 💼 Bandeau Trésorerie & Chiffre d'Affaires Haute Visibilité (Modern Clean & Trust) */}
-        <div className="mt-4 sm:mt-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-50 via-blue-50/30 to-slate-50 border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3.5 flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs">
-                <Coins className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-xs sm:text-sm font-black text-slate-900 tracking-tight block">
-                  Bilan Financier &amp; Trésorerie Plateforme
-                </span>
-                <span className="text-[10px] text-slate-500 font-medium">
-                  Suivi en temps réel des encaissements, commissions réalisées et soldes en séquestre
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setActiveTab('RECHARGES')}
-              className="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-white hover:bg-blue-50 px-3 py-1 rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer flex items-center gap-1"
-            >
-              <span>Gérer les Recharges</span>
-              <TrendingUp className="w-3 h-3" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
-            {/* 1. CA Brut Encaissé */}
-            <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-xs space-y-1">
-              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-slate-500 font-bold block truncate">
-                CA Brut Encaissé
-              </span>
-              <p className="text-lg sm:text-2xl font-black font-mono text-slate-900">
-                {financialMetrics.grossRevenueEncaissed.toLocaleString('fr-FR')} <span className="text-xs font-normal text-slate-500 font-sans">DH</span>
-              </p>
-              <span className="text-[9px] sm:text-[10px] text-slate-400 font-mono block truncate">
-                Recharges réelles payées
-              </span>
-            </div>
-
-            {/* 2. CA Net Réalisé */}
-            <div className="p-3.5 rounded-xl bg-white border border-emerald-200/90 shadow-xs space-y-1 ring-1 ring-emerald-500/10">
-              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-emerald-700 font-bold block truncate">
-                CA Net Réalisé (Gagné)
-              </span>
-              <p className="text-lg sm:text-2xl font-black font-mono text-emerald-700">
-                {financialMetrics.netEarnedCommissions.toLocaleString('fr-FR')} <span className="text-xs font-normal text-emerald-600 font-sans">DH</span>
-              </p>
-              <span className="text-[9px] sm:text-[10px] text-emerald-600 font-mono block truncate">
-                {financialMetrics.unlockedMissionsCount} mission{financialMetrics.unlockedMissionsCount > 1 ? 's' : ''} débloquée{financialMetrics.unlockedMissionsCount > 1 ? 's' : ''} (15 DH/u)
-              </span>
-            </div>
-
-            {/* 3. Solde Non Consommé Maâlems */}
-            <div className="p-3.5 rounded-xl bg-white border border-amber-200/90 shadow-xs space-y-1 ring-1 ring-amber-500/10">
-              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-amber-800 font-bold block truncate">
-                Crédits Non Consommés
-              </span>
-              <p className="text-lg sm:text-2xl font-black font-mono text-amber-800">
-                {financialMetrics.totalMaalemCredits.toLocaleString('fr-FR')} <span className="text-xs font-normal text-amber-700 font-sans">DH</span>
-              </p>
-              <span className="text-[9px] sm:text-[10px] text-amber-700 font-mono block truncate">
-                {financialMetrics.unspentRealCash} DH avances + {financialMetrics.unspentBonusCredits} DH bonus
-              </span>
-            </div>
-
-            {/* 4. Volume Global Chantiers */}
-            <div className="p-3.5 rounded-xl bg-white border border-blue-200/90 shadow-xs space-y-1 ring-1 ring-blue-500/10">
-              <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-blue-700 font-bold block truncate">
-                Volume Chantiers Réel
-              </span>
-              <p className="text-lg sm:text-2xl font-black font-mono text-blue-700">
-                {financialMetrics.directChantiersVolume.toLocaleString('fr-FR')} <span className="text-xs font-normal text-blue-600 font-sans">DH</span>
-              </p>
-              <span className="text-[9px] sm:text-[10px] text-blue-500 font-mono block truncate">
-                {financialMetrics.completedMissionsCount > 0
-                  ? `${financialMetrics.completedMissionsCount} chantier${financialMetrics.completedMissionsCount > 1 ? 's' : ''} en Accord Direct`
-                  : 'Accords directs à convenir'}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
