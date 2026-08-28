@@ -11,6 +11,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        entryFileNames: 'assets/[name]-[hash]-v3.js',
+        chunkFileNames: 'assets/[name]-[hash]-v3.js',
+        assetFileNames: 'assets/[name]-[hash]-v3.[ext]',
         manualChunks: {
           'maplibre-vendor': ['maplibre-gl'],
           'firebase-vendor': ['firebase/app', 'firebase/auth'],

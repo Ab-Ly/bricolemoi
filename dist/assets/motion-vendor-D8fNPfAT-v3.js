@@ -1,4 +1,4 @@
-import{r as w}from"./icons-vendor-B1E9i1es.js";var Ys={exports:{}},ce={};/**
+import{r as w}from"./icons-vendor-B1E9i1es-v3.js";var Ys={exports:{}},ce={};/**
  * @license React
  * react-jsx-runtime.production.min.js
  *

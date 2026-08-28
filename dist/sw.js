@@ -3,7 +3,7 @@
  * Système de mise en cache résilient et réveil haptique d'urgence pour Artisans Maâlems au Maroc
  */
 
-const CACHE_NAME = 'bricolemoi-v7';
+const CACHE_NAME = 'bricolemoi-v10-fresh';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
