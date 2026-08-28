@@ -199,7 +199,7 @@ export const LandingPage = ({ onSelectJourney }) => {
   const currentCity = MOROCCAN_CITIES.find((c) => c.name === selectedCityName) || MOROCCAN_CITIES[0];
 
   return (
-    <div className={`space-y-12 pb-16 relative overflow-hidden ${isAr ? 'font-arabic' : 'font-sans'}`}>
+    <div dir={isAr ? 'rtl' : 'ltr'} className={`space-y-12 pb-16 relative overflow-hidden ${isAr ? 'font-arabic' : 'font-sans'}`}>
       
       {/* Ambient Decorative Lighting Background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none -z-10 overflow-hidden">
@@ -795,7 +795,7 @@ export const LandingPage = ({ onSelectJourney }) => {
               <p className={`text-xs font-black truncate transition-colors ${selectedCityName === city.name ? 'text-blue-700 font-black' : 'text-slate-800 group-hover:text-blue-600'}`}>
                 {isAr ? city.nameAr : city.name}
               </p>
-              <p className="text-[10px] text-blue-600 font-mono font-bold mt-0.5">{city.activeMaalems} {t.pros_active}</p>
+              <p className="text-[10px] text-emerald-700 font-bold mt-0.5">{isAr ? 'تغطية فورية' : 'Disponible 24/7'}</p>
             </motion.button>
           ))}
         </div>

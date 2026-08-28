@@ -93,13 +93,13 @@ const CLIENT_SCENES = [
   },
   {
     id: 4,
-    shortLabel: '🤝 4. Devis & 0 Arnaque',
-    badge: 'Cas Réel 4/4 • Devis Garanti',
-    badgeAr: 'ثمن محدد وبلا زيادات',
-    title: 'Devis Convenu de 120 DH & Réparation Réussie',
-    titleAr: 'تفاهمتو على 120 درهم قبل ما يقيس حتى بياسة',
-    desc: 'Hassan diagnostique le problème sur place et confirme le montant de 120 DH avant de commencer. Après réparation, vous validez la fin des travaux et réglez directement le montant convenu.',
-    descAr: 'كيقاد المشكل فـ 20 دقيقة، كتخلصلو 120 درهم نيشان وكتخلي ليه تقييم فالتطبيق باش يستافدو ناس خرين.',
+    shortLabel: '🤝 4. Accord Direct & 0 Arnaque',
+    badge: 'Cas Réel 4/4 • Accord Direct',
+    badgeAr: 'اتفاق مباشر و0% عمولة',
+    title: 'Tarif Convenu en Direct & Réparation Réussie',
+    titleAr: 'تفاهمتو على الثمن ديريكت قبل ما يبدا الخدمة وبلا زيادة',
+    desc: 'Hassan diagnostique le problème sur place et convient du tarif directement avec vous. Après réparation, vous validez la fin des travaux et réglez directement le Maâlem en toute transparence.',
+    descAr: 'كيقاد المشكل بكل احترافية، كتخلصو نيشان فالثمن لي تفاهمتو عليه وبلا حتى وسيط، وكتعطيه تقييم فالتطبيق.',
     icon: ShieldCheck,
     themeColor: 'from-cyan-400 to-emerald-500',
     accentColor: 'text-cyan-300',
@@ -107,7 +107,7 @@ const CLIENT_SCENES = [
     mockupVisual: {
       type: 'REAL_RECEIPT',
       reparation: 'Remplacement Flexible & Joint Robinetterie',
-      totalPaid: '120.00 DH (Prix Convenu Respecté)',
+      totalPaid: 'Accord Direct Respecté (0% Commission)',
       satisfaction: '★★★★★ 5.0 - Client Satisfait'
     }
   }
