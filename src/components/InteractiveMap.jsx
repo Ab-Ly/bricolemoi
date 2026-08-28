@@ -254,6 +254,17 @@ const getMapIconSvg = (specType) => {
   return SVG_ICONS.PLUMBING;
 };
 
+// Calcul du cap / angle d'orientation routier (0-360 deg)
+const computeBearing = (lat1, lon1, lat2, lon2) => {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const toDeg = (rad) => (rad * 180) / Math.PI;
+  const dLon = toRad(lon2 - lon1);
+  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+  const brng = toDeg(Math.atan2(y, x));
+  return (brng + 360) % 360;
+};
+
 export const InteractiveMap = ({
   mode = 'CLIENT_PICKER',
   selectedLat,
@@ -300,6 +311,10 @@ export const InteractiveMap = ({
   const clientMarkerRef = useRef(null);
   const destinationMarkerRef = useRef(null);
   const trackingMaalemMarkerRef = useRef(null);
+  const vehicleIconElRef = useRef(null);
+  const currentVehiclePosRef = useRef(null);
+  const currentVehicleHeadingRef = useRef(0);
+  const vehicleAnimRef = useRef(null);
   const lastRouteSigRef = useRef('');
 
   // 1. Initialize MapLibre Canvas with Full Street & Place Names Tile Layer
@@ -309,6 +324,12 @@ export const InteractiveMap = ({
     // Reset marker refs for fresh map instance
     clientMarkerRef.current = null;
     destinationMarkerRef.current = null;
+    if (vehicleAnimRef.current) {
+      cancelAnimationFrame(vehicleAnimRef.current);
+      vehicleAnimRef.current = null;
+    }
+    currentVehiclePosRef.current = null;
+    vehicleIconElRef.current = null;
     if (trackingMaalemMarkerRef.current) {
       trackingMaalemMarkerRef.current.remove();
       trackingMaalemMarkerRef.current = null;
@@ -560,43 +581,108 @@ export const InteractiveMap = ({
       }
     });
 
-    // D. Véhicule Maâlem en Route (Suivi GPS Direct le long du trajet)
+    // D. Véhicule Maâlem en Route (Suivi GPS Direct & Glissade Fluide Style WhatsApp)
     if (trackingMaalemPos && Array.isArray(trackingMaalemPos) && trackingMaalemPos.length >= 2) {
       const tLat = parseFloat(trackingMaalemPos[0]);
       const tLng = parseFloat(trackingMaalemPos[1]);
       if (!isNaN(tLat) && !isNaN(tLng) && tLat > 20 && tLat < 38) {
         if (!trackingMaalemMarkerRef.current) {
           const el = document.createElement('div');
-          el.style.width = '48px';
-          el.style.height = '48px';
-          el.className = 'relative flex items-center justify-center cursor-pointer transition-all duration-700 ease-out z-40';
-          el.innerHTML = `
-            <div class="absolute w-12 h-12 rounded-2xl bg-amber-500/30 animate-ping"></div>
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 border-2 border-white shadow-xl flex items-center justify-center text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
-            </div>
-            <span class="absolute -bottom-1 px-1.5 py-0.2 bg-slate-900 text-[8px] font-black text-white rounded-full border border-white shadow-xs">MAÂLEM</span>
+          el.style.width = '52px';
+          el.style.height = '52px';
+          el.className = 'relative flex items-center justify-center cursor-pointer z-40';
+
+          const iconContainer = document.createElement('div');
+          iconContainer.className = 'w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 border-2 border-white shadow-xl flex items-center justify-center text-white transition-transform duration-500 ease-out';
+          iconContainer.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
           `;
+
+          const beaconPing = document.createElement('div');
+          beaconPing.className = 'absolute w-12 h-12 rounded-2xl bg-amber-500/30 animate-ping pointer-events-none';
+
+          const badgeLabel = document.createElement('span');
+          badgeLabel.className = 'absolute -bottom-1 px-1.5 py-0.2 bg-slate-900 text-[8px] font-black text-white rounded-full border border-white shadow-xs pointer-events-none';
+          badgeLabel.innerText = 'MAÂLEM';
+
+          el.appendChild(beaconPing);
+          el.appendChild(iconContainer);
+          el.appendChild(badgeLabel);
+
+          vehicleIconElRef.current = iconContainer;
+          currentVehiclePosRef.current = [tLng, tLat];
+
           const popup = new maplibregl.Popup({ offset: 25, className: 'clean-trust-popup' }).setHTML(
             `<div class="bg-white/95 backdrop-blur-xl border border-amber-300 p-3 rounded-2xl text-center shadow-xl font-sans">
               <p class="text-xs font-black text-slate-900">Artisan Maâlem en Route</p>
-              <p class="text-[10px] text-amber-700 font-bold mt-0.5">En déplacement direct vers vous</p>
+              <p class="text-[10px] text-amber-700 font-bold mt-0.5">Glissade GPS directe vers vous</p>
             </div>`
           );
+
           trackingMaalemMarkerRef.current = new maplibregl.Marker({ element: el })
             .setLngLat([tLng, tLat])
             .setPopup(popup)
             .addTo(map);
         } else {
-          trackingMaalemMarkerRef.current.setLngLat([tLng, tLat]);
           if (!trackingMaalemMarkerRef.current.getElement().parentNode) {
             trackingMaalemMarkerRef.current.addTo(map);
+          }
+
+          const prevPos = currentVehiclePosRef.current || [tLng, tLat];
+          const [fromLng, fromLat] = prevPos;
+          const delta = Math.hypot(tLng - fromLng, tLat - fromLat);
+
+          // Si déplacement réel > ~4 mètres : Glissade fluide WhatsApp (Linear Interpolation)
+          if (delta > 0.00004) {
+            const heading = computeBearing(fromLat, fromLng, tLat, tLng);
+            currentVehicleHeadingRef.current = heading;
+            if (vehicleIconElRef.current) {
+              vehicleIconElRef.current.style.transform = `rotate(${Math.round(heading)}deg)`;
+            }
+
+            if (vehicleAnimRef.current) {
+              cancelAnimationFrame(vehicleAnimRef.current);
+            }
+
+            const startTime = performance.now();
+            const duration = 1200; // Glissade douce de 1.2s
+
+            const glideStep = (now) => {
+              const elapsed = now - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const ease = 1 - Math.pow(1 - progress, 3); // Cubic ease out
+
+              const curLng = fromLng + (tLng - fromLng) * ease;
+              const curLat = fromLat + (tLat - fromLat) * ease;
+
+              if (trackingMaalemMarkerRef.current) {
+                trackingMaalemMarkerRef.current.setLngLat([curLng, curLat]);
+              }
+
+              if (progress < 1) {
+                vehicleAnimRef.current = requestAnimationFrame(glideStep);
+              } else {
+                vehicleAnimRef.current = null;
+                currentVehiclePosRef.current = [tLng, tLat];
+              }
+            };
+
+            vehicleAnimRef.current = requestAnimationFrame(glideStep);
+          } else {
+            trackingMaalemMarkerRef.current.setLngLat([tLng, tLat]);
+            currentVehiclePosRef.current = [tLng, tLat];
           }
         }
       }
     } else if (trackingMaalemMarkerRef.current) {
+      if (vehicleAnimRef.current) {
+        cancelAnimationFrame(vehicleAnimRef.current);
+        vehicleAnimRef.current = null;
+      }
       trackingMaalemMarkerRef.current.remove();
       trackingMaalemMarkerRef.current = null;
+      vehicleIconElRef.current = null;
+      currentVehiclePosRef.current = null;
     }
 
     // E. Emergency SOS Leads
@@ -855,9 +941,8 @@ export const InteractiveMap = ({
 
   const activeOnlineMaalems = (maalems || []).filter((m) => {
     if (m.is_online !== true || m.is_available === false) return false;
-    const rawPos = liveMaalemCoords[m.id] || { lat: m.lat, lng: m.lng };
-    const mLat = parseFloat(rawPos.lat);
-    const mLng = parseFloat(rawPos.lng);
+    const mLat = parseFloat(m.lat);
+    const mLng = parseFloat(m.lng);
     return !isNaN(mLat) && !isNaN(mLng) && mLat >= 20 && mLat <= 38 && mLng < 0;
   });
   const activeMaalemsCount = activeOnlineMaalems.length;
@@ -872,9 +957,8 @@ export const InteractiveMap = ({
     // S'il y a 1 seul Maâlem (ex: vous-même ou l'artisan en direct), zoomer directement dessus
     if (activeOnlineMaalems.length === 1) {
       const single = activeOnlineMaalems[0];
-      const rawPos = liveMaalemCoords[single.id] || { lat: single.lat, lng: single.lng };
-      const mLat = parseFloat(rawPos.lat);
-      const mLng = parseFloat(rawPos.lng);
+      const mLat = parseFloat(single.lat);
+      const mLng = parseFloat(single.lng);
       if (!isNaN(mLat) && !isNaN(mLng) && mLng < 0) {
         map.flyTo({
           center: [mLng, mLat],
@@ -893,9 +977,8 @@ export const InteractiveMap = ({
     const bounds = new maplibregl.LngLatBounds();
     let validCount = 0;
     activeOnlineMaalems.forEach((m) => {
-      const rawPos = liveMaalemCoords[m.id] || { lat: m.lat, lng: m.lng };
-      const mLat = parseFloat(rawPos.lat);
-      const mLng = parseFloat(rawPos.lng);
+      const mLat = parseFloat(m.lat);
+      const mLng = parseFloat(m.lng);
       if (!isNaN(mLat) && !isNaN(mLng) && mLng < 0 && mLat >= 20 && mLat <= 38) {
         bounds.extend([mLng, mLat]);
         validCount++;
