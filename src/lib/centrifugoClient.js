@@ -223,3 +223,10 @@ class CentrifugoClient {
 
 // Instance Singleton
 export const centrifugo = new CentrifugoClient();
+
+// Auto-connexion immédiate au WebSocket dès le chargement de l'application
+if (typeof window !== 'undefined' && isCentrifugoConfigured) {
+  try {
+    centrifugo.connect();
+  } catch (e) {}
+}

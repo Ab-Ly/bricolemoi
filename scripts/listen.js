@@ -106,7 +106,7 @@ try {
   const ws = new WebSocket(directWsUrl);
 
   ws.on('open', () => {
-    // Connexion Centrifugo
+    // Connexion Centrifugo v5
     ws.send(JSON.stringify({ id: 1, connect: { token: '' } }));
   });
 
@@ -116,8 +116,10 @@ try {
       for (const line of lines) {
         const msg = JSON.parse(line);
 
-        if (msg.connect) {
-          console.log(`${formatTime()} \x1b[32m✓ Connecté à Centrifugo v5 sur le VPS (${directWsUrl}) !\x1b[0m`);
+        // Connexion réussie
+        if (msg.id === 1 || msg.connect || msg.result?.client) {
+          const clientId = msg.result?.client || msg.connect?.client || 'Connecté';
+          console.log(`${formatTime()} \x1b[32m✓ Connecté à Centrifugo v5 sur le VPS (${directWsUrl}) [Client ID: ${clientId}]\x1b[0m`);
           
           // Souscription aux canaux BricoleMoi
           const channels = ['jobs:stream', 'admin:alerts', 'tracking:all'];
