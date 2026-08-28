@@ -106,10 +106,16 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
   const mId = String(maalemOrUser.id || '').trim();
   const mPhone = String(maalemOrUser.phone || '').replace(/\D/g, '');
 
+  const isFallbackMaalem = !mId || mId === 'maalem-1' || mId === '22222222-2222-2222-2222-222222222222';
+
   const myTransactions = (transactions || []).filter((t) => {
-    const matchId = mId && String(t.maalem_id || '').trim() === mId;
-    const matchPhone = mPhone && mPhone.length > 7 && String(t.maalem_phone || '').replace(/\D/g, '') === mPhone;
-    return matchId || matchPhone;
+    if (!t) return false;
+    const tId = String(t.maalem_id || '').trim();
+    const tPhone = String(t.maalem_phone || '').replace(/\D/g, '');
+    const matchId = mId && tId === mId;
+    const matchPhone = mPhone && mPhone.length > 7 && tPhone === mPhone;
+    const matchFallback = isFallbackMaalem && (tId === 'maalem-1' || tId === '22222222-2222-2222-2222-222222222222');
+    return matchId || matchPhone || matchFallback;
   });
 
   // Dédupliquer les transactions de déduction de lead pour la même intervention
@@ -142,7 +148,7 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
         ? maalemOrUser.credits
         : (maalemOrUser?.maalem_details?.credit_balance !== undefined && maalemOrUser?.maalem_details?.credit_balance !== null
           ? maalemOrUser.maalem_details.credit_balance
-          : (maalemOrUser?.role?.toUpperCase() === 'MAALEM' ? 15.00 : 0)))
+          : 0))
   );
 
   const totalRechargeAndBonus = totalRechargedSum + totalBonusSum;
@@ -150,12 +156,10 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
 
   if (totalRechargeAndBonus > 0) {
     liveTotalBalance = Math.max(0, totalRechargeAndBonus - totalValidatedLeadsSpent);
-  } else {
-    liveTotalBalance = Math.max(0, fallbackCredits);
-  }
-
-  if (!isNaN(fallbackCredits) && fallbackCredits > liveTotalBalance && totalRechargedSum === 0) {
+  } else if (!isNaN(fallbackCredits) && fallbackCredits > 0) {
     liveTotalBalance = fallbackCredits;
+  } else {
+    liveTotalBalance = 0;
   }
 
   return {

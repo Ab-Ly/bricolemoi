@@ -99,14 +99,22 @@ export const MaalemRadarHeader = ({
 
               {/* Note et avis réels */}
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 mt-1">
-                <span className="inline-flex items-center gap-1 text-amber-600 font-black whitespace-nowrap">
-                  <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                  <span>{ratingInfo.averageRating} / 5</span>
-                </span>
-                <span>•</span>
-                <span className="whitespace-nowrap font-medium">
-                  {(ratingInfo.totalReviews ?? ratingInfo.reviewsCount ?? 0)} avis {(ratingInfo.totalReviews ?? ratingInfo.reviewsCount ?? 0) <= 1 ? 'client' : 'clients'}
-                </span>
+                {(ratingInfo.totalReviews ?? 0) > 0 ? (
+                  <>
+                    <span className="inline-flex items-center gap-1 text-amber-600 font-black whitespace-nowrap">
+                      <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                      <span>{ratingInfo.averageRating} / 5</span>
+                    </span>
+                    <span>•</span>
+                    <span className="whitespace-nowrap font-medium">
+                      {ratingInfo.totalReviews} avis {ratingInfo.totalReviews <= 1 ? 'client' : 'clients'}
+                    </span>
+                  </>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-slate-600 font-semibold bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200 text-[11px]">
+                    <span>✨ Nouveau Maâlem (0 avis)</span>
+                  </span>
+                )}
                 {ratingInfo.loyalty?.qualifyingCount > 0 && (
                   <>
                     <span>•</span>

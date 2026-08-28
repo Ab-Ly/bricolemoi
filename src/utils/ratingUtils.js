@@ -80,16 +80,10 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
 
   const totalReviews = allMaalemReviews.length;
   
-  // Note moyenne exacte (arrondie à 1 décimale)
-  const defaultBaseRating = parseFloat(
-    maalemOrUser.rating_avg || 
-    maalemOrUser.maalem_details?.rating_avg || 
-    5.0
-  );
-
+  // Note moyenne exacte : null si 0 avis (règle zéro donnée forcée)
   const averageRating = totalReviews > 0
     ? Number((totalScore / totalReviews).toFixed(1))
-    : defaultBaseRating;
+    : null;
 
   // Calcul du streak de 5 étoiles consécutives
   let consecutiveFiveStars = 0;

@@ -227,7 +227,7 @@ export const Navbar = ({ deferredPrompt, installPWA, isInstalled, onGoHome, appM
                   <div className="h-9 sm:h-11 flex items-center gap-1 sm:gap-1.5 bg-amber-50 border border-amber-200 px-2 sm:px-3 rounded-xl sm:rounded-2xl text-xs font-bold text-amber-900 shadow-xs flex-shrink-0">
                     <Coins weight="duotone" className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
                     <span className="text-slate-900 font-mono font-black text-xs">
-                      {liveCreditBalance.toFixed(0)} <span className="text-amber-600 text-[10px]">{t.dh}</span>
+                      {liveCreditBalance.toFixed(2)} <span className="text-amber-700 text-[10px] font-sans font-bold">{t.dh || 'DH'}</span>
                     </span>
                   </div>
 
