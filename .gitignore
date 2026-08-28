@@ -1,7 +1,10 @@
 .vercel
 .env*
 node_modules
+ACCES_SERVEUR_BRICOLEMOI.txt
+*.pem
+*.key
 # Local graphify cache and machine-specific roots
 graphify-out/cache/
 graphify-out/.graphify_*
-graphify-out/20*
+graphify-out/20*
