@@ -33,8 +33,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Fuites d\'eau, canalisations, chauffe-eau',
     descAr: 'تسرب المياه، قوادس، سخانات الماء',
     iconType: 'PLUMBING',
-    minPrice: 80, 
-    maxPrice: 200, 
     time: '< 15 min', 
     timeAr: '< 15 دقيقة',
     color: 'from-cyan-500 to-blue-600',
@@ -47,8 +45,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Pannes, disjoncteurs, prises, tableaux',
     descAr: 'انقطاع الضوء، ديجونكتور، بريزات',
     iconType: 'ELECTRICIAN',
-    minPrice: 100, 
-    maxPrice: 250, 
     time: '< 15 min', 
     timeAr: '< 15 دقيقة',
     color: 'from-amber-500 to-yellow-600',
@@ -61,8 +57,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Portes bloquées, serrures blindées, clés',
     descAr: 'أبواب مغلقة، كوالين، تبديل السواريت',
     iconType: 'SERRURERIE',
-    minPrice: 100, 
-    maxPrice: 300, 
     time: '< 15 min', 
     timeAr: '< 15 دقيقة',
     color: 'from-emerald-500 to-teal-600',
@@ -75,8 +69,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Moteur volet bloqué, manivelle, rideau magasin',
     descAr: 'ريدو هابط، موطور كوانسي، ألمنيوم',
     iconType: 'VOLETS_RIDEAUX',
-    minPrice: 120, 
-    maxPrice: 300, 
     time: '< 20 min', 
     timeAr: '< 20 دقيقة',
     color: 'from-cyan-600 to-blue-700',
@@ -89,8 +81,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Recharge gaz, nettoyage, filtres, split',
     descAr: 'شحن الغاز، صيانة وتنظيف المكيفات',
     iconType: 'CLIMATISATION',
-    minPrice: 150, 
-    maxPrice: 400, 
     time: '< 25 min', 
     timeAr: '< 25 دقيقة',
     color: 'from-sky-400 to-cyan-600',
@@ -103,8 +93,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Batterie à plat, démarrage, crevaison',
     descAr: 'باتري طايح، رويدة، ديباناج سريع',
     iconType: 'AUTO_MECHANIC',
-    minPrice: 120, 
-    maxPrice: 350, 
     time: '< 20 min', 
     timeAr: '< 20 دقيقة',
     color: 'from-blue-500 to-indigo-600',
@@ -117,8 +105,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Camionnette, porteurs, meubles en kit',
     descAr: 'ترنسبور ديور، نقالة، مونطاج حوايج',
     iconType: 'DEMENAGEMENT',
-    minPrice: 150, 
-    maxPrice: 600, 
     time: '< 30 min', 
     timeAr: '< 30 دقيقة',
     color: 'from-amber-600 to-orange-700',
@@ -131,8 +117,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Panneaux solaires, résistance, thermostat',
     descAr: 'سخان السطح، ريزيستانس، صيانة',
     iconType: 'SOLAIRE',
-    minPrice: 150, 
-    maxPrice: 450, 
     time: '< 25 min', 
     timeAr: '< 25 دقيقة',
     color: 'from-amber-500 to-yellow-500',
@@ -145,8 +129,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Pompe de puits, surpresseur, filtration',
     descAr: 'موطور بئر، سوربريسور، بيسين',
     iconType: 'POMPE_PISCINE',
-    minPrice: 120, 
-    maxPrice: 380, 
     time: '< 25 min', 
     timeAr: '< 25 دقيقة',
     color: 'from-teal-500 to-emerald-600',
@@ -159,8 +141,6 @@ const MOROCCAN_SERVICES = [
     desc: 'Machine à laver, frigo, fours, plaques',
     descAr: 'ماكينة الصابون، ثلاجة، أفران',
     iconType: 'ELECTROMENAGER',
-    minPrice: 100, 
-    maxPrice: 280, 
     time: '< 20 min', 
     timeAr: '< 20 دقيقة',
     color: 'from-purple-500 to-pink-600',
@@ -169,13 +149,13 @@ const MOROCCAN_SERVICES = [
 ];
 
 const MOROCCAN_CITIES = [
-  { name: 'Casablanca', nameAr: 'الدار البيضاء', activeMaalems: 420 },
-  { name: 'Rabat - Salé', nameAr: 'الرباط - سلا', activeMaalems: 260 },
-  { name: 'Marrakech', nameAr: 'مراكش', activeMaalems: 190 },
-  { name: 'Tanger', nameAr: 'طنجة', activeMaalems: 175 },
-  { name: 'Fès', nameAr: 'فاس', activeMaalems: 140 },
-  { name: 'Agadir', nameAr: 'أكادير', activeMaalems: 110 },
-  { name: 'Meknès', nameAr: 'مكناس', activeMaalems: 85 }
+  { name: 'Casablanca', nameAr: 'الدار البيضاء' },
+  { name: 'Rabat - Salé', nameAr: 'الرباط - سلا' },
+  { name: 'Marrakech', nameAr: 'مراكش' },
+  { name: 'Tanger', nameAr: 'طنجة' },
+  { name: 'Fès', nameAr: 'فاس' },
+  { name: 'Agadir', nameAr: 'أكادير' },
+  { name: 'Meknès', nameAr: 'مكناس' }
 ];
 
 export const LandingPage = ({ onSelectJourney }) => {
@@ -328,7 +308,7 @@ export const LandingPage = ({ onSelectJourney }) => {
                 >
                   {MOROCCAN_CITIES.map((city) => (
                     <option key={city.name} value={city.name} className="bg-white text-slate-900">
-                      {isAr ? city.nameAr : city.name} ({city.activeMaalems} {t.online_count})
+                      {isAr ? city.nameAr : city.name} ({isAr ? 'تغطية فورية' : '24/7'})
                     </option>
                   ))}
                 </select>
@@ -411,8 +391,8 @@ export const LandingPage = ({ onSelectJourney }) => {
                           </div>
 
                           <div className="text-right shrink-0 pl-2">
-                            <span className="text-[10px] font-black text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200 font-mono block">
-                              {problem.minPrice}-{problem.maxPrice} DH
+                            <span className="text-[10px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 block">
+                              {isAr ? 'اتفاق مباشر' : 'Accord Direct'}
                             </span>
                             <span className="text-[9px] text-slate-400 font-medium">
                               {problem.timeEstimate}
@@ -476,8 +456,8 @@ export const LandingPage = ({ onSelectJourney }) => {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-100 font-mono">
-                      <span className={`font-bold ${isSelected ? meta.colorClass : 'text-blue-600'}`}>{srv.minPrice}-{srv.maxPrice} {t.dh}</span>
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-100 font-sans">
+                      <span className={`font-bold ${isSelected ? meta.colorClass : 'text-blue-600'}`}>{isAr ? 'اتفاق مباشر' : 'Accord Direct'}</span>
                       <span className="text-emerald-600 font-bold">{isAr ? srv.timeAr : srv.time}</span>
                     </div>
                   </motion.button>
@@ -488,15 +468,15 @@ export const LandingPage = ({ onSelectJourney }) => {
             {/* Live Result Card & Direct Action */}
             <div className="mt-6 p-5 sm:p-6 bg-slate-50/80 border border-slate-200/90 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
               
-              {/* Metric 1 : Tarif Garanti */}
+              {/* Metric 1 : Tarif Garanti -> Accord Direct */}
               <div className="flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-blue-600 shadow-xs flex-shrink-0">
                   <Coins className="w-6 h-6" />
                 </div>
                 <div>
                   <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{t.price_guarantee_title}</p>
-                  <p className="text-2xl font-black text-slate-900 font-mono">
-                    {currentService.minPrice} - {currentService.maxPrice} <span className="text-sm text-amber-600 font-bold">{t.dh}</span>
+                  <p className="text-lg sm:text-xl font-black text-slate-900 font-sans mt-0.5">
+                    {isAr ? 'اتفاق حر 100%' : 'Accord Direct'} <span className="text-xs text-blue-600 font-bold">(0% Comm.)</span>
                   </p>
                   <p className="text-[10px] text-slate-500">{t.price_guarantee_sub}</p>
                 </div>
@@ -511,7 +491,7 @@ export const LandingPage = ({ onSelectJourney }) => {
                   <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{t.arrival_time_title}</p>
                   <p className="text-xl font-black text-emerald-600 font-mono">{isAr ? currentService.timeAr : currentService.time}</p>
                   <p className="text-[10px] text-slate-500">
-                    <strong className="text-emerald-700 font-bold">{Math.round(currentCity.activeMaalems * 0.35)}</strong> {t.pros_nearby}
+                    <strong className="text-emerald-700 font-bold">{isAr ? 'تغطية فورية' : 'Disponible 24/7'}</strong> {isAr ? 'في جميع الأحياء' : 'dans votre secteur'}
                   </p>
                 </div>
               </div>
