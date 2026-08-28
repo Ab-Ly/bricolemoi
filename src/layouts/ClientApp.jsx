@@ -31,27 +31,6 @@ export const ClientApp = ({ initialCategory, initialCity, initialDistrict }) => 
   // Role Etanchéité Guard: If logged in as MAALEM on client.*, block access & redirect
   const isUnauthorizedRole = user && user.role?.toUpperCase() !== 'CLIENT';
 
-  const handleQuickClientLogin = () => {
-    let dynamicZone = 'Casablanca - Centre-Ville';
-    try {
-      const gps = JSON.parse(localStorage.getItem('bricolemoi_client_gps') || '{}');
-      if (gps.city) dynamicZone = gps.district ? `${gps.city} - ${gps.district}` : gps.city;
-    } catch (e) {}
-
-    const demoClient = {
-      id: '11111111-1111-1111-1111-111111111111',
-      role: 'CLIENT',
-      full_name: 'Karim Particulier',
-      phone: '+212600112233',
-      city_zone: dynamicZone
-    };
-    setUser(demoClient);
-    switchRole('CLIENT');
-    try {
-      sessionStorage.setItem('bricolemoi_session', JSON.stringify(demoClient));
-    } catch (e) { }
-  };
-
   const handleConvertCurrentToClient = () => {
     if (!user) return;
     const updated = {
@@ -84,15 +63,8 @@ export const ClientApp = ({ initialCategory, initialCity, initialDistrict }) => 
             </div>
             <div className="pt-2 flex flex-col gap-2.5">
               <button
-                onClick={handleQuickClientLogin}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl px-6 py-3.5 shadow-sm active:scale-95 transition-all text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
-              >
-                ⚡ Connexion Directe Client Démo (Karim)
-              </button>
-
-              <button
                 onClick={handleConvertCurrentToClient}
-                className="w-full bg-white hover:bg-slate-50 text-blue-700 border border-slate-200 rounded-xl px-6 py-3 text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl px-6 py-3.5 shadow-sm active:scale-95 transition-all text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
               >
                 🔄 Basculer ce Compte en Rôle Client ({user.full_name})
               </button>

@@ -391,18 +391,6 @@ export const EmergencyFlowProvider = ({ children }) => {
         isAvailable: m.is_available !== false
       })).filter((m) => Boolean(m.phone));
 
-      // Si aucun artisan enregistré en local/BDD, inclure le numéro de test/démo
-      if (candidates.length === 0 && userRef.current?.phone) {
-        candidates.push({
-          name: 'Maâlem Pro (Test)',
-          phone: userRef.current.phone,
-          specialty: targetCat,
-          lat: clientLat + 0.015,
-          lng: clientLng + 0.012,
-          isAvailable: true
-        });
-      }
-
       fetch('/api/dispatch-sos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

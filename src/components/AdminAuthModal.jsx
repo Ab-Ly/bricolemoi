@@ -96,7 +96,7 @@ export const AdminAuthModal = () => {
               {/* 2. Mot de Passe Admin */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Mot de Passe Supabase <span className="text-[10px] text-slate-400 font-normal">(Optionnel en démo)</span>
+                  Mot de Passe Supabase
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />

@@ -12,36 +12,6 @@ export const MaalemApp = () => {
   // Check if user is authenticated and has role MAALEM
   const isMaalem = user && user.role?.toUpperCase() === 'MAALEM';
 
-  const handleQuickMaalemLogin = () => {
-    const demoMaalem = {
-      id: '22222222-2222-2222-2222-222222222222',
-      role: 'MAALEM',
-      full_name: 'Artisan Partenaire',
-      phone: '+212661234567',
-      credits: 15.00,
-      city: 'Casablanca',
-      district: 'Maârif',
-      lat: 33.5883,
-      lng: -7.6328,
-      is_verified: true,
-      cin_verified: true,
-      maalem_details: {
-        specialty: 'PLUMBING',
-        rating_avg: 5.0,
-        credit_balance: 15.00,
-        is_verified: true,
-        cin_verified: true,
-        is_online: true,
-        is_available: true
-      }
-    };
-    setUser(demoMaalem);
-    switchRole('MAALEM');
-    try {
-      sessionStorage.setItem('bricolemoi_session', JSON.stringify(demoMaalem));
-    } catch (e) { }
-  };
-
   const handleUpgradeCurrentToMaalem = () => {
     if (!user) return;
     const updated = {
@@ -97,14 +67,6 @@ export const MaalemApp = () => {
               >
                 Se Connecter / S'inscrire comme Maalem Pro
               </button>
-
-              <button
-                type="button"
-                onClick={handleQuickMaalemLogin}
-                className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-all active:scale-95 cursor-pointer shadow-xs"
-              >
-                ⚡ Connexion Rapide Démo (Maâlem Hassan)
-              </button>
             </div>
           </div>
         ) : !isMaalem ? (
@@ -120,15 +82,8 @@ export const MaalemApp = () => {
             </div>
             <div className="pt-2 flex flex-col gap-2.5">
               <button
-                onClick={handleQuickMaalemLogin}
-                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-xl px-6 py-3.5 shadow-sm active:scale-95 transition-all text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
-              >
-                ⚡ Connexion Directe Maâlem Démo (Hassan Plombier)
-              </button>
-
-              <button
                 onClick={handleUpgradeCurrentToMaalem}
-                className="w-full bg-white hover:bg-slate-50 text-amber-800 border border-slate-200 rounded-xl px-6 py-3 text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-xl px-6 py-3.5 shadow-sm active:scale-95 transition-all text-xs sm:text-sm cursor-pointer"
               >
                 🔄 Activer le Rôle Artisan sur ce Compte ({user.full_name})
               </button>

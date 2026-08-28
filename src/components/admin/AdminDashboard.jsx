@@ -48,8 +48,7 @@ export const AdminDashboard = () => {
     approveRecharge,
     rejectRecharge,
     generateReceiptPDF,
-    ablyOnlineMaalemsCount,
-    resetAndSeedDemo
+    ablyOnlineMaalemsCount
   } = useApp();
 
   const [activeTab, setActiveTab] = useState('MISSIONS'); // 'CLIENTS' | 'MISSIONS' | 'MAALEMS' | 'DISPUTES' | 'RECHARGES' | 'REWARDS'
