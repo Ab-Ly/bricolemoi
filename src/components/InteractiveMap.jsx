@@ -553,6 +553,16 @@ export const InteractiveMap = ({
       });
     } else {
       const pendingInterventions = interventions.filter((i) => i.status === 'PENDING');
+      const pendingIds = new Set(pendingInterventions.map((i) => String(i.id).trim()));
+
+      // Nettoyer immédiatement les marqueurs SOS clôturés, acceptés ou annulés
+      Object.keys(emergencyMarkersRef.current).forEach((id) => {
+        if (!pendingIds.has(String(id).trim())) {
+          emergencyMarkersRef.current[id].remove();
+          delete emergencyMarkersRef.current[id];
+        }
+      });
+
       pendingInterventions.forEach((item) => {
         const lat = parseFloat(item.lat || 33.5883);
         const lng = parseFloat(item.lng || -7.6328);
