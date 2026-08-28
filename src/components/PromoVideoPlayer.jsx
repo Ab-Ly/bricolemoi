@@ -34,10 +34,11 @@ const CLIENT_SCENES = [
   {
     id: 1,
     shortLabel: '🚨 1. Panne Réelle (22h)',
+    shortLabelAr: '🚨 1. عطب واقعي بالليل',
     badge: 'Cas Réel 1/4 • L\'Urgence à Domicile',
-    badgeAr: 'مشكل واقعي فالدار',
+    badgeAr: 'مشكل واقعي 1/4 • طوارئ بالدار',
     title: '21h45 : Fuite d\'Eau sous l\'Évier à Casablanca (Maârif)',
-    titleAr: 'الما سايل فالكوزينة فـ 10 دالليل وما لقيتي نمرة حتى معلم ؟',
+    titleAr: '21:45 : الما سايل فالكوزينة بالليل وما لقيتي نمرة حتى معلم ؟',
     desc: 'L\'eau inonde votre cuisine en pleine soirée. Impossible de trouver un artisan disponible dans la rue ou sur les petites annonces. Avec BricoleMoi, vous trouvez un plombier en 1 clic.',
     descAr: 'ما تبقاش تقلب فزنقة ولا تصوني على نمر طافيين.. بريكول موي كيلقا ليك المعلم لي مسالي فالحومة ديالك فـ 30 ثانية.',
     icon: Zap,
@@ -47,20 +48,25 @@ const CLIENT_SCENES = [
     mockupVisual: {
       type: 'REAL_ALERT',
       service: 'Plomberie & Dégât des Eaux',
+      serviceAr: 'سباكة وتسرب المياه',
       location: 'Rue Normandie, Maârif • Casablanca',
+      locationAr: 'شارع نورماندي، المعاريف • الدار البيضاء',
       urgency: 'Intervention Immédiate Requise',
-      status: '🚨 Recherche de 3 Maâlems en direct...'
+      urgencyAr: 'تدخل فوري مطلوب',
+      status: '🚨 Recherche de 3 Maâlems en direct...',
+      statusAr: '🚨 جاري البحث عن 3 معلمين فالحين...'
     }
   },
   {
     id: 2,
     shortLabel: '🎙️ 2. Vocal en Darija',
+    shortLabelAr: '🎙️ 2. أوديو بالدارجة',
     badge: 'Cas Réel 2/4 • Description Simple',
-    badgeAr: 'سجل أوديو بالدارجة',
+    badgeAr: 'مشكل واقعي 2/4 • وصف ساهل',
     title: 'Vous Envoyez un Message Vocal en Darija (Sans Écrire)',
-    titleAr: 'سجل أوديو بالدارجة و التطبيق كيتكلف بالباقي',
+    titleAr: 'سجل أوديو بالدارجة والتطبيق كيتكلف بالباقي',
     desc: 'Appuyez sur le micro et parlez naturellement : "عندي روبيني تهرس والما كيعمر الكوزينة". Le système analyse instantanément votre demande et diffuse l\'alerte auprès des artisans qualifiés du quartier.',
-    descAr: 'صيفط فوكال عادي كيفما كتهضر، السيستيم كيوصل الطلب ديالك للحرفيين القرابين ليك فالحين.',
+    descAr: 'صيفط فوكال عادي كيفما كتهضر، السيستيم كيوصل الطلب ديالك للحرفيين القرابين ليك فالحين وبلا ما تحتاج تكتب.',
     icon: Sparkles,
     themeColor: 'from-blue-500 to-indigo-600',
     accentColor: 'text-blue-400',
@@ -68,18 +74,20 @@ const CLIENT_SCENES = [
     mockupVisual: {
       type: 'REAL_VOICE',
       audioText: '🎙️ "السلام عليكم، عندي روبيني ديال الكوزينة طرطق والما سايل.. عتقونا."',
-      diagnostic: 'Diagnostic Automatique : Dépannage Plomberie Express'
+      diagnostic: 'Diagnostic Automatique : Dépannage Plomberie Express',
+      diagnosticAr: 'تشخيص تلقائي : ديباناج ترصيص وسباكة مستعجل'
     }
   },
   {
     id: 3,
     shortLabel: '📍 3. Maâlem en Route',
+    shortLabelAr: '📍 3. المعلم فالطريق',
     badge: 'Cas Réel 3/4 • Suivi Live GPS',
-    badgeAr: 'المعلم فطريقو عندك',
+    badgeAr: 'مشكل واقعي 3/4 • تتبع GPS مباشر',
     title: '12 Minutes : Maâlem Hassan Arrive chez Vous',
-    titleAr: 'المعلم حسن واصل فـ 12 دقيقة مع تتبع GPS مباشر',
+    titleAr: '12 دقيقة : المعلم حسن واصل لعندك مع تتبع مباشر',
     desc: 'Vous recevez la fiche de Hassan : Plombier professionnel vérifié, noté 4.9★ (128 avis). Vous pouvez l\'appeler ou lui parler sur WhatsApp et voir sa moto avancer sur la carte en temps réel.',
-    descAr: 'كتشوف تصويرتو، النمرة ديالو، والكونط ديالو مفعل، والبوزيسيون ديال الموطور ديالو جاية ديريكت لدارك.',
+    descAr: 'كتشوف تصويرتو، النمرة ديالو، والكونط ديالو مفعل، وتتبع البوزيسيون ديال الموطور ديالو جاية ديريكت لدارك فالخريطة.',
     icon: Clock,
     themeColor: 'from-emerald-500 to-teal-600',
     accentColor: 'text-emerald-400',
@@ -87,16 +95,21 @@ const CLIENT_SCENES = [
     mockupVisual: {
       type: 'REAL_TRACKING',
       maalemName: 'Hassan Plombier (Maârif)',
+      maalemNameAr: 'المعلم حسن السباك (المعاريف)',
       verifiedBadge: '✔ Artisan Professionnel Vérifié',
+      verifiedBadgeAr: '✔ حرفي مهني معتمد',
       rating: '4.9 ★ (128 interventions)',
-      eta: 'En route en Moto • Arrivée dans 8 min (1.2 km)'
+      ratingAr: '4.9 ★ (128 تدخل منجز)',
+      eta: 'En route en Moto • Arrivée dans 8 min (1.2 km)',
+      etaAr: 'فالطريق بالموطور • واصل فـ 8 دقائق (1.2 كلم)'
     }
   },
   {
     id: 4,
     shortLabel: '🤝 4. Accord Direct & 0 Arnaque',
+    shortLabelAr: '🤝 4. اتفاق مباشر و0% عمولة',
     badge: 'Cas Réel 4/4 • Accord Direct',
-    badgeAr: 'اتفاق مباشر و0% عمولة',
+    badgeAr: 'مشكل واقعي 4/4 • اتفاق مباشر',
     title: 'Tarif Convenu en Direct & Réparation Réussie',
     titleAr: 'تفاهمتو على الثمن ديريكت قبل ما يبدا الخدمة وبلا زيادة',
     desc: 'Hassan diagnostique le problème sur place et convient du tarif directement avec vous. Après réparation, vous validez la fin des travaux et réglez directement le Maâlem en toute transparence.',
@@ -108,8 +121,11 @@ const CLIENT_SCENES = [
     mockupVisual: {
       type: 'REAL_RECEIPT',
       reparation: 'Remplacement Flexible & Joint Robinetterie',
+      reparationAr: 'تبديل الفليكسيبل وجوانات الروبيني',
       totalPaid: 'Accord Direct Respecté (0% Commission)',
-      satisfaction: '★★★★★ 5.0 - Client Satisfait'
+      totalPaidAr: 'احترام الاتفاق المباشر (0% عمولة)',
+      satisfaction: '★★★★★ 5.0 - Client Satisfait',
+      satisfactionAr: '★★★★★ 5.0 - زبون راضي جدا'
     }
   }
 ];
@@ -118,12 +134,13 @@ const MAALEM_SCENES = [
   {
     id: 1,
     shortLabel: '📱 1. Inscription 30s',
+    shortLabelAr: '📱 1. تسجيل فـ 30 ثانية',
     badge: 'Cas Réel 1/4 • Inscription Express',
-    badgeAr: 'تسجيل سريع في 30 ثانية',
+    badgeAr: 'حالة واقعية 1/4 • تسجيل سريع',
     title: 'Inscription Pro en 30s avec votre Téléphone',
     titleAr: 'سجل برقم تليفونك واختار الحرفة ديالك باش تبدا',
     desc: 'Saisissez votre numéro marocain (+212 6... / 7...) et sélectionnez votre métier. Votre profil artisan est activé immédiatement pour recevoir des chantiers dans votre ville.',
-    descAr: 'بلا تعقيدات وبلا ما تمشي للبيرو، دخل نمرتك وحرفتك والسيستيم كيفعل الكونط فالحين.',
+    descAr: 'بلا تعقيدات وبلا ما تمشي للبيرو، دخل نمرتك وحرفتك والسيستيم كيفعل الكونط فالحين لاستقبال الشانطيات.',
     icon: Wrench,
     themeColor: 'from-amber-500 to-orange-600',
     accentColor: 'text-amber-400',
@@ -131,19 +148,23 @@ const MAALEM_SCENES = [
     mockupVisual: {
       type: 'REAL_PROFILE_ACTIVATION',
       title: 'Activation Immédiate du Profil Pro',
+      titleAr: 'تفعيل فوري لبروفايل الحرفي',
       extractedName: 'Hassan El Alami (Plombier Casablanca)',
-      status: '✔ Profil Validé & Prêt à Recevoir des Chantiers'
+      extractedNameAr: 'حسن العلمي (سباك بالدار البيضاء)',
+      status: '✔ Profil Validé & Prêt à Recevoir des Chantiers',
+      statusAr: '✔ بروفايل معتمد وجاهز لاستقبال الشانطيات'
     }
   },
   {
     id: 2,
     shortLabel: '🎁 2. +15 DH Cadeau',
+    shortLabelAr: '🎁 2. +15 درهم كادو',
     badge: 'Cas Réel 2/4 • Premier Chantier Offert',
-    badgeAr: '15 درهم كادو فجيبك',
+    badgeAr: 'حالة واقعية 2/4 • أول خدمة مهداة',
     title: '+15 DH Crédités Directement dans votre Portefeuille',
     titleAr: '15 درهم كادو باش تجرب أول كليان فابور بلا ما تخلص والو',
     desc: 'Dès que votre compte est validé, BricoleMoi vous offre un bonus de 15 DH. Cela vous permet de débloquer votre tout premier chantier client sans dépenser un seul centime.',
-    descAr: 'جرب الخدمة فابور، أول كليان كتدخل ليه الواتساب ديالو مجانا بالصولد لي عطاتك المنصة.',
+    descAr: 'جرب الخدمة فابور، أول كليان كتدخل ليه الواتساب ديالو مجانا بالصولد لي عطاتك المنصة كهدية ترحيب.',
     icon: Gift,
     themeColor: 'from-emerald-500 to-amber-500',
     accentColor: 'text-emerald-400',
@@ -151,19 +172,23 @@ const MAALEM_SCENES = [
     mockupVisual: {
       type: 'REAL_WALLET',
       bonusAmount: '+15.00 DH (Bonus Bienvenue Activé)',
+      bonusAmountAr: '+15.00 درهم (بونيس الترحيب مفعل)',
       balance: 'Solde Disponible : 15.00 DH',
-      perk: '👉 1 Lead Client SOS 100% Déblocable Immédiatement'
+      balanceAr: 'الرصيد المتوفر : 15.00 درهم',
+      perk: '👉 1 Lead Client SOS 100% Déblocable Immédiatement',
+      perkAr: '👉 فتح أول طلب كليان SOS مجانا 100%'
     }
   },
   {
     id: 3,
     shortLabel: '📡 3. Alertes WhatsApp',
+    shortLabelAr: '📡 3. تنبيهات مباشرة',
     badge: 'Cas Réel 3/4 • Chantiers dans votre Zone',
-    badgeAr: 'تنبيهات صوتية ديال الخدمة',
+    badgeAr: 'حالة واقعية 3/4 • طلبات قريبة منك',
     title: 'Votre Téléphone Sonne : SOS Plomberie à 800m de Vous',
     titleAr: 'كتسمع تنبيه صوتي فتيليفونك وأوديو ديال كليان باغي معلم دابا',
     desc: 'Une alerte d\'urgence s\'affiche avec la note vocale du client. Vous écoutez le problème, cliquez pour débloquer le lead à 15 DH et ouvrez la discussion WhatsApp en Darija en 1 seconde.',
-    descAr: 'كتسمع الكليان شنو عندو، كتكليكي تفك النمرة بـ 15 درهم، وكتدوز تهضر معاه فواتساب باش تفاهمو على الوقت.',
+    descAr: 'كتسمع الكليان شنو عندو، كتكليكي تفك النمرة بـ 15 درهم، وكتدوز تهضر معاه فواتساب باش تفاهمو على الخدمة.',
     icon: WhatsappLogo,
     themeColor: 'from-cyan-500 to-blue-600',
     accentColor: 'text-cyan-400',
@@ -171,15 +196,18 @@ const MAALEM_SCENES = [
     mockupVisual: {
       type: 'REAL_LEAD',
       clientAlert: '🚨 SOS Plomberie (Quartier Agdal - Rabat)',
+      clientAlertAr: '🚨 طلب استغاثة SOS سباكة (حي أقدال - الرباط)',
       audioSnippet: '🎙️ "عفاك راه عندي قادوس مسدود.. محتاج معلم دابا"',
-      action: 'Bouton : Débloquer & Ouvrir WhatsApp Darija 🇲🇦'
+      action: 'Bouton : Débloquer & Ouvrir WhatsApp Darija 🇲🇦',
+      actionAr: 'فتح الواتساب بالدارجة 🇲🇦'
     }
   },
   {
     id: 4,
     shortLabel: '💰 4. 0% Commission',
+    shortLabelAr: '💰 4. 0% عمولة',
     badge: 'Cas Réel 4/4 • Vos Gains Réels',
-    badgeAr: '100% ديال الأرباح فجيبك',
+    badgeAr: 'حالة واقعية 4/4 • أرباحك الصافية',
     title: 'Vous Encaissez 100% du Prix Convenu (0% Commission)',
     titleAr: 'كتخدم بـ 200 درهم كتاخد 200 درهم كاملة كاش وبلا اقتطاعات',
     desc: 'Si vous convenez d\'une intervention à 250 DH avec le client, vous encaissez la totalité des 250 DH en direct. Avec 3 interventions par jour, générez entre 9 000 et 15 000 DH/mois.',
@@ -191,8 +219,11 @@ const MAALEM_SCENES = [
     mockupVisual: {
       type: 'REAL_INCOME',
       dailyWork: '3 chantiers / jour x 26 jours travaillés',
+      dailyWorkAr: '3 خدمات / يوم × 26 يوم عمل',
       grossMonthly: '~11 700 DH / mois net direct',
-      commission: 'Commission Plateforme : 0.00 DH (0%)'
+      grossMonthlyAr: '~11 700 درهم / شهر صافي ديريكت',
+      commission: 'Commission Plateforme : 0.00 DH (0%)',
+      commissionAr: 'عمولة المنصة : 0.00 درهم (0%)'
     }
   }
 ];
@@ -211,7 +242,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
   const timerRef = useRef(null);
   const progressIntervalRef = useRef(null);
 
-  // Auto-advance scenes every 6 seconds when playing
+  // Auto-advance scenes every 6.5 seconds when playing
   useEffect(() => {
     if (!isPlaying) {
       clearInterval(timerRef.current);
@@ -294,6 +325,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-lg relative">
+        {/* Progress Timeline */}
         <div className="grid grid-cols-4 gap-1.5 p-3 sm:p-4 bg-slate-50 border-b border-slate-200">
           {scenes.map((sc, idx) => {
             const isCurrent = idx === currentSceneIdx;
@@ -304,7 +336,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                 type="button"
                 onClick={() => handleSelectScene(idx)}
                 className="h-2 rounded-full bg-slate-200 relative overflow-hidden cursor-pointer group"
-                title={sc.title}
+                title={isAr ? sc.titleAr : sc.title}
               >
                 <div 
                   className={`h-full rounded-full transition-all duration-75 ${
@@ -322,15 +354,15 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
         <div className="p-4 sm:p-8 min-h-[360px] sm:min-h-[440px] flex flex-col justify-between relative overflow-hidden">
           <div className="flex items-center justify-between relative z-10 gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-black font-mono border shadow-xs ${
+              <span className={`px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-black border shadow-xs ${
                 track === 'CLIENT' 
                   ? 'bg-blue-50 text-blue-800 border-blue-200' 
                   : 'bg-amber-50 text-amber-900 border-amber-200'
               }`}>
-                {currentScene.badge}
+                {isAr ? currentScene.badgeAr : currentScene.badge}
               </span>
-              <span className="text-[11px] text-slate-500 font-bold font-arabic hidden md:inline">
-                {currentScene.badgeAr}
+              <span className="text-[11px] text-slate-500 font-bold hidden md:inline">
+                {isAr ? currentScene.badge : currentScene.badgeAr}
               </span>
             </div>
 
@@ -339,7 +371,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                 type="button"
                 onClick={() => setSoundEnabled(!soundEnabled)}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-all cursor-pointer shadow-xs"
-                title={soundEnabled ? 'Couper le son' : 'Activer les effets sonores'}
+                title={soundEnabled ? (isAr ? 'كتم الصوت' : 'Couper le son') : (isAr ? 'تشغيل المؤثرات الصوتية' : 'Activer les effets sonores')}
               >
                 {soundEnabled ? <SpeakerHigh className="w-4 h-4 text-blue-600" /> : <SpeakerSimpleSlash className="w-4 h-4 text-slate-400" />}
               </button>
@@ -348,9 +380,9 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                 type="button"
                 onClick={() => setIsPlaying(!isPlaying)}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-all cursor-pointer shadow-xs"
-                title={isPlaying ? 'Mettre en pause' : 'Lire la vidéo'}
+                title={isPlaying ? (isAr ? 'إيقاف مؤقت' : 'Mettre en pause') : (isAr ? 'تشغيل' : 'Lire la vidéo')}
               >
-                {isPlaying ? <Pause className="w-4 h-4 text-blue-600" /> : <Play className="w-4 h-4 text-blue-600 fill-blue-600 ml-0.5" />}
+                {isPlaying ? <Pause className="w-4 h-4 text-blue-600" /> : <Play className={`w-4 h-4 text-blue-600 fill-blue-600 ${isAr ? 'mr-0.5' : 'ml-0.5'}`} />}
               </button>
             </div>
           </div>
@@ -364,7 +396,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
               transition={{ duration: 0.35, ease: 'easeOut' }}
               className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center my-4 sm:my-6 relative z-10"
             >
-              <div className="lg:col-span-7 space-y-3.5 text-left">
+              <div className={`lg:col-span-7 space-y-3.5 ${isAr ? 'text-right' : 'text-left'}`}>
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
                   {React.createElement(currentScene.icon, {
                     className: `w-6 h-6 sm:w-7 sm:h-7 text-blue-600`
@@ -373,22 +405,22 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
 
                 <div>
                   <h4 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-snug">
-                    {currentScene.title}
+                    {isAr ? currentScene.titleAr : currentScene.title}
                   </h4>
-                  <p className="text-xs sm:text-sm font-arabic font-bold text-amber-700 mt-1" dir="rtl">
-                    {currentScene.titleAr}
+                  <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+                    {isAr ? currentScene.title : currentScene.titleAr}
                   </p>
                 </div>
 
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                  {currentScene.desc}
+                  {isAr ? currentScene.descAr : currentScene.desc}
                 </p>
 
-                <div className="p-3 sm:p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-2.5 shadow-xs">
-                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono text-[9px] sm:text-[10px] font-black flex-shrink-0 mt-0.5">
-                    🇲🇦 DARIJA
+                <div className="p-3 sm:p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-start gap-2.5 shadow-xs">
+                  <span className="px-2 py-0.5 rounded bg-blue-600 text-white font-mono text-[9px] sm:text-[10px] font-black flex-shrink-0 mt-0.5">
+                    {isAr ? '🇲🇦 بالدارجة' : '🇲🇦 DARIJA'}
                   </span>
-                  <p className="text-xs sm:text-sm text-slate-800 font-medium italic leading-relaxed font-arabic break-words" dir="rtl">
+                  <p className="text-xs sm:text-sm text-slate-800 font-medium italic leading-relaxed break-words font-arabic">
                     "{currentScene.descAr}"
                   </p>
                 </div>
@@ -406,20 +438,22 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                   </div>
 
                   {currentScene.mockupVisual.type === 'REAL_ALERT' && (
-                    <div className="p-3 sm:p-4 bg-white rounded-2xl border border-red-200 space-y-2 text-left shadow-xs">
+                    <div className={`p-3 sm:p-4 bg-white rounded-2xl border border-red-200 space-y-2 shadow-xs ${isAr ? 'text-right' : 'text-left'}`}>
                       <div className="flex items-center justify-between">
                         <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-[9px] sm:text-[10px] font-black">
-                          {currentScene.mockupVisual.urgency}
+                          {isAr ? currentScene.mockupVisual.urgencyAr : currentScene.mockupVisual.urgency}
                         </span>
                         <span className="text-[10px] text-slate-500 font-mono font-bold">21:45</span>
                       </div>
-                      <p className="text-xs sm:text-sm font-black text-slate-900">{currentScene.mockupVisual.service}</p>
+                      <p className="text-xs sm:text-sm font-black text-slate-900">
+                        {isAr ? currentScene.mockupVisual.serviceAr : currentScene.mockupVisual.service}
+                      </p>
                       <p className="text-[11px] text-slate-500 flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                        <span className="truncate">{currentScene.mockupVisual.location}</span>
+                        <span className="truncate">{isAr ? currentScene.mockupVisual.locationAr : currentScene.mockupVisual.location}</span>
                       </p>
-                      <div className="p-2 bg-blue-50 rounded-xl text-[10px] sm:text-[11px] text-blue-800 font-mono font-bold text-center border border-blue-200">
-                        {currentScene.mockupVisual.status}
+                      <div className="p-2 bg-blue-50 rounded-xl text-[10px] sm:text-[11px] text-blue-800 font-bold text-center border border-blue-200">
+                        {isAr ? currentScene.mockupVisual.statusAr : currentScene.mockupVisual.status}
                       </div>
                     </div>
                   )}
@@ -427,37 +461,43 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                   {currentScene.mockupVisual.type === 'REAL_VOICE' && (
                     <div className="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-xs">
                       <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1 text-right font-arabic">
-                        <span className="text-[9px] text-blue-600 font-bold block">تسجيل صوتي (أوديو الزبون) :</span>
+                        <span className="text-[9px] text-blue-600 font-bold block">{isAr ? 'تسجيل صوتي (أوديو الزبون) :' : 'Enregistrement vocal client :'}</span>
                         <p className="text-[11px] sm:text-xs text-slate-800 leading-relaxed">{currentScene.mockupVisual.audioText}</p>
                       </div>
-                      <div className="space-y-1 text-left">
-                        <p className="text-[9px] text-slate-500 font-bold uppercase">Diagnostic Instantané :</p>
-                        <p className="text-[11px] sm:text-xs font-bold text-emerald-700 leading-tight">{currentScene.mockupVisual.diagnostic}</p>
+                      <div className={`space-y-1 ${isAr ? 'text-right' : 'text-left'}`}>
+                        <p className="text-[9px] text-slate-500 font-bold uppercase">{isAr ? 'التشخيص التلقائي :' : 'Diagnostic Instantané :'}</p>
+                        <p className="text-[11px] sm:text-xs font-bold text-emerald-700 leading-tight">
+                          {isAr ? currentScene.mockupVisual.diagnosticAr : currentScene.mockupVisual.diagnostic}
+                        </p>
                         <div className="p-1.5 sm:p-2 bg-blue-50 rounded-xl text-[11px] font-bold text-blue-900 flex items-center justify-between mt-1 border border-blue-200">
-                          <span>Tarification :</span>
-                          <span>🤝 Accord Direct Client ↔ Artisan</span>
+                          <span>{isAr ? 'طريقة الثمن :' : 'Tarification :'}</span>
+                          <span>{isAr ? '🤝 اتفاق مباشر (0% عمولة)' : '🤝 Accord Direct (0% Comm.)'}</span>
                         </div>
                       </div>
                     </div>
                   )}
 
                   {currentScene.mockupVisual.type === 'REAL_TRACKING' && (
-                    <div className="p-3 sm:p-4 bg-white rounded-2xl border border-emerald-200 space-y-2.5 text-left shadow-xs">
+                    <div className={`p-3 sm:p-4 bg-white rounded-2xl border border-emerald-200 space-y-2.5 shadow-xs ${isAr ? 'text-right' : 'text-left'}`}>
                       <div className="flex items-center gap-2.5">
                         <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-xs flex-shrink-0">
                           HP
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-black text-slate-900 truncate">{currentScene.mockupVisual.maalemName}</p>
+                          <p className="text-xs font-black text-slate-900 truncate">
+                            {isAr ? currentScene.mockupVisual.maalemNameAr : currentScene.mockupVisual.maalemName}
+                          </p>
                           <p className="text-[9px] text-emerald-700 font-bold flex items-center gap-1">
                             <BadgeCheck className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">{currentScene.mockupVisual.verifiedBadge}</span>
+                            <span className="truncate">{isAr ? currentScene.mockupVisual.verifiedBadgeAr : currentScene.mockupVisual.verifiedBadge}</span>
                           </p>
-                          <p className="text-[9px] text-amber-700 font-bold font-mono">{currentScene.mockupVisual.rating}</p>
+                          <p className="text-[9px] text-amber-700 font-bold font-mono">
+                            {isAr ? currentScene.mockupVisual.ratingAr : currentScene.mockupVisual.rating}
+                          </p>
                         </div>
                       </div>
-                      <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-[10px] sm:text-xs text-emerald-900 font-mono font-bold">
-                        {currentScene.mockupVisual.eta}
+                      <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-[10px] sm:text-xs text-emerald-900 font-bold">
+                        {isAr ? currentScene.mockupVisual.etaAr : currentScene.mockupVisual.eta}
                       </div>
                     </div>
                   )}
@@ -467,25 +507,33 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                       <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-base shadow-xs">
                         <Check className="w-5 h-5" />
                       </div>
-                      <p className="text-xs font-black text-slate-900">{currentScene.mockupVisual.reparation}</p>
-                      <div className="p-2 bg-emerald-50 rounded-xl text-xs sm:text-sm font-mono font-black text-emerald-800 border border-emerald-200">
-                        {currentScene.mockupVisual.totalPaid}
+                      <p className="text-xs font-black text-slate-900">
+                        {isAr ? currentScene.mockupVisual.reparationAr : currentScene.mockupVisual.reparation}
+                      </p>
+                      <div className="p-2 bg-emerald-50 rounded-xl text-xs sm:text-sm font-bold text-emerald-800 border border-emerald-200">
+                        {isAr ? currentScene.mockupVisual.totalPaidAr : currentScene.mockupVisual.totalPaid}
                       </div>
-                      <p className="text-[9px] text-amber-800 font-bold">{currentScene.mockupVisual.satisfaction}</p>
+                      <p className="text-[9px] text-amber-800 font-bold">
+                        {isAr ? currentScene.mockupVisual.satisfactionAr : currentScene.mockupVisual.satisfaction}
+                      </p>
                     </div>
                   )}
 
                   {currentScene.mockupVisual.type === 'REAL_PROFILE_ACTIVATION' && (
-                    <div className="p-3 sm:p-4 bg-white rounded-2xl border border-amber-200 space-y-2 text-left shadow-xs">
+                    <div className={`p-3 sm:p-4 bg-white rounded-2xl border border-amber-200 space-y-2 shadow-xs ${isAr ? 'text-right' : 'text-left'}`}>
                       <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[9px] sm:text-[10px] font-black">
-                        {currentScene.mockupVisual.title}
+                        {isAr ? currentScene.mockupVisual.titleAr : currentScene.mockupVisual.title}
                       </span>
                       <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                        <p className="text-xs font-bold text-slate-900">{currentScene.mockupVisual.extractedName}</p>
-                        <p className="text-[10px] text-emerald-700 font-bold">{currentScene.mockupVisual.status}</p>
+                        <p className="text-xs font-bold text-slate-900">
+                          {isAr ? currentScene.mockupVisual.extractedNameAr : currentScene.mockupVisual.extractedName}
+                        </p>
+                        <p className="text-[10px] text-emerald-700 font-bold">
+                          {isAr ? currentScene.mockupVisual.statusAr : currentScene.mockupVisual.status}
+                        </p>
                       </div>
                       <div className="p-1.5 bg-emerald-50 rounded-xl text-[9px] text-emerald-800 font-bold text-center border border-emerald-200">
-                        Badge Artisan Officiel Activé 🚀
+                        {isAr ? 'شارة الحرفي المعتمد مفعلة 🚀' : 'Badge Artisan Officiel Activé 🚀'}
                       </div>
                     </div>
                   )}
@@ -495,32 +543,44 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                       <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-base shadow-xs">
                         <Gift className="w-5 h-5 text-emerald-600" />
                       </div>
-                      <p className="text-xs sm:text-sm font-black text-emerald-800 font-mono">{currentScene.mockupVisual.bonusAmount}</p>
-                      <p className="text-[11px] font-bold text-slate-900">{currentScene.mockupVisual.balance}</p>
-                      <p className="text-[9px] text-slate-500 font-medium">{currentScene.mockupVisual.perk}</p>
+                      <p className="text-xs sm:text-sm font-black text-emerald-800 font-mono">
+                        {isAr ? currentScene.mockupVisual.bonusAmountAr : currentScene.mockupVisual.bonusAmount}
+                      </p>
+                      <p className="text-[11px] font-bold text-slate-900">
+                        {isAr ? currentScene.mockupVisual.balanceAr : currentScene.mockupVisual.balance}
+                      </p>
+                      <p className="text-[9px] text-slate-500 font-medium">
+                        {isAr ? currentScene.mockupVisual.perkAr : currentScene.mockupVisual.perk}
+                      </p>
                     </div>
                   )}
 
                   {currentScene.mockupVisual.type === 'REAL_LEAD' && (
-                    <div className="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200 space-y-2 text-left shadow-xs">
-                      <p className="text-[11px] sm:text-xs font-black text-slate-900">{currentScene.mockupVisual.clientAlert}</p>
+                    <div className={`p-3 sm:p-4 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs ${isAr ? 'text-right' : 'text-left'}`}>
+                      <p className="text-[11px] sm:text-xs font-black text-slate-900">
+                        {isAr ? currentScene.mockupVisual.clientAlertAr : currentScene.mockupVisual.clientAlert}
+                      </p>
                       <div className="p-2 bg-slate-50 rounded-xl text-[10px] text-slate-700 font-arabic text-right border border-slate-200">
                         {currentScene.mockupVisual.audioSnippet}
                       </div>
                       <div className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
                         <WhatsappLogo weight="fill" className="w-4 h-4" />
-                        <span>Ouvrir WhatsApp en Darija 🇲🇦</span>
+                        <span>{isAr ? currentScene.mockupVisual.actionAr : currentScene.mockupVisual.action}</span>
                       </div>
                     </div>
                   )}
 
                   {currentScene.mockupVisual.type === 'REAL_INCOME' && (
                     <div className="p-3 sm:p-4 bg-white rounded-2xl border border-amber-200 text-center space-y-2 shadow-xs">
-                      <p className="text-[10px] text-slate-500 font-bold">{currentScene.mockupVisual.dailyWork}</p>
-                      <p className="text-xl font-black text-amber-950 font-mono">
-                        {currentScene.mockupVisual.grossMonthly}
+                      <p className="text-[10px] text-slate-500 font-bold">
+                        {isAr ? currentScene.mockupVisual.dailyWorkAr : currentScene.mockupVisual.dailyWork}
                       </p>
-                      <p className="text-[10px] text-emerald-700 font-bold">{currentScene.mockupVisual.commission}</p>
+                      <p className="text-xl font-black text-amber-950 font-mono">
+                        {isAr ? currentScene.mockupVisual.grossMonthlyAr : currentScene.mockupVisual.grossMonthly}
+                      </p>
+                      <p className="text-[10px] text-emerald-700 font-bold">
+                        {isAr ? currentScene.mockupVisual.commissionAr : currentScene.mockupVisual.commission}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -543,7 +603,7 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                       : 'bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200'
                   }`}
                 >
-                  {sc.shortLabel || `${idx + 1}. Étape`}
+                  {isAr ? (sc.shortLabelAr || sc.shortLabel) : sc.shortLabel}
                 </button>
               ))}
             </div>
@@ -556,18 +616,18 @@ export const PromoVideoPlayer = ({ onSelectJourney }) => {
                   className="w-full sm:w-auto py-3 px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Zap className="w-4 h-4 fill-current text-white flex-shrink-0" />
-                  <span>Lancer mon Dépannage Immédiat</span>
-                  <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>{isAr ? 'طلب ديباناج فوري دابا' : 'Lancer mon Dépannage Immédiat'}</span>
+                  <ArrowRight className={`w-3.5 h-3.5 flex-shrink-0 ${isAr ? 'rotate-180' : ''}`} />
                 </motion.button>
               ) : (
                 <motion.button
                   whileTap={{ scale: 0.94 }}
                   onClick={() => onSelectJourney('MAALEM', { promo: 'BONUS15' })}
-                  className="w-full sm:w-auto py-3 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(245,158,11,0.5)] flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="w-full sm:w-auto py-3 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-xs shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
-                  <Wrench className="w-4 h-4 text-slate-950 flex-shrink-0" />
-                  <span>Rejoindre le Réseau &amp; Recevoir +15 DH</span>
-                  <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
+                  <Wrench className="w-4 h-4 text-white flex-shrink-0" />
+                  <span>{isAr ? 'انضم للشبكة واستلم +15 درهم كادو' : 'Rejoindre le Réseau & Recevoir +15 DH'}</span>
+                  <ArrowRight className={`w-3.5 h-3.5 flex-shrink-0 ${isAr ? 'rotate-180' : ''}`} />
                 </motion.button>
               )}
             </div>
