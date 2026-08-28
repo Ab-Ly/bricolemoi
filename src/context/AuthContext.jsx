@@ -714,6 +714,26 @@ export const AuthProvider = ({ children }) => {
                     await supabase.from('maalem_details').upsert([defaultDetails]).select();
                   } catch (upsertErr) {}
                   authenticatedUser.maalem_details = defaultDetails;
+
+                  // Enregistrement de la transaction officielle de bonus de bienvenue (+15 DH)
+                  try {
+                    const welcomeTx = {
+                      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ('tx-bonus-' + Date.now()),
+                      maalem_id: validProfileId,
+                      maalem_name: fullName || 'Artisan Maâlem',
+                      maalem_phone: finalPhone,
+                      amount_dh: 15.00,
+                      type: 'BONUS',
+                      payment_method: 'WELCOME_BONUS_15DH',
+                      reference_ref: `WELCOME-BONUS-15DH-${Date.now()}`,
+                      status: 'VALIDATED',
+                      admin_notes: 'Bonus de bienvenue +15 DH accordé suite à confirmation SMS et code PIN',
+                      created_at: new Date().toISOString()
+                    };
+                    await supabase.from('transactions').insert([welcomeTx]);
+                  } catch (txErr) {
+                    console.warn('[Supabase Welcome Bonus Tx Warning]:', txErr.message);
+                  }
                 }
               }
             } catch (dbErr) {

@@ -641,7 +641,7 @@ export const useAuthModalLogic = () => {
     const fullNumber = getFullInternationalNumber();
 
     try {
-      if (authMode === 'FORGOT_PIN') {
+      if (authMode === 'FORGOT_PIN' || authMode === 'SIGN_UP') {
         setStep('SET_PIN');
         setTimeout(() => newPinRefs.current[0]?.focus(), 150);
         return;
