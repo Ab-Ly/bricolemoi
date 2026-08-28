@@ -24,8 +24,7 @@ import {
 } from 'lucide-react';
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
-import { formatDateTime } from '../../utils/dateUtils';
-import { calculateMaalemBalance } from '../../utils/balanceUtils';
+import { calculateMaalemBalance, isRealRechargeTx, isLeadTx, isBonusTx, isRefundTx } from '../../utils/balanceUtils';
 import { paginateArray } from '../../utils/paginationUtils';
 import { PaginationControls } from '../common/PaginationControls';
 

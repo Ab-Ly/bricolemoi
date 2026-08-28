@@ -26,7 +26,7 @@ import {
   DollarSign,
   PiggyBank
 } from 'lucide-react';
-import { isRealRechargeTx, isLeadTx, isBonusTx } from '../../utils/balanceUtils';
+import { isRealRechargeTx, isLeadTx, isBonusTx, isRefundTx } from '../../utils/balanceUtils';
 import { AdminClientsView } from './AdminClientsView';
 import { AdminLiveMissions } from './AdminLiveMissions';
 import { AdminMaalemsView } from './AdminMaalemsView';
