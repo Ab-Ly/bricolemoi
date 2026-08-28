@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  centrifugo:
+    image: centrifugo/centrifugo:v5
+    container_name: bricolemoi-centrifugo
+    restart: always
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config.json:/centrifugo/config.json:ro
+    command: centrifugo -c config.json
+    environment:
+      - CENTRIFUGO_ADMIN_PASSWORD=BricoleMoi2026_AdminSecretKey!
+      - CENTRIFUGO_ADMIN_SECRET=BricoleMoi2026_AdminJwtSecretToken!
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3

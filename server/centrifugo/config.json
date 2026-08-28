@@ -1,0 +1,49 @@
+{
+  "token_hmac_secret_key": "bricolemoi_super_jwt_secret_key_v5_prod_2026",
+  "admin": true,
+  "admin_password": "BricoleMoi2026_AdminSecretKey!",
+  "admin_secret": "BricoleMoi2026_AdminJwtSecretToken!",
+  "api_key": "bricolemoi_http_api_key_v5_secret",
+  "allowed_origins": [
+    "*"
+  ],
+  "client": {
+    "allowed_origins": [
+      "*"
+    ],
+    "history_max_publication_limit": 100,
+    "max_message_size": 65536
+  },
+  "namespaces": [
+    {
+      "name": "jobs",
+      "allow_subscribe_for_anonymous": true,
+      "allow_publish_for_anonymous": true,
+      "history_size": 50,
+      "history_ttl": "300s",
+      "force_recovery": true
+    },
+    {
+      "name": "tracking",
+      "allow_subscribe_for_anonymous": true,
+      "allow_publish_for_anonymous": true,
+      "history_size": 10,
+      "history_ttl": "60s"
+    },
+    {
+      "name": "user",
+      "allow_subscribe_for_anonymous": true,
+      "allow_publish_for_anonymous": true,
+      "history_size": 20,
+      "history_ttl": "3600s",
+      "presence": true
+    },
+    {
+      "name": "admin",
+      "allow_subscribe_for_anonymous": true,
+      "allow_publish_for_anonymous": true,
+      "history_size": 50,
+      "history_ttl": "86400s"
+    }
+  ]
+}
