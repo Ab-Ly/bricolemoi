@@ -2,8 +2,7 @@
 
 /**
  * 📟 BricoleMoi Live Console & Telemetry CLI
- * Affiche en temps réel dans le terminal tous les événements, logs,
- * actions et erreurs émis depuis n'importe quel téléphone ou navigateur connecté.
+ * Version 2.0 : Offline Queue Catch-up, Network Health & Deep Error Monitoring
  *
  * Usage :
  *   npm run logs
@@ -57,15 +56,16 @@ const C = {
   bgAmber: '\x1b[43m\x1b[30m',
   bgRed: '\x1b[41m\x1b[37m',
   bgGreen: '\x1b[42m\x1b[30m',
-  bgPurple: '\x1b[45m\x1b[37m'
+  bgPurple: '\x1b[45m\x1b[37m',
+  bgGray: '\x1b[100m\x1b[37m'
 };
 
 console.clear();
 console.log(`${C.cyan}╔════════════════════════════════════════════════════════════════════════════╗${C.reset}`);
-console.log(`${C.cyan}║${C.reset}  ${C.bold}${C.green}📟 BRICOLEMOI LIVE CONSOLE & TELEMETRY STREAM CLI${C.reset}                        ${C.cyan}║${C.reset}`);
-console.log(`${C.cyan}║${C.reset}  ${C.dim}Flux temps réel des téléphones, tablettes & navigateurs connectés 🇲🇦${C.reset}      ${C.cyan}║${C.reset}`);
+console.log(`${C.cyan}║${C.reset}  ${C.bold}${C.green}📟 BRICOLEMOI LIVE CONSOLE & TELEMETRY STREAM 2.0${C.reset}                         ${C.cyan}║${C.reset}`);
+console.log(`${C.cyan}║${C.reset}  ${C.dim}Flux temps réel & rattrapage hors-ligne des téléphones & navigateurs 🇲🇦${C.reset}    ${C.cyan}║${C.reset}`);
 console.log(`${C.cyan}╚════════════════════════════════════════════════════════════════════════════╝${C.reset}`);
-console.log(`${C.dim}📡 Canal actif : bricolemoi:terminal:logs | bricolemoi:jobs:stream${C.reset}`);
+console.log(`${C.dim}📡 Canaux actifs : bricolemoi:terminal:logs | bricolemoi:jobs:stream | bricolemoi:admin:alerts${C.reset}`);
 console.log(`${C.green}✓ Connecté à Ably Realtime Gateway. En attente d'événements...${C.reset}\n`);
 
 const ably = new Ably.Realtime({
@@ -86,6 +86,8 @@ const getRoleBadge = (role) => {
       return `${C.bgBlue} 👤 CLIENT ${C.reset}`;
     case 'ADMIN':
       return `${C.bgPurple} 🛡️ ADMIN ${C.reset}`;
+    case 'SYSTEM':
+      return `${C.bgGray} ⚙️ SYSTÈME ${C.reset}`;
     default:
       return `${C.dim}[VISITEUR]${C.reset}`;
   }
@@ -103,6 +105,8 @@ const getLevelBadge = (level) => {
       return `${C.green}${C.bold}📍 GPS${C.reset}`;
     case 'SOS':
       return `${C.red}${C.bold}🚨 SOS${C.reset}`;
+    case 'NETWORK':
+      return `${C.magenta}${C.bold}🌐 RÉSEAU${C.reset}`;
     default:
       return `${C.blue}${C.bold}ℹ INFO${C.reset}`;
   }
@@ -118,8 +122,9 @@ logsChannel.subscribe('client_log', (message) => {
   const userLabel = p.user?.name ? `${C.bold}${p.user.name}${C.reset}` : `${C.dim}Anonyme${C.reset}`;
   const phoneLabel = p.user?.phone ? `${C.dim}(${p.user.phone})${C.reset}` : '';
   const device = p.device?.summary || `${C.dim}Web Browser${C.reset}`;
+  const queuedBadge = p.isQueued ? ` ${C.yellow}[RATTRAPÉ HORS-LIGNE]${C.reset}` : '';
 
-  console.log(`${time} ${levelBadge} ${roleBadge} ${userLabel} ${phoneLabel}`);
+  console.log(`${time} ${levelBadge} ${roleBadge} ${userLabel} ${phoneLabel}${queuedBadge}`);
   console.log(`   ${C.bold}» ${p.message}${C.reset} ${C.dim}• ${device} • [${p.category || 'APP'}]${C.reset}`);
 
   if (p.data && Object.keys(p.data).length > 0) {
