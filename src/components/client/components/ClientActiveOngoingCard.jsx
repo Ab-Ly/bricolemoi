@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, MapPin, Car, Star, PhoneCall, MessageSquare, Navigation, Clock } from 'lucide-react';
 import { InteractiveMap } from '../../InteractiveMap';
