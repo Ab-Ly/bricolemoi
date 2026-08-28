@@ -288,9 +288,8 @@ export const InteractiveMap = ({
   const defaultLng = selectedLng || savedGPS?.lng || -7.6328;
 
   const [activeStyleKey, setActiveStyleKey] = useState('OSM_FR');
-  const [mapTheme, setMapTheme] = useState('GOLD_CYAN'); // 'GOLD_CYAN' | 'NEON_CYBER' | 'SILVER_SLATE' | 'NATURAL'
+  const [mapTheme, setMapTheme] = useState('NATURAL'); // 'NATURAL' | 'GOLD_CYAN' | 'NEON_CYBER' | 'SILVER_SLATE'
   const [userGPSPos, setUserGPSPos] = useState({ lat: defaultLat, lng: defaultLng });
-  const [liveMaalemCoords, setLiveMaalemCoords] = useState({});
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [showLayerMenu, setShowLayerMenu] = useState(false);
@@ -326,7 +325,7 @@ export const InteractiveMap = ({
       maxZoom: 19,
       pitch: 0,
       bearing: 0,
-      antialias: true,
+      antialias: false,
       attributionControl: false
     });
 
@@ -374,16 +373,7 @@ export const InteractiveMap = ({
     }
   }, [selectedLat, selectedLng, activeRouteCoords]);
 
-  // 3. Synchronisation réactive des coordonnées Maâlem (sans boucle CPU artificielle)
-  useEffect(() => {
-    const coords = {};
-    (maalems || []).forEach((m) => {
-      coords[m.id] = { lat: m.lat, lng: m.lng };
-    });
-    setLiveMaalemCoords(coords);
-  }, [maalems]);
-
-  // 4. Render & Update All Markers (Client GPS, Destination, Maalems, SOS Leads)
+  // 3. Render & Update All Markers (Client GPS, Destination, Maalems, SOS Leads)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded) return;
@@ -480,9 +470,8 @@ export const InteractiveMap = ({
 
     const filteredMaalems = (maalems || []).filter((m) => {
       if (m.is_online !== true || m.is_available === false) return false;
-      const rawPos = liveMaalemCoords[m.id] || { lat: m.lat, lng: m.lng };
-      const mLat = parseFloat(rawPos.lat);
-      const mLng = parseFloat(rawPos.lng);
+      const mLat = parseFloat(m.lat);
+      const mLng = parseFloat(m.lng);
       if (isNaN(mLat) || isNaN(mLng) || mLat < 20 || mLat > 38 || mLng >= 0) return false;
       return true;
     });
@@ -496,9 +485,8 @@ export const InteractiveMap = ({
     });
 
     filteredMaalems.forEach((m) => {
-      const rawPos = liveMaalemCoords[m.id] || { lat: m.lat, lng: m.lng };
-      const mLat = parseFloat(rawPos.lat || 33.5883);
-      const mLng = parseFloat(rawPos.lng || -7.6328);
+      const mLat = parseFloat(m.lat || 33.5883);
+      const mLng = parseFloat(m.lng || -7.6328);
       if (isNaN(mLat) || isNaN(mLng) || mLat < 20 || mLat > 38 || mLng >= 0) return;
 
       const isSelf = user && String(m.id).trim() === String(user.id).trim();
@@ -698,7 +686,7 @@ export const InteractiveMap = ({
       });
     }
 
-  }, [mapLoaded, user, userGPSPos, selectedLat, selectedLng, liveMaalemCoords, trackingMaalemPos, filterCategory, maalems, interventions, activeStyleKey]);
+  }, [mapLoaded, user, userGPSPos, selectedLat, selectedLng, trackingMaalemPos, filterCategory, maalems, interventions, activeStyleKey]);
 
   // 5. Rendu du Tracé Routier OSRM & Guidage en Temps Réel
   useEffect(() => {

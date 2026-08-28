@@ -1,7 +1,20 @@
 // Web Audio API Sound Synthesizer & Vibration API for Realtime Notifications
 
-let activeSirenContext = null;
+let sharedAudioCtx = null;
 let activeSirenInterval = null;
+
+const getSharedAudioCtx = () => {
+  try {
+    if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) sharedAudioCtx = new AudioCtx();
+    }
+    if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+      sharedAudioCtx.resume().catch(() => {});
+    }
+  } catch (e) {}
+  return sharedAudioCtx;
+};
 
 /**
  * Joue un son de notification ponctuel
@@ -9,9 +22,8 @@ let activeSirenInterval = null;
  */
 export const playNotificationSound = (type = 'emergency') => {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
+    const ctx = getSharedAudioCtx();
+    if (!ctx) return;
 
     if (type === 'emergency' || type === 'alert') {
       // Alarme d'urgence : deux impulsions aiguës montantes (880 Hz -> 1046 Hz)
@@ -100,11 +112,10 @@ export const stopEmergencySiren = () => {
       navigator.vibrate(0);
     } catch (e) {}
   }
-  if (activeSirenContext) {
+  if (sharedAudioCtx && sharedAudioCtx.state === 'running') {
     try {
-      activeSirenContext.close();
+      sharedAudioCtx.suspend().catch(() => {});
     } catch (e) {}
-    activeSirenContext = null;
   }
 };
 

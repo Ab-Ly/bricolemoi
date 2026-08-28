@@ -170,21 +170,13 @@
   display: none !important;
 }
 
-/* Custom Road & Streets Color Grading Themes for MapLibre Canvas */
-.map-theme-gold-cyan .maplibregl-canvas {
-  filter: contrast(1.18) saturate(1.35) brightness(1.02);
-}
-
-.map-theme-neon-cyber .maplibregl-canvas {
-  filter: invert(92%) hue-rotate(190deg) saturate(230%) contrast(125%) brightness(0.95);
-}
-
-.map-theme-silver-slate .maplibregl-canvas {
-  filter: saturate(0.25) contrast(1.2) brightness(1.06);
-}
-
+/* Custom Road & Streets Color Grading Themes for MapLibre Canvas (Optimisé 0% CPU) */
+.map-theme-gold-cyan .maplibregl-canvas,
+.map-theme-neon-cyber .maplibregl-canvas,
+.map-theme-silver-slate .maplibregl-canvas,
 .map-theme-natural .maplibregl-canvas {
-  filter: none;
+  filter: none !important;
+  will-change: auto;
 }
 
 /* Glowing Blue/Cyan Pulsing Circle for Client Geolocation */
