@@ -34,6 +34,9 @@ function formatEvolutionNumber(rawPhone) {
   return digits;
 }
 
+// Cache anti-doublon en mémoire (15 secondes)
+const recentDispatches = new Map();
+
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -66,15 +69,25 @@ export default async function handler(req, res) {
     const formattedClientPhone = formatEvolutionNumber(clientPhone);
     console.log(`🚨 [SOS Dispatch API] Nouvelle urgence de ${clientName} (${formattedClientPhone || 'Sans tél'}) à ${locationLabel}`);
 
-    // 1. Appel n8n en tâche de fond (non bloquant)
-    fetch(N8N_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...req.body,
-        clientPhone: formattedClientPhone
-      })
-    }).catch((err) => console.warn("[n8n Hook Error]:", err.message));
+    // Anti-doublon : Éviter d'envoyer 2 alertes WhatsApp en rafale pour la même demande (< 15 secondes)
+    const dedupKey = `${formattedClientPhone || clientName}_${category}_${district}_${city}`;
+    const now = Date.now();
+    if (recentDispatches.has(dedupKey) && now - recentDispatches.get(dedupKey) < 15000) {
+      console.log(`⏱️ [SOS Dispatch API] Requête en doublon ignorée (< 15s) pour ${dedupKey}`);
+      return res.status(200).json({
+        success: true,
+        message: "Alerte déjà transmise récemment (anti-doublon actif).",
+        deduplicated: true
+      });
+    }
+    recentDispatches.set(dedupKey, now);
+
+    // Nettoyage périodique du cache anti-doublon
+    if (recentDispatches.size > 200) {
+      for (const [k, ts] of recentDispatches.entries()) {
+        if (now - ts > 60000) recentDispatches.delete(k);
+      }
+    }
 
     // 2. Résolution des Maâlems candidats : utiliser la liste reçue OU interroger Supabase directement
     let rawMaalems = candidateMaalems;
