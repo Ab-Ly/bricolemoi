@@ -62,6 +62,7 @@ export const ClientActiveOngoingCard = ({
       : (resolvedMaalem?.rating_avg ? Number(resolvedMaalem.rating_avg).toFixed(1) : '5.0'));
 
   const lastRouteSigRef = useRef('');
+  const stableMaalemCoordsRef = useRef({ lat: null, lng: null });
 
   // Coordonnées client ultra-stables (priorité absolue à l'intervention enregistrée)
   const clientLat = (activeOngoingSOS.lat && !isNaN(Number(activeOngoingSOS.lat)))
@@ -71,18 +72,40 @@ export const ClientActiveOngoingCard = ({
     ? Number(activeOngoingSOS.lng)
     : Number(selectedLng);
 
-  // Coordonnées Maâlem
-  const maalemLat = parseFloat(resolvedMaalem?.lat || activeOngoingSOS.maalem_lat || 33.5883);
-  const maalemLng = parseFloat(resolvedMaalem?.lng || activeOngoingSOS.maalem_lng || -7.6328);
+  // Coordonnées Maâlem ultra-stables (anti-oscillation et anti-écrasement par fallback)
+  const rawLat = parseFloat(resolvedMaalem?.lat || activeOngoingSOS.maalem_lat);
+  const rawLng = parseFloat(resolvedMaalem?.lng || activeOngoingSOS.maalem_lng);
+
+  const isValidRaw = !isNaN(rawLat) && !isNaN(rawLng) && rawLat > 20 && rawLat < 38 && rawLng < 0;
+  const isGenericCenter =
+    (rawLat === 33.5883 && rawLng === -7.6328) ||
+    (rawLat === 34.0331 && rawLng === -5.0003) ||
+    (rawLat === 34.0209 && rawLng === -6.8416) ||
+    (rawLat === 31.6295 && rawLng === -7.9811);
+
+  if (isValidRaw && (!isGenericCenter || !stableMaalemCoordsRef.current.lat)) {
+    stableMaalemCoordsRef.current = { lat: rawLat, lng: rawLng };
+  }
+
+  const maalemLat = stableMaalemCoordsRef.current.lat || (isValidRaw ? rawLat : 33.5883);
+  const maalemLng = stableMaalemCoordsRef.current.lng || (isValidRaw ? rawLng : -7.6328);
 
   // Calcul du tracé routier réel entre le Maâlem et le Client (sans recalculs intempestifs)
   useEffect(() => {
     let isCancelled = false;
 
     if (!isNaN(clientLat) && !isNaN(clientLng) && !isNaN(maalemLat) && !isNaN(maalemLng)) {
-      const sig = `${maalemLat.toFixed(4)},${maalemLng.toFixed(4)}_${clientLat.toFixed(4)},${clientLng.toFixed(4)}`;
-      if (lastRouteSigRef.current === sig) return;
-      lastRouteSigRef.current = sig;
+      // Filtrer les micro-déplacements < 40m pour ne pas recalculer constamment tout le tracé OSRM
+      if (lastRouteSigRef.current) {
+        const [prevMLat, prevMLng, prevCLat, prevCLng] = lastRouteSigRef.current.split('_').map(Number);
+        const mDelta = Math.hypot(maalemLat - prevMLat, maalemLng - prevMLng);
+        const cDelta = Math.hypot(clientLat - prevCLat, clientLng - prevCLng);
+        if (mDelta < 0.0004 && cDelta < 0.0001) {
+          return;
+        }
+      }
+
+      lastRouteSigRef.current = `${maalemLat.toFixed(5)}_${maalemLng.toFixed(5)}_${clientLat.toFixed(5)}_${clientLng.toFixed(5)}`;
 
       fetchRoadRoute([maalemLat, maalemLng], [clientLat, clientLng]).then((res) => {
         if (!isCancelled && res) {
@@ -94,7 +117,7 @@ export const ClientActiveOngoingCard = ({
     return () => {
       isCancelled = true;
     };
-  }, [clientLat, clientLng, resolvedMaalem?.lat, resolvedMaalem?.lng, activeOngoingSOS.maalem_lat, activeOngoingSOS.maalem_lng]);
+  }, [clientLat, clientLng, maalemLat, maalemLng]);
 
   return (
     <motion.div
@@ -326,6 +349,7 @@ export const ClientActiveOngoingCard = ({
           filterCategory={activeOngoingSOS.service_type || serviceType}
           activeRouteCoords={routeInfo?.coordinates}
           trackingMaalemPos={[maalemLat, maalemLng]}
+          trackingMaalemId={rawMaalemId}
           etaSummary={routeInfo?.summary}
         />
       </div>

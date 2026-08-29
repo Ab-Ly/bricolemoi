@@ -273,6 +273,7 @@ export const InteractiveMap = ({
   filterCategory,
   activeRouteCoords,
   trackingMaalemPos,
+  trackingMaalemId,
   trackingClientPos,
   etaSummary
 }) => {
@@ -289,8 +290,9 @@ export const InteractiveMap = ({
   // Read cached GPS from localStorage if available
   const savedGPS = (() => {
     try {
-      return JSON.parse(localStorage.getItem('bricolemoi_client_gps') || 'null');
-    } catch (e) {
+      const raw = localStorage.getItem('bricolemoi_client_gps') || localStorage.getItem('bricolemoi_maalem_gps');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
       return null;
     }
   })();
@@ -316,6 +318,7 @@ export const InteractiveMap = ({
   const currentVehicleHeadingRef = useRef(0);
   const vehicleAnimRef = useRef(null);
   const lastRouteSigRef = useRef('');
+  const hasAutoFittedRouteRef = useRef(false);
 
   // 1. Initialize MapLibre Canvas with Full Street & Place Names Tile Layer
   useEffect(() => {
@@ -506,6 +509,16 @@ export const InteractiveMap = ({
     });
 
     filteredMaalems.forEach((m) => {
+      // Si cet artisan fait l'objet d'un suivi de véhicule direct avec trace active,
+      // masquer le marqueur statique doublon pour éviter les scintillements
+      if (trackingMaalemPos && trackingMaalemId && String(m.id).trim() === String(trackingMaalemId).trim()) {
+        if (maalemMarkersRef.current[m.id]) {
+          maalemMarkersRef.current[m.id].remove();
+          delete maalemMarkersRef.current[m.id];
+        }
+        return;
+      }
+
       const mLat = parseFloat(m.lat || 33.5883);
       const mLng = parseFloat(m.lng || -7.6328);
       if (isNaN(mLat) || isNaN(mLng) || mLat < 20 || mLat > 38 || mLng >= 0) return;
@@ -654,6 +667,7 @@ export const InteractiveMap = ({
 
               const curLng = fromLng + (tLng - fromLng) * ease;
               const curLat = fromLat + (tLat - fromLat) * ease;
+              currentVehiclePosRef.current = [curLng, curLat];
 
               if (trackingMaalemMarkerRef.current) {
                 trackingMaalemMarkerRef.current.setLngLat([curLng, curLat]);
@@ -787,6 +801,7 @@ export const InteractiveMap = ({
       if (map.getLayer(lineLayerId)) map.removeLayer(lineLayerId);
       if (map.getLayer(casingLayerId)) map.removeLayer(casingLayerId);
       if (map.getSource(sourceId)) map.removeSource(sourceId);
+      hasAutoFittedRouteRef.current = false;
       return;
     }
 
@@ -840,13 +855,13 @@ export const InteractiveMap = ({
       });
     }
 
-    // Auto-cadrage doux pour englober tout le trajet (uniquement au premier affichage ou si le tracé change)
-    const startPt = activeRouteCoords[0];
+    // Auto-cadrage doux pour englober tout le trajet (uniquement au premier affichage ou si la destination change)
     const endPt = activeRouteCoords[activeRouteCoords.length - 1];
-    const routeSignature = `${startPt[0].toFixed(3)},${startPt[1].toFixed(3)}_${endPt[0].toFixed(3)},${endPt[1].toFixed(3)}`;
+    const routeDestSig = `${endPt[0].toFixed(3)},${endPt[1].toFixed(3)}`;
 
-    if (lastRouteSigRef.current !== routeSignature) {
-      lastRouteSigRef.current = routeSignature;
+    if (!hasAutoFittedRouteRef.current || lastRouteSigRef.current !== routeDestSig) {
+      hasAutoFittedRouteRef.current = true;
+      lastRouteSigRef.current = routeDestSig;
       try {
         const bounds = new maplibregl.LngLatBounds();
         activeRouteCoords.forEach((pt) => {

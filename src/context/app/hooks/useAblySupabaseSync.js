@@ -69,19 +69,31 @@ export const useAblySupabaseSync = ({
         if (member && member.lat !== undefined && member.lng !== undefined) {
           const pLat = parseFloat(member.lat);
           const pLng = parseFloat(member.lng);
-          if (!isNaN(pLat) && !isNaN(pLng) && pLat > 20 && pLat < 38) {
-            latestPresenceCoordsRef.current.set(cleanId, { lat: pLat, lng: pLng });
+          if (!isNaN(pLat) && !isNaN(pLng) && pLat > 20 && pLat < 38 && pLng < 0) {
+            const existingLive = latestPresenceCoordsRef.current.get(cleanId);
+            // Vérifier si la coordonnée entrante est un fallback statique de ville (ex: centre Casa ou Fès)
+            const isCityFallback =
+              (pLat === 33.5883 && pLng === -7.6328) ||
+              (pLat === 34.0331 && pLng === -5.0003) ||
+              (pLat === 34.0209 && pLng === -6.8416) ||
+              (pLat === 31.6295 && pLng === -7.9811);
+
+            // Ne JAMAIS écraser un vrai point GPS mobile par un fallback statique de ville !
+            if (!existingLive || !isCityFallback) {
+              latestPresenceCoordsRef.current.set(cleanId, { lat: pLat, lng: pLng });
+            }
           }
         }
         const existing = maalemMap.get(cleanId);
+        const resolvedLivePos = latestPresenceCoordsRef.current.get(cleanId);
 
         if (existing) {
           maalemMap.set(cleanId, {
             ...existing,
             is_online: true,
             is_available: true,
-            lat: member.lat !== undefined ? member.lat : existing.lat,
-            lng: member.lng !== undefined ? member.lng : existing.lng,
+            lat: resolvedLivePos ? resolvedLivePos.lat : (member.lat !== undefined ? member.lat : existing.lat),
+            lng: resolvedLivePos ? resolvedLivePos.lng : (member.lng !== undefined ? member.lng : existing.lng),
             last_seen_at: member.last_seen_at || Date.now(),
             full_name: member.full_name || existing.full_name,
             specialty: member.specialty || existing.specialty,

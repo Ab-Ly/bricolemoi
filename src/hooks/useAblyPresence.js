@@ -27,13 +27,40 @@ export const useAblyPresence = ({ user, isOnline, onPresenceChange } = {}) => {
   isOnlineRef.current = isOnline;
   userRef.current = user;
 
-  // Calcul des coordonnées par défaut ou existantes
+  // Calcul des coordonnées par défaut ou existantes (avec priorité absolue au GPS réel)
   const getUserCoordinates = useCallback(() => {
+    // 1. Priorité absolue : dernière position GPS en direct enregistrée dans le hook
+    if (
+      lastLocationUpdateRef.current?.lat &&
+      lastLocationUpdateRef.current?.lng &&
+      !isNaN(lastLocationUpdateRef.current.lat) &&
+      !isNaN(lastLocationUpdateRef.current.lng)
+    ) {
+      return { lat: lastLocationUpdateRef.current.lat, lng: lastLocationUpdateRef.current.lng };
+    }
+
+    // 2. Vérifier si une position récente a été enregistrée en cache local
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem('bricolemoi_maalem_gps') ||
+        localStorage.getItem('bricolemoi_client_gps') ||
+        'null'
+      );
+      if (saved?.lat && saved?.lng && !isNaN(Number(saved.lat)) && !isNaN(Number(saved.lng))) {
+        const sLat = Number(saved.lat);
+        const sLng = Number(saved.lng);
+        if (sLat > 20 && sLat < 38 && sLng < 0) {
+          lastLocationUpdateRef.current = { lat: sLat, lng: sLng, timestamp: saved.updated_at || Date.now() };
+          return { lat: sLat, lng: sLng };
+        }
+      }
+    } catch (e) {}
+
     const currUser = userRef.current;
     if (!currUser) return { lat: 33.5883, lng: -7.6328 };
 
-    let mLat = parseFloat(currUser.lat);
-    let mLng = parseFloat(currUser.lng);
+    let mLat = parseFloat(currUser.lat || currUser.maalem_details?.lat);
+    let mLng = parseFloat(currUser.lng || currUser.maalem_details?.lng);
 
     if (isNaN(mLat) || isNaN(mLng) || mLng >= 0 || mLat < 20 || mLat > 38) {
       const zone = (currUser.city_zone || currUser.city || '').toLowerCase();
@@ -208,6 +235,13 @@ export const useAblyPresence = ({ user, isOnline, onPresenceChange } = {}) => {
 
         if (timeDiff >= 5000 || hasMoved) {
           lastLocationUpdateRef.current = { lat: latitude, lng: longitude, timestamp: now };
+          try {
+            localStorage.setItem(
+              'bricolemoi_maalem_gps',
+              JSON.stringify({ lat: latitude, lng: longitude, updated_at: now })
+            );
+          } catch (e) {}
+
           broadcastSelfPresence({ lat: latitude, lng: longitude });
 
           if (user?.id && String(user.role || '').toUpperCase() === 'MAALEM') {
