@@ -14,6 +14,26 @@ import { getSpecialtyLabel } from './EnhancedCategoryIcon';
 
 // High-Density Native Map Tiles (Zero API Key - 100% Free & No Watermark)
 const MAP_STYLES = {
+  OSM_FR: {
+    id: 'OSM_FR',
+    name: 'Plan Urbain HD Maroc (Rues Nommées & Bâtiments)',
+    tiles: [
+      'https://a.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+      'https://b.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+      'https://c.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png'
+    ],
+    attribution: '&copy; OpenStreetMap France & contributeurs'
+  },
+  OSM_HOT: {
+    id: 'OSM_HOT',
+    name: 'OSM Humanitarian Hot (Épuré Pastel)',
+    tiles: [
+      'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+      'https://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+      'https://c.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
+    ],
+    attribution: '&copy; OpenStreetMap contributors, Humanitarian OSM'
+  },
   ESRI_STREETS: {
     id: 'ESRI_STREETS',
     name: 'Esri World Streets HD (Officiel & Détaillé)',
@@ -29,26 +49,6 @@ const MAP_STYLES = {
       '/tiles-proxy/styles/basic-preview/{z}/{x}/{y}.png'
     ],
     attribution: '&copy; BricoleMoi Dedicated VPS &copy; OpenMapTiles'
-  },
-  OSM_HOT: {
-    id: 'OSM_HOT',
-    name: 'OSM Humanitarian Hot (Épuré Pastel)',
-    tiles: [
-      'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-      'https://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-      'https://c.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
-    ],
-    attribution: '&copy; OpenStreetMap contributors, Humanitarian OSM'
-  },
-  OSM_FR: {
-    id: 'OSM_FR',
-    name: 'Plan Urbain Classique OSM',
-    tiles: [
-      'https://a.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
-      'https://b.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
-      'https://c.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png'
-    ],
-    attribution: '&copy; OpenStreetMap France contributors'
   },
   SATELLITE: {
     id: 'SATELLITE',
@@ -69,7 +69,7 @@ const ROAD_COLOR_THEMES = [
 ];
 
 const getMapStyleJson = (styleKey) => {
-  const cfg = MAP_STYLES[styleKey] || MAP_STYLES.ESRI_STREETS;
+  const cfg = MAP_STYLES[styleKey] || MAP_STYLES.OSM_FR;
   const isRetina = typeof window !== 'undefined' && (window.devicePixelRatio || 1) > 1.25;
   const tileUrls = cfg.tiles.map((t) => t.replace('{r}', isRetina ? '@2x' : ''));
   return {
@@ -88,7 +88,12 @@ const getMapStyleJson = (styleKey) => {
         type: 'raster',
         source: 'base-tiles',
         minzoom: 0,
-        maxzoom: 19
+        maxzoom: 20,
+        paint: {
+          'raster-resampling': 'linear',
+          'raster-contrast': 0.05,
+          'raster-saturation': 0.05
+        }
       }
     ]
   };
@@ -455,7 +460,7 @@ export const InteractiveMap = ({
   const defaultLat = selectedLat || savedGPS?.lat || 33.5883;
   const defaultLng = selectedLng || savedGPS?.lng || -7.6328;
 
-  const [activeStyleKey, setActiveStyleKey] = useState('ESRI_STREETS');
+  const [activeStyleKey, setActiveStyleKey] = useState('OSM_FR');
   const [mapTheme, setMapTheme] = useState('GOLD_CYAN'); // 'GOLD_CYAN' | 'NEON_CYBER' | 'SILVER_SLATE' | 'NATURAL'
   const [userGPSPos, setUserGPSPos] = useState({ lat: defaultLat, lng: defaultLng });
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -503,7 +508,7 @@ export const InteractiveMap = ({
       center: [defaultLng, defaultLat],
       zoom: 14.5,
       minZoom: 10,
-      maxZoom: 19,
+      maxZoom: 20,
       pitch: 0,
       bearing: 0,
       antialias: true,

@@ -117,11 +117,13 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
 
   const isFallbackMaalem = !mId || mId === 'maalem-1' || mId === '22222222-2222-2222-2222-222222222222';
 
+  const maalemPhoneMap = new Map((maalems || []).map(m => [String(m.id).trim(), String(m.phone || '').replace(/\D/g, '').slice(-9)]));
+
   const myTransactions = (transactions || []).filter((t) => {
     if (!t) return false;
     const tId = String(t.maalem_id || '').trim();
     const tPhoneDigits = String(t.maalem_phone || '').replace(/\D/g, '');
-    const tPhone9 = tPhoneDigits.slice(-9);
+    const tPhone9 = tPhoneDigits.slice(-9) || maalemPhoneMap.get(tId) || '';
     const matchId = mId && tId === mId;
     const matchPhone = mPhone9.length >= 8 && tPhone9.length >= 8 && mPhone9 === tPhone9;
     const matchFallback = isFallbackMaalem && (tId === 'maalem-1' || tId === '22222222-2222-2222-2222-222222222222');

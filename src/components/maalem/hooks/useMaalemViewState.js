@@ -315,10 +315,21 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
     .sort((a, b) => (a.calculatedDistance || 0) - (b.calculatedDistance || 0));
 
   // 2. Chantiers Actifs Débloqués (Missions assignées à cet artisan)
+  const uPhone9 = String(user?.phone || '').replace(/\D/g, '').slice(-9);
+  const uId = String(user?.id || '').trim();
+
+  let myUnlockedLeadsStorage = [];
+  try {
+    myUnlockedLeadsStorage = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
+  } catch (e) {}
+
   const activeUnlockedLeads = interventions
     .filter((item) => {
       if (item.status === 'COMPLETED' || item.status === 'CANCELLED' || item.status === 'PENDING') return false;
-      const isOwner = user?.id && String(item.maalem_id || '').trim() === String(user.id).trim();
+      const isOwnerById = uId && String(item.maalem_id || '').trim() === uId;
+      const mPhone9 = String(item.maalem_phone || '').replace(/\D/g, '').slice(-9);
+      const isOwnerByPhone = uPhone9.length >= 8 && mPhone9.length >= 8 && uPhone9 === mPhone9;
+      const isUnlockedLocally = myUnlockedLeadsStorage.includes(String(item.id).trim());
       const isFallbackOwner =
         (!user?.id ||
           user.id === 'maalem-1' ||
@@ -326,7 +337,7 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
         (!item.maalem_id ||
           item.maalem_id === 'maalem-1' ||
           item.maalem_id === '22222222-2222-2222-2222-222222222222');
-      return isOwner || isFallbackOwner;
+      return isOwnerById || isOwnerByPhone || isUnlockedLocally || isFallbackOwner;
     })
     .sort(
       (a, b) =>
@@ -337,7 +348,10 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
   const completedLeads = interventions
     .filter((item) => {
       if (item.status !== 'COMPLETED') return false;
-      const isOwner = user?.id && String(item.maalem_id || '').trim() === String(user.id).trim();
+      const isOwnerById = uId && String(item.maalem_id || '').trim() === uId;
+      const mPhone9 = String(item.maalem_phone || '').replace(/\D/g, '').slice(-9);
+      const isOwnerByPhone = uPhone9.length >= 8 && mPhone9.length >= 8 && uPhone9 === mPhone9;
+      const isUnlockedLocally = myUnlockedLeadsStorage.includes(String(item.id).trim());
       const isFallbackOwner =
         (!user?.id ||
           user.id === 'maalem-1' ||
@@ -345,7 +359,7 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
         (!item.maalem_id ||
           item.maalem_id === 'maalem-1' ||
           item.maalem_id === '22222222-2222-2222-2222-222222222222');
-      return isOwner || isFallbackOwner;
+      return isOwnerById || isOwnerByPhone || isUnlockedLocally || isFallbackOwner;
     })
     .map((item) => {
       const matchReview = (reviews || []).find(

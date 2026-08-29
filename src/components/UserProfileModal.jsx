@@ -43,7 +43,7 @@ import { updateProfilePin } from '../lib/infobipAuthService';
 
 export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfile }) => {
   const { user, setUser, logout } = useAuth();
-  const { interventions = [], transactions = [], maalems = [], setMaalems, reviews = [], refreshData } = useApp();
+  const { interventions = [], transactions = [], maalems = [], clients = [], setMaalems, reviews = [], refreshData } = useApp();
 
   const balanceInfo = calculateMaalemBalance(user, transactions, maalems);
   const ratingInfo = calculateMaalemRating(user, reviews, interventions);
@@ -91,33 +91,15 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
   useEffect(() => {
     if (user) {
       setFullName(user.full_name || '');
-      setSpecialty(user?.maalem_details?.specialty || user?.specialty || 'PLUMBING');
-      if (user.phone) {
-        // Détecter indicatif existant si présent
-        const matchingCountry = COUNTRY_DIAL_CODES.find(c => user.phone.startsWith(c.dial));
-        if (matchingCountry) {
-          setSelectedCountry(matchingCountry);
-          setPhone(user.phone.replace(matchingCountry.dial, ''));
-        } else {
-          setPhone(user.phone.replace(/^\+/, ''));
-        }
-      }
+      setPhone(user.phone ? user.phone.replace(/^\+\d{1,4}/, '') : '');
       if (user.city_zone) {
         const parts = user.city_zone.split(' - ');
-        if (parts[0]) setSelectedCity(parts[0]);
-        if (parts[1]) setSelectedDistrict(parts[1]);
-      } else {
-        try {
-          const gps = JSON.parse(localStorage.getItem('bricolemoi_client_gps') || '{}');
-          if (gps.city) setSelectedCity(gps.city);
-          if (gps.district) setSelectedDistrict(gps.district);
-        } catch (e) {}
+        setSelectedCity(parts[0] || MOROCCAN_CITIES[0].name);
+        setSelectedDistrict(parts[1] || 'Centre');
       }
-      if (isMissingPhone) {
-        setActiveTab('edit');
-      }
+      setSpecialty(user.maalem_details?.specialty || user.specialty || 'PLUMBING');
     }
-  }, [user, isMissingPhone, isOpen]);
+  }, [user]);
 
   // Fermer dropdown pays lors d'un clic extérieur
   useEffect(() => {
@@ -132,14 +114,72 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
 
   if (!isOpen || !user) return null;
 
-  const isMaalem = user?.role?.toUpperCase() === 'MAALEM';
-  const activeJob = interventions?.find((i) => {
+  const isMaalem = user?.role?.toUpperCase() === 'MAALEM' || Boolean(user?.is_maalem) || Boolean(user?.maalem_details);
+  const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
+
+  const clientPhoneMap = new Map((clients || []).map(c => [String(c.id).trim(), String(c.phone || '').replace(/\D/g, '').slice(-9)]));
+  const maalemPhoneMap = new Map((maalems || []).map(m => [String(m.id).trim(), String(m.phone || '').replace(/\D/g, '').slice(-9)]));
+
+  const DUMMY_CLIENT_ID = '11111111-1111-1111-1111-111111111111';
+  const uId = String(user?.id || '').trim();
+  const uPhone9 = String(user?.phone || '').replace(/\D/g, '').slice(-9);
+
+  const myClientInterventions = (interventions || []).filter((i) => {
+    let myCreated = [];
+    try {
+      myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
+    } catch (e) {}
+    if (myCreated.includes(String(i.id).trim())) return true;
+    if (!user) return false;
+
+    const iClientId = String(i.client_id || '').trim();
+    if (uId && uId !== DUMMY_CLIENT_ID && iClientId && iClientId !== DUMMY_CLIENT_ID && iClientId === uId) {
+      return true;
+    }
+
+    const ip9 = String(i.client_phone || '').replace(/\D/g, '').slice(-9) || clientPhoneMap.get(iClientId) || '';
+    if (uPhone9.length >= 8 && ip9.length >= 8 && uPhone9 === ip9) {
+      return true;
+    }
+
+    return false;
+  }).sort((a, b) => new Date(b.created_at || b.updated_at || 0) - new Date(a.created_at || a.updated_at || 0));
+
+  const myMaalemInterventions = (interventions || []).filter((i) => {
+    if (!user) return false;
+    const iMaalemId = String(i.maalem_id || '').trim();
+    if (uId && iMaalemId && iMaalemId === uId) {
+      return true;
+    }
+
+    const mp9 = String(i.maalem_phone || '').replace(/\D/g, '').slice(-9) || maalemPhoneMap.get(iMaalemId) || '';
+    if (uPhone9.length >= 8 && mp9.length >= 8 && uPhone9 === mp9) {
+      return true;
+    }
+
+    let myUnlocked = [];
+    try {
+      myUnlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
+    } catch (e) {}
+    if (myUnlocked.includes(String(i.id).trim())) return true;
+
+    return false;
+  }).sort((a, b) => new Date(b.completed_at || b.updated_at || b.created_at || 0) - new Date(a.completed_at || a.updated_at || a.created_at || 0));
+
+  const myMaalemTransactions = balanceInfo.myTransactions || [];
+
+  const completedCount = myClientInterventions.filter(i => i.status === 'COMPLETED').length;
+  const activeCount = myClientInterventions.filter(i => i.status === 'PENDING' || i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.status === 'PENDING_COMPLETION').length;
+
+  const currentCityObj = MOROCCAN_CITIES.find(c => c.name === selectedCity) || MOROCCAN_CITIES[0];
+
+  const activeJob = (interventions || []).find((i) => {
     const isOngoing = ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status);
     if (!isOngoing) return false;
     if (isMaalem) {
-      return String(i.maalem_id || '').trim() === String(user.id).trim();
+      return String(i.maalem_id || '').trim() === uId || (uPhone9.length >= 8 && String(i.maalem_phone || '').replace(/\D/g, '').slice(-9) === uPhone9);
     }
-    return String(i.client_id || '').trim() === String(user.id).trim() || (user.phone && i.client_phone === user.phone);
+    return (String(i.client_id || '').trim() === uId && uId !== DUMMY_CLIENT_ID) || (uPhone9.length >= 8 && String(i.client_phone || '').replace(/\D/g, '').slice(-9) === uPhone9);
   });
 
   const handleLogout = async (force = false) => {
@@ -153,40 +193,6 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
       if (onLoggedOut) onLoggedOut();
     });
   };
-
-  const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
-
-  const DUMMY_CLIENT_ID = '11111111-1111-1111-1111-111111111111';
-  const myClientInterventions = interventions.filter((i) => {
-    let myCreated = [];
-    try {
-      myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
-    } catch (e) {}
-    if (myCreated.includes(String(i.id).trim())) return true;
-    if (!user) return false;
-    const isOwnerById = user.id && user.id !== DUMMY_CLIENT_ID && i.client_id && i.client_id !== DUMMY_CLIENT_ID && String(i.client_id).trim() === String(user.id).trim();
-    const cp9 = String(user.phone || '').replace(/\D/g, '').slice(-9);
-    const ip9 = String(i.client_phone || '').replace(/\D/g, '').slice(-9);
-    const isOwnerByPhone = cp9.length >= 8 && ip9.length >= 8 && cp9 === ip9 && cp9 !== '661234567';
-    return isOwnerById || isOwnerByPhone;
-  }).sort((a, b) => new Date(b.created_at || b.updated_at || 0) - new Date(a.created_at || a.updated_at || 0));
-
-  const myMaalemInterventions = interventions.filter((i) => {
-    if (!user) return false;
-    const mId = String(user.id || '').trim();
-    const mPhone9 = String(user.phone || '').replace(/\D/g, '').slice(-9);
-    const matchId = mId && String(i.maalem_id || '').trim() === mId;
-    const iPhone9 = String(i.maalem_phone || '').replace(/\D/g, '').slice(-9);
-    const matchPhone = mPhone9.length >= 8 && iPhone9.length >= 8 && mPhone9 === iPhone9;
-    return matchId || matchPhone;
-  }).sort((a, b) => new Date(b.completed_at || b.updated_at || b.created_at || 0) - new Date(a.completed_at || a.updated_at || a.created_at || 0));
-
-  const myMaalemTransactions = balanceInfo.myTransactions || [];
-
-  const completedCount = myClientInterventions.filter(i => i.status === 'COMPLETED').length;
-  const activeCount = myClientInterventions.filter(i => i.status === 'PENDING' || i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.status === 'PENDING_COMPLETION').length;
-
-  const currentCityObj = MOROCCAN_CITIES.find(c => c.name === selectedCity) || MOROCCAN_CITIES[0];
 
   const handleDetectGps = () => {
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {

@@ -75,6 +75,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
   const {
     interventions,
     maalems,
+    clients,
     reviews,
     createIntervention,
     confirmFinalDevis,
@@ -177,6 +178,12 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
   const DUMMY_CLIENT_ID = '11111111-1111-1111-1111-111111111111';
 
+  const clientPhoneMap = new Map(
+    (clients || []).map((c) => [String(c.id).trim(), String(c.phone || '').replace(/\D/g, '').slice(-9)])
+  );
+  const cp9 = String(user?.phone || '').replace(/\D/g, '').slice(-9);
+  const uId = String(user?.id || '').trim();
+
   const myClientInterventions = interventions
     .filter((item) => {
       let myCreated = [];
@@ -189,15 +196,17 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
       if (!user) return false;
 
+      const iClientId = String(item.client_id || '').trim();
       const isOwnerById =
-        user.id &&
-        user.id !== DUMMY_CLIENT_ID &&
-        item.client_id &&
-        item.client_id !== DUMMY_CLIENT_ID &&
-        String(item.client_id).trim() === String(user.id).trim();
-      const cp9 = String(user.phone || '').replace(/\D/g, '').slice(-9);
-      const ip9 = String(item.client_phone || '').replace(/\D/g, '').slice(-9);
-      const isOwnerByPhone = cp9.length >= 8 && ip9.length >= 8 && cp9 === ip9 && cp9 !== '661234567';
+        uId &&
+        uId !== DUMMY_CLIENT_ID &&
+        iClientId &&
+        iClientId !== DUMMY_CLIENT_ID &&
+        iClientId === uId;
+
+      const rawPhone = item.client_phone || clientPhoneMap.get(iClientId) || '';
+      const ip9 = String(rawPhone).replace(/\D/g, '').slice(-9);
+      const isOwnerByPhone = cp9.length >= 8 && ip9.length >= 8 && cp9 === ip9;
 
       return isOwnerById || isOwnerByPhone;
     })
