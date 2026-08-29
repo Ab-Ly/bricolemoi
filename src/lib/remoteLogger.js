@@ -225,9 +225,22 @@ export const initRemoteTelemetry = () => {
 
         // Ne pas polluer les logs avec les annulations normales de zoom/déplacement de carte
         if (!isAborted && !isMapTile && !url.includes('ably.net') && !url.includes('centrifugo')) {
-          sendTerminalLog('ERROR', 'NETWORK', `Coupure ou échec réseau sur : ${url.split('?')[0]}`, {
-            error: errMsg || 'NetworkError'
-          });
+          const isTransientOffline = 
+            !navigator.onLine || 
+            errMsg.includes('Failed to fetch') || 
+            errMsg.includes('NetworkError') || 
+            errMsg.includes('Load failed');
+
+          if (isTransientOffline) {
+            sendTerminalLog('WARN', 'NETWORK', `Micro-coupure réseau mobile sur : ${url.split('?')[0]} (rétablissement automatique)`, {
+              error: errMsg || 'NetworkOffline',
+              online: navigator.onLine
+            });
+          } else {
+            sendTerminalLog('ERROR', 'NETWORK', `Échec requête réseau sur : ${url.split('?')[0]}`, {
+              error: errMsg || 'NetworkError'
+            });
+          }
         }
         throw networkErr;
       }
