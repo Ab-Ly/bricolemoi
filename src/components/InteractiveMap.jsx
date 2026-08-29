@@ -278,6 +278,152 @@ const computeBearing = (lat1, lon1, lat2, lon2) => {
   return (brng + 360) % 360;
 };
 
+// Gabarit HTML Popup Maâlem en Route (Modern Clean & Trust)
+const renderTrackingPopupHtml = ({ maalem, etaSummary, distanceKm, durationMin }) => {
+  const displayName = maalem?.full_name && maalem.full_name !== 'Maalem' && maalem.full_name !== 'Artisan Maalem'
+    ? maalem.full_name
+    : 'Artisan Maâlem';
+  const specialtyLabel = getSpecialtyLabel(maalem?.specialty);
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('') || 'AM';
+  const ratingText = (maalem?.rating_avg ? Number(maalem.rating_avg) : 5.0).toFixed(1);
+  const rawPhone = String(maalem?.phone || '').replace(/\D/g, '');
+  const hasPhone = rawPhone.length >= 9;
+  const intlPhone = rawPhone.startsWith('212')
+    ? rawPhone
+    : rawPhone.startsWith('0')
+    ? `212${rawPhone.slice(1)}`
+    : `212${rawPhone}`;
+
+  let etaDisplay = '~5 min';
+  let distDisplay = 'En route';
+  if (durationMin) {
+    etaDisplay = `~${durationMin} min`;
+  } else if (etaSummary) {
+    const parts = etaSummary.split('•');
+    if (parts[0]) etaDisplay = parts[0].replace('Trajet estimé :', '').trim();
+  }
+
+  if (distanceKm) {
+    distDisplay = `${distanceKm} km`;
+  } else if (etaSummary && etaSummary.includes('•')) {
+    const parts = etaSummary.split('•');
+    if (parts[1]) distDisplay = parts[1].trim();
+  }
+
+  return `
+    <div class="bg-white/98 backdrop-blur-2xl border border-slate-200/90 rounded-2xl shadow-2xl p-4 font-sans text-slate-800 min-w-[270px] max-w-[310px] space-y-3">
+      <!-- Entête : Avatar & Statut -->
+      <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0 font-black text-sm tracking-wider">
+            ${initials}
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1">
+              <span class="font-extrabold text-sm text-slate-900 tracking-tight truncate">${displayName}</span>
+              <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            </div>
+            <p class="text-[11px] font-semibold text-slate-500 truncate">${specialtyLabel}</p>
+          </div>
+        </div>
+        <span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full shrink-0">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+          En direct
+        </span>
+      </div>
+
+      <!-- Boîte ETA & Distance Temps Réel -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-100/90 rounded-xl p-2.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-blue-800 uppercase tracking-wider">Arrivée estimée</p>
+            <p class="text-sm font-black text-slate-900">${etaDisplay}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Distance</p>
+          <p class="text-xs font-black text-blue-700 font-mono">${distDisplay}</p>
+        </div>
+      </div>
+
+      <!-- Pied de fiche : Note & Actions Téléphone / WhatsApp -->
+      <div class="flex items-center justify-between gap-2 pt-0.5">
+        <div class="flex items-center gap-1">
+          <span class="text-amber-500 text-sm">★</span>
+          <span class="font-black text-slate-800 text-xs">${ratingText}</span>
+          <span class="text-[10px] text-slate-400">/ 5.0</span>
+        </div>
+        ${hasPhone ? `
+          <div class="flex items-center gap-1.5">
+            <a href="tel:${rawPhone}" class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold shadow-xs transition-all no-underline">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+              Appeler
+            </a>
+            <a href="https://wa.me/${intlPhone}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-7 h-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-xs transition-all no-underline" title="Contacter sur WhatsApp">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+            </a>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+};
+
+// Gabarit HTML Popup Maâlem Radar
+const renderMaalemPopupHtml = ({ maalem, isSelf, distanceKm, etaMin }) => {
+  const formattedName = (maalem?.full_name || 'Artisan Maâlem')
+    .split(' ')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+  const specialtyLabel = getSpecialtyLabel(maalem?.specialty);
+  const ratingText = (maalem?.rating_avg ? Number(maalem.rating_avg) : 5.0).toFixed(1);
+  const reviewsCount = maalem?.reviews_count ? ` (${maalem.reviews_count} avis)` : '';
+  const rawPhone = String(maalem?.phone || '').replace(/\D/g, '');
+  const hasPhone = rawPhone.length >= 9 && !isSelf;
+
+  return `
+    <div class="bg-white/98 backdrop-blur-2xl border border-slate-200/90 rounded-2xl shadow-2xl p-3.5 font-sans text-slate-800 min-w-[250px] max-w-[290px] space-y-2.5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+          <span class="font-extrabold text-sm text-slate-900 truncate">${isSelf ? 'Votre Position Artisan' : formattedName}</span>
+        </div>
+        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+          ${isSelf ? '🟢 En Ligne' : 'Disponible'}
+        </span>
+      </div>
+      <div class="space-y-1.5 text-xs">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-[11px] text-slate-600 font-semibold truncate">${specialtyLabel}</span>
+          <span class="text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 text-[11px] shrink-0">
+            ★ ${ratingText} / 5.0${reviewsCount}
+          </span>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-slate-600 pt-1.5 border-t border-slate-100">
+          <span>Distance : <strong class="text-slate-900">${distanceKm} km</strong></span>
+          <span>Trajet : <strong class="text-blue-700 font-bold">~${etaMin} min</strong></span>
+        </div>
+      </div>
+      ${hasPhone ? `
+        <div class="pt-1 border-t border-slate-100 flex justify-end">
+          <a href="tel:${rawPhone}" class="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold shadow-xs transition-all no-underline">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            Contacter
+          </a>
+        </div>
+      ` : ''}
+    </div>
+  `;
+};
+
 export const InteractiveMap = ({
   mode = 'CLIENT_PICKER',
   selectedLat,
@@ -327,6 +473,7 @@ export const InteractiveMap = ({
   const destinationMarkerRef = useRef(null);
   const trackingMaalemMarkerRef = useRef(null);
   const vehicleIconElRef = useRef(null);
+  const vehicleHeadingRingRef = useRef(null);
   const currentVehiclePosRef = useRef(null);
   const currentVehicleHeadingRef = useRef(0);
   const vehicleAnimRef = useRef(null);
@@ -346,6 +493,7 @@ export const InteractiveMap = ({
     }
     currentVehiclePosRef.current = null;
     vehicleIconElRef.current = null;
+    vehicleHeadingRingRef.current = null;
     if (trackingMaalemMarkerRef.current) {
       trackingMaalemMarkerRef.current.remove();
       trackingMaalemMarkerRef.current = null;
@@ -570,29 +718,7 @@ export const InteractiveMap = ({
         }
 
         const popup = new maplibregl.Popup({ offset: 20, className: 'clean-trust-popup' }).setHTML(
-          `<div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 p-3.5 rounded-2xl text-slate-800 font-sans shadow-xl min-w-[240px]">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-                <span class="font-black text-sm text-slate-900 truncate max-w-[140px]">${isSelf ? 'Votre Position Artisan' : formattedName}</span>
-              </div>
-              <span class="text-[10px] font-mono text-emerald-700 font-extrabold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
-                ${isSelf ? '🟢 En Ligne' : 'En direct'}
-              </span>
-            </div>
-            <div class="space-y-2 text-xs">
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-[11px] text-slate-600 font-semibold truncate">${getSpecialtyLabel(m.specialty)}</span>
-                <span class="text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 font-mono text-[11px] whitespace-nowrap shrink-0">
-                  ⭐ ${(m.rating_avg || 5.0).toFixed(1)} / 5.0${m.reviews_count ? ` (${m.reviews_count})` : ''}
-                </span>
-              </div>
-              <div class="flex items-center justify-between text-[11px] text-slate-600 font-mono pt-2 border-t border-slate-100 whitespace-nowrap">
-                <span>Distance : <strong class="text-slate-900">${distanceKm} km</strong></span>
-                <span>Arrivée : <strong class="text-blue-700 font-bold">~${etaMin} min</strong></span>
-              </div>
-            </div>
-          </div>`
+          renderMaalemPopupHtml({ maalem: m, isSelf, distanceKm, etaMin })
         );
 
         maalemMarkersRef.current[m.id] = new maplibregl.Marker({ element: el })
@@ -612,38 +738,36 @@ export const InteractiveMap = ({
       const tLat = parseFloat(trackingMaalemPos[0]);
       const tLng = parseFloat(trackingMaalemPos[1]);
       if (!isNaN(tLat) && !isNaN(tLng) && tLat > 20 && tLat < 38) {
+        const trackingMaalemObj = (maalems || []).find((m) => String(m.id).trim() === String(trackingMaalemId).trim());
+        const trackingPopupHtml = renderTrackingPopupHtml({ maalem: trackingMaalemObj, etaSummary });
+
         if (!trackingMaalemMarkerRef.current) {
           const el = document.createElement('div');
-          el.style.width = '52px';
-          el.style.height = '52px';
-          el.className = 'relative flex items-center justify-center cursor-pointer z-40';
+          el.style.width = '58px';
+          el.style.height = '58px';
+          el.className = 'relative flex items-center justify-center cursor-pointer z-40 group';
 
-          const iconContainer = document.createElement('div');
-          iconContainer.className = 'w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 border-2 border-white shadow-xl flex items-center justify-center text-white transition-transform duration-500 ease-out';
-          iconContainer.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+          el.innerHTML = `
+            <div class="absolute w-14 h-14 rounded-full bg-amber-500/25 animate-ping pointer-events-none"></div>
+            <div class="absolute w-11 h-11 rounded-full bg-amber-500/15 animate-pulse pointer-events-none"></div>
+            <div class="vehicle-heading-ring absolute w-12 h-12 flex items-center justify-center transition-transform duration-500 ease-out pointer-events-none">
+              <div class="absolute -top-1.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[8px] border-b-amber-600 drop-shadow-sm"></div>
+            </div>
+            <div class="relative w-11 h-11 rounded-full bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 border-2.5 border-white shadow-[0_6px_18px_rgba(217,119,6,0.45)] flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-xs"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+              <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white shadow-xs"></span>
+            </div>
+            <div class="absolute -bottom-3 px-2 py-0.5 bg-slate-900/95 backdrop-blur-md text-white text-[9px] font-black tracking-wide rounded-full border border-slate-700/80 shadow-md flex items-center gap-1 pointer-events-none whitespace-nowrap">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+              <span>MAÂLEM EN ROUTE</span>
+            </div>
           `;
 
-          const beaconPing = document.createElement('div');
-          beaconPing.className = 'absolute w-12 h-12 rounded-2xl bg-amber-500/30 animate-ping pointer-events-none';
-
-          const badgeLabel = document.createElement('span');
-          badgeLabel.className = 'absolute -bottom-1 px-1.5 py-0.2 bg-slate-900 text-[8px] font-black text-white rounded-full border border-white shadow-xs pointer-events-none';
-          badgeLabel.innerText = 'MAÂLEM';
-
-          el.appendChild(beaconPing);
-          el.appendChild(iconContainer);
-          el.appendChild(badgeLabel);
-
-          vehicleIconElRef.current = iconContainer;
+          const headingRing = el.querySelector('.vehicle-heading-ring');
+          vehicleHeadingRingRef.current = headingRing;
           currentVehiclePosRef.current = [tLng, tLat];
 
-          const popup = new maplibregl.Popup({ offset: 25, className: 'clean-trust-popup' }).setHTML(
-            `<div class="bg-white/95 backdrop-blur-xl border border-amber-300 p-3 rounded-2xl text-center shadow-xl font-sans">
-              <p class="text-xs font-black text-slate-900">Artisan Maâlem en Route</p>
-              <p class="text-[10px] text-amber-700 font-bold mt-0.5">Glissade GPS directe vers vous</p>
-            </div>`
-          );
+          const popup = new maplibregl.Popup({ offset: 30, className: 'clean-trust-popup' }).setHTML(trackingPopupHtml);
 
           trackingMaalemMarkerRef.current = new maplibregl.Marker({ element: el })
             .setLngLat([tLng, tLat])
@@ -654,6 +778,12 @@ export const InteractiveMap = ({
             trackingMaalemMarkerRef.current.addTo(map);
           }
 
+          // Mettre à jour dynamiquement le contenu du popup avec l'ETA et les données en direct
+          const existingPopup = trackingMaalemMarkerRef.current.getPopup();
+          if (existingPopup) {
+            existingPopup.setHTML(trackingPopupHtml);
+          }
+
           const prevPos = currentVehiclePosRef.current || [tLng, tLat];
           const [fromLng, fromLat] = prevPos;
           const delta = Math.hypot(tLng - fromLng, tLat - fromLat);
@@ -662,8 +792,8 @@ export const InteractiveMap = ({
           if (delta > 0.00004) {
             const heading = computeBearing(fromLat, fromLng, tLat, tLng);
             currentVehicleHeadingRef.current = heading;
-            if (vehicleIconElRef.current) {
-              vehicleIconElRef.current.style.transform = `rotate(${Math.round(heading)}deg)`;
+            if (vehicleHeadingRingRef.current) {
+              vehicleHeadingRingRef.current.style.transform = `rotate(${Math.round(heading)}deg)`;
             }
 
             if (vehicleAnimRef.current) {
@@ -709,6 +839,7 @@ export const InteractiveMap = ({
       trackingMaalemMarkerRef.current.remove();
       trackingMaalemMarkerRef.current = null;
       vehicleIconElRef.current = null;
+      vehicleHeadingRingRef.current = null;
       currentVehiclePosRef.current = null;
     }
 
