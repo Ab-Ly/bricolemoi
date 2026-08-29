@@ -22,6 +22,14 @@ const MAP_STYLES = {
     ],
     attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap'
   },
+  VPS_DEDICATED: {
+    id: 'VPS_DEDICATED',
+    name: 'Serveur Dédié VPS BricoleMoi (Ultra-Rapide)',
+    tiles: [
+      '/tiles-proxy/styles/basic-preview/{z}/{x}/{y}.png'
+    ],
+    attribution: '&copy; BricoleMoi Dedicated VPS &copy; OpenMapTiles'
+  },
   OSM_HOT: {
     id: 'OSM_HOT',
     name: 'OSM Humanitarian Hot (Épuré Pastel)',

@@ -6,7 +6,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    host: true
+    host: true,
+    proxy: {
+      '/tiles-proxy': {
+        target: 'http://51.255.46.206:8086',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/tiles-proxy/, '')
+      }
+    }
   },
   build: {
     rollupOptions: {

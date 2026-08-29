@@ -76,6 +76,10 @@
   ],
   "rewrites": [
     {
+      "source": "/tiles-proxy/(.*)",
+      "destination": "http://51.255.46.206:8086/$1"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },
