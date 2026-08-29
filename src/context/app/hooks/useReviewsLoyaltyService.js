@@ -230,8 +230,10 @@ export const useReviewsLoyaltyService = ({
           .from('interventions')
           .update({
             status: 'COMPLETED',
+            progress_step: 'COMPLETED',
             rating: Number(rating),
-            comment: fullComment
+            comment: fullComment,
+            completed_at: new Date().toISOString()
           })
           .eq('id', String(intervention_id).trim());
 

@@ -59,11 +59,20 @@ async function reconcileBalances() {
     let recharges = 0;
     let bonuses = 0;
     const uniqueLeads = new Map();
+    const uniqueRefunds = new Map();
 
     for (const t of myTxs) {
       const amt = parseFloat(t.amount_dh) || 0;
-      if (t.payment_method?.includes('Offert') || t.type === 'BONUS' || String(t.reference_ref || '').includes('BONUS')) {
+      const isBonus = t.payment_method?.includes('Offert') || t.type === 'BONUS' || String(t.reference_ref || '').includes('BONUS');
+      const isRefund = t.payment_method?.includes('Remboursement') || String(t.reference_ref || '').startsWith('REFUND_');
+
+      if (isBonus) {
         bonuses += amt;
+      } else if (isRefund) {
+        const ref = String(t.reference_ref || '');
+        const uuidMatch = ref.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+        const key = uuidMatch ? uuidMatch[0].toLowerCase() : t.id;
+        uniqueRefunds.set(key, 15);
       } else if (amt > 0) {
         recharges += amt;
       } else {
@@ -74,12 +83,13 @@ async function reconcileBalances() {
       }
     }
 
-    if (recharges === 0 && bonuses === 0 && uniqueLeads.size === 0) {
+    if (recharges === 0 && bonuses === 0 && uniqueLeads.size === 0 && uniqueRefunds.size === 0) {
       continue;
     }
 
     const uniqueLeadDebits = uniqueLeads.size * 15.0;
-    const exactBalance = Math.max(0, (recharges + bonuses) - uniqueLeadDebits);
+    const uniqueRefundCredits = uniqueRefunds.size * 15.0;
+    const exactBalance = Math.max(0, (recharges + bonuses + uniqueRefundCredits) - uniqueLeadDebits);
 
     const details = (maalemDetails || []).find((d) => String(d.id).trim() === mId) || {};
     const currentDb = Number(details.credit_balance ?? m.credits ?? 0);

@@ -93,11 +93,20 @@ async function runGlobalAudit() {
     let recharges = 0;
     let bonuses = 0;
     const uniqueLeads = new Map();
+    const uniqueRefunds = new Map();
 
     for (const t of myTxs) {
       const amt = parseFloat(t.amount_dh) || 0;
-      if (t.payment_method?.includes('Offert') || t.type === 'BONUS' || String(t.reference_ref || '').includes('BONUS')) {
+      const isBonus = t.payment_method?.includes('Offert') || t.type === 'BONUS' || String(t.reference_ref || '').includes('BONUS');
+      const isRefund = t.payment_method?.includes('Remboursement') || String(t.reference_ref || '').startsWith('REFUND_');
+
+      if (isBonus) {
         bonuses += amt;
+      } else if (isRefund) {
+        const ref = String(t.reference_ref || '');
+        const uuidMatch = ref.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+        const key = uuidMatch ? uuidMatch[0].toLowerCase() : t.id;
+        uniqueRefunds.set(key, 15);
       } else if (amt > 0) {
         recharges += amt;
       } else {
@@ -109,8 +118,9 @@ async function runGlobalAudit() {
     }
 
     const uniqueLeadDebits = uniqueLeads.size * 15.0;
+    const uniqueRefundCredits = uniqueRefunds.size * 15.0;
     totalSpentLeadsAll += uniqueLeadDebits;
-    const ledgerExpected = (recharges + bonuses) - uniqueLeadDebits;
+    const ledgerExpected = (recharges + bonuses + uniqueRefundCredits) - uniqueLeadDebits;
     const isPerfect = Math.abs(dbCredit - ledgerExpected) < 0.01 || (recharges === 0 && bonuses === 0);
 
     const statusBadge = isPerfect ? '\x1b[32m[✓ ÉQUILIBRÉ]\x1b[0m' : '\x1b[31m[⚠️ ÉCART DÉTECTÉ]\x1b[0m';
@@ -118,7 +128,7 @@ async function runGlobalAudit() {
       `  ${statusBadge} \x1b[1m${m.full_name || 'Maâlem'}\x1b[0m (${m.phone || 'Sans tel'}) | Spécialité: \x1b[35m${details.specialty || 'N/A'}\x1b[0m`
     );
     console.log(
-      `     • Solde DB: \x1b[1m${dbCredit.toFixed(2)} DH\x1b[0m | Grand Livre (Recharges: +${recharges} DH, Bonus: +${bonuses} DH, Leads: -${uniqueLeadDebits} DH) ➔ \x1b[1m${ledgerExpected.toFixed(2)} DH\x1b[0m`
+      `     • Solde DB: \x1b[1m${dbCredit.toFixed(2)} DH\x1b[0m | Grand Livre (Recharges: +${recharges} DH, Bonus: +${bonuses} DH, Remboursements: +${uniqueRefundCredits} DH, Leads: -${uniqueLeadDebits} DH) ➔ \x1b[1m${ledgerExpected.toFixed(2)} DH\x1b[0m`
     );
 
     if (!isPerfect && (recharges > 0 || bonuses > 0)) {

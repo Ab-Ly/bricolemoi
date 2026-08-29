@@ -288,9 +288,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/AdminDashboard.jsx": {
-    "mtime": 1787944950.71807,
-    "seen": 1788026192.631167,
-    "ast_hash": "d79ae20070c786f21d671e6e0c707df3",
+    "mtime": 1788028805.8091671,
+    "seen": 1788029289.895922,
+    "ast_hash": "32861722d90e4f857ea5222e18927056",
     "semantic_hash": ""
   },
   "src/components/admin/AdminDisputesView.jsx": {
@@ -300,9 +300,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/AdminLiveMissions.jsx": {
-    "mtime": 1787944950.718774,
-    "seen": 1788026192.631171,
-    "ast_hash": "dffa30dae9097d845067d2bcb8f0ddc1",
+    "mtime": 1788028794.0158944,
+    "seen": 1788029289.8959832,
+    "ast_hash": "9dc309adfceef475ea9bdcbe30ad6746",
     "semantic_hash": ""
   },
   "src/components/admin/AdminMaalemsView.jsx": {
@@ -468,9 +468,9 @@
     "semantic_hash": ""
   },
   "src/utils/balanceUtils.js": {
-    "mtime": 1788025521.4731917,
-    "seen": 1788026192.631335,
-    "ast_hash": "c57526d3a3cde5d4976d2d7b67ab544e",
+    "mtime": 1788028665.6139345,
+    "seen": 1788029289.900809,
+    "ast_hash": "92f6cafd6c8aaa9ce9ff8a82f4e9cb01",
     "semantic_hash": ""
   },
   "src/utils/ratingUtils.js": {
@@ -996,9 +996,9 @@
     "semantic_hash": ""
   },
   "src/context/app/hooks/useAblySupabaseSync.js": {
-    "mtime": 1788026068.6995058,
-    "seen": 1788026192.631275,
-    "ast_hash": "c43eb4135f66f50c7f7b481ff266fcec",
+    "mtime": 1788027191.0447857,
+    "seen": 1788029289.899164,
+    "ast_hash": "968b38b01ed5e90031f8d235e9f4922e",
     "semantic_hash": ""
   },
   "src/context/app/hooks/useAdminService.js": {
@@ -1008,21 +1008,21 @@
     "semantic_hash": ""
   },
   "src/context/app/hooks/useInterventionsService.js": {
-    "mtime": 1788025960.381756,
-    "seen": 1788026192.631279,
-    "ast_hash": "b4551a553d06ebb7688092023f5b1d01",
+    "mtime": 1788028825.7394714,
+    "seen": 1788029289.899232,
+    "ast_hash": "c6a4c2bf3b7713d4f035f301d54ec736",
     "semantic_hash": ""
   },
   "src/context/app/hooks/useReviewsLoyaltyService.js": {
-    "mtime": 1787856065.7135863,
-    "seen": 1788026192.631281,
-    "ast_hash": "bbbb4fb6210cb15369753a7010bc8385",
+    "mtime": 1788028835.3832958,
+    "seen": 1788029289.899235,
+    "ast_hash": "215ac460b637f736e472fb48ec471da6",
     "semantic_hash": ""
   },
   "src/context/app/hooks/useWalletTransactionsService.js": {
-    "mtime": 1788025521.4684684,
-    "seen": 1788026192.6312819,
-    "ast_hash": "fd3370ee7ec90fe8f6ec581b4dcd70f9",
+    "mtime": 1788028739.2462993,
+    "seen": 1788029289.8992372,
+    "ast_hash": "fe878d9eff26087b725d4337432a09ef",
     "semantic_hash": ""
   },
   "src/lib/telemetry.js": {
@@ -1038,9 +1038,9 @@
     "semantic_hash": ""
   },
   "src/utils/dataNormalizer.js": {
-    "mtime": 1787856065.7229772,
-    "seen": 1788026192.631337,
-    "ast_hash": "cd23280eac4429f2c5e4eabdeca21a78",
+    "mtime": 1788028782.9049664,
+    "seen": 1788029289.900811,
+    "ast_hash": "56ea71e8f62494c46bcf85bb13e84f93",
     "semantic_hash": ""
   },
   "src/utils/dateUtils.js": {
@@ -1056,15 +1056,15 @@
     "semantic_hash": ""
   },
   "scripts/audit.js": {
-    "mtime": 1787945294.0583527,
-    "seen": 1788026192.63109,
-    "ast_hash": "96c0ca878ab39e4266aa43432c08f42e",
+    "mtime": 1788028919.1169052,
+    "seen": 1788029289.893895,
+    "ast_hash": "9173abc71bf61582b37cc6915459d831",
     "semantic_hash": ""
   },
   "scripts/reconcile.js": {
-    "mtime": 1787945297.8450046,
-    "seen": 1788026192.631104,
-    "ast_hash": "c04995cf591bb2c4149155afb728ba4d",
+    "mtime": 1788028949.6564481,
+    "seen": 1788029289.894212,
+    "ast_hash": "9415c85da80bf776ae00f99a15a9177a",
     "semantic_hash": ""
   },
   "scripts/simulate.js": {
@@ -1086,9 +1086,9 @@
     "semantic_hash": ""
   },
   "src/lib/remoteLogger.js": {
-    "mtime": 1787944950.7451832,
-    "seen": 1788026192.631319,
-    "ast_hash": "52ca1cc66542d589a80b7db94ea18436",
+    "mtime": 1788026679.6486926,
+    "seen": 1788029289.900299,
+    "ast_hash": "1daade13e514608458fe223322c66518",
     "semantic_hash": ""
   },
   "src/components/common/PaginationControls.jsx": {
@@ -1203,6 +1203,12 @@
     "mtime": 1787946376.9695878,
     "seen": 1788026192.631218,
     "ast_hash": "63e7e8a32c6434051a624bd449eaf1fe",
+    "semantic_hash": ""
+  },
+  "scripts/deep-audit.js": {
+    "mtime": 1788027261.2795784,
+    "seen": 1788029289.894003,
+    "ast_hash": "d2f8da4c82d6b5ab17d229f62732112d",
     "semantic_hash": ""
   }
 }

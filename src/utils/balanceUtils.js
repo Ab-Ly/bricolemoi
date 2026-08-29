@@ -145,6 +145,21 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
     }
   }
 
+  // Dédupliquer les remboursements de leads par intervention (évite les doublons de clics)
+  const validatedRefundTxs = myTransactions.filter((t) => t.status === 'VALIDATED' && isRefundTx(t));
+  const seenRefundKeys = new Set();
+  let totalValidatedRefunds = 0;
+
+  for (const t of validatedRefundTxs) {
+    const ref = String(t.reference_ref || '').trim();
+    const uuidMatch = ref.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    const intvKey = uuidMatch ? uuidMatch[0].toLowerCase() : (t.id || ref);
+    if (!seenRefundKeys.has(intvKey)) {
+      seenRefundKeys.add(intvKey);
+      totalValidatedRefunds += Math.abs(parseFloat(t.amount_dh) || 15.0);
+    }
+  }
+
   const totalBonusSum = myTransactions
     .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
     .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
@@ -163,11 +178,11 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
           : 0))
   );
 
-  const totalRechargeAndBonus = totalRechargedSum + totalBonusSum;
+  const totalCreditsInjected = totalRechargedSum + totalBonusSum + totalValidatedRefunds;
   let liveTotalBalance = 0;
 
-  if (totalRechargeAndBonus > 0) {
-    liveTotalBalance = Math.max(0, totalRechargeAndBonus - totalValidatedLeadsSpent);
+  if (totalCreditsInjected > 0 || totalValidatedLeadsSpent > 0) {
+    liveTotalBalance = Math.max(0, totalCreditsInjected - totalValidatedLeadsSpent);
   } else if (!isNaN(fallbackCredits) && fallbackCredits > 0) {
     liveTotalBalance = fallbackCredits;
   } else {

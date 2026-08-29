@@ -42,9 +42,16 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
     const total = interventions.length;
     const pending = interventions.filter((i) => i.status === 'PENDING').length;
     const completed = interventions.filter((i) => i.status === 'COMPLETED').length;
-    const refunded = interventions.filter((i) => i.status === 'UNREACHABLE_REFUNDED').length;
+    const refunded = interventions.filter(
+      (i) => i.status === 'UNREACHABLE_REFUNDED' || i.status === 'UNFEASIBLE' || i.status === 'CANCELLED'
+    ).length;
     const inProgress = interventions.filter(
-      (i) => i.status !== 'PENDING' && i.status !== 'COMPLETED' && i.status !== 'UNREACHABLE_REFUNDED'
+      (i) =>
+        i.status !== 'PENDING' &&
+        i.status !== 'COMPLETED' &&
+        i.status !== 'UNREACHABLE_REFUNDED' &&
+        i.status !== 'CANCELLED' &&
+        i.status !== 'UNFEASIBLE'
     ).length;
 
     return { total, pending, inProgress, completed, refunded };
@@ -63,9 +70,20 @@ export const AdminLiveMissions = ({ interventions = [], maalems = [], onCancelIn
 
       let statusOk = true;
       if (statusFilter === 'PENDING') statusOk = item.status === 'PENDING';
-      else if (statusFilter === 'IN_PROGRESS') statusOk = item.status !== 'PENDING' && item.status !== 'COMPLETED' && item.status !== 'UNREACHABLE_REFUNDED';
-      else if (statusFilter === 'COMPLETED') statusOk = item.status === 'COMPLETED';
-      else if (statusFilter === 'UNREACHABLE_REFUNDED') statusOk = item.status === 'UNREACHABLE_REFUNDED';
+      else if (statusFilter === 'IN_PROGRESS') {
+        statusOk =
+          item.status !== 'PENDING' &&
+          item.status !== 'COMPLETED' &&
+          item.status !== 'UNREACHABLE_REFUNDED' &&
+          item.status !== 'CANCELLED' &&
+          item.status !== 'UNFEASIBLE';
+      } else if (statusFilter === 'COMPLETED') statusOk = item.status === 'COMPLETED';
+      else if (statusFilter === 'UNREACHABLE_REFUNDED') {
+        statusOk =
+          item.status === 'UNREACHABLE_REFUNDED' ||
+          item.status === 'UNFEASIBLE' ||
+          item.status === 'CANCELLED';
+      }
 
       return queryOk && serviceOk && statusOk;
     });

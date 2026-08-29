@@ -925,7 +925,12 @@ export const useInterventionsService = ({
         }
         await supabase
           .from('interventions')
-          .update({ status: 'COMPLETED', escrow_status: 'DEBITED' })
+          .update({
+            status: 'COMPLETED',
+            progress_step: 'COMPLETED',
+            escrow_status: 'DEBITED',
+            completed_at: new Date().toISOString()
+          })
           .eq('id', cleanId);
       } catch (e) {
         console.warn('[Supabase] completeIntervention warning:', e.message);

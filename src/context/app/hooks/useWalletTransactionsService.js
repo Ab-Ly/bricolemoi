@@ -60,6 +60,19 @@ export const useWalletTransactionsService = ({
       console.warn('[releaseLeadCredit] L\'identifiant cible n\'est pas un artisan Maâlem enregistré, annulation:', cleanMaalemId);
       return;
     }
+
+    // Idempotence stricte : Vérifier si cette intervention a DÉJÀ été remboursée à ce Maâlem
+    const alreadyRefunded = (transactions || []).some(
+      (t) =>
+        String(t.maalem_id || '').trim() === cleanMaalemId &&
+        String(t.reference_ref || '').includes(cleanIntId) &&
+        (String(t.type || '').toUpperCase() === 'RECHARGE' || String(t.payment_method || '').includes('Remboursement'))
+    );
+    if (alreadyRefunded) {
+      console.log('[releaseLeadCredit] Intervention déjà remboursée pour ce Maâlem, annulation du double crédit:', cleanIntId);
+      return;
+    }
+
     const nowIso = new Date().toISOString();
 
     const refundTx = {

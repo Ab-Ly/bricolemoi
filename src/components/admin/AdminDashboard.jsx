@@ -92,7 +92,12 @@ export const AdminDashboard = () => {
   // Calcul des métriques globales en direct et détaillées
   const pendingSOSCount = interventions.filter((i) => i.status === 'PENDING').length;
   const inProgressSOSCount = interventions.filter(
-    (i) => i.status !== 'COMPLETED' && i.status !== 'CANCELLED' && (i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.progress_step === 'ON_THE_WAY' || i.progress_step === 'ARRIVED')
+    (i) =>
+      i.status !== 'COMPLETED' &&
+      i.status !== 'CANCELLED' &&
+      i.status !== 'UNFEASIBLE' &&
+      i.status !== 'UNREACHABLE_REFUNDED' &&
+      (i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.progress_step === 'ON_THE_WAY' || i.progress_step === 'ARRIVED')
   ).length;
   const activeSOSCount = pendingSOSCount + inProgressSOSCount;
   const completedSOSCount = interventions.filter((i) => i.status === 'COMPLETED').length;

@@ -90,7 +90,9 @@ export const normalizeIntervention = (raw = {}, context = {}) => {
     photos_list: cleanPhotosList,
     audio_note_url: raw.audio_note_url || null,
     status: String(raw.status || 'PENDING').toUpperCase(),
-    progress_step: raw.progress_step || 'DISPATCHED',
+    progress_step: (String(raw.status || '').toUpperCase() === 'COMPLETED' || String(raw.status || '').toUpperCase() === 'CANCELLED' || String(raw.status || '').toUpperCase() === 'UNFEASIBLE')
+      ? String(raw.status || '').toUpperCase()
+      : (raw.progress_step || 'DISPATCHED'),
     final_agreed_price: finalAgreedPrice,
     rating: numericRating,
     comment: cleanComment,
