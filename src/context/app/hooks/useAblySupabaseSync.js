@@ -52,6 +52,11 @@ export const useAblySupabaseSync = ({
     interventionsRef.current = interventions;
   }, [interventions]);
 
+  const maalemsRef = useRef(maalems);
+  useEffect(() => {
+    maalemsRef.current = maalems;
+  }, [maalems]);
+
   const isMaalemOnlineRef = useRef(isMaalemOnline);
   useEffect(() => {
     isMaalemOnlineRef.current = isMaalemOnline;
