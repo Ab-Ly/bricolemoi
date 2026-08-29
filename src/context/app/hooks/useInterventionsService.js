@@ -952,14 +952,15 @@ export const useInterventionsService = ({
     const nowIso = new Date().toISOString();
     const updatedCancelled = {
       status: 'CANCELLED',
-      cancelled_by: 'CLIENT',
-      cancelled_at: nowIso
+      updated_at: nowIso
     };
 
     // Conserver dans l'historique (Client, Maâlem & Admin) avec statut CANCELLED au lieu de le supprimer !
     setInterventions((prev) =>
       prev.map((item) =>
-        String(item.id).trim() === cleanId ? { ...item, ...updatedCancelled } : item
+        String(item.id).trim() === cleanId
+          ? { ...item, ...updatedCancelled, cancelled_by: 'CLIENT', cancelled_at: nowIso }
+          : item
       )
     );
 
