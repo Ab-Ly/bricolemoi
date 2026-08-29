@@ -351,6 +351,8 @@ export const ClientActiveOngoingCard = ({
           trackingMaalemPos={[maalemLat, maalemLng]}
           trackingMaalemId={rawMaalemId}
           etaSummary={routeInfo?.summary}
+          distanceKm={routeInfo?.distanceKm}
+          durationMin={routeInfo?.durationMin}
         />
       </div>
 

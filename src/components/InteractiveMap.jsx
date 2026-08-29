@@ -300,26 +300,20 @@ const renderTrackingPopupHtml = ({ maalem, etaSummary, distanceKm, durationMin }
     ? `212${rawPhone.slice(1)}`
     : `212${rawPhone}`;
 
-  let etaDisplay = '~5 min';
-  let distDisplay = 'En route';
-  if (durationMin) {
-    etaDisplay = `~${durationMin} min`;
-  } else if (etaSummary) {
-    const parts = etaSummary.split('•');
-    if (parts[0]) etaDisplay = parts[0].replace('Trajet estimé :', '').trim();
-  }
+  let etaDisplay = durationMin ? `~${durationMin} min` : '~5-10 min';
+  let distDisplay = distanceKm ? `${distanceKm} km` : 'En route';
 
-  if (distanceKm) {
-    distDisplay = `${distanceKm} km`;
-  } else if (etaSummary && etaSummary.includes('•')) {
-    const parts = etaSummary.split('•');
-    if (parts[1]) distDisplay = parts[1].trim();
+  if (etaSummary) {
+    const kmMatch = etaSummary.match(/([\d.,]+)\s*km/i);
+    const minMatch = etaSummary.match(/~?\s*(\d+)\s*min/i);
+    if (kmMatch) distDisplay = `${kmMatch[1]} km`;
+    if (minMatch) etaDisplay = `~${minMatch[1]} min`;
   }
 
   return `
-    <div class="bg-white/98 backdrop-blur-2xl border border-slate-200/90 rounded-2xl shadow-2xl p-4 font-sans text-slate-800 min-w-[270px] max-w-[310px] space-y-3">
+    <div class="bg-white border border-slate-200/90 rounded-2xl shadow-[0_12px_32px_rgba(15,23,42,0.18)] p-3.5 sm:p-4 font-sans text-slate-800 w-[290px] sm:w-[310px] space-y-3">
       <!-- Entête : Avatar & Statut -->
-      <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+      <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0 font-black text-sm tracking-wider">
             ${initials}
@@ -332,25 +326,25 @@ const renderTrackingPopupHtml = ({ maalem, etaSummary, distanceKm, durationMin }
             <p class="text-[11px] font-semibold text-slate-500 truncate">${specialtyLabel}</p>
           </div>
         </div>
-        <span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full shrink-0">
+        <span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full shrink-0">
           <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
           En direct
         </span>
       </div>
 
       <!-- Boîte ETA & Distance Temps Réel -->
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-100/90 rounded-xl p-2.5 flex items-center justify-between">
+      <div class="bg-blue-50/80 border border-blue-100 rounded-xl p-2.5 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <div>
-            <p class="text-[10px] font-bold text-blue-800 uppercase tracking-wider">Arrivée estimée</p>
-            <p class="text-sm font-black text-slate-900">${etaDisplay}</p>
+            <p class="text-[9px] font-bold text-blue-800 uppercase tracking-wider">Arrivée estimée</p>
+            <p class="text-xs font-black text-slate-900 font-mono">${etaDisplay}</p>
           </div>
         </div>
         <div class="text-right">
-          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Distance</p>
+          <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Distance</p>
           <p class="text-xs font-black text-blue-700 font-mono">${distDisplay}</p>
         </div>
       </div>
@@ -364,11 +358,11 @@ const renderTrackingPopupHtml = ({ maalem, etaSummary, distanceKm, durationMin }
         </div>
         ${hasPhone ? `
           <div class="flex items-center gap-1.5">
-            <a href="tel:${rawPhone}" class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold shadow-xs transition-all no-underline">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            <a href="tel:${rawPhone}" class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all no-underline">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
               Appeler
             </a>
-            <a href="https://wa.me/${intlPhone}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-7 h-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-xs transition-all no-underline" title="Contacter sur WhatsApp">
+            <a href="https://wa.me/${intlPhone}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-7 h-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-all no-underline shrink-0" title="Contacter sur WhatsApp">
               <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
             </a>
           </div>
@@ -435,7 +429,9 @@ export const InteractiveMap = ({
   trackingMaalemPos,
   trackingMaalemId,
   trackingClientPos,
-  etaSummary
+  etaSummary,
+  distanceKm,
+  durationMin
 }) => {
   const { user } = useAuth();
   const { interventions, maalems, calculateDistanceInKm, showToast, isMaalemOnline, toggleMaalemOnlineStatus } = useApp();
@@ -740,7 +736,7 @@ export const InteractiveMap = ({
       const tLng = parseFloat(trackingMaalemPos[1]);
       if (!isNaN(tLat) && !isNaN(tLng) && tLat > 20 && tLat < 38) {
         const trackingMaalemObj = (maalems || []).find((m) => String(m.id).trim() === String(trackingMaalemId).trim());
-        const trackingPopupHtml = renderTrackingPopupHtml({ maalem: trackingMaalemObj, etaSummary });
+        const trackingPopupHtml = renderTrackingPopupHtml({ maalem: trackingMaalemObj, etaSummary, distanceKm, durationMin });
 
         if (!trackingMaalemMarkerRef.current) {
           const el = document.createElement('div');
@@ -768,7 +764,7 @@ export const InteractiveMap = ({
           vehicleHeadingRingRef.current = headingRing;
           currentVehiclePosRef.current = [tLng, tLat];
 
-          const popup = new maplibregl.Popup({ offset: 30, className: 'clean-trust-popup' }).setHTML(trackingPopupHtml);
+          const popup = new maplibregl.Popup({ offset: 30, className: 'clean-trust-popup', closeButton: false }).setHTML(trackingPopupHtml);
 
           trackingMaalemMarkerRef.current = new maplibregl.Marker({ element: el })
             .setLngLat([tLng, tLat])
