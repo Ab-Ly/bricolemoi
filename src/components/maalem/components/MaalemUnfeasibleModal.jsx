@@ -7,7 +7,8 @@ export const MaalemUnfeasibleModal = ({
   setUnreachableModalLead,
   unreachableReason,
   setUnreachableReason,
-  declareMissionUnfeasible
+  declareMissionUnfeasible,
+  abandonActiveMission
 }) => {
   return (
     <AnimatePresence>
@@ -93,7 +94,12 @@ export const MaalemUnfeasibleModal = ({
               <button
                 type="button"
                 onClick={async () => {
-                  await declareMissionUnfeasible(unreachableModalLead.id, unreachableReason);
+                  if (unreachableModalLead?.id) {
+                    if (abandonActiveMission) {
+                      await abandonActiveMission(unreachableReason);
+                    }
+                    await declareMissionUnfeasible(unreachableModalLead.id, unreachableReason);
+                  }
                   setUnreachableModalLead(null);
                 }}
                 className="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all cursor-pointer"

@@ -7,4 +7,5 @@ ACCES_SERVEUR_BRICOLEMOI.txt
 # Local graphify cache and machine-specific roots
 graphify-out/cache/
 graphify-out/.graphify_*
-graphify-out/20*
+graphify-out/20*
+.DS_Store

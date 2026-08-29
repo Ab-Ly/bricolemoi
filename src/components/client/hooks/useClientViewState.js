@@ -640,38 +640,63 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
        Boolean(i.maalem_id))
   );
 
-  const isEmergencyMatched = isMatched || (activeEmergency && 
-    activeEmergency.status !== 'COMPLETED' &&
-    activeEmergency.status !== 'CANCELLED' && (
-      ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(activeEmergency.status) ||
-      ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(activeEmergency.progress_step) ||
-      Boolean(activeEmergency.maalem_id)
-    )
-  );
+  // Synchroniser activeEmergency avec son état réel le plus récent dans myClientInterventions
+  const liveActiveEmergency = activeEmergency?.id
+    ? myClientInterventions.find((i) => String(i.id).trim() === String(activeEmergency.id).trim()) || activeEmergency
+    : activeEmergency;
+
+  const isLiveEmergencyActive =
+    liveActiveEmergency &&
+    liveActiveEmergency.status !== 'COMPLETED' &&
+    liveActiveEmergency.status !== 'CANCELLED' &&
+    liveActiveEmergency.status !== 'UNFEASIBLE' &&
+    (
+      ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(liveActiveEmergency.status) ||
+      ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(liveActiveEmergency.progress_step) ||
+      Boolean(liveActiveEmergency.maalem_id)
+    );
+
+  const isEmergencyMatched = isMatched && isLiveEmergencyActive;
 
   const activeOngoingSOS =
-    (ongoingFromList && ongoingFromList.status !== 'COMPLETED' && ongoingFromList.status !== 'CANCELLED')
+    ongoingFromList
       ? ongoingFromList
-      : (isEmergencyMatched && activeEmergency && !isCompleted && activeEmergency.status !== 'COMPLETED' && activeEmergency.status !== 'CANCELLED'
-        ? activeEmergency
+      : (isEmergencyMatched && liveActiveEmergency && !isCompleted
+        ? liveActiveEmergency
         : null);
 
   const pendingFromList = !activeOngoingSOS
     ? activeClientInterventions.find(
-        (i) => i.status === 'PENDING' && !i.maalem_id && i.progress_step !== 'COMPLETED'
+        (i) => i.status === 'PENDING' && !i.maalem_id && i.progress_step !== 'COMPLETED' && i.status !== 'CANCELLED' && i.status !== 'UNFEASIBLE'
       )
     : null;
 
+  const isPendingEmergencyValid =
+    liveActiveEmergency &&
+    liveActiveEmergency.status === 'PENDING' &&
+    !liveActiveEmergency.maalem_id &&
+    liveActiveEmergency.status !== 'COMPLETED' &&
+    liveActiveEmergency.status !== 'CANCELLED' &&
+    liveActiveEmergency.status !== 'UNFEASIBLE';
+
   const activePendingSOS = !activeOngoingSOS
     ? pendingFromList ||
-      (isSearching && !isEmergencyMatched && !isCompleted && activeEmergency?.status !== 'COMPLETED' && (!activeEmergency?.maalem_id && activeEmergency?.status === 'PENDING')
-        ? activeEmergency || {
+      (isSearching && !isEmergencyMatched && !isCompleted && isPendingEmergencyValid
+        ? liveActiveEmergency || {
             id: 'pending-sos',
             service_type: serviceType,
             district: `${selectedCity} - ${selectedDistrict}`
           }
         : null)
     : null;
+
+  const handleCancelIntervention = useCallback(
+    async (interventionId) => {
+      flowCancelSOS();
+      return await cancelIntervention(interventionId);
+    },
+    [flowCancelSOS, cancelIntervention]
+  );
 
   return {
     t,
@@ -752,7 +777,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
     clientHistoryPage,
     setClientHistoryPage,
     totalClientHistoryPages,
-    cancelIntervention,
+    cancelIntervention: handleCancelIntervention,
     relaunchEmergencyRequest,
     maalems,
     matchedMaalem,

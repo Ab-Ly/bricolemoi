@@ -239,6 +239,13 @@ export const useInterventionsService = ({
       return updated;
     });
 
+    // Nettoyage immédiat du stockage local Maâlem pour enlever la mission débloquée
+    try {
+      const unlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
+      const filtered = unlocked.filter((id) => String(id).trim() !== cleanIntId);
+      localStorage.setItem('bricolemoi_my_unlocked_leads', JSON.stringify(filtered));
+    } catch (e) {}
+
     broadcastSync({
       type: 'INTERVENTION_UNFEASIBLE',
       intervention_id: cleanIntId,
@@ -249,6 +256,15 @@ export const useInterventionsService = ({
 
     publishRealtimeEvent('job_unfeasible', {
       intervention_id: cleanIntId,
+      status: 'UNFEASIBLE',
+      reason,
+      notes,
+      timestamp: Date.now()
+    });
+
+    publishRealtimeEvent('job:unfeasible', {
+      intervention_id: cleanIntId,
+      status: 'UNFEASIBLE',
       reason,
       notes,
       timestamp: Date.now()
@@ -927,6 +943,7 @@ export const useInterventionsService = ({
     const cleanId = String(interventionId).trim();
     const targetIntv = (interventions || []).find((i) => String(i.id).trim() === cleanId);
     const assignedMaalemId = targetIntv?.maalem_id || null;
+    const clientId = targetIntv?.client_id || null;
 
     // Si un artisan avait déjà débloqué ce contact SOS, lui rembourser immédiatement ses 15 DH
     if (assignedMaalemId) {
@@ -936,17 +953,90 @@ export const useInterventionsService = ({
     const nowIso = new Date().toISOString();
     const updatedCancelled = {
       status: 'CANCELLED',
+      cancelled_by: 'CLIENT',
+      cancelled_at: nowIso,
       updated_at: nowIso
     };
 
+    // Nettoyer les caches locaux pour éviter que les écrans restent bloqués
+    try {
+      const unlocked = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
+      const filteredUnlocked = unlocked.filter((id) => String(id).trim() !== cleanId);
+      localStorage.setItem('bricolemoi_my_unlocked_leads', JSON.stringify(filteredUnlocked));
+    } catch (e) {}
+
     // Conserver dans l'historique (Client, Maâlem & Admin) avec statut CANCELLED au lieu de le supprimer !
-    setInterventions((prev) =>
-      prev.map((item) =>
+    setInterventions((prev) => {
+      const updated = prev.map((item) =>
         String(item.id).trim() === cleanId
-          ? { ...item, ...updatedCancelled, cancelled_by: 'CLIENT', cancelled_at: nowIso }
+          ? { ...item, ...updatedCancelled }
           : item
-      )
-    );
+      );
+      try {
+        localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    // Synchronisation Broadcast cross-tabs
+    broadcastSync({
+      type: 'INTERVENTION_CANCELLED',
+      intervention_id: cleanId,
+      cancelled_by: 'CLIENT',
+      cancelled_at: nowIso,
+      maalem_id: assignedMaalemId,
+      client_id: clientId
+    });
+
+    // Événements Realtime universels pour débloquer immédiatement Maâlem et Client
+    publishRealtimeEvent('job_cancelled', {
+      intervention_id: cleanId,
+      status: 'CANCELLED',
+      cancelled_by: 'CLIENT',
+      cancelled_at: nowIso,
+      maalem_id: assignedMaalemId,
+      client_id: clientId,
+      timestamp: Date.now()
+    });
+
+    publishRealtimeEvent('job:cancelled', {
+      intervention_id: cleanId,
+      reason: 'CLIENT_CANCELLED',
+      cancelled_by: 'CLIENT',
+      timestamp: Date.now()
+    });
+
+    publishRealtimeEvent('sos:cancelled', {
+      intervention_id: cleanId,
+      reason: 'CLIENT_CANCELLED',
+      timestamp: Date.now()
+    });
+
+    if (assignedMaalemId) {
+      publishRealtimeEvent(
+        'job:cancelled',
+        {
+          intervention_id: cleanId,
+          reason: 'CLIENT_CANCELLED',
+          cancelled_by: 'CLIENT',
+          timestamp: Date.now()
+        },
+        ABLY_CHANNELS.getUserChannel(assignedMaalemId)
+      );
+    }
+
+    if (clientId) {
+      publishRealtimeEvent(
+        'job:cancelled',
+        {
+          intervention_id: cleanId,
+          reason: 'CLIENT_CANCELLED',
+          cancelled_by: 'CLIENT',
+          timestamp: Date.now()
+        },
+        ABLY_CHANNELS.getUserChannel(clientId)
+      );
+    }
 
     if (isSupabaseConfigured) {
       try {

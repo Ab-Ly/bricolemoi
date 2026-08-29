@@ -15,6 +15,7 @@ export const ClientActiveOngoingCard = ({
   interventions = [],
   setPendingCompletionModalInt,
   cancelIntervention,
+  flowCancelSOS,
   selectedLat,
   selectedLng,
   serviceType,
@@ -314,6 +315,7 @@ export const ClientActiveOngoingCard = ({
             type="button"
             onClick={() => {
               if (window.confirm('Voulez-vous vraiment annuler cette intervention ?')) {
+                if (flowCancelSOS) flowCancelSOS();
                 cancelIntervention(activeOngoingSOS.id);
               }
             }}

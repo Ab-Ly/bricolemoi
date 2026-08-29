@@ -131,9 +131,31 @@ export const EmergencyFlowProvider = ({ children }) => {
     const isMaalem = user?.role?.toUpperCase() === 'MAALEM';
 
     if (isMaalem && user?.id) {
+      let myUnlockedStorage = [];
+      try {
+        myUnlockedStorage = JSON.parse(localStorage.getItem('bricolemoi_my_unlocked_leads') || '[]');
+      } catch (e) {}
+
+      const isMyMaalemJob = (i) => {
+        if (!i) return false;
+        const uId = String(user.id).trim();
+        const isOwnerById = uId && String(i.maalem_id || '').trim() === uId;
+        const uPhone9 = String(user?.phone || '').replace(/\D/g, '').slice(-9);
+        const mPhone9 = String(i.maalem_phone || '').replace(/\D/g, '').slice(-9);
+        const isOwnerByPhone = uPhone9.length >= 8 && mPhone9.length >= 8 && uPhone9 === mPhone9;
+        const isUnlockedLocally = myUnlockedStorage.includes(String(i.id).trim());
+        const isFallbackOwner =
+          (!user?.id || user.id === 'maalem-1' || user.id === '22222222-2222-2222-2222-222222222222') &&
+          (!i.maalem_id || i.maalem_id === 'maalem-1' || i.maalem_id === '22222222-2222-2222-2222-222222222222');
+        return isOwnerById || isOwnerByPhone || isUnlockedLocally || isFallbackOwner;
+      };
+
       // Trouver si le Maâlem a une intervention en cours
       const activeJob = interventions?.find(
-        (i) => String(i.maalem_id || '').trim() === String(user.id).trim() && 
+        (i) => isMyMaalemJob(i) && 
+               i.status !== 'COMPLETED' &&
+               i.status !== 'CANCELLED' &&
+               i.status !== 'UNFEASIBLE' &&
                ['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status)
       );
       if (activeJob) {
@@ -146,8 +168,8 @@ export const EmergencyFlowProvider = ({ children }) => {
             }
           });
         }
-      } else if (flowState.state === EMERGENCY_STATES.MATCHED) {
-        // La mission précédente a été clôturée, annulée ou déclarée non réalisable -> Débloquer le Maâlem
+      } else if (flowState.state === EMERGENCY_STATES.MATCHED || flowState.state === EMERGENCY_STATES.SEARCHING) {
+        // La mission précédente a été clôturée, annulée ou déclarée non réalisable -> Débloquer le Maâlem immédiatement !
         dispatch({ type: ACTIONS.RESET_TO_IDLE });
       }
     } else {
@@ -174,6 +196,7 @@ export const EmergencyFlowProvider = ({ children }) => {
         (i) => isMyIntv(i) && 
                i.status !== 'COMPLETED' &&
                i.status !== 'CANCELLED' &&
+               i.status !== 'UNFEASIBLE' &&
                (['ACCEPTED', 'ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS', 'PENDING_COMPLETION'].includes(i.status) ||
                 ['ON_THE_WAY', 'ARRIVED', 'IN_PROGRESS'].includes(i.progress_step) ||
                 Boolean(i.maalem_id))
@@ -204,6 +227,9 @@ export const EmergencyFlowProvider = ({ children }) => {
           type: ACTIONS.TRIGGER_SOS,
           payload: { emergency: myPending }
         });
+      } else if (!myMatched && !myPending && (flowState.state === EMERGENCY_STATES.MATCHED || flowState.state === EMERGENCY_STATES.SEARCHING)) {
+        // Débloquer le Client immédiatement si l'intervention active a été annulée, abandonnée ou clôturée
+        dispatch({ type: ACTIONS.RESET_TO_IDLE });
       }
     }
   }, [user?.id, user?.role, user?.phone, interventions, maalems, flowState.state, flowState.progressStep]);
@@ -217,8 +243,55 @@ export const EmergencyFlowProvider = ({ children }) => {
     const handleEmergencyEvent = ({ event, payload }) => {
       if (!payload) return;
 
-      const currentApp = getAppSubdomain();
       const currentRole = (user?.role || 'CLIENT').toUpperCase();
+      const intId = String(payload.intervention_id || payload.intervention?.id || '').trim();
+      const currentEmergencyId = String(flowState.activeEmergency?.id || '').trim();
+
+      // Gestion universelle d'annulation & d'abandon (débloque aussi bien le Maâlem que le Client)
+      if (
+        event === 'job:unfeasible' || 
+        event === 'job_unfeasible' || 
+        event === 'job:cancelled' || 
+        event === 'job_cancelled' || 
+        event === 'sos:cancelled'
+      ) {
+        let myCreated = [];
+        try {
+          myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
+        } catch (e) {}
+
+        const isTargetOfCancel =
+          (currentEmergencyId && intId === currentEmergencyId) ||
+          (intId && myCreated.includes(intId)) ||
+          (payload.client_id && user?.id && String(payload.client_id).trim() === String(user.id).trim()) ||
+          (payload.maalem_id && user?.id && String(payload.maalem_id).trim() === String(user.id).trim()) ||
+          !intId;
+
+        if (isTargetOfCancel) {
+          stopEmergencySiren();
+          dispatch({ type: ACTIONS.RESET_TO_IDLE });
+          if (event === 'job:cancelled' || event === 'job_cancelled' || event === 'sos:cancelled') {
+            notify.info(
+              'Mission Annulée ℹ️',
+              currentRole === 'MAALEM'
+                ? 'Le client a annulé la demande SOS. Vos 15 DH de déblocage vous ont été automatiquement recrédités.'
+                : 'Votre demande SOS a été annulée.',
+              { id: `job-cancel-${intId || 'done'}`, duration: 7000 }
+            );
+          } else {
+            notify.warning(
+              'Mission Non Réalisée ℹ️',
+              currentRole === 'MAALEM'
+                ? 'Mission déclarée non réalisable. Vos 15 DH ont été restitués sur votre solde.'
+                : `L'artisan a signalé une impossibilité (${payload.reason || 'imprévu'}). Vous pouvez relancer un SOS immédiatement.`,
+              { id: `job-unfeasible-${intId || 'done'}`, duration: 7000 }
+            );
+          }
+        }
+        return;
+      }
+
+      const currentApp = getAppSubdomain();
       if (currentApp !== 'CLIENT' || currentRole === 'ADMIN' || currentRole === 'MAALEM') {
         return;
       }
@@ -229,8 +302,6 @@ export const EmergencyFlowProvider = ({ children }) => {
         myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
       } catch (e) {}
 
-      const intId = String(payload.intervention_id || payload.intervention?.id || '').trim();
-      const currentEmergencyId = String(flowState.emergency?.id || '').trim();
       const isTargetingMyEmergency =
         (currentEmergencyId && intId === currentEmergencyId) ||
         (intId && myCreated.includes(intId)) ||
@@ -282,13 +353,6 @@ export const EmergencyFlowProvider = ({ children }) => {
         });
       } else if (event === 'job:completed') {
         dispatch({ type: ACTIONS.RESET_TO_IDLE });
-      } else if (event === 'job:unfeasible' || event === 'job:cancelled') {
-        dispatch({ type: ACTIONS.RESET_TO_IDLE });
-        notify.warning(
-          'Mission Non Réalisée ℹ️',
-          `L'artisan a signalé une impossibilité (${payload.reason || 'imprévu'}). Vous pouvez relancer un SOS immédiatement.`,
-          { id: `job-unfeasible-${intId || 'done'}`, duration: 7000 }
-        );
       }
     };
 
@@ -306,7 +370,7 @@ export const EmergencyFlowProvider = ({ children }) => {
         } catch (e) {}
       });
     };
-  }, [user?.id, user?.role, flowState.emergency?.id]);
+  }, [user?.id, user?.role, flowState.activeEmergency?.id]);
 
   // Écoute des alertes SOS géographiques pour les Maâlems en ligne
   useEffect(() => {
@@ -349,6 +413,20 @@ export const EmergencyFlowProvider = ({ children }) => {
           dispatch({ type: ACTIONS.DISMISS_ALERT });
           notify.info('Lead Attribué', 'Une autre équipe a déjà pris en charge cette intervention.', { id: `claimed-${payload.intervention_id}` });
         }
+      } else if (
+        event === 'job:cancelled' || 
+        event === 'job_cancelled' || 
+        event === 'sos:cancelled' ||
+        event === 'job:unfeasible' ||
+        event === 'job_unfeasible'
+      ) {
+        const targetIntId = String(payload.intervention_id || payload.id || '').trim();
+        const activeId = String(flowState.activeEmergency?.id || '').trim();
+        const alertId = String(flowState.incomingAlert?.id || '').trim();
+        if (targetIntId && (targetIntId === activeId || targetIntId === alertId)) {
+          stopEmergencySiren();
+          dispatch({ type: ACTIONS.RESET_TO_IDLE });
+        }
       }
     };
 
@@ -362,7 +440,7 @@ export const EmergencyFlowProvider = ({ children }) => {
       unsubGlobal();
       stopEmergencySiren();
     };
-  }, [user?.id, user?.role, user?.city_zone, user?.specialty, flowState.state, flowState.incomingAlert?.id]);
+  }, [user?.id, user?.role, user?.city_zone, user?.specialty, flowState.state, flowState.activeEmergency?.id, flowState.incomingAlert?.id]);
 
   // =========================================================================
   // 3. ACTIONS DE L'ORCHESTRATEUR DE FLUX

@@ -325,7 +325,7 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
 
   const activeUnlockedLeads = interventions
     .filter((item) => {
-      if (item.status === 'COMPLETED' || item.status === 'CANCELLED' || item.status === 'PENDING') return false;
+      if (item.status === 'COMPLETED' || item.status === 'CANCELLED' || item.status === 'UNFEASIBLE' || item.status === 'PENDING') return false;
       const isOwnerById = uId && String(item.maalem_id || '').trim() === uId;
       const mPhone9 = String(item.maalem_phone || '').replace(/\D/g, '').slice(-9);
       const isOwnerByPhone = uPhone9.length >= 8 && mPhone9.length >= 8 && uPhone9 === mPhone9;
@@ -608,6 +608,7 @@ https://bricolemoi.ma/maalem/access?id=${user?.id || 'maalem-pro'}`;
     updateInterventionProgress,
     reportUnreachableClient,
     declareMissionUnfeasible,
+    abandonActiveMission,
     requestWorkCompletion,
     requestOnSiteReview,
     generateReceiptPDF,

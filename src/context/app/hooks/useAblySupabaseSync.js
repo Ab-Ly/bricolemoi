@@ -745,6 +745,51 @@ export const useAblySupabaseSync = ({
           fetchRealSupabaseData();
         }
 
+        if (payload.type === 'INTERVENTION_CANCELLED') {
+          const intId = String(payload.intervention_id || '').trim();
+          if (intId) {
+            setInterventions((prev) => {
+              const next = prev.map((item) =>
+                String(item.id).trim() === intId
+                  ? {
+                      ...item,
+                      status: 'CANCELLED',
+                      cancelled_by: payload.cancelled_by || 'CLIENT',
+                      cancelled_at: payload.cancelled_at || new Date().toISOString()
+                    }
+                  : item
+              );
+              try {
+                localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+              } catch (e) {}
+              return next;
+            });
+          }
+        }
+
+        if (payload.type === 'INTERVENTION_UNFEASIBLE') {
+          const intId = String(payload.intervention_id || '').trim();
+          if (intId) {
+            setInterventions((prev) => {
+              const next = prev.map((item) =>
+                String(item.id).trim() === intId
+                  ? {
+                      ...item,
+                      status: 'UNFEASIBLE',
+                      unfeasible_reason: payload.reason || item.unfeasible_reason,
+                      unfeasible_notes: payload.notes || item.unfeasible_notes,
+                      unfeasible_reported_at: new Date().toISOString()
+                    }
+                  : item
+              );
+              try {
+                localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+              } catch (e) {}
+              return next;
+            });
+          }
+        }
+
         if (payload.type === 'INTERVENTION_COMPLETED_WITH_REVIEW' || payload.type === 'INTERVENTION_COMPLETED') {
           const intId = String(payload.intervention_id || '').trim();
           const rRating = payload.rating !== undefined && payload.rating !== null ? Number(payload.rating) : null;
@@ -838,6 +883,45 @@ export const useAblySupabaseSync = ({
                 const next = prev.map((item) =>
                   String(item.id).trim() === intId
                     ? { ...item, progress_step: payload.progress_step || payload.step || item.progress_step }
+                    : item
+                );
+                try {
+                  localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+                } catch (e) {}
+                return next;
+              });
+            }
+          } else if (event === 'job_cancelled' || event === 'job:cancelled' || event === 'sos:cancelled') {
+            if (intId) {
+              setInterventions((prev) => {
+                const next = prev.map((item) =>
+                  String(item.id).trim() === intId
+                    ? {
+                        ...item,
+                        status: 'CANCELLED',
+                        cancelled_by: payload.cancelled_by || 'CLIENT',
+                        cancelled_at: payload.cancelled_at || new Date().toISOString()
+                      }
+                    : item
+                );
+                try {
+                  localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(next));
+                } catch (e) {}
+                return next;
+              });
+            }
+          } else if (event === 'job_unfeasible' || event === 'job:unfeasible') {
+            if (intId) {
+              setInterventions((prev) => {
+                const next = prev.map((item) =>
+                  String(item.id).trim() === intId
+                    ? {
+                        ...item,
+                        status: 'UNFEASIBLE',
+                        unfeasible_reason: payload.reason || item.unfeasible_reason,
+                        unfeasible_notes: payload.notes || item.unfeasible_notes,
+                        unfeasible_reported_at: payload.unfeasible_reported_at || new Date().toISOString()
+                      }
                     : item
                 );
                 try {
