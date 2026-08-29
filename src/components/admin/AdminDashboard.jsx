@@ -34,6 +34,7 @@ import { AdminDisputesView } from './AdminDisputesView';
 import { AdminRechargesView } from './AdminRechargesView';
 import { AdminLoyaltyRewardsView } from './AdminLoyaltyRewardsView';
 import { AdminRealtimeConsole } from './AdminRealtimeConsole';
+import { AdminSystemHealthMatrix } from './AdminSystemHealthMatrix';
 import { auditPlatformState, healPlatformState } from '../../services/platformAuditReferee';
 
 export const AdminDashboard = () => {
@@ -626,7 +627,9 @@ export const AdminDashboard = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
+            className="space-y-6"
           >
+            <AdminSystemHealthMatrix />
             <AdminRealtimeConsole />
           </motion.div>
         )}

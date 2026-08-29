@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-08-29T18:59:35.354Z",
+  "overallStatus": "DEGRADED",
+  "latencyAvgMs": 1846,
+  "nodes": {
+    "supabase": {
+      "status": "DEGRADED",
+      "latencyMs": 2368,
+      "dbRecords": {
+        "profiles": 6,
+        "interventions": 9,
+        "transactions": 20,
+        "maalems": 1
+      },
+      "ledgerBalanced": true,
+      "error": null
+    },
+    "centrifugo": {
+      "status": "DEGRADED",
+      "latencyMs": 1931,
+      "wsLatencyMs": 1931,
+      "activeClients": 1,
+      "activeChannels": 4,
+      "error": null
+    },
+    "evolutionApi": {
+      "status": "DEGRADED",
+      "instanceStatus": "close",
+      "latencyMs": 1494,
+      "error": null
+    },
+    "n8nRadar": {
+      "status": "DEGRADED",
+      "latencyMs": 1475,
+      "error": null
+    },
+    "r2Storage": {
+      "status": "DEGRADED",
+      "latencyMs": 1961,
+      "error": null
+    }
+  },
+  "links": {
+    "front_to_supabase": {
+      "status": "SLOW",
+      "latencyMs": 2368
+    },
+    "front_to_centrifugo": {
+      "status": "SLOW",
+      "latencyMs": 1931,
+      "fallbackActive": false
+    },
+    "supabase_to_centrifugo": {
+      "status": "DESYNC",
+      "lagSeconds": 0.2
+    },
+    "radar_to_evolution": {
+      "status": "FAIL",
+      "queuePending": 0
+    }
+  },
+  "alerts": [
+    {
+      "level": "WARN",
+      "message": "Evolution WhatsApp instance \"bricolemoi-otp\" est en état \"close\".",
+      "timestamp": "2026-08-29T18:59:35.354Z"
+    }
+  ]
+}

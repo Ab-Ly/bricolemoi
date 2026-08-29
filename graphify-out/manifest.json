@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1787945306.7616098,
-    "seen": 1788026192.631045,
-    "ast_hash": "d1a6f59e8367d5b8296782e41e16490e",
+    "mtime": 1788029966.360875,
+    "seen": 1788030082.031808,
+    "ast_hash": "2eefc7ae2e77093cb226fe63260b093d",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -288,9 +288,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/AdminDashboard.jsx": {
-    "mtime": 1788028805.8091671,
-    "seen": 1788029289.895922,
-    "ast_hash": "32861722d90e4f857ea5222e18927056",
+    "mtime": 1788029958.1172304,
+    "seen": 1788030082.0353658,
+    "ast_hash": "9501fdc455f719c3fd9b8e876caa1ec2",
     "semantic_hash": ""
   },
   "src/components/admin/AdminDisputesView.jsx": {
@@ -1209,6 +1209,24 @@
     "mtime": 1788027261.2795784,
     "seen": 1788029289.894003,
     "ast_hash": "d2f8da4c82d6b5ab17d229f62732112d",
+    "semantic_hash": ""
+  },
+  "scripts/telemetryDaemon.js": {
+    "mtime": 1788029841.0829947,
+    "seen": 1788030082.033686,
+    "ast_hash": "a5d0945f6eceb2008d96198b22bafa02",
+    "semantic_hash": ""
+  },
+  "src/components/admin/AdminSystemHealthMatrix.jsx": {
+    "mtime": 1788029887.0347931,
+    "seen": 1788030082.0357609,
+    "ast_hash": "ecd5269d1cf1cbf3c9e4b4b8b87165f9",
+    "semantic_hash": ""
+  },
+  "src/hooks/useSystemTelemetry.js": {
+    "mtime": 1788029869.1518219,
+    "seen": 1788030082.039799,
+    "ast_hash": "ac28a360d670990fb90efe1f876f0f2b",
     "semantic_hash": ""
   }
 }

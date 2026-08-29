@@ -13,6 +13,8 @@
     "listen": "node scripts/listen.js",
     "logs": "node scripts/logs.js",
     "audit": "node scripts/audit.js",
+    "telemetry": "node scripts/telemetryDaemon.js --once",
+    "telemetry:daemon": "node scripts/telemetryDaemon.js",
     "reconcile": "node scripts/reconcile.js",
     "simulate": "node scripts/simulate.js",
     "deploy": "npx vercel",
