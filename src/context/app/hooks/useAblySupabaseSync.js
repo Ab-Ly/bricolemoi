@@ -1050,6 +1050,20 @@ export const useAblySupabaseSync = ({
               fetchRealSupabaseData();
             }
           )
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'reviews' },
+            () => {
+              fetchRealSupabaseData();
+            }
+          )
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'profiles' },
+            () => {
+              fetchRealSupabaseData();
+            }
+          )
           .subscribe();
       } catch (e) {
         console.warn('[Supabase Realtime Sync Warning]:', e);

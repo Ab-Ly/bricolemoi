@@ -45,15 +45,21 @@ export const useWalletTransactionsService = ({
   ) => {
     const cleanIntId = String(interventionId || '').trim();
     const targetIntv = (interventions || []).find((i) => String(i.id).trim() === cleanIntId);
-    const resolvedMaalemId = explicitMaalemId || targetIntv?.maalem_id || (user?.role === 'MAALEM' ? user?.id : null);
+    const candidateMaalemId = explicitMaalemId || targetIntv?.maalem_id || (user?.role === 'MAALEM' ? user?.id : null);
 
-    if (!resolvedMaalemId) {
+    if (!candidateMaalemId) {
       console.log('[releaseLeadCredit] Aucun Maâlem à rembourser pour l\'intervention:', cleanIntId);
       return;
     }
 
-    const cleanMaalemId = String(resolvedMaalemId).trim();
-    const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === cleanMaalemId) || (user?.id === cleanMaalemId ? user : null);
+    const cleanMaalemId = String(candidateMaalemId).trim();
+    const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === cleanMaalemId) || (user?.id === cleanMaalemId && user?.role === 'MAALEM' ? user : null);
+
+    // Ne JAMAIS créditer un compte client : seuls les Maâlems possèdent un portefeuille de leads !
+    if (!liveMaalem) {
+      console.warn('[releaseLeadCredit] L\'identifiant cible n\'est pas un artisan Maâlem enregistré, annulation:', cleanMaalemId);
+      return;
+    }
     const nowIso = new Date().toISOString();
 
     const refundTx = {
