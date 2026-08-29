@@ -17,13 +17,15 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
   }
 
   const mId = String(maalemOrUser.id || '').trim();
-  const mPhone = String(maalemOrUser.phone || '').replace(/\D/g, '');
+  const mPhoneDigits = String(maalemOrUser.phone || '').replace(/\D/g, '');
+  const mPhone9 = mPhoneDigits.slice(-9);
 
   // 1. Filtrage précis et strict des avis pour cet artisan (Cloud-First)
   const matchedReviews = (reviews || []).filter((r) => {
     if (!r) return false;
     const matchId = mId && String(r.maalem_id || '').trim() === mId;
-    const matchPhone = mPhone && mPhone.length > 7 && String(r.maalem_phone || '').replace(/\D/g, '') === mPhone;
+    const rPhone9 = String(r.maalem_phone || '').replace(/\D/g, '').slice(-9);
+    const matchPhone = mPhone9.length >= 8 && rPhone9.length >= 8 && mPhone9 === rPhone9;
     return matchId || matchPhone;
   });
 
@@ -34,7 +36,8 @@ export const calculateMaalemRating = (maalemOrUser, reviews = [], interventions 
     .filter((i) => {
       if (!i || i.status !== 'COMPLETED' || !i.rating) return false;
       const matchIntId = mId && String(i.maalem_id || '').trim() === mId;
-      const matchIntPhone = mPhone && mPhone.length > 7 && String(i.maalem_phone || '').replace(/\D/g, '') === mPhone;
+      const iPhone9 = String(i.maalem_phone || '').replace(/\D/g, '').slice(-9);
+      const matchIntPhone = mPhone9.length >= 8 && iPhone9.length >= 8 && mPhone9 === iPhone9;
       const isCandidate = matchIntId || matchIntPhone;
       return isCandidate && !reviewedInterventionIds.has(String(i.id).trim());
     })

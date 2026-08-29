@@ -112,16 +112,18 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
 
   const currentLiveMaalem = maalems?.find((m) => m.id === maalemOrUser?.id) || maalemOrUser?.maalem_details || maalemOrUser;
   const mId = String(maalemOrUser.id || '').trim();
-  const mPhone = String(maalemOrUser.phone || '').replace(/\D/g, '');
+  const mPhoneDigits = String(maalemOrUser.phone || '').replace(/\D/g, '');
+  const mPhone9 = mPhoneDigits.slice(-9);
 
   const isFallbackMaalem = !mId || mId === 'maalem-1' || mId === '22222222-2222-2222-2222-222222222222';
 
   const myTransactions = (transactions || []).filter((t) => {
     if (!t) return false;
     const tId = String(t.maalem_id || '').trim();
-    const tPhone = String(t.maalem_phone || '').replace(/\D/g, '');
+    const tPhoneDigits = String(t.maalem_phone || '').replace(/\D/g, '');
+    const tPhone9 = tPhoneDigits.slice(-9);
     const matchId = mId && tId === mId;
-    const matchPhone = mPhone && mPhone.length > 7 && tPhone === mPhone;
+    const matchPhone = mPhone9.length >= 8 && tPhone9.length >= 8 && mPhone9 === tPhone9;
     const matchFallback = isFallbackMaalem && (tId === 'maalem-1' || tId === '22222222-2222-2222-2222-222222222222');
     return matchId || matchPhone || matchFallback;
   });

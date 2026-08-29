@@ -12,6 +12,7 @@ import { getRechargePackBonus } from '../../../utils/balanceUtils';
 export const useWalletTransactionsService = ({
   user,
   setUser,
+  interventions = [],
   transactions,
   setTransactions,
   maalems,
@@ -39,34 +40,42 @@ export const useWalletTransactionsService = ({
 
   const releaseLeadCredit = async (
     interventionId,
-    reason = 'Mission non réalisable'
+    reason = 'Mission non réalisable',
+    explicitMaalemId = null
   ) => {
-    const cleanIntId = String(interventionId).trim();
-    const maalemId = user?.id;
-    const cleanMaalemId = String(maalemId || 'maalem-1').trim();
-    const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === cleanMaalemId) || user?.maalem_details || user;
+    const cleanIntId = String(interventionId || '').trim();
+    const targetIntv = (interventions || []).find((i) => String(i.id).trim() === cleanIntId);
+    const resolvedMaalemId = explicitMaalemId || targetIntv?.maalem_id || (user?.role === 'MAALEM' ? user?.id : null);
+
+    if (!resolvedMaalemId) {
+      console.log('[releaseLeadCredit] Aucun Maâlem à rembourser pour l\'intervention:', cleanIntId);
+      return;
+    }
+
+    const cleanMaalemId = String(resolvedMaalemId).trim();
+    const liveMaalem = (maalems || []).find((m) => String(m.id).trim() === cleanMaalemId) || (user?.id === cleanMaalemId ? user : null);
     const nowIso = new Date().toISOString();
 
     const refundTx = {
       id: `tx-refund-${cleanIntId}-${Date.now()}`,
       maalem_id: cleanMaalemId,
-      maalem_name: user?.full_name || liveMaalem?.full_name || 'Artisan Maalem',
-      maalem_phone: user?.phone || liveMaalem?.phone || '',
+      maalem_name: liveMaalem?.full_name || 'Artisan Maâlem',
+      maalem_phone: liveMaalem?.phone || '',
       amount_dh: 15.0,
       type: 'RECHARGE',
       payment_method: 'Remboursement Lead 🛡️',
       reference_ref: `REFUND_INT_${cleanIntId}`,
       status: 'VALIDATED',
-      admin_notes: `Remboursement 15 DH suite à mission non réalisable (${reason}) #${cleanIntId}`,
+      admin_notes: `Remboursement 15 DH suite à annulation / non réalisable (${reason}) #${cleanIntId}`,
       created_at: nowIso
     };
 
     setTransactions((prev) => [refundTx, ...prev]);
 
-    const currentBal = Number(user?.maalem_details?.credit_balance || user?.credits || liveMaalem?.credit_balance || 0);
+    const currentBal = Number(liveMaalem?.credit_balance || liveMaalem?.credits || 0);
     const newBal = currentBal + 15.0;
 
-    if (user?.role === 'MAALEM') {
+    if (user?.id === cleanMaalemId) {
       setUser((prev) => ({
         ...prev,
         credits: newBal,
@@ -83,7 +92,7 @@ export const useWalletTransactionsService = ({
       )
     );
 
-    if (isSupabaseConfigured && maalemId) {
+    if (isSupabaseConfigured && cleanMaalemId) {
       try {
         await supabase.from('transactions').insert([
           {
@@ -93,7 +102,7 @@ export const useWalletTransactionsService = ({
             payment_method: 'Remboursement Lead 🛡️',
             reference_ref: `REFUND_INT_${cleanIntId}`,
             status: 'VALIDATED',
-            admin_notes: `Remboursement 15 DH suite à mission non réalisable (${reason}) #${cleanIntId}`
+            admin_notes: `Remboursement 15 DH suite à annulation (${reason}) #${cleanIntId}`
           }
         ]);
         await supabase

@@ -12,37 +12,25 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { getSpecialtyLabel } from './EnhancedCategoryIcon';
 
-// High-Density Native Map Tiles (Clean & Trust - CartoDB / Esri / OSM)
+// High-Density Native Map Tiles (Zero API Key - 100% Free & No Watermark)
 const MAP_STYLES = {
-  VOYAGER: {
-    id: 'VOYAGER',
-    name: 'Carto Voyager HD (Clair, Net & Moderne)',
-    tiles: [
-      'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      'https://d.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-    ],
-    attribution: '&copy; CARTO &copy; OpenStreetMap'
-  },
-  POSITRON: {
-    id: 'POSITRON',
-    name: 'Carto Positron (Épuré Haute Lisibilité)',
-    tiles: [
-      'https://a.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
-      'https://b.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
-      'https://c.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
-      'https://d.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png'
-    ],
-    attribution: '&copy; CARTO &copy; OpenStreetMap'
-  },
   ESRI_STREETS: {
     id: 'ESRI_STREETS',
-    name: 'Esri World Streets (Détaillé & Relief)',
+    name: 'Esri World Streets HD (Officiel & Détaillé)',
     tiles: [
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'
     ],
     attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap'
+  },
+  OSM_HOT: {
+    id: 'OSM_HOT',
+    name: 'OSM Humanitarian Hot (Épuré Pastel)',
+    tiles: [
+      'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+      'https://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+      'https://c.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
+    ],
+    attribution: '&copy; OpenStreetMap contributors, Humanitarian OSM'
   },
   OSM_FR: {
     id: 'OSM_FR',
@@ -73,7 +61,7 @@ const ROAD_COLOR_THEMES = [
 ];
 
 const getMapStyleJson = (styleKey) => {
-  const cfg = MAP_STYLES[styleKey] || MAP_STYLES.VOYAGER;
+  const cfg = MAP_STYLES[styleKey] || MAP_STYLES.ESRI_STREETS;
   const isRetina = typeof window !== 'undefined' && (window.devicePixelRatio || 1) > 1.25;
   const tileUrls = cfg.tiles.map((t) => t.replace('{r}', isRetina ? '@2x' : ''));
   return {
@@ -83,7 +71,7 @@ const getMapStyleJson = (styleKey) => {
         type: 'raster',
         tiles: tileUrls,
         tileSize: 256,
-        attribution: cfg.attribution || '&copy; CARTO &copy; OpenStreetMap'
+        attribution: cfg.attribution || '&copy; OpenStreetMap'
       }
     },
     layers: [
@@ -459,7 +447,7 @@ export const InteractiveMap = ({
   const defaultLat = selectedLat || savedGPS?.lat || 33.5883;
   const defaultLng = selectedLng || savedGPS?.lng || -7.6328;
 
-  const [activeStyleKey, setActiveStyleKey] = useState('VOYAGER');
+  const [activeStyleKey, setActiveStyleKey] = useState('ESRI_STREETS');
   const [mapTheme, setMapTheme] = useState('GOLD_CYAN'); // 'GOLD_CYAN' | 'NEON_CYBER' | 'SILVER_SLATE' | 'NATURAL'
   const [userGPSPos, setUserGPSPos] = useState({ lat: defaultLat, lng: defaultLng });
   const [mapLoaded, setMapLoaded] = useState(false);

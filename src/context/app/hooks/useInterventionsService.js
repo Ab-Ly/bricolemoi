@@ -941,21 +941,40 @@ export const useInterventionsService = ({
 
   const cancelIntervention = async (interventionId) => {
     const cleanId = String(interventionId).trim();
-    await releaseLeadCredit(cleanId, 'Annulation par le client');
+    const targetIntv = (interventions || []).find((i) => String(i.id).trim() === cleanId);
+    const assignedMaalemId = targetIntv?.maalem_id || null;
 
+    // Si un artisan avait déjà débloqué ce contact SOS, lui rembourser immédiatement ses 15 DH
+    if (assignedMaalemId) {
+      await releaseLeadCredit(cleanId, 'Annulation par le client', assignedMaalemId);
+    }
+
+    const nowIso = new Date().toISOString();
+    const updatedCancelled = {
+      status: 'CANCELLED',
+      cancelled_by: 'CLIENT',
+      cancelled_at: nowIso
+    };
+
+    // Conserver dans l'historique (Client, Maâlem & Admin) avec statut CANCELLED au lieu de le supprimer !
     setInterventions((prev) =>
-      prev.filter((item) => String(item.id).trim() !== cleanId)
+      prev.map((item) =>
+        String(item.id).trim() === cleanId ? { ...item, ...updatedCancelled } : item
+      )
     );
 
     if (isSupabaseConfigured) {
       try {
-        await supabase.from('interventions').delete().eq('id', cleanId);
+        await supabase
+          .from('interventions')
+          .update(updatedCancelled)
+          .eq('id', cleanId);
       } catch (e) {
         console.warn('[Supabase] cancelIntervention error:', e.message);
       }
     }
 
-    showToast('Demande SOS annulée et retirée des radars des Maâlems.', 'info');
+    showToast('Demande SOS annulée. Le solde du Maâlem a été automatiquement recrédité (15 DH).', 'info');
   };
 
   return {

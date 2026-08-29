@@ -88,11 +88,13 @@ export const AdminMaalemsView = ({
     if (!selectedMaalem) return { maalemMissions: [], maalemTransactions: [], stats: { totalJobs: 0, completedJobs: 0, totalRevenueDh: 0 } };
 
     const mId = String(selectedMaalem.id || '').trim();
-    const mPhone = String(selectedMaalem.phone || '').replace(/\D/g, '');
+    const mPhoneDigits = String(selectedMaalem.phone || '').replace(/\D/g, '');
+    const mPhone9 = mPhoneDigits.slice(-9);
 
     const rawMissions = interventions.filter((intv) => {
       const matchId = mId && String(intv.maalem_id || '').trim() === mId;
-      const matchPhone = mPhone && mPhone.length > 7 && String(intv.maalem_phone || '').replace(/\D/g, '') === mPhone;
+      const intvPhone9 = String(intv.maalem_phone || '').replace(/\D/g, '').slice(-9);
+      const matchPhone = mPhone9.length >= 8 && intvPhone9.length >= 8 && mPhone9 === intvPhone9;
       return matchId || matchPhone;
     });
 
@@ -137,9 +139,10 @@ export const AdminMaalemsView = ({
 
     const maalemTransactions = transactions.filter((tx) => {
       const matchId = mId && String(tx.maalem_id || '').trim() === mId;
-      const matchPhone = mPhone && mPhone.length > 7 && String(tx.maalem_phone || '').replace(/\D/g, '') === mPhone;
+      const txPhone9 = String(tx.maalem_phone || '').replace(/\D/g, '').slice(-9);
+      const matchPhone = mPhone9.length >= 8 && txPhone9.length >= 8 && mPhone9 === txPhone9;
       return matchId || matchPhone;
-    });
+    }).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
     const completed = maalemMissions.filter((m) => m.status === 'COMPLETED');
     const totalRevenueDh = completed.reduce((sum, m) => sum + (parseFloat(m.final_agreed_price) || 0), 0);
@@ -748,6 +751,53 @@ export const AdminMaalemsView = ({
                                   </p>
                                 )
                               )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Journal des Transactions Financières du Portefeuille */}
+                  <div className="space-y-3 pt-3 border-t border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Journal du Portefeuille ({maalemDrawerData.maalemTransactions.length})</span>
+                      </h4>
+                      <span className="text-[11px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                        Solde : {getMaalemCreditBalance(selectedMaalem).toFixed(2)} DH
+                      </span>
+                    </div>
+
+                    {maalemDrawerData.maalemTransactions.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center shadow-xs">
+                        Aucune transaction enregistrée pour cet artisan.
+                      </p>
+                    ) : (
+                      <div className="space-y-2 max-h-56 overflow-y-auto modal-scroll pr-1">
+                        {maalemDrawerData.maalemTransactions.map((tx) => {
+                          const isPositive = Number(tx.amount_dh) > 0;
+                          return (
+                            <div
+                              key={tx.id}
+                              className="bg-white border border-slate-200 rounded-xl p-3 text-xs flex items-center justify-between gap-2 shadow-2xs"
+                            >
+                              <div className="min-w-0">
+                                <p className="font-bold text-slate-900 truncate">
+                                  {tx.payment_method || tx.type}
+                                </p>
+                                <p className="text-[10px] text-slate-500 font-mono">
+                                  {formatDateTime(tx.created_at || Date.now(), 'long')}
+                                </p>
+                              </div>
+                              <span className={`font-mono font-bold px-2 py-0.5 rounded-lg text-xs ${
+                                isPositive
+                                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                  : 'bg-rose-50 text-rose-800 border border-rose-200'
+                              }`}>
+                                {isPositive ? `+${Number(tx.amount_dh).toFixed(2)}` : Number(tx.amount_dh).toFixed(2)} DH
+                              </span>
                             </div>
                           );
                         })}

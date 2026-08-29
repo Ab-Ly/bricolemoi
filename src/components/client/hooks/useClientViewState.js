@@ -195,9 +195,9 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
         item.client_id &&
         item.client_id !== DUMMY_CLIENT_ID &&
         String(item.client_id).trim() === String(user.id).trim();
-      const cp = String(user.phone || '').replace(/\D/g, '');
-      const ip = String(item.client_phone || '').replace(/\D/g, '');
-      const isOwnerByPhone = cp.length >= 8 && ip.length >= 8 && cp === ip && cp !== '0661234567';
+      const cp9 = String(user.phone || '').replace(/\D/g, '').slice(-9);
+      const ip9 = String(item.client_phone || '').replace(/\D/g, '').slice(-9);
+      const isOwnerByPhone = cp9.length >= 8 && ip9.length >= 8 && cp9 === ip9 && cp9 !== '661234567';
 
       return isOwnerById || isOwnerByPhone;
     })

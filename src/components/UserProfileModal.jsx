@@ -26,8 +26,10 @@ import {
   ChevronDown, 
   Lock, 
   Globe, 
-  AlertCircle 
+  AlertCircle,
+  Receipt
 } from 'lucide-react';
+import { WhatsappLogo } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { formatDateTime } from '../utils/dateUtils';
 import { EnhancedCategoryIcon, getSpecialtyLabel } from './EnhancedCategoryIcon';
@@ -163,11 +165,23 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
     if (myCreated.includes(String(i.id).trim())) return true;
     if (!user) return false;
     const isOwnerById = user.id && user.id !== DUMMY_CLIENT_ID && i.client_id && i.client_id !== DUMMY_CLIENT_ID && String(i.client_id).trim() === String(user.id).trim();
-    const cp = String(user.phone || '').replace(/\D/g, '');
-    const ip = String(i.client_phone || '').replace(/\D/g, '');
-    const isOwnerByPhone = cp.length >= 8 && ip.length >= 8 && cp === ip && cp !== '0661234567';
+    const cp9 = String(user.phone || '').replace(/\D/g, '').slice(-9);
+    const ip9 = String(i.client_phone || '').replace(/\D/g, '').slice(-9);
+    const isOwnerByPhone = cp9.length >= 8 && ip9.length >= 8 && cp9 === ip9 && cp9 !== '661234567';
     return isOwnerById || isOwnerByPhone;
-  });
+  }).sort((a, b) => new Date(b.created_at || b.updated_at || 0) - new Date(a.created_at || a.updated_at || 0));
+
+  const myMaalemInterventions = interventions.filter((i) => {
+    if (!user) return false;
+    const mId = String(user.id || '').trim();
+    const mPhone9 = String(user.phone || '').replace(/\D/g, '').slice(-9);
+    const matchId = mId && String(i.maalem_id || '').trim() === mId;
+    const iPhone9 = String(i.maalem_phone || '').replace(/\D/g, '').slice(-9);
+    const matchPhone = mPhone9.length >= 8 && iPhone9.length >= 8 && mPhone9 === iPhone9;
+    return matchId || matchPhone;
+  }).sort((a, b) => new Date(b.completed_at || b.updated_at || b.created_at || 0) - new Date(a.completed_at || a.updated_at || a.created_at || 0));
+
+  const myMaalemTransactions = balanceInfo.myTransactions || [];
 
   const completedCount = myClientInterventions.filter(i => i.status === 'COMPLETED').length;
   const activeCount = myClientInterventions.filter(i => i.status === 'PENDING' || i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.status === 'PENDING_COMPLETION').length;
@@ -464,7 +478,7 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             <button
               type="button"
               onClick={() => setActiveTab('info')}
-              className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer text-center whitespace-nowrap ${
+              className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer text-center whitespace-nowrap ${
                 activeTab === 'info'
                   ? isMaalem ? 'bg-amber-600 text-white shadow-xs' : 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -472,57 +486,90 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             >
               Coordonnées
             </button>
+
             {isMaalem && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('missions')}
+                  className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                    activeTab === 'missions'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Wrench className="w-3.5 h-3.5" />
+                  <span>Chantiers ({myMaalemInterventions.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('reviews')}
+                  className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                    activeTab === 'reviews'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span>Avis ({ratingInfo.totalReviews})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('transactions')}
+                  className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                    activeTab === 'transactions'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Receipt className="w-3.5 h-3.5" />
+                  <span>Portefeuille ({myMaalemTransactions.length})</span>
+                </button>
+              </>
+            )}
+
+            {!isMaalem && (
               <button
                 type="button"
-                onClick={() => setActiveTab('reviews')}
-                className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
-                  activeTab === 'reviews'
-                    ? 'bg-amber-600 text-white shadow-xs'
+                onClick={() => setActiveTab('requests')}
+                className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                  activeTab === 'requests'
+                    ? 'bg-blue-600 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <span>Avis ({ratingInfo.totalReviews})</span>
+                <HistoryIcon className="w-3.5 h-3.5" />
+                <span>Mes Demandes ({myClientInterventions.length})</span>
               </button>
             )}
+
             <button
               type="button"
               onClick={() => setActiveTab('edit')}
-              className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+              className={`flex-1 min-w-[80px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                 activeTab === 'edit'
-                  ? 'bg-blue-600 text-white shadow-xs'
+                  ? 'bg-slate-900 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Edit3 className="w-3 h-3" />
               <span>{isMissingPhone ? 'Compléter' : 'Modifier'}</span>
             </button>
+
             <button
               type="button"
               onClick={() => setActiveTab('pin')}
-              className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+              className={`flex-1 min-w-[80px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
                 activeTab === 'pin'
                   ? 'bg-slate-900 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <Lock className="w-3 h-3 text-amber-500" />
-              <span>Code PIN</span>
+              <span>PIN</span>
             </button>
-            {!isMaalem && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('stats')}
-                className={`flex-1 min-w-[90px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap ${
-                  activeTab === 'stats'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Activité SOS
-              </button>
-            )}
           </div>
 
           {/* Tab 1: Informations View */}
@@ -711,6 +758,146 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             </motion.div>
           )}
 
+          {/* Tab: Missions / Chantiers (Maâlem) */}
+          {activeTab === 'missions' && isMaalem && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-slate-900 block">Registre des Chantiers</span>
+                  <span className="text-[10px] text-slate-500">Missions acceptées et réalisées</span>
+                </div>
+                <span className="text-xs font-mono font-black text-amber-800 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200">
+                  {myMaalemInterventions.length} mission{myMaalemInterventions.length > 1 ? 's' : ''}
+                </span>
+              </div>
+
+              <div className="space-y-2 max-h-72 overflow-y-auto modal-scroll pr-1">
+                {myMaalemInterventions.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500 space-y-1">
+                    <p className="text-xs font-bold">Aucun chantier dans votre historique.</p>
+                    <p className="text-[11px] text-slate-400">Vos missions acceptées et terminées apparaîtront ici.</p>
+                  </div>
+                ) : (
+                  myMaalemInterventions.map((item) => {
+                    const clientPhoneClean = String(item.client_phone || '').replace(/\D/g, '');
+                    return (
+                      <div key={item.id} className="p-3.5 bg-white border border-slate-200 rounded-2xl space-y-2 shadow-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-xs text-slate-900 truncate">
+                            {item.subcategory || item.service_type || 'Dépannage d\'urgence'}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border ${
+                            item.status === 'COMPLETED'
+                              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                              : item.status === 'CANCELLED'
+                              ? 'bg-rose-50 border-rose-200 text-rose-700'
+                              : 'bg-blue-50 border-blue-200 text-blue-800 animate-pulse'
+                          }`}>
+                            {item.status === 'COMPLETED' ? '✅ Clôturé' : item.status === 'CANCELLED' ? '❌ Annulé' : '🛠️ En cours'}
+                          </span>
+                        </div>
+
+                        <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 flex items-center justify-between gap-2 text-[11px]">
+                          <div className="flex items-center gap-1.5 text-slate-700 truncate">
+                            <span className="font-bold text-slate-900">👤 {item.client_name || 'Client BricoleMoi'}</span>
+                            <span>•</span>
+                            <span className="text-slate-500">📍 {item.district || 'Casablanca'}</span>
+                          </div>
+
+                          {item.client_phone && (
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <a href={`tel:${item.client_phone}`} className="font-mono text-blue-700 font-bold hover:underline flex items-center gap-1">
+                                <Phone className="w-3 h-3 text-blue-600" />
+                                <span>{item.client_phone}</span>
+                              </a>
+                              {clientPhoneClean.length >= 9 && (
+                                <a
+                                  href={`https://wa.me/212${clientPhoneClean.replace(/^0/, '')}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-emerald-700 hover:text-emerald-800 p-0.5"
+                                >
+                                  <WhatsappLogo weight="fill" className="w-3.5 h-3.5" />
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+                          <span>Tarif : <strong className="text-slate-900">{item.final_agreed_price ? `${item.final_agreed_price} DH` : '🤝 Accord Direct'}</strong></span>
+                          <span>{formatDateTime(item.created_at || Date.now(), 'long')}</span>
+                        </div>
+
+                        {item.rating && (
+                          <div className="mt-1 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                            <span className="text-amber-800 font-bold flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                              <span>Évaluation reçue :</span>
+                            </span>
+                            <span className="font-mono font-black text-amber-900">{Number(item.rating).toFixed(1)} / 5 ★</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Tab: Transactions / Portefeuille (Maâlem) */}
+          {activeTab === 'transactions' && isMaalem && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+              <div className="bg-emerald-50/80 border border-emerald-200 p-3.5 rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-emerald-950 block">Solde Disponible</span>
+                  <span className="text-[10px] text-emerald-800">Crédits valides pour débloquer des chantiers</span>
+                </div>
+                <span className="text-base font-mono font-black text-emerald-900">
+                  {balanceInfo.liveAvailableBalance.toFixed(2)} DH
+                </span>
+              </div>
+
+              <div className="space-y-2 max-h-72 overflow-y-auto modal-scroll pr-1">
+                {myMaalemTransactions.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500 space-y-1">
+                    <p className="text-xs font-bold">Aucune transaction enregistrée.</p>
+                    <p className="text-[11px] text-slate-400">Vos déblocages de leads (-15 DH) et recharges apparaîtront ici.</p>
+                  </div>
+                ) : (
+                  myMaalemTransactions.map((tx) => {
+                    const isPositive = Number(tx.amount_dh) > 0;
+                    return (
+                      <div key={tx.id} className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center justify-between gap-2 shadow-xs text-xs">
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 truncate">
+                            {tx.payment_method || tx.type}
+                          </p>
+                          <p className="text-[10px] text-slate-500 font-mono">
+                            {formatDateTime(tx.created_at || Date.now(), 'long')}
+                          </p>
+                          {tx.admin_notes && (
+                            <p className="text-[10px] text-slate-600 italic truncate mt-0.5">
+                              {tx.admin_notes}
+                            </p>
+                          )}
+                        </div>
+                        <span className={`font-mono font-bold px-2.5 py-1 rounded-xl text-xs shrink-0 ${
+                          isPositive
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            : 'bg-rose-50 text-rose-800 border border-rose-200'
+                        }`}>
+                          {isPositive ? `+${Number(tx.amount_dh).toFixed(2)}` : Number(tx.amount_dh).toFixed(2)} DH
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </motion.div>
+          )}
+
           {/* Tab 2: Edit Form */}
           {activeTab === 'edit' && (
             <motion.form initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={handleSaveProfile} className="space-y-3.5">
@@ -861,29 +1048,88 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             </motion.form>
           )}
 
-          {/* Tab 3: Stats View */}
-          {activeTab === 'stats' && !isMaalem && (
+          {/* Tab: Demandes SOS (Client) */}
+          {activeTab === 'requests' && !isMaalem && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
               <div className="grid grid-cols-3 gap-2">
-                <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center">
-                  <div className="text-xl font-black text-blue-600 font-mono">{myClientInterventions.length}</div>
-                  <div className="text-[10px] text-slate-500 font-bold uppercase mt-1">SOS Totaux</div>
+                <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-2xl text-center">
+                  <div className="text-lg font-black text-blue-600 font-mono">{myClientInterventions.length}</div>
+                  <div className="text-[9px] text-slate-500 font-bold uppercase mt-0.5">SOS Totaux</div>
                 </div>
-                <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center">
-                  <div className="text-xl font-black text-emerald-600 font-mono">{completedCount}</div>
-                  <div className="text-[10px] text-slate-500 font-bold uppercase mt-1">Clôturés</div>
+                <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-2xl text-center">
+                  <div className="text-lg font-black text-emerald-600 font-mono">{completedCount}</div>
+                  <div className="text-[9px] text-slate-500 font-bold uppercase mt-0.5">Clôturés</div>
                 </div>
-                <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center">
-                  <div className="text-xl font-black text-amber-600 font-mono">{activeCount}</div>
-                  <div className="text-[10px] text-slate-500 font-bold uppercase mt-1">En Cours</div>
+                <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-2xl text-center">
+                  <div className="text-lg font-black text-amber-600 font-mono">{activeCount}</div>
+                  <div className="text-[9px] text-slate-500 font-bold uppercase mt-0.5">En Cours</div>
                 </div>
               </div>
 
+              <div className="space-y-2 max-h-72 overflow-y-auto modal-scroll pr-1">
+                {myClientInterventions.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500 space-y-1">
+                    <p className="text-xs font-bold">Aucune demande SOS trouvée.</p>
+                    <p className="text-[11px] text-slate-400">Vos demandes de dépannage apparaîtront ici.</p>
+                  </div>
+                ) : (
+                  myClientInterventions.map((item) => {
+                    return (
+                      <div key={item.id} className="p-3.5 bg-white border border-slate-200 rounded-2xl space-y-2 shadow-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-xs text-slate-900 truncate">
+                            {item.subcategory || item.service_type || 'Dépannage d\'urgence'}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border ${
+                            item.status === 'COMPLETED'
+                              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                              : item.status === 'CANCELLED'
+                              ? 'bg-rose-50 border-rose-200 text-rose-700'
+                              : 'bg-blue-50 border-blue-200 text-blue-800 animate-pulse'
+                          }`}>
+                            {item.status === 'COMPLETED' ? '✅ Clôturé' : item.status === 'CANCELLED' ? '❌ Annulé' : '🛠️ En cours'}
+                          </span>
+                        </div>
+
+                        <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 flex items-center justify-between gap-2 text-[11px]">
+                          <div className="flex items-center gap-1.5 text-slate-700 truncate">
+                            <span className="font-bold text-slate-900">🛠️ {item.maalem_name || 'Artisan BricoleMoi'}</span>
+                            <span>•</span>
+                            <span className="text-slate-500">📍 {item.district || 'Casablanca'}</span>
+                          </div>
+                          {item.maalem_phone && (
+                            <a href={`tel:${item.maalem_phone}`} className="font-mono text-blue-700 font-bold hover:underline flex items-center gap-1 shrink-0">
+                              <Phone className="w-3 h-3 text-blue-600" />
+                              <span>{item.maalem_phone}</span>
+                            </a>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+                          <span>Tarif : <strong className="text-slate-900">{item.final_agreed_price ? `${item.final_agreed_price} DH` : '🤝 Accord Direct'}</strong></span>
+                          <span>{formatDateTime(item.created_at || Date.now(), 'long')}</span>
+                        </div>
+
+                        {item.rating && (
+                          <div className="mt-1 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                            <span className="text-amber-800 font-bold flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                              <span>Votre note :</span>
+                            </span>
+                            <span className="font-mono font-black text-amber-900">{Number(item.rating).toFixed(1)} / 5 ★</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
               <div className="bg-blue-50/50 border border-blue-200 p-3 rounded-2xl flex items-center gap-3">
-                <ShieldCheck className="w-6 h-6 text-blue-600 shrink-0" />
+                <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
                 <div className="text-xs">
-                  <p className="font-bold text-slate-900">Garantie Intervention BricoleMoi</p>
-                  <p className="text-[11px] text-slate-600">Tous vos chantiers sont protégés par notre protocole d'arbitrage et de contrôle qualité.</p>
+                  <p className="font-bold text-slate-900">Garantie BricoleMoi</p>
+                  <p className="text-[11px] text-slate-600">Vos demandes et chantiers sont protégés et archivés en toute sécurité.</p>
                 </div>
               </div>
             </motion.div>

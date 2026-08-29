@@ -74,6 +74,7 @@ export const AppProvider = ({ children }) => {
   const walletService = useWalletTransactionsService({
     user,
     setUser,
+    interventions,
     transactions,
     setTransactions,
     maalems,
