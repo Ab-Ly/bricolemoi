@@ -1,16 +1,16 @@
 # Graph Report - bricolemoi  (2026-08-29)
 
 ## Corpus Check
-- 197 files · ~835,795 words
+- 197 files · ~835,971 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 10479 nodes · 30278 edges · 141 communities (124 shown, 17 thin omitted)
+- 10479 nodes · 30278 edges · 140 communities (123 shown, 17 thin omitted)
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 2478 edges (avg confidence: 0.61)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `47c8504b`
+- Built from commit: `8bd121dc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -24,7 +24,7 @@
 - assets/maplibre-gl-shared-dev.mjs
 - public/maplibre-gl-shared-dev.mjs
 - coveringTiles
-- push
+- get
 - get
 - get
 - concat
@@ -45,7 +45,7 @@
 - dist
 - ._update
 - update
-- locationToScreenPoint
+- coveringTiles
 - assets/maplibre-gl-worker.mjs
 - assets/maplibre-gl-worker-dev.mjs
 - get
@@ -63,25 +63,25 @@
 - constructor
 - devDependencies
 - emplaceBack
-- renderLayer
+- clone
 - EmergencyFlowContext.jsx
 - dependencies
 - writeMessage
 - writeMessage
-- .handleEvent
+- emplaceBack
 - appendRoundCorner
 - appendRoundCorner
 - AdminDashboard.jsx
 - Wu
 - queryIntersectsFeature
 - eliminateHoles
-- updateVariableAnchorsForBucket
-- eliminateHoles
-- readVarint
-- pointsToPolygonDistance
-- is
-- sub
 - getElevation
+- eliminateHoles
+- ga
+- pointsToPolygonDistance
+- getSunPos
+- sub
+- updateVariableAnchorsForBucket
 - get
 - useAblySupabaseSync.js
 - readVarint
@@ -97,14 +97,14 @@
 - 📝 Notes de Relais pour la Prochaine Session (BricoleMoi)
 - Modern Clean & Trust Engineering Guidelines (BricoleMoi)
 - listen.js
-- mergeSourceDiffs
+- _addDefaultHandlers
 - dist
 - notify-recharge.js
 - rules/graphify.md
 - manifest.json
 - sub
 - workflows/graphify.md
-- _createTinySDF
+- convertGeometryVector
 - resize
 - extend
 - inspect_finances.js
@@ -115,17 +115,16 @@
 - dispatch-sos.js
 - verify-otp.js
 - relaunch_centrifugo.js
-- parseCssColor
+- mergeSourceDiffs
 - inspect_docker.js
 - verify-infobip-otp/index.ts
 - verify-otp-sms/index.ts
 - inspect_prelude.js
 - test_prelude_otp.js
-- _executeRelevantHandler
+- decodeFloat64Values
 - send-infobip-otp/index.ts
 - send-otp-sms/index.ts
 - verify-maalem-cin/index.ts
-- decodeFloat64Values
 - update_centrifugo.js
 - vercel.json
 - sw.js
@@ -175,139 +174,139 @@
 ## Import Cycles
 - None detected.
 
-## Communities (141 total, 17 thin omitted)
+## Communities (140 total, 17 thin omitted)
 
 ### Community 0 - "public/maplibre-gl.mjs"
 Cohesion: 0.01
-Nodes (546): aa(), ac(), acquire(), add(), addBucket(), addClassName(), addControl(), addDash() (+538 more)
+Nodes (572): aa(), ac(), acquire(), acquireRTT(), add(), addBucket(), addClassName(), addControl() (+564 more)
 
 ### Community 1 - "assets/maplibre-gl.mjs"
 Cohesion: 0.01
-Nodes (558): _a(), aa(), acquire(), acquireRTT(), add(), addBucket(), addClassName(), addControl() (+550 more)
+Nodes (562): aa(), ac(), acquire(), add(), addBucket(), addClassName(), addControl(), addDash() (+554 more)
 
 ### Community 2 - "public/maplibre-gl-shared.mjs"
 Cohesion: 0.01
-Nodes (554): Ms(), quadrant(), Ru(), _addCollisionDebugVertex(), addCollisionDebugVertices(), addCurrentVertex(), addDebugCollisionBoxes(), addFeature() (+546 more)
+Nodes (571): Ms(), quadrant(), Ru(), Aa(), ad, _addCollisionDebugVertex(), addCollisionDebugVertices(), addCurrentVertex() (+563 more)
 
 ### Community 3 - "assets/maplibre-gl-shared.mjs"
 Cohesion: 0.01
-Nodes (479): Ms(), quadrant(), Ru(), ad, _addCollisionDebugVertex(), addCollisionDebugVertices(), addCurrentVertex(), addDebugCollisionBoxes() (+471 more)
+Nodes (560): Ms(), quadrant(), Ru(), ad, _addCollisionDebugVertex(), addCollisionDebugVertices(), addCurrentVertex(), addDebugCollisionBoxes() (+552 more)
 
 ### Community 4 - "public/maplibre-gl-dev.mjs"
 Cohesion: 0.01
-Nodes (217): acquire(), acquireRTT(), addBucket(), addDash(), addRegularDash(), addRoundDash(), addSourceType(), alphaTable (+209 more)
+Nodes (219): acquire(), acquireRTT(), addBucket(), addDash(), addRegularDash(), addRoundDash(), addSourceType(), alphaTable (+211 more)
 
 ### Community 5 - "assets/maplibre-gl-dev.mjs"
 Cohesion: 0.01
-Nodes (237): acquire(), acquireRTT(), addBucket(), addDash(), addRegularDash(), addRoundDash(), addSourceType(), alphaTable (+229 more)
+Nodes (217): acquire(), acquireRTT(), addBucket(), addDash(), addRegularDash(), addRoundDash(), addSourceType(), alphaTable (+209 more)
 
 ### Community 6 - "assets/maplibre-gl-shared-dev.mjs"
 Cohesion: 0.01
-Nodes (270): addEventDefaultOptions, _addEventListener(), addGlobalState(), addImageSection(), addTextSection(), align$1(), allowsLetterSpacing(), altitudeFromMercatorZ() (+262 more)
+Nodes (281): addEventDefaultOptions, _addEventListener(), addGlobalState(), addImageSection(), addTextSection(), align$1(), allowsLetterSpacing(), altitudeFromMercatorZ() (+273 more)
 
 ### Community 7 - "public/maplibre-gl-shared-dev.mjs"
 Cohesion: 0.01
-Nodes (256): tileIdToLngLatBounds(), addEventDefaultOptions, addGlobalState(), addImageSection(), addTextSection(), align$1(), allowsLetterSpacing(), altitudeFromMercatorZ() (+248 more)
+Nodes (260): tileIdToLngLatBounds(), addEventDefaultOptions, _addEventListener(), addGlobalState(), addImageSection(), addTextSection(), align$1(), allowsLetterSpacing() (+252 more)
 
 ### Community 8 - "coveringTiles"
 Cohesion: 0.05
-Nodes (53): _addDefaultHandlers(), allowVariableZoom(), allowWorldCopies(), assignEvents(), coordinatePoint(), coveringTiles(), coveringZoomLevel(), depthAtPoint() (+45 more)
+Nodes (57): allowVariableZoom(), allowWorldCopies(), convertFeaturesToMapFeatures(), convertFeaturesToMapFeaturesMultiple(), convertFeatureToMapFeature(), coordinatePoint(), coveringTiles(), coveringZoomLevel() (+49 more)
 
-### Community 9 - "push"
-Cohesion: 0.03
-Nodes (175): ac(), add(), addIndicesForPlacedSymbol(), addSymbols(), addTileFeatures(), addToLineVertexArray(), addToSortKeyRanges(), ah() (+167 more)
+### Community 9 - "get"
+Cohesion: 0.05
+Nodes (92): ac(), add(), addIndicesForPlacedSymbol(), addToLineVertexArray(), addToSortKeyRanges(), angleTo(), ax, bc() (+84 more)
 
 ### Community 10 - "get"
 Cohesion: 0.03
-Nodes (168): _a(), ad(), al(), attemptAnchorPlacement(), bd(), bind(), bl(), Bu() (+160 more)
+Nodes (163): _a(), ad(), al(), attemptAnchorPlacement(), bd(), bind(), bl(), Bu() (+155 more)
 
 ### Community 11 - "get"
 Cohesion: 0.03
-Nodes (171): ad(), al(), attemptAnchorPlacement(), bd(), bind(), bl(), Bu(), _buildSkirts() (+163 more)
+Nodes (186): _a(), acquireRTT(), ad(), al(), anyTilesAfterTime(), attemptAnchorPlacement(), bd(), bind() (+178 more)
 
 ### Community 12 - "concat"
 Cohesion: 0.04
-Nodes (88): bind(), checkChild(), classifyChildren(), classifyFilter(), coalesce$1(), concat(), convertComparisonOp$1(), convertDisjunctionOp() (+80 more)
+Nodes (94): bind(), checkChild(), coalesce$1(), concat(), convertComparisonOp$1(), convertDisjunctionOp(), convertFilter$1(), convertHasOp$1() (+86 more)
 
 ### Community 13 - "get"
-Cohesion: 0.03
-Nodes (163): atmosphereUniformValues(), attemptAnchorPlacement(), backgroundUniformValues(), bind(), bindDasharrayTextures(), bindFramebuffer(), bindGradientAndDashTextures(), bindGradientTextures() (+155 more)
+Cohesion: 0.04
+Nodes (151): atmosphereUniformValues(), backgroundUniformValues(), bind(), bindDasharrayTextures(), bindFramebuffer(), bindGradientAndDashTextures(), bindGradientTextures(), bindImagePatternTextures() (+143 more)
 
 ### Community 14 - "get"
 Cohesion: 0.04
-Nodes (140): atmosphereUniformValues(), backgroundPatternUniformValues(), backgroundUniformValues(), bgPatternUniformValues(), bind(), bindDasharrayTextures(), bindFramebuffer(), bindGradientAndDashTextures() (+132 more)
+Nodes (153): atmosphereUniformValues(), attemptAnchorPlacement(), backgroundUniformValues(), bind(), bindDasharrayTextures(), bindFramebuffer(), bindGradientAndDashTextures(), bindGradientTextures() (+145 more)
 
 ### Community 15 - "_calcMatrices"
 Cohesion: 0.03
-Nodes (149): adjustAntiMeridian(), _afterEase(), angularCoordinatesRadiansToVector(), angularCoordinatesToSurfaceVector(), apply(), applyUpdatedTransform(), bearing(), _calcMatrices() (+141 more)
+Nodes (147): adjustAntiMeridian(), _afterEase(), angularCoordinatesRadiansToVector(), angularCoordinatesToSurfaceVector(), apply(), applyUpdatedTransform(), bearing(), _calcMatrices() (+139 more)
 
 ### Community 16 - "s"
-Cohesion: 0.05
-Nodes (137): adjustAntiMeridian(), _afterEase(), apply(), applyUpdatedTransform(), _calcMatrices(), calculateCameraOptionsFromTo(), _calculateNearFarZIfNeeded(), cameraForBounds() (+129 more)
+Cohesion: 0.06
+Nodes (133): adjustAntiMeridian(), _afterEase(), apply(), applyUpdatedTransform(), _calcMatrices(), calculateCameraOptionsFromTo(), cameraForBounds(), cameraForBoxAndBearing() (+125 more)
 
 ### Community 17 - "_calcMatrices"
-Cohesion: 0.03
-Nodes (143): adjustAntiMeridian(), _afterEase(), angularCoordinatesRadiansToVector(), angularCoordinatesToSurfaceVector(), apply(), applyUpdatedTransform(), bearing(), _calcMatrices() (+135 more)
+Cohesion: 0.04
+Nodes (116): adjustAntiMeridian(), angularCoordinatesRadiansToVector(), angularCoordinatesToSurfaceVector(), apply(), applyUpdatedTransform(), _calcMatrices(), calculateCameraOptionsFromTo(), calculateCenterFromCameraLngLatAlt() (+108 more)
 
 ### Community 18 - "constructor"
 Cohesion: 0.03
-Nodes (91): add(), addClassName(), addControl(), addTo(), applyAnchorClass(), _cancelRenderFrame(), checkGeolocationSupport(), _clearWatch() (+83 more)
+Nodes (93): add(), addClassName(), addControl(), addTo(), applyAnchorClass(), _cancelRenderFrame(), checkGeolocationSupport(), _clearWatch() (+85 more)
 
 ### Community 19 - "update"
 Cohesion: 0.03
-Nodes (112): _addTerrainIdealTiles(), _addTile(), anyTilesAfterTime(), _areDescendentsComplete(), backfillDEM(), _cleanUpRasterTiles(), _cleanUpVectorTiles(), _clearSource() (+104 more)
+Nodes (106): _addTerrainIdealTiles(), _addTile(), anyTilesAfterTime(), _areDescendentsComplete(), backfillDEM(), _cleanUpRasterTiles(), _cleanUpVectorTiles(), _clearSource() (+98 more)
 
 ### Community 20 - "constructor"
 Cohesion: 0.02
-Nodes (135): add(), addClassName(), addControl(), addTo(), applyAnchorClass(), _calculateTransform(), _cancelRenderFrame(), checkGeolocationSupport() (+127 more)
+Nodes (128): add(), addClassName(), addControl(), addTo(), applyAnchorClass(), _calculateTransform(), checkGeolocationSupport(), _clearWatch() (+120 more)
 
 ### Community 21 - "decodeGeometryColumn"
 Cohesion: 0.04
-Nodes (109): columnToField(), columnTypeHasChildren(), columnTypeHasName(), createConstGeometryVector(), createConstGpuVector(), createFlatGeometryVector(), createFlatGeometryVectorMortonEncoded(), createFlatGpuVector() (+101 more)
+Nodes (105): columnToField(), columnTypeHasChildren(), columnTypeHasName(), createConstGeometryVector(), createConstGpuVector(), createFlatGeometryVector(), createFlatGeometryVectorMortonEncoded(), createFlatGpuVector() (+97 more)
 
 ### Community 22 - "decodeGeometryColumn"
-Cohesion: 0.03
-Nodes (112): columnToField(), columnTypeHasChildren(), columnTypeHasName(), createConstGeometryVector(), createConstGpuVector(), createFlatGeometryVector(), createFlatGeometryVectorMortonEncoded(), createFlatGpuVector() (+104 more)
+Cohesion: 0.04
+Nodes (108): columnToField(), columnTypeHasChildren(), columnTypeHasName(), createConstGeometryVector(), createConstGpuVector(), createFlatGeometryVector(), createFlatGeometryVectorMortonEncoded(), createFlatGpuVector() (+100 more)
 
 ### Community 23 - "push"
 Cohesion: 0.03
-Nodes (131): sphereSurfacePointToCoordinates(), addCurrentVertex(), addFeature$1(), addHalfVertex(), addLine(), addLinesTileFeature(), addLineTileFeautre(), addMultiPolygonTileFeature() (+123 more)
+Nodes (132): sphereSurfacePointToCoordinates(), addCurrentVertex(), addFeature$1(), addHalfVertex(), addIndicesForPlacedSymbol(), addLine(), addLinesTileFeature(), addLineTileFeautre() (+124 more)
 
 ### Community 24 - "._update"
 Cohesion: 0.03
-Nodes (107): addImage(), addLayer(), addSource(), addSprite(), _afterImageUpdated(), _applyGlobalStateChanges(), _checkLoaded(), clearTextures() (+99 more)
+Nodes (102): addImage(), addLayer(), addSource(), addSprite(), _afterImageUpdated(), _applyGlobalStateChanges(), _checkLoaded(), clearTextures() (+94 more)
 
 ### Community 25 - "n"
-Cohesion: 0.03
-Nodes (177): addLayer(), addSource(), addSprite(), _applyGlobalStateChanges(), calculateCenterFromCameraLngLatAlt(), _checkLoaded(), ci(), _computeTileBoundingVolume() (+169 more)
+Cohesion: 0.04
+Nodes (168): addLayer(), addSource(), addSprite(), _applyGlobalStateChanges(), calculateCenterFromCameraLngLatAlt(), _checkLoaded(), ci(), _computeTileBoundingVolume() (+160 more)
 
 ### Community 26 - "push"
 Cohesion: 0.03
-Nodes (126): sphereSurfacePointToCoordinates(), addCurrentVertex(), addFeature$1(), addHalfVertex(), addIndicesForPlacedSymbol(), addLine(), addLinesTileFeature(), addLineTileFeautre() (+118 more)
+Nodes (139): sphereSurfacePointToCoordinates(), addCurrentVertex(), addFeature$1(), addHalfVertex(), addIndicesForPlacedSymbol(), addLine(), addLinesTileFeature(), addLineTileFeautre() (+131 more)
 
 ### Community 27 - "dist"
 Cohesion: 0.33
 Nodes (11): addToLineVertexArray(), anchorIsTooClose(), angleTo(), checkMaxAngle(), dist(), getAnchors(), getAngleWindowSize(), getCenterAnchor() (+3 more)
 
 ### Community 28 - "._update"
-Cohesion: 0.03
-Nodes (97): addLayer(), addSource(), addSprite(), _afterImageUpdated(), _applyGlobalStateChanges(), _applyResourceTiming(), _checkLoaded(), clearTextures() (+89 more)
+Cohesion: 0.04
+Nodes (87): addLayer(), addSource(), addSprite(), _afterImageUpdated(), _applyGlobalStateChanges(), _checkLoaded(), clearTextures(), coalesceChanges() (+79 more)
 
 ### Community 29 - "update"
 Cohesion: 0.03
-Nodes (127): _addTerrainIdealTiles(), _addTile(), allowVariableZoom(), allowWorldCopies(), anyTilesAfterTime(), _areDescendentsComplete(), backfillDEM(), _cleanUpRasterTiles() (+119 more)
+Nodes (111): _addTerrainIdealTiles(), _addTile(), anyTilesAfterTime(), _areDescendentsComplete(), backfillDEM(), _cleanUpRasterTiles(), _cleanUpVectorTiles(), _clearSource() (+103 more)
 
-### Community 30 - "locationToScreenPoint"
-Cohesion: 0.13
-Nodes (19): coordinatePoint(), depthAtPoint(), getElevationForLngLat(), getElevationForLngLatZoom(), getMinMaxElevation(), getMinTileElevationForLngLatZoom(), _getOverscaledTileIDFromLngLatZoom(), getPitch() (+11 more)
+### Community 30 - "coveringTiles"
+Cohesion: 0.06
+Nodes (45): allowVariableZoom(), allowWorldCopies(), coordinatePoint(), coveringTiles(), coveringZoomLevel(), depthAtPoint(), distanceToTile2d(), distanceToTileSimple() (+37 more)
 
 ### Community 31 - "assets/maplibre-gl-worker.mjs"
-Cohesion: 0.05
-Nodes (59): _computeClippingPlane(), _createStyleImage(), mf(), rs(), al, bt(), cn(), dn() (+51 more)
+Cohesion: 0.04
+Nodes (71): loadURL(), mf(), mo(), rs(), al, bt(), cn(), determineAverageLineWidth() (+63 more)
 
 ### Community 32 - "assets/maplibre-gl-worker-dev.mjs"
 Cohesion: 0.03
-Nodes (107): _afterTileLoadWorkerResponse(), _createStyleImage(), _diffStyle(), dispatchRenderCallbacks(), _getOverzoomParameters(), loadGlyphRange(), loadSprite(), loadTile() (+99 more)
+Nodes (110): _afterTileLoadWorkerResponse(), _createStyleImage(), _diffStyle(), dispatchRenderCallbacks(), _getOverzoomParameters(), loadGlyphRange(), loadSprite(), loadTile() (+102 more)
 
 ### Community 33 - "get"
 Cohesion: 0.05
@@ -315,15 +314,15 @@ Nodes (92): ac(), add(), addIndicesForPlacedSymbol(), addToLineVertexArray(), ad
 
 ### Community 34 - "n"
 Cohesion: 0.03
-Nodes (190): addLayer(), addSource(), addSprite(), _applyGlobalStateChanges(), calculateCenterFromCameraLngLatAlt(), _checkLoaded(), ci(), coalesceChanges() (+182 more)
+Nodes (175): addLayer(), addSource(), addSprite(), _applyGlobalStateChanges(), calculateCenterFromCameraLngLatAlt(), _checkLoaded(), ci(), _computeTileBoundingVolume() (+167 more)
 
 ### Community 35 - "public/maplibre-gl-worker.mjs"
 Cohesion: 0.04
-Nodes (63): _computeClippingPlane(), _createStyleImage(), mf(), rs(), al, bt(), cn(), dn() (+55 more)
+Nodes (72): _computeClippingPlane(), _createStyleImage(), mf(), rs(), al, bt(), cn(), determineAverageLineWidth() (+64 more)
 
 ### Community 36 - "concat"
 Cohesion: 0.05
-Nodes (79): bind(), coalesce$1(), concat(), convertComparisonOp$1(), convertDisjunctionOp(), convertFilter$1(), convertHasOp$1(), convertNegation() (+71 more)
+Nodes (74): bind(), coalesce$1(), concat(), createFunction(), deepUnbundle(), evaluateCategoricalFunction(), evaluateExponentialFunction(), evaluateIdentityFunction() (+66 more)
 
 ### Community 37 - "parse"
 Cohesion: 0.04
@@ -335,31 +334,31 @@ Nodes (23): _convertFromCellCoord(), convertInOp$1(), _convertToCellCoord(), cre
 
 ### Community 39 - "s"
 Cohesion: 0.06
-Nodes (130): ac(), adjustAntiMeridian(), _afterEase(), apply(), applyUpdatedTransform(), _calcMatrices(), calculateCameraOptionsFromTo(), calculateFogBlendOpacity() (+122 more)
+Nodes (133): adjustAntiMeridian(), _afterEase(), apply(), applyUpdatedTransform(), _calcMatrices(), calculateCameraOptionsFromTo(), _calculateNearFarZIfNeeded(), cameraForBounds() (+125 more)
 
 ### Community 40 - ".handleEvent"
 Cohesion: 0.04
-Nodes (71): _applyChanges(), _blockedByActive(), _calculateTransform(), cloneImages(), contextmenu(), _destroyUI(), disable(), dragEnd() (+63 more)
+Nodes (70): _applyChanges(), _blockedByActive(), _calculateTransform(), cloneImages(), contextmenu(), _destroyUI(), disable(), dragEnd() (+62 more)
 
 ### Community 41 - "constructor"
 Cohesion: 0.04
-Nodes (58): add(), addImages(), backfillBorder(), bucketIndex(), calculateScaledKey(), calculateTileKey(), constructor(), copy() (+50 more)
+Nodes (64): add(), addImages(), backfillBorder(), bucketIndex(), calculateScaledKey(), calculateTileKey(), constructor(), copy() (+56 more)
 
 ### Community 42 - "public/maplibre-gl-worker-dev.mjs"
 Cohesion: 0.05
 Nodes (69): serialize(), addProtocol(), br(), clipGeometry(), createStyleLayer(), filterObject(), fromVectorTileJs(), getArrayBuffer() (+61 more)
 
 ### Community 43 - "featureFilter"
-Cohesion: 0.07
-Nodes (34): checkChild(), classifyChildren(), classifyFilter(), _convertFromCellCoord(), convertInOp$1(), _convertToCellCoord(), createTree(), expandBy() (+26 more)
+Cohesion: 0.06
+Nodes (39): checkChild(), classifyChildren(), classifyFilter(), convertComparisonOp$1(), convertDisjunctionOp(), convertFilter$1(), _convertFromCellCoord(), convertHasOp$1() (+31 more)
 
 ### Community 44 - "get"
 Cohesion: 0.03
-Nodes (111): add(), addDebugCollisionBoxes(), addFeature(), addFeatures(), addLineDashDependencies(), addPatternDependencies(), addSymbol(), addTextVertices() (+103 more)
+Nodes (122): add(), addDebugCollisionBoxes(), addFeature(), addFeatures(), addLineDashDependencies(), addPatternDependencies(), addSymbol(), addTextVertices() (+114 more)
 
 ### Community 45 - "constructor"
-Cohesion: 0.02
-Nodes (122): addImages(), array(), assertRootKey(), backfillBorder(), bucketIndex(), calculateScaledKey(), calculateTileKey(), checkSubtype() (+114 more)
+Cohesion: 0.03
+Nodes (79): addImages(), backfillBorder(), bbox(), bucketIndex(), calculateScaledKey(), calculateTileKey(), constructor(), copy() (+71 more)
 
 ### Community 46 - "devDependencies"
 Cohesion: 0.10
@@ -369,9 +368,9 @@ Nodes (21): autoprefixer, devDependencies, autoprefixer, postcss, ssh2, tailwind
 Cohesion: 0.10
 Nodes (33): accumulatePointsToCentroid(), addCircleVertex(), _addCollisionDebugVertex(), addCollisionDebugVertices(), addDynamicAttributes(), addSymbols(), addTextVariableAnchorOffsets(), addVertex() (+25 more)
 
-### Community 48 - "renderLayer"
-Cohesion: 0.12
-Nodes (23): acquireRTT(), bindRTT(), getRTT(), getTexture(), renderLayer(), ad, Dd(), distSqr() (+15 more)
+### Community 48 - "clone"
+Cohesion: 0.06
+Nodes (41): clone(), completeTask(), containsMaxSafeIntegerValues(), decode(), decodeFsst(), decodeString$2(), deserialize(), div() (+33 more)
 
 ### Community 49 - "EmergencyFlowContext.jsx"
 Cohesion: 0.14
@@ -389,17 +388,17 @@ Nodes (48): command(), makeRoomForExtraLength(), realloc(), writeBigVarint(), wr
 Cohesion: 0.07
 Nodes (48): command(), makeRoomForExtraLength(), realloc(), writeBigVarint(), writeBigVarintHigh(), writeBigVarintLow(), writeBoolean(), writeBooleanField() (+40 more)
 
-### Community 53 - ".handleEvent"
-Cohesion: 0.11
-Nodes (21): _applyChanges(), _blockedByActive(), _fireEvent(), _fireEvents(), fitScreenCoordinates(), _getMapTouches(), hasChange(), isActive() (+13 more)
+### Community 53 - "emplaceBack"
+Cohesion: 0.10
+Nodes (33): accumulatePointsToCentroid(), addCircleVertex(), _addCollisionDebugVertex(), addCollisionDebugVertices(), addDynamicAttributes(), addSymbols(), addTextVariableAnchorOffsets(), addVertex() (+25 more)
 
 ### Community 54 - "appendRoundCorner"
 Cohesion: 0.06
 Nodes (44): getTileSkewVectors(), align(), angle(), appendRoundCorner(), breakLines(), calculateBadness(), calculateLineContentSize(), calculatePenalty() (+36 more)
 
 ### Community 55 - "appendRoundCorner"
-Cohesion: 0.05
-Nodes (48): getTileSkewVectors(), align(), angle(), appendRoundCorner(), breakLines(), calculateBadness(), calculateLineContentSize(), calculatePenalty() (+40 more)
+Cohesion: 0.06
+Nodes (44): getTileSkewVectors(), align(), angle(), appendRoundCorner(), breakLines(), calculateBadness(), calculateLineContentSize(), calculatePenalty() (+36 more)
 
 ### Community 56 - "AdminDashboard.jsx"
 Cohesion: 0.14
@@ -407,7 +406,7 @@ Nodes (31): AdminClientsView(), AdminDashboard(), AdminDisputesView(), AdminLive
 
 ### Community 57 - "Wu"
 Cohesion: 0.07
-Nodes (36): bo(), co(), Do(), getPerspectiveRatio(), getPitchedTextCorrection(), go(), ho(), isInsideGrid() (+28 more)
+Nodes (34): bo(), co(), Do(), getPerspectiveRatio(), getPitchedTextCorrection(), go(), ho(), isInsideGrid() (+26 more)
 
 ### Community 58 - "queryIntersectsFeature"
 Cohesion: 0.06
@@ -417,41 +416,41 @@ Nodes (45): checkIntersection(), circleIntersection(), classifyRings(), compareM
 Cohesion: 0.08
 Nodes (40): area(), buildBlockIndex(), clipLine(), compareXYSlope(), covers(), createNode(), cureLocalIntersections(), earcut() (+32 more)
 
-### Community 60 - "updateVariableAnchorsForBucket"
-Cohesion: 0.05
-Nodes (60): attemptAnchorPlacement(), calculateVariableLayoutShift(), calculateVariableRenderShift(), continuePlacement(), fastInvertSkewMat4(), findOffsetIntersectionPoint(), getDEMElevation(), _getDEMTileMatrix() (+52 more)
+### Community 60 - "getElevation"
+Cohesion: 0.10
+Nodes (31): fastInvertSkewMat4(), findOffsetIntersectionPoint(), getElevation(), getShiftedAnchor(), _getTerrainElevationFunc(), isInsideGrid(), isOffscreen(), pathSlicedToLongestUnoccluded() (+23 more)
 
 ### Community 61 - "eliminateHoles"
 Cohesion: 0.08
 Nodes (39): area(), buildBlockIndex(), clear(), compareXYSlope(), covers(), createNode(), cureLocalIntersections(), earcut() (+31 more)
 
-### Community 62 - "readVarint"
+### Community 62 - "ga"
 Cohesion: 0.09
-Nodes (34): bbox(), nextField(), parseGlyphPbf(), readBoolean(), readBytes(), readDouble(), readFields(), readFixed32() (+26 more)
+Nodes (26): allowVariableZoom(), allowWorldCopies(), _computeClippingPlane(), distanceToTile2d(), distanceX(), distanceY(), Dp(), ga() (+18 more)
 
 ### Community 63 - "pointsToPolygonDistance"
-Cohesion: 0.08
-Nodes (46): bboxToBBoxDistance(), boxWithinBox(), canonicalID(), compareDistPair(), distance(), _down(), getBBox(), getPolygonBBox() (+38 more)
+Cohesion: 0.07
+Nodes (49): bboxToBBoxDistance(), boxWithinBox(), canonicalID(), compareDistPair(), distance(), _down(), getBBox(), getPolygonBBox() (+41 more)
 
-### Community 64 - "is"
-Cohesion: 0.06
-Nodes (43): bo(), co(), Do(), getElevationForLngLatZoom(), getMinTileElevationForLngLatZoom(), _getOverscaledTileIDFromLngLatZoom(), getPerspectiveRatio(), ho() (+35 more)
+### Community 64 - "getSunPos"
+Cohesion: 0.12
+Nodes (17): fillExtrusionUniformValues(), getCartesianPosition(), getSunPos(), transformLightDirection(), create$4(), create$6(), createIdentityMat4f32(), createIdentityMat4f64() (+9 more)
 
 ### Community 65 - "sub"
 Cohesion: 0.10
 Nodes (36): adjustFarPlaneByHorizonPlane(), calculateRasterPerspectiveTransform(), cameraPosition(), clampToSphere(), _computeTileBoundingVolume(), findAxisMinMax(), fromCenterSizeAngles(), fromInvProjectionMatrix() (+28 more)
 
-### Community 66 - "getElevation"
-Cohesion: 0.07
-Nodes (42): fastInvertSkewMat4(), findOffsetIntersectionPoint(), getDEMElevation(), _getDEMTileMatrix(), getElevation(), _getElevationSampler(), getShiftedAnchor(), getTerrainCoords() (+34 more)
+### Community 66 - "updateVariableAnchorsForBucket"
+Cohesion: 0.05
+Nodes (67): _applyDiffToSource(), _applyResourceTiming(), applySourceDiff(), attemptAnchorPlacement(), calculateVariableLayoutShift(), calculateVariableRenderShift(), continuePlacement(), demoteFeatureIds() (+59 more)
 
 ### Community 67 - "get"
 Cohesion: 0.03
-Nodes (121): accumulatePointsToCentroid(), addCircleVertex(), _addCollisionDebugVertex(), addCollisionDebugVertices(), addDebugCollisionBoxes(), addDynamicAttributes(), addFeature(), addFeatures() (+113 more)
+Nodes (117): addDebugCollisionBoxes(), addFeature(), addFeatures(), addLineDashDependencies(), addPatternDependencies(), addSymbol(), addTextVertices(), addToSortKeyRanges() (+109 more)
 
 ### Community 68 - "useAblySupabaseSync.js"
-Cohesion: 0.10
-Nodes (39): AdminRealtimeConsole(), NEGATIVE_BADGES, POSITIVE_BADGES, broadcastSync(), calculateDistanceInKm(), DUMMY_CLIENT_ID, DUMMY_MAALEM_ID, generateUuid() (+31 more)
+Cohesion: 0.11
+Nodes (37): AdminRealtimeConsole(), NEGATIVE_BADGES, POSITIVE_BADGES, broadcastSync(), calculateDistanceInKm(), DUMMY_CLIENT_ID, DUMMY_MAALEM_ID, generateUuid() (+29 more)
 
 ### Community 69 - "readVarint"
 Cohesion: 0.09
@@ -462,20 +461,20 @@ Cohesion: 0.30
 Nodes (12): addCommand(), addSource(), canUpdateGeoJSON(), deepEqual(), diff(), diffLayerPropertyChanges(), diffLayers(), diffSources() (+4 more)
 
 ### Community 71 - "extend"
-Cohesion: 0.06
-Nodes (52): _afterTileLoadWorkerResponse(), backgroundPatternUniformValues(), bgPatternUniformValues(), calculateTileRatio(), _diffStyle(), doOnceCompleted(), extend(), fillExtrusionPatternUniformValues() (+44 more)
+Cohesion: 0.05
+Nodes (62): _afterTileLoadWorkerResponse(), backgroundPatternUniformValues(), bgPatternUniformValues(), calculateTileRatio(), _charUsesLocalIdeographFontFamily(), _createTinySDF(), _diffStyle(), doOnceCompleted() (+54 more)
 
 ### Community 72 - "pointsToPolygonDistance"
-Cohesion: 0.08
-Nodes (49): bboxToBBoxDistance(), boxWithinBox(), canonicalID(), compareDistPair(), distance(), getBBox(), getLngLatFromTileCoord(), getPolygonBBox() (+41 more)
+Cohesion: 0.13
+Nodes (28): bboxToBBoxDistance(), compareDistPair(), distance(), getBBox(), getLngLatFromTileCoord(), getRangeSize(), isRangeSafe(), isValidBBox() (+20 more)
 
 ### Community 73 - "App.jsx"
 Cohesion: 0.09
-Nodes (25): AdminApp, App(), ClientApp, MaalemApp, MainApp(), AdminAuthModal(), BottomNav(), ErrorBoundary (+17 more)
+Nodes (27): AdminApp, App(), ClientApp, MaalemApp, MainApp(), AdminAuthModal(), BottomNav(), ErrorBoundary (+19 more)
 
 ### Community 74 - "getPitchedLabelPlaneMatrix"
-Cohesion: 0.13
-Nodes (22): calculatePosMatrix(), getFastPathSimpleProjectionMatrix(), getGlCoordMatrix(), getPitchedLabelPlaneMatrix(), getPixelPosMatrix(), getTerrainCoords(), _getTerrainCoordsForRegularTile(), _getTerrainCoordsForTileRanges() (+14 more)
+Cohesion: 0.11
+Nodes (26): calculatePosMatrix(), getDEMElevation(), _getDEMTileMatrix(), _getElevationSampler(), getFastPathSimpleProjectionMatrix(), getGlCoordMatrix(), getPitchedLabelPlaneMatrix(), getPixelPosMatrix() (+18 more)
 
 ### Community 75 - "AuthContext.jsx"
 Cohesion: 0.11
@@ -486,12 +485,12 @@ Cohesion: 0.12
 Nodes (16): scripts, audit, build, deploy, deploy:logs, deploy:prod, deploy:status, dev (+8 more)
 
 ### Community 77 - "auth/AuthModal.jsx"
-Cohesion: 0.10
-Nodes (17): AuthModal(), AuthHeader(), CountryCodeSelector(), CountrySelectModal(), ErrorInfoBanner(), RememberedAccountCard(), RoleSwitcher(), ExistingUserPinStep() (+9 more)
+Cohesion: 0.09
+Nodes (20): AuthModal(), AuthHeader(), CountryCodeSelector(), CountrySelectModal(), ErrorInfoBanner(), RememberedAccountCard(), RoleSwitcher(), ExistingUserPinStep() (+12 more)
 
 ### Community 78 - "deepEqual"
-Cohesion: 0.09
-Nodes (31): setState(), addCommand(), _addEventListener(), addSource(), canUpdateGeoJSON(), deepEqual(), deref(), derefLayers() (+23 more)
+Cohesion: 0.16
+Nodes (19): setState(), addCommand(), addSource(), canUpdateGeoJSON(), deepEqual(), deref(), derefLayers(), diff() (+11 more)
 
 ### Community 79 - "📝 Notes de Relais pour la Prochaine Session (BricoleMoi)"
 Cohesion: 0.33
@@ -505,9 +504,9 @@ Nodes (5): 1. Visual Identity & Palette (« Modern Clean & Trust »), 2. Action 
 Cohesion: 0.24
 Nodes (10): C, __dirname, envPath, envVars, __filename, formatTime(), getLevelBadge(), getRoleBadge() (+2 more)
 
-### Community 82 - "mergeSourceDiffs"
-Cohesion: 0.28
-Nodes (9): _applyDiffToSource(), applySourceDiff(), demoteFeatureIds(), diffToHashed(), getFeatureId(), hashedToDiff(), mergeSourceDiffs(), promoteFeatureIds() (+1 more)
+### Community 82 - "_addDefaultHandlers"
+Cohesion: 0.20
+Nodes (15): _addDefaultHandlers(), assignEvents(), _finishLoading(), generateMousePanHandler(), generateMousePitchHandler(), generateMouseRollHandler(), generateMouseRotationHandler(), getCenter() (+7 more)
 
 ### Community 83 - "dist"
 Cohesion: 0.07
@@ -521,17 +520,17 @@ Nodes (9): background_color, description, display, icons, name, orientation, sho
 Cohesion: 0.10
 Nodes (35): adjustFarPlaneByHorizonPlane(), calculateRasterPerspectiveTransform(), cameraPosition(), clampToSphere(), _computeTileBoundingVolume(), findAxisMinMax(), fromCenterSizeAngles(), fromInvProjectionMatrix() (+27 more)
 
-### Community 89 - "_createTinySDF"
-Cohesion: 0.12
-Nodes (18): _charUsesLocalIdeographFontFamily(), _createTinySDF(), _downloadAndCacheRangePromise(), _drawGlyph(), _fontStyle(), _fontWeight(), _getAndCacheGlyphsPromise(), getGlyphs() (+10 more)
+### Community 89 - "convertGeometryVector"
+Cohesion: 0.24
+Nodes (11): containsPolygonGeometry(), convertGeometryVector(), decodeDictionaryEncodedLineString(), decodeDictionaryEncodedLineStringOrRing(), decodeMorton(), decodeMortonDictionaryEncodedLineString(), decodeZOrderCurve(), geometryType() (+3 more)
 
 ### Community 90 - "resize"
-Cohesion: 0.18
-Nodes (17): _addDefaultHandlers(), assignEvents(), createQuadTriangles(), generateMousePanHandler(), generateMousePitchHandler(), generateMouseRollHandler(), generateMouseRotationHandler(), getCenter() (+9 more)
+Cohesion: 0.12
+Nodes (25): _addDefaultHandlers(), assignEvents(), _containerDimensions(), createQuadTriangles(), generateMousePanHandler(), generateMousePitchHandler(), generateMouseRollHandler(), generateMouseRotationHandler() (+17 more)
 
 ### Community 91 - "extend"
-Cohesion: 0.07
-Nodes (36): _applyDiffToSource(), _applyResourceTiming(), applySourceDiff(), demoteFeatureIds(), diffToHashed(), _dispatchWorkerUpdate(), extend(), extractCoordinates() (+28 more)
+Cohesion: 0.04
+Nodes (84): _afterEase(), _applyChanges(), _applyResourceTiming(), backgroundPatternUniformValues(), bearing(), bgPatternUniformValues(), _blockedByActive(), _cancelRenderFrame() (+76 more)
 
 ### Community 92 - "inspect_finances.js"
 Cohesion: 0.29
@@ -565,19 +564,15 @@ Nodes (3): cleanPhoneNumber(), handler(), verifyOtpSignature()
 Cohesion: 0.40
 Nodes (4): configB64, configContent, conn, __dirname
 
-### Community 100 - "parseCssColor"
-Cohesion: 0.13
-Nodes (17): clamp$1(), constrainAngle(), getOwn(), hcl(), hslToRgb(), f(), lab(), overwriteGetter() (+9 more)
+### Community 100 - "mergeSourceDiffs"
+Cohesion: 0.28
+Nodes (9): _applyDiffToSource(), applySourceDiff(), demoteFeatureIds(), diffToHashed(), getFeatureId(), hashedToDiff(), mergeSourceDiffs(), promoteFeatureIds() (+1 more)
 
 ### Community 101 - "inspect_docker.js"
 Cohesion: 0.50
 Nodes (3): configJson, conn, __dirname
 
-### Community 106 - "_executeRelevantHandler"
-Cohesion: 0.31
-Nodes (9): endMove(), _executeRelevantHandler(), _isOneFingerTouch(), _isSameTouchEvent(), isValidEndEvent(), isValidMoveEvent(), isValidStartEvent(), Ef() (+1 more)
-
-### Community 110 - "decodeFloat64Values"
+### Community 106 - "decodeFloat64Values"
 Cohesion: 0.43
 Nodes (7): decodeFloat64Values(), decodeRleFloat64(), decodeUnsignedRleFloat64(), decodeZigZagDeltaFloat64(), decodeZigZagFloat64(), decodeZigZagFloat64Value(), decodeZigZagRleFloat64()
 
@@ -610,8 +605,8 @@ Cohesion: 0.08
 Nodes (32): addImage(), _createStyleImage(), dispatchRenderCallbacks(), getImage(), getPattern(), updateImage(), _updatePatternAtlas(), compareMax() (+24 more)
 
 ### Community 137 - "maalem/MaalemView.jsx"
-Cohesion: 0.16
-Nodes (10): MaalemActiveMissionCard(), MaalemLoyaltyGaugeCard(), MaalemPhotoPreviewModal(), MaalemRadarHeader(), MaalemUnfeasibleModal(), MaalemWalletModal(), MaalemWelcomeWhatsAppBanner(), MaalemView() (+2 more)
+Cohesion: 0.20
+Nodes (7): MaalemActiveMissionCard(), MaalemLoyaltyGaugeCard(), MaalemPhotoPreviewModal(), MaalemRadarHeader(), MaalemUnfeasibleModal(), MaalemWelcomeWhatsAppBanner(), MaalemView()
 
 ### Community 147 - "supabase-status.js"
 Cohesion: 0.29
@@ -645,11 +640,11 @@ Nodes (3): clearScreen(), sleep(), watchLiveDeployments()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `x()` connect `s` to `assets/maplibre-gl.mjs`, `n`, `assets/maplibre-gl-shared.mjs`, `push`, `queryIntersectsFeature`, `push`, `get`, `_calcMatrices`, `constructor`, `resize`, `update`, `assets/maplibre-gl-worker.mjs`?**
+- **Why does `x()` connect `s` to `assets/maplibre-gl.mjs`, `n`, `assets/maplibre-gl-shared.mjs`, `push`, `queryIntersectsFeature`, `get`, `get`, `get`, `_calcMatrices`, `constructor`, `resize`, `coveringTiles`, `assets/maplibre-gl-worker.mjs`?**
   _High betweenness centrality (0.030) - this node is a cross-community bridge._
-- **Why does `y()` connect `s` to `assets/maplibre-gl.mjs`, `assets/maplibre-gl-shared.mjs`, `push`, `queryIntersectsFeature`, `get`, `get`, `_calcMatrices`, `constructor`, `resize`, `update`, `assets/maplibre-gl-worker.mjs`?**
+- **Why does `y()` connect `s` to `assets/maplibre-gl.mjs`, `assets/maplibre-gl-shared.mjs`, `push`, `queryIntersectsFeature`, `get`, `get`, `_calcMatrices`, `constructor`, `ga`, `resize`, `coveringTiles`, `assets/maplibre-gl-worker.mjs`?**
   _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `y()` connect `s` to `public/maplibre-gl.mjs`, `public/maplibre-gl-shared.mjs`, `get`, `public/maplibre-gl-worker.mjs`, `update`, `coveringTiles`, `get`, `_calcMatrices`, `constructor`, `push`?**
+- **Why does `y()` connect `s` to `public/maplibre-gl.mjs`, `public/maplibre-gl-shared.mjs`, `get`, `public/maplibre-gl-worker.mjs`, `update`, `coveringTiles`, `get`, `_calcMatrices`, `constructor`, `_addDefaultHandlers`, `push`?**
   _High betweenness centrality (0.020) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `constructor()` (e.g. with `name()` and `size()`) actually correct?**
   _`constructor()` has 8 INFERRED edges - model-reasoned connections that need verification._
@@ -658,4 +653,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `recentRequests`, `R2_PUBLIC_DOMAIN`, `s3Client` to the rest of the system?**
   _539 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `public/maplibre-gl.mjs` be split into smaller, more focused modules?**
-  _Cohesion score 0.005255458435431372 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.005095650096418027 - nodes in this community are weakly interconnected._

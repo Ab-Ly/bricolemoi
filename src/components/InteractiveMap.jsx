@@ -12,25 +12,47 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { getSpecialtyLabel } from './EnhancedCategoryIcon';
 
-// High-Density Native Map Tiles
+// High-Density Native Map Tiles (Clean & Trust - CartoDB / Esri / OSM)
 const MAP_STYLES = {
+  VOYAGER: {
+    id: 'VOYAGER',
+    name: 'Carto Voyager HD (Clair, Net & Moderne)',
+    tiles: [
+      'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      'https://d.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+    ],
+    attribution: '&copy; CARTO &copy; OpenStreetMap'
+  },
+  POSITRON: {
+    id: 'POSITRON',
+    name: 'Carto Positron (Épuré Haute Lisibilité)',
+    tiles: [
+      'https://a.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
+      'https://b.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
+      'https://c.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
+      'https://d.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png'
+    ],
+    attribution: '&copy; CARTO &copy; OpenStreetMap'
+  },
+  ESRI_STREETS: {
+    id: 'ESRI_STREETS',
+    name: 'Esri World Streets (Détaillé & Relief)',
+    tiles: [
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'
+    ],
+    attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap'
+  },
   OSM_FR: {
     id: 'OSM_FR',
-    name: 'Plan Urbain Complet (Rues & Lieux)',
+    name: 'Plan Urbain Classique OSM',
     tiles: [
       'https://a.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
       'https://b.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
       'https://c.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png'
     ],
     attribution: '&copy; OpenStreetMap France contributors'
-  },
-  ESRI_STREETS: {
-    id: 'ESRI_STREETS',
-    name: 'Esri World Streets (Détaillé)',
-    tiles: [
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'
-    ],
-    attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap'
   },
   SATELLITE: {
     id: 'SATELLITE',
@@ -39,17 +61,6 @@ const MAP_STYLES = {
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
     ],
     attribution: '&copy; Esri, Maxar, Earthstar Geographics'
-  },
-  VOYAGER: {
-    id: 'VOYAGER',
-    name: 'Carto Voyager (Épuré)',
-    tiles: [
-      'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      'https://d.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-    ],
-    attribution: '&copy; CARTO &copy; OpenStreetMap'
   }
 };
 
@@ -62,15 +73,17 @@ const ROAD_COLOR_THEMES = [
 ];
 
 const getMapStyleJson = (styleKey) => {
-  const cfg = MAP_STYLES[styleKey] || MAP_STYLES.OSM_FR;
+  const cfg = MAP_STYLES[styleKey] || MAP_STYLES.VOYAGER;
+  const isRetina = typeof window !== 'undefined' && (window.devicePixelRatio || 1) > 1.25;
+  const tileUrls = cfg.tiles.map((t) => t.replace('{r}', isRetina ? '@2x' : ''));
   return {
     version: 8,
     sources: {
       'base-tiles': {
         type: 'raster',
-        tiles: cfg.tiles,
+        tiles: tileUrls,
         tileSize: 256,
-        attribution: cfg.attribution || '&copy; OpenStreetMap'
+        attribution: cfg.attribution || '&copy; CARTO &copy; OpenStreetMap'
       }
     },
     layers: [
@@ -300,8 +313,8 @@ export const InteractiveMap = ({
   const defaultLat = selectedLat || savedGPS?.lat || 33.5883;
   const defaultLng = selectedLng || savedGPS?.lng || -7.6328;
 
-  const [activeStyleKey, setActiveStyleKey] = useState('OSM_FR');
-  const [mapTheme, setMapTheme] = useState('NATURAL'); // 'NATURAL' | 'GOLD_CYAN' | 'NEON_CYBER' | 'SILVER_SLATE'
+  const [activeStyleKey, setActiveStyleKey] = useState('VOYAGER');
+  const [mapTheme, setMapTheme] = useState('GOLD_CYAN'); // 'GOLD_CYAN' | 'NEON_CYBER' | 'SILVER_SLATE' | 'NATURAL'
   const [userGPSPos, setUserGPSPos] = useState({ lat: defaultLat, lng: defaultLng });
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
@@ -349,7 +362,7 @@ export const InteractiveMap = ({
       maxZoom: 19,
       pitch: 0,
       bearing: 0,
-      antialias: false,
+      antialias: true,
       attributionControl: false
     });
 
@@ -1036,6 +1049,22 @@ export const InteractiveMap = ({
     map.fitBounds(bounds, { padding: 60, maxZoom: 15 });
   };
 
+  const handleFitFullRoute = () => {
+    const map = mapRef.current;
+    if (!map || !activeRouteCoords || activeRouteCoords.length < 2) return;
+    try {
+      const bounds = new maplibregl.LngLatBounds();
+      activeRouteCoords.forEach((pt) => {
+        if (Array.isArray(pt) && pt.length >= 2 && !isNaN(pt[0]) && !isNaN(pt[1])) {
+          bounds.extend(pt);
+        }
+      });
+      if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { padding: 60, maxZoom: 16 });
+      }
+    } catch (e) {}
+  };
+
   return (
     <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200 shadow-md bg-white">
       {/* MapLibre WebGL Canvas Container */}
@@ -1238,6 +1267,19 @@ export const InteractiveMap = ({
 
             {/* Zone Droite Client */}
             <div className="grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              {activeRouteCoords && activeRouteCoords.length >= 2 && (
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={handleFitFullRoute}
+                  className="h-8 sm:h-9 bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 sm:px-3 rounded-xl border border-blue-200 font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all text-[11px] sm:text-xs whitespace-nowrap cursor-pointer"
+                  title="Cadrer l'ensemble du trajet (Artisan et Arrivée)"
+                >
+                  <Navigation className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                  <span className="truncate">Tout le Trajet</span>
+                </motion.button>
+              )}
+
               {mode === 'CLIENT_PICKER' && selectedLat && selectedLng && (
                 <motion.button
                   whileTap={{ scale: 0.95 }}
