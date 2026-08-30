@@ -49,6 +49,18 @@ function createDbAdapter(pbInstance) {
           filterConditions.push(`${column} ~ "${val}"`);
           return queryBuilder;
         },
+        in(column, values) {
+          if (Array.isArray(values) && values.length > 0) {
+            const orParts = values.map(val => {
+              if (column === 'id') {
+                return `(id = "${toPbId(val)}" || uuid = "${val}")`;
+              }
+              return `${column} = "${val}"`;
+            });
+            filterConditions.push(`(${orParts.join(' || ')})`);
+          }
+          return queryBuilder;
+        },
         order(column, { ascending = true } = {}) {
           sortField = `${ascending ? '+' : '-'}${column === 'created_at' ? 'created' : column}`;
           return queryBuilder;
