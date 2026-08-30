@@ -22,7 +22,14 @@ import {
   Workflow,
   MapPin,
   RefreshCw,
-  HardDrive
+  HardDrive,
+  Key,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Cloud,
+  ShieldAlert
 } from 'lucide-react';
 import { switchSubdomainInDev } from '../lib/subdomain';
 
@@ -95,12 +102,125 @@ const DEVOPS_SERVICES = [
   }
 ];
 
+// 🔑 TROUSSEAU D'ACCÈS SÉCURISÉ & IDENTIFIANTS (DEVOPS VAULT)
+const DEVOPS_KEYRING = [
+  {
+    id: 'ssh-vps',
+    name: 'Serveur VPS OVH (Accès SSH & Root)',
+    category: 'INFRASTRUCTURE',
+    url: '51.255.46.206:22',
+    isUrl: false,
+    cmdSnippet: 'ssh debian@51.255.46.206',
+    loginLabel: 'Utilisateur SSH',
+    loginValue: 'debian',
+    secretLabel: 'Mot de passe Sudo',
+    secretValue: 'Ali15091985@@',
+    badge: 'Port 22 • Debian 12',
+    notes: 'Accès console administrateur système OVH Gravelines.'
+  },
+  {
+    id: 'pocketbase-admin',
+    name: 'PocketBase Admin Dashboard',
+    category: 'BASE DE DONNÉES',
+    url: 'https://pocketbase.51.255.46.206.sslip.io/_/',
+    isUrl: true,
+    loginLabel: 'Superuser Email',
+    loginValue: 'admin@bricolemoi.ma',
+    secretLabel: 'Mot de passe Superuser',
+    secretValue: 'BricoleMoi2026!Securise',
+    badge: 'Port 8090 • SSL Let\'s Encrypt',
+    notes: 'Console centrale des collections SQL et gestion des règles d\'API.'
+  },
+  {
+    id: 'coolify-panel',
+    name: 'Coolify Platform PaaS',
+    category: 'ORCHESTRATION',
+    url: 'http://51.255.46.206:8000',
+    isUrl: true,
+    loginLabel: 'Email Administrateur',
+    loginValue: 'admin@bricolemoi.ma',
+    secretLabel: 'Mot de passe Coolify',
+    secretValue: 'Ali15091985@@',
+    badge: 'Port 8000 • Traefik v3.6',
+    notes: 'Gestion des 17 conteneurs Docker, bases de données et proxies.'
+  },
+  {
+    id: 'beszel-hub',
+    name: 'Beszel Monitoring VPS',
+    category: 'SURVEILLANCE',
+    url: 'http://51.255.46.206:8095',
+    isUrl: true,
+    loginLabel: 'Email de Connexion',
+    loginValue: 'abdelalilyoussefi@gmail.com',
+    secretLabel: 'Port Écoute Agent',
+    secretValue: '45876',
+    badge: 'Port 8095 • Agent 45876',
+    notes: 'Monitoring CPU, RAM, Disque et conteneurs Docker en temps réel.'
+  },
+  {
+    id: 'evolution-whatsapp',
+    name: 'Evolution API (WhatsApp Business Gateway)',
+    category: 'MESSAGERIE',
+    url: 'http://51.255.46.206:8085',
+    isUrl: true,
+    loginLabel: 'Instance Active',
+    loginValue: 'bricolemoi-otp',
+    secretLabel: 'Global API Key',
+    secretValue: 'bricolemoi_secret_token_2026',
+    badge: 'Port 8085 • WhatsApp v2',
+    notes: 'Passerelle d\'envoi de SMS OTP et d\'alertes chantiers Maâlems.'
+  },
+  {
+    id: 'n8n-workflows',
+    name: 'n8n Workflows Engine',
+    category: 'AUTOMATISATION',
+    url: 'http://n8n-nfyfefwxs67boyv7oeeu02s4.51.255.46.206.sslip.io:5678',
+    isUrl: true,
+    loginLabel: 'Webhook Radar',
+    loginValue: '/webhook/bricolemoi-booking-radar',
+    secretLabel: 'Port Interne',
+    secretValue: '5678',
+    badge: 'Port 5678 • No-Code Engine',
+    notes: 'Dispatching géographique des demandes SOS dans un rayon de 8 km.'
+  },
+  {
+    id: 'prelude-otp',
+    name: 'Prelude.so Verification Gateway',
+    category: 'AUTHENTIFICATION',
+    url: 'https://prelude.so',
+    isUrl: true,
+    loginLabel: 'Fournisseur Primaire',
+    loginValue: 'Prelude SMS & WhatsApp',
+    secretLabel: 'API Secret Key',
+    secretValue: 'sk_72Xju0Hj6c3evZiDyrQJ0alDnxPiLDaZ',
+    badge: 'OTP Cloud • Haute Délivrabilité',
+    notes: 'Service mondial de validation de numéros de téléphone par SMS et WhatsApp.'
+  },
+  {
+    id: 'cloudflare-r2',
+    name: 'Cloudflare R2 (Stockage Médias)',
+    category: 'STOCKAGE CLOUD',
+    url: 'https://pub-e32b5a8e3eb24da59b44606366d761d7.r2.dev',
+    isUrl: true,
+    loginLabel: 'Bucket Name',
+    loginValue: 'bricolemoi-media',
+    secretLabel: 'Frais Egress Sortants',
+    secretValue: '0.00 DH (Gratuit à vie)',
+    badge: 'S3 Compatible • Zero Egress Fee',
+    notes: 'Stockage des enregistrements vocaux SOS et photos chantiers WebP.'
+  }
+];
+
 export const ITApp = () => {
   const { user, currentRole, loginAdminWithCredentials } = useAuth();
   const [pinInput, setPinInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' | 'SERVICES' | 'MONITORING' | 'MATRIX' | 'CONSOLE'
+  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' | 'KEYRING' | 'SERVICES' | 'MONITORING' | 'MATRIX' | 'CONSOLE'
+
+  // État local pour révéler les secrets du trousseau (masqué par défaut)
+  const [visibleSecrets, setVisibleSecrets] = useState({});
+  const [copiedKey, setCopiedKey] = useState(null);
 
   const [isPinAuthenticated, setIsPinAuthenticated] = useState(
     () => currentRole === 'ADMIN' || user?.role?.toUpperCase() === 'ADMIN'
@@ -136,6 +256,17 @@ export const ITApp = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const toggleSecretVisibility = (id) => {
+    setVisibleSecrets(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const copyToClipboard = (text, keyId) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedKey(keyId);
+    setTimeout(() => setCopiedKey(null), 2000);
   };
 
   return (
@@ -204,7 +335,7 @@ export const ITApp = () => {
             <div>
               <h2 className="text-xl font-black text-slate-900 tracking-tight">Accès Ingénierie &amp; IT</h2>
               <p className="text-xs text-slate-500 mt-1">
-                Espace réservé à l'infrastructure technique, au monitoring Beszel et à l'observabilité temps réel.
+                Espace sécurisé : trousseau de mots de passe, monitoring Beszel et supervision technique.
               </p>
             </div>
 
@@ -258,6 +389,18 @@ export const ITApp = () => {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setActiveTab('KEYRING')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                    activeTab === 'KEYRING'
+                      ? 'bg-white text-amber-700 shadow-xs border border-slate-200/80 font-black'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Key className="w-3.5 h-3.5 text-amber-600" />
+                  <span>🔑 Trousseau de Logins ({DEVOPS_KEYRING.length})</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setActiveTab('SERVICES')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap ${
                     activeTab === 'SERVICES'
@@ -304,9 +447,166 @@ export const ITApp = () => {
 
               <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs shrink-0">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="font-bold text-slate-700">Docker Engine 27.x • 17 Conteneurs</span>
+                <span className="font-bold text-slate-700">Trousseau Chiffré • Accès Protégé</span>
               </div>
             </div>
+
+            {/* 🔑 SECTION : TROUSSEAU DE LOGINS & MOTS DE PASSE (DEVOPS KEYRING) */}
+            {(activeTab === 'ALL' || activeTab === 'KEYRING') && (
+              <div className="space-y-3.5 bg-gradient-to-br from-amber-50/40 via-white to-slate-50 border border-amber-200/70 rounded-3xl p-4 sm:p-6 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-100 pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700">
+                      <Key className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2 font-mono">
+                        TROUSSEAU D'ACCÈS SÉCURISÉ &amp; IDENTIFIANTS
+                      </h2>
+                      <p className="text-xs text-slate-500">
+                        Tous vos identifiants, mots de passe et commandes SSH avec copie en 1 clic et liens directs.
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="text-[11px] font-mono font-bold text-amber-800 bg-amber-100/70 border border-amber-200 px-3 py-1 rounded-full self-start sm:self-auto">
+                    🔒 Masquage Actif (Eye Toggle)
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  {DEVOPS_KEYRING.map((item) => {
+                    const isSecretShown = Boolean(visibleSecrets[item.id]);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-3"
+                      >
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
+                              {item.category}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                              {item.badge}
+                            </span>
+                          </div>
+
+                          <h3 className="text-sm font-bold text-slate-900">
+                            {item.name}
+                          </h3>
+
+                          {/* Ligne 1 : Login / Identifiant */}
+                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <span className="text-[10px] font-mono text-slate-400 block">{item.loginLabel}</span>
+                              <span className="text-xs font-mono font-bold text-slate-800 truncate block">
+                                {item.loginValue}
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(item.loginValue, `${item.id}-login`)}
+                              className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer"
+                              title="Copier l'identifiant"
+                            >
+                              {copiedKey === `${item.id}-login` ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span className="text-[10px] text-emerald-700 font-bold">Copié</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3.5 h-3.5 text-slate-500" />
+                                  <span className="text-[10px]">Copier</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+
+                          {/* Ligne 2 : Mot de passe ou Clé secrète */}
+                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <span className="text-[10px] font-mono text-slate-400 block">{item.secretLabel}</span>
+                              <span className="text-xs font-mono font-bold text-slate-800 truncate block">
+                                {isSecretShown ? item.secretValue : '••••••••••••••••'}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => toggleSecretVisibility(item.id)}
+                                className="p-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-lg shadow-xs transition-all cursor-pointer"
+                                title={isSecretShown ? 'Masquer' : 'Afficher le mot de passe'}
+                              >
+                                {isSecretShown ? <EyeOff className="w-3.5 h-3.5 text-amber-600" /> : <Eye className="w-3.5 h-3.5 text-slate-500" />}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(item.secretValue, `${item.id}-secret`)}
+                                className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer"
+                                title="Copier le mot de passe"
+                              >
+                                {copiedKey === `${item.id}-secret` ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span className="text-[10px] text-emerald-700 font-bold">Copié</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5 text-slate-500" />
+                                    <span className="text-[10px]">Copier</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Snippet SSH optionnel */}
+                          {item.cmdSnippet && (
+                            <div className="p-2 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between text-[11px] font-mono text-slate-700">
+                              <code className="truncate">{item.cmdSnippet}</code>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(item.cmdSnippet, `${item.id}-cmd`)}
+                                className="text-blue-600 hover:text-blue-700 font-bold ml-2 shrink-0 cursor-pointer"
+                              >
+                                {copiedKey === `${item.id}-cmd` ? '✓' : 'Copier'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Footer Carte : Lien Direct */}
+                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                          <span className="text-[11px] text-slate-500 italic truncate max-w-[220px]">
+                            {item.notes}
+                          </span>
+
+                          {item.isUrl ? (
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-all cursor-pointer shadow-xs active:scale-95"
+                            >
+                              <span>Ouvrir</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          ) : (
+                            <span className="text-[11px] font-mono text-slate-400">Terminal SSH</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* SECTION 1 : GRILLE DES RACCOURCIS DIRECTS CLOUD & VPS */}
             {(activeTab === 'ALL' || activeTab === 'SERVICES') && (
