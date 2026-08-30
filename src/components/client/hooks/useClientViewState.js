@@ -13,6 +13,9 @@ export const getServiceDisplay = (type) => {
   if (t.includes('PLUMB') || t.includes('PLOMB')) return { label: 'Plomberie', icon: '🚰' };
   if (t.includes('ELEC')) return { label: 'Électricité', icon: '⚡' };
   if (t.includes('SERRUR') || t.includes('LOCK')) return { label: 'Serrurerie', icon: '🔑' };
+  if (t.includes('VOLET') || t.includes('RIDEAU')) return { label: 'Volets & Rideaux', icon: '🪟' };
+  if (t.includes('PARABOL') || t.includes('CAMERA') || t.includes('TV')) return { label: 'Paraboles & Caméras', icon: '📡' };
+  if (t.includes('SOLAR') || t.includes('SOLAIRE') || t.includes('CHAUFFE')) return { label: 'Chauffe-eau & Solaire', icon: '🔥' };
   if (t.includes('AUTO') || t.includes('MECAN')) return { label: 'Mécanique Auto', icon: '🚗' };
   if (t.includes('CLIM') || t.includes('FROID')) return { label: 'Climatisation', icon: '❄️' };
   if (t.includes('ELECTRO') || t.includes('APPLIANCE')) return { label: 'Électroménager', icon: '🧺' };
@@ -29,6 +32,9 @@ export const mapCategoryToSlug = (cat) => {
   if (c.includes('plomb')) return 'plomberie';
   if (c.includes('elec')) return 'electricite';
   if (c.includes('serrur')) return 'serrurerie';
+  if (c.includes('volet') || c.includes('rideau')) return 'volets-rideaux';
+  if (c.includes('parabol') || c.includes('camera') || c.includes('tv')) return 'parabole-cameras';
+  if (c.includes('solar') || c.includes('solaire') || c.includes('chauffe')) return 'chauffe-eau-solaire';
   if (c.includes('auto') || c.includes('mecan')) return 'mecanique';
   if (c.includes('clim') || c.includes('froid')) return 'climatisation';
   if (c.includes('appliance') || c.includes('electro')) return 'electromenager';

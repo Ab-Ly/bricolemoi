@@ -440,6 +440,51 @@ export const MOROCCAN_REPAIR_PROBLEMS = [
     timeEstimate: '< 30 min',
     urgencyLevel: 'LOW',
     iconType: 'DEMENAGEMENT'
+  },
+  {
+    id: 'parabole-signal-satellite',
+    category: 'PARABOLE',
+    title: 'Réglage Parabole & Signal Satellite (Nilesat / Astra)',
+    titleAr: 'ريڭلاج البارابول والإشارة (نايلسات وأسترا)',
+    keywords: [
+      'parabole', 'reglage parabole', 'signal satellite', 'nilesat', 'astra', 'tete lnb', 'recepteur satellite',
+      'tarkib parabole', 'riglage parabole', 'ichara maqto3a', 'parabol'
+    ],
+    minPrice: 80,
+    maxPrice: 180,
+    timeEstimate: '< 25 min',
+    urgencyLevel: 'MEDIUM',
+    iconType: 'PARABOLE'
+  },
+  {
+    id: 'camera-surveillance-securite',
+    category: 'PARABOLE',
+    title: 'Installation Caméras de Surveillance & Sécurité (Maison / Commerce)',
+    titleAr: 'تركيب وتثبيت كاميرات المراقبة (المنازل والمحلات)',
+    keywords: [
+      'camera', 'cameras', 'cameras de surveillance', 'surveillance camera', 'cctv', 'dvr', 'nvr', 'camera wifi',
+      'tarkib camerawat', 'camerat mouraqaba', 'camera dvr', 'alarme'
+    ],
+    minPrice: 150,
+    maxPrice: 400,
+    timeEstimate: '< 45 min',
+    urgencyLevel: 'MEDIUM',
+    iconType: 'PARABOLE'
+  },
+  {
+    id: 'tv-support-mural',
+    category: 'PARABOLE',
+    title: 'Fixation Support Mural TV (LED / OLED / Écran Salon)',
+    titleAr: 'تعليق وتثبيت التلفاز في الحائط (سيبور تيفي صوليد)',
+    keywords: [
+      'support tv', 'support mural tv', 'accrocher tv', 'fixation tele', 'support television',
+      'tarkib telfaza', 'seppor tv', 'seppor telfaza', 'telfaza fel hit'
+    ],
+    minPrice: 100,
+    maxPrice: 200,
+    timeEstimate: '< 30 min',
+    urgencyLevel: 'LOW',
+    iconType: 'PARABOLE'
   }
 ];
 
@@ -450,6 +495,7 @@ export const MOROCCAN_MAIN_CATEGORIES = [
   { id: 'SERRURERIE', name: 'Serrurerie d\'Urgence', nameAr: 'أقفال وكوالين', color: 'from-emerald-600 to-teal-600', icon: 'SERRURERIE' },
   { id: 'VOLETS_RIDEAUX', name: 'Volets Roulants & Rideaux', nameAr: 'ريدو كهربائي وألمنيوم', color: 'from-cyan-600 to-blue-700', icon: 'VOLETS_RIDEAUX' },
   { id: 'CLIMATISATION', name: 'Climatisation & Froid', nameAr: 'تكييف وتبريد', color: 'from-sky-500 to-blue-600', icon: 'CLIMATISATION' },
+  { id: 'PARABOLE', name: 'Paraboles, Caméras & TV', nameAr: 'بارابول، كاميرات وتلفاز', color: 'from-indigo-600 to-purple-600', icon: 'PARABOLE' },
   { id: 'AUTO_MECHANIC', name: 'Dépannage Auto Express', nameAr: 'ميكانيك وبطاريات', color: 'from-indigo-600 to-blue-700', icon: 'AUTO_MECHANIC' },
   { id: 'APPLIANCE_REPAIR', name: 'Électroménager', nameAr: 'أجهزة منزلية', color: 'from-purple-600 to-indigo-600', icon: 'APPLIANCE_REPAIR' },
   { id: 'DEMENAGEMENT', name: 'Déménagement & Montage', nameAr: 'ترحيل وتركيب', color: 'from-orange-500 to-amber-600', icon: 'DEMENAGEMENT' }

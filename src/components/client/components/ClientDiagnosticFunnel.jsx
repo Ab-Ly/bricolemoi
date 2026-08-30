@@ -19,13 +19,16 @@ import {
   ShieldCheck,
   Buildings,
   MapPinLine,
-  Sparkle
+  Door,
+  HouseLine,
+  Television,
+  Car
 } from '@phosphor-icons/react';
 import { CustomDropdown } from '../../CustomDropdown';
 import { InteractiveMap } from '../../InteractiveMap';
 import { VoiceRecorder } from '../../VoiceRecorder';
 
-// Taxonomie Bilingue des Urgences Express & Arbre Diagnostic (Français & الدارجة المغربية)
+// Taxonomie Bilingue des Urgences & Installations Express (Français & الدارجة المغربية)
 export const DIAGNOSTIC_TAXONOMY = [
   {
     id: 'leak',
@@ -119,7 +122,7 @@ export const DIAGNOSTIC_TAXONOMY = [
   },
   {
     id: 'lock',
-    serviceType: 'LOCKSMITH',
+    serviceType: 'SERRURERIE',
     icon: Key,
     color: 'from-purple-500 to-indigo-600',
     badgeBg: 'bg-purple-50 text-purple-600 border-purple-100',
@@ -141,14 +144,46 @@ export const DIAGNOSTIC_TAXONOMY = [
     ]
   },
   {
+    id: 'volets',
+    serviceType: 'VOLETS_RIDEAUX',
+    icon: Door,
+    color: 'from-cyan-600 to-blue-700',
+    badgeBg: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+    titleFr: "Volets Roulants & Rideaux Métalliques",
+    titleAr: "ريدو كهربائي وألمنيوم",
+    descFr: "Moteur volet bloqué, manivelle, rideau de magasin ou garage",
+    descAr: "ريدو هابط مابغاش يطلع، موطور كوانسي، ألمنيوم وتصليح",
+    questions: [
+      {
+        id: 'type',
+        labelFr: "Quel équipement est bloqué ?",
+        labelAr: "شنو هو الريدو اللي مبلوكي ؟",
+        options: [
+          { value: "Volet roulant électrique maison", valueAr: "ريدو كهربائي د الدار بالبوطون", icon: "🪟" },
+          { value: "Rideau métallique magasin / garage", valueAr: "ريدو د الحانوت أو الڭاراج", icon: "🏪" },
+          { value: "Volet manuel à manivelle / sangle", valueAr: "ريدو عادي بالمانيفيل", icon: "⚙️" }
+        ]
+      },
+      {
+        id: 'problem',
+        labelFr: "Quelle est la panne constatée ?",
+        labelAr: "شنو العطب اللي فيه ؟",
+        options: [
+          { value: "Moteur ne répond plus / bloqué en bas", valueAr: "الموطور ساكت والريدو هابط لتحت", icon: "🛑" },
+          { value: "Lame cassée / volet décroché", valueAr: "السلايت مقطوعين أو خارجين د السكة", icon: "🛠️" }
+        ]
+      }
+    ]
+  },
+  {
     id: 'water_heater',
-    serviceType: 'HEATING',
+    serviceType: 'SOLAIRE',
     icon: Flame,
     color: 'from-red-500 to-amber-600',
     badgeBg: 'bg-red-50 text-red-600 border-red-100',
-    titleFr: "Chauffe-eau en panne (Gaz / Élec)",
-    titleAr: "الشوفو خاسر (غاز / ضو)",
-    descFr: "Pas d'eau chaude, étincelle absente ou fuite",
+    titleFr: "Chauffe-eau en panne (Gaz / Élec / Solaire)",
+    titleAr: "الشوفو خاسر (غاز / ضو / طاقة شمسية)",
+    descFr: "Pas d'eau chaude, étincelle absente, fuite ou résistance",
     descAr: "الما سخون ماكاينش، الشوفو ماكايشعلش أو كايسيل",
     questions: [
       {
@@ -157,7 +192,8 @@ export const DIAGNOSTIC_TAXONOMY = [
         labelAr: "شنو نوع الشوفو ديالك ؟",
         options: [
           { value: "Chauffe-eau à Gaz", valueAr: "شوفو د الغاز", icon: "🔥" },
-          { value: "Chauffe-eau Électrique", valueAr: "شوفو د الضو", icon: "⚡" }
+          { value: "Chauffe-eau Électrique", valueAr: "شوفو د الضو", icon: "⚡" },
+          { value: "Chauffe-eau Solaire (Toiture)", valueAr: "سخان الطاقة الشمسية ف السطح", icon: "☀️" }
         ]
       },
       {
@@ -166,7 +202,8 @@ export const DIAGNOSTIC_TAXONOMY = [
         labelAr: "شنو هو العطب اللي فيه ؟",
         options: [
           { value: "Ne s'allume pas / Pas d'eau chaude", valueAr: "ماكايشعلش كاع / الما بارد", icon: "❄️" },
-          { value: "Fuite d'eau sur le chauffe-eau", valueAr: "كايسيل منو الما", icon: "💧" }
+          { value: "Fuite d'eau sur le chauffe-eau", valueAr: "كايسيل منو الما", icon: "💧" },
+          { value: "Résistance grillée / Thermostat", valueAr: "الريزيستانس تحرقات أو الترموستا", icon: "🔌" }
         ]
       }
     ]
@@ -177,7 +214,7 @@ export const DIAGNOSTIC_TAXONOMY = [
     icon: Snowflake,
     color: 'from-teal-500 to-cyan-600',
     badgeBg: 'bg-teal-50 text-teal-600 border-teal-100',
-    titleFr: "Climatiseur en panne & Recharge",
+    titleFr: "Climatiseur en panne & Recharge Fréon",
     titleAr: "كليماتيزور مبلوك أو خاصو فريون",
     descFr: "Ne refroidit plus, recharge de gaz fréon ou fuite",
     descAr: "مابقاش كايبرّد، خاصو شارج فريون أو كايكب الما",
@@ -195,25 +232,73 @@ export const DIAGNOSTIC_TAXONOMY = [
     ]
   },
   {
-    id: 'handyman',
-    serviceType: 'HANDYMAN',
-    icon: Hammer,
-    color: 'from-slate-600 to-slate-800',
-    badgeBg: 'bg-slate-100 text-slate-700 border-slate-200',
-    titleFr: "Autre réparation / Petit bricolage urgent",
-    titleAr: "عطب أو بريكولاج مستعجل آخر",
-    descFr: "Menuiserie, fixation solide, étanchéité ou montage",
-    descAr: "تركيب، نجارة، سيكوريتي، زليج أو إصلاح سريع",
+    id: 'parabole_tech',
+    serviceType: 'PARABOLE',
+    icon: HouseLine,
+    color: 'from-indigo-600 to-purple-600',
+    badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    titleFr: "Paraboles, Caméras & Installation TV",
+    titleAr: "بارابول، كاميرات المراقبة وتلفاز",
+    descFr: "Réglage signal satellite, caméras de sécurité, support TV mural",
+    descAr: "ريڭلاج بارابول، كاميرات المراقبة للفيلا أو المحل، تعليق التلفاز فالحيط",
     questions: [
       {
-        id: 'category',
-        labelFr: "De quoi s'agit-il ?",
-        labelAr: "شنو نوع هاد الخدمة ؟",
+        id: 'tech_type',
+        labelFr: "Quel est votre besoin d'installation ?",
+        labelAr: "شنو نوع التركيب اللي محتاج دابا ؟",
         options: [
-          { value: "Fixation, meuble ou tringle lourde", valueAr: "تركيب ثقيل (بلاكارات، ريدويات)", icon: "🪛" },
-          { value: "Porte, fenêtre ou volet roulant", valueAr: "شرجم، ريدو أو باب كوانسي", icon: "🪟" },
-          { value: "Infiltration d'eau / Joint silicone", valueAr: "جوان سيليكون / شقوق الما", icon: "🧱" },
-          { value: "Autre petit dépannage maison", valueAr: "حاجة أخرى فالدار", icon: "🛠️" }
+          { value: "Réglage Parabole / Signal perdu (Nilesat/Astra)", valueAr: "ريڭلاج البارابول والإشارة (نايلسات/أسترا)", icon: "📡" },
+          { value: "Pose Caméras de Surveillance (Maison / Commerce)", valueAr: "تركيب كاميرات المراقبة (دار / محل)", icon: "📹" },
+          { value: "Fixation Support Mural TV (LED / OLED)", valueAr: "تعليق التلفاز فالحيط بسيبور صوليد", icon: "📺" },
+          { value: "Câblage Antenne & Prise TV / Réseau", valueAr: "كابلاج التلفاز والريزو فالدار", icon: "🔌" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'appliance',
+    serviceType: 'ELECTROMENAGER',
+    icon: Television,
+    color: 'from-purple-600 to-pink-600',
+    badgeBg: 'bg-purple-50 text-purple-700 border-purple-200',
+    titleFr: "Électroménager & Cuisson",
+    titleAr: "أجهزة منزلية وماكينات الصابون",
+    descFr: "Machine à laver, lave-vaisselle, réfrigérateur, four encastrable",
+    descAr: "ماكينة الصابون، لاف-فيسيل، ثلاجة، فران وبلاكة الطياب",
+    questions: [
+      {
+        id: 'appliance_type',
+        labelFr: "Quel appareil est en panne ?",
+        labelAr: "أشنو هو الجهاز اللي خاسر ؟",
+        options: [
+          { value: "Machine à laver le linge (Ne vidange pas / bloque)", valueAr: "ماكينة الصابون مابغاتش تعصر أو كتقرقب", icon: "🧺" },
+          { value: "Réfrigérateur / Congélateur (Ne refroidit plus)", valueAr: "الثلاجة أو الفريڭو مابقاش كايبرد", icon: "🧊" },
+          { value: "Four encastrable ou Plaque de cuisson", valueAr: "الفران د الضو أو بلاكة د الطياب", icon: "🍳" },
+          { value: "Lave-vaisselle (Fuite d'eau ou arrêt)", valueAr: "لاف-فيسيل كاتسيل الما أو كاتبلوكي", icon: "🍽️" }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'auto',
+    serviceType: 'AUTO_MECHANIC',
+    icon: Car,
+    color: 'from-blue-600 to-indigo-700',
+    badgeBg: 'bg-blue-50 text-blue-800 border-blue-200',
+    titleFr: "Dépannage Auto Express",
+    titleAr: "ديباناج سريع وبطاريات السيارات",
+    descFr: "Batterie à plat à domicile, crevaison de roue, démarrage",
+    descAr: "باتري طايح عند الدار، رويدة مبنشرة، كابلات شارج ديباناج",
+    questions: [
+      {
+        id: 'car_problem',
+        labelFr: "Quel est le problème avec votre véhicule ?",
+        labelAr: "شنو المشكل اللي واقع للسيارة ؟",
+        options: [
+          { value: "Batterie à plat (Besoin de booster / câbles)", valueAr: "الباتري طايح (خاص كابلات د الشارج)", icon: "🔋" },
+          { value: "Pneu crevé (Changement roue de secours)", valueAr: "الرويدة مبنشرة (خاص تبديل سكور)", icon: "🛞" },
+          { value: "Clés enfermées à l'intérieur de la voiture", valueAr: "السواريت تسدو لداخل فالطوموبيل", icon: "🔑" },
+          { value: "Démarrage impossible / Panne mécanique", valueAr: "مابغاتش ديماري كاع", icon: "🚗" }
         ]
       }
     ]
@@ -402,22 +487,27 @@ export const ClientDiagnosticFunnel = ({
                     key={issue.id}
                     type="button"
                     onClick={() => handleSelectIssue(issue)}
-                    className={`p-4 sm:p-5 rounded-2xl border text-left flex items-start gap-4 transition-all duration-200 active:scale-[0.98] cursor-pointer group ${
+                    className={`p-4 sm:p-4.5 rounded-2xl border text-left flex items-start gap-3.5 transition-all duration-200 active:scale-[0.98] cursor-pointer group ${
                       isSelected
                         ? 'bg-blue-50/70 border-2 border-blue-600 shadow-sm'
-                        : 'bg-white border-slate-200/90 hover:border-blue-400 hover:shadow-md'
+                        : 'bg-white border-slate-200/90 hover:border-blue-300 hover:shadow-md'
                     }`}
                   >
                     <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-white shadow-sm bg-gradient-to-br ${issue.color} group-hover:scale-105 transition-transform`}
+                      className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 text-white shadow-xs bg-gradient-to-br ${issue.color} group-hover:scale-105 transition-transform`}
                     >
-                      <IconComp weight="duotone" className="w-6 h-6" />
+                      <IconComp weight="duotone" className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-black text-slate-900 text-sm sm:text-base group-hover:text-blue-600 transition-colors">
-                        {isRtl ? issue.titleAr : issue.titleFr}
-                      </h4>
-                      <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                      <div className="flex items-center justify-between gap-1">
+                        <h4 className="font-black text-slate-900 text-sm sm:text-base group-hover:text-blue-600 transition-colors truncate">
+                          {isRtl ? issue.titleAr : issue.titleFr}
+                        </h4>
+                        <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 shrink-0">
+                          {isRtl ? 'اتفاق مباشر' : 'Accord Direct'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">
                         {isRtl ? issue.descAr : issue.descFr}
                       </p>
                     </div>

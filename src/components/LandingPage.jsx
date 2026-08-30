@@ -145,6 +145,18 @@ const MOROCCAN_SERVICES = [
     timeAr: '< 20 دقيقة',
     color: 'from-purple-500 to-pink-600',
     borderColor: 'border-purple-500/40'
+  },
+  { 
+    id: 'PARABOLE', 
+    name: 'Paraboles, Caméras & TV', 
+    nameAr: 'بارابول، كاميرات وتلفاز',
+    desc: 'Réglage satellite, caméras surveillance, support mural TV',
+    descAr: 'ريڭلاج بارابول، كاميرات المراقبة، تركيب التلفاز',
+    iconType: 'PARABOLE',
+    time: '< 25 min', 
+    timeAr: '< 25 دقيقة',
+    color: 'from-indigo-500 to-purple-600',
+    borderColor: 'border-indigo-500/40'
   }
 ];
 
