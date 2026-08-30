@@ -256,15 +256,27 @@ export const useAblySupabaseSync = ({
         bc.close();
       } catch (e) {}
 
-      if (isSupabaseConfigured) {
+      if (isSupabaseConfigured && user?.id) {
         try {
           safeSupabaseBroadcast('public:jobs', 'maalem_heartbeat', hbPayload);
+          // Persistance autonome dans PocketBase pour synchronisation inter-appareils
+          supabase
+            .from('maalem_details')
+            .update({
+              last_seen_at: new Date().toISOString(),
+              is_online: true,
+              is_available: true,
+              lat: mLat,
+              lng: mLng
+            })
+            .eq('id', user.id)
+            .catch(() => {});
         } catch (e) {}
       }
     };
 
     sendHeartbeat();
-    const interval = setInterval(sendHeartbeat, 45000);
+    const interval = setInterval(sendHeartbeat, 30000); // Heartbeat toutes les 30 secondes
     return () => clearInterval(interval);
   }, [user, isMaalemOnline]);
 

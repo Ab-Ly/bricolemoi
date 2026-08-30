@@ -134,8 +134,16 @@ export const normalizeMaalemProfile = (raw = {}) => {
     district: raw.district || raw.city_zone || 'Casablanca',
     lat: resolvedCoords.lat,
     lng: resolvedCoords.lng,
-    credit_balance: parseFloat(details.credit_balance ?? raw.credits ?? raw.credit_balance ?? 15.0),
-    is_online: Boolean(raw.is_online || details.is_online),
+    credit_balance: parseFloat(details.credit_balance ?? raw.credits ?? raw.credit_balance ?? 0.0),
+    is_online: (() => {
+      if (!raw.is_online && !details.is_online) return false;
+      const lastSeen = details.last_seen_at || raw.last_seen_at;
+      if (!lastSeen) return false;
+      const lastSeenMs = typeof lastSeen === 'number' ? lastSeen : new Date(lastSeen).getTime();
+      if (isNaN(lastSeenMs) || lastSeenMs <= 0) return false;
+      // Autonome : Si le maâlem n'a pas émis de ping depuis plus de 2 minutes, il est HORS LIGNE
+      return (Date.now() - lastSeenMs) < (120 * 1000);
+    })(),
     is_available: Boolean(raw.is_available ?? true),
     is_verified: Boolean(raw.is_verified ?? true),
     cin_verified: Boolean(raw.cin_verified ?? false),

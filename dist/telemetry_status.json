@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-08-30T16:42:16.076Z",
+  "timestamp": "2026-08-30T20:28:20.618Z",
   "overallStatus": "HEALTHY",
-  "latencyAvgMs": 235,
+  "latencyAvgMs": 279,
   "nodes": {
     "supabase": {
       "status": "UP",
-      "latencyMs": 405,
+      "latencyMs": 381,
       "dbRecords": {
         "profiles": 6,
         "interventions": 9,
@@ -17,8 +17,8 @@
     },
     "centrifugo": {
       "status": "UP",
-      "latencyMs": 254,
-      "wsLatencyMs": 254,
+      "latencyMs": 285,
+      "wsLatencyMs": 285,
       "activeClients": 1,
       "activeChannels": 4,
       "error": null
@@ -26,28 +26,28 @@
     "evolutionApi": {
       "status": "UP",
       "instanceStatus": "open",
-      "latencyMs": 150,
+      "latencyMs": 196,
       "error": null
     },
     "n8nRadar": {
       "status": "UP",
-      "latencyMs": 135,
+      "latencyMs": 201,
       "error": null
     },
     "r2Storage": {
       "status": "UP",
-      "latencyMs": 230,
+      "latencyMs": 330,
       "error": null
     }
   },
   "links": {
     "front_to_supabase": {
       "status": "UP",
-      "latencyMs": 405
+      "latencyMs": 381
     },
     "front_to_centrifugo": {
       "status": "UP",
-      "latencyMs": 254,
+      "latencyMs": 285,
       "fallbackActive": false
     },
     "supabase_to_centrifugo": {
