@@ -906,9 +906,9 @@
     "semantic_hash": ""
   },
   "src/components/client/hooks/useClientViewState.js": {
-    "mtime": 1788026032.2737815,
-    "seen": 1788026192.631229,
-    "ast_hash": "a43cbfc3698f6c99a58b04f9bd2816e3",
+    "mtime": 1788107020.2785394,
+    "seen": 1788107146.3459,
+    "ast_hash": "83506bf66f23dd5b819665dee4ef4c0a",
     "semantic_hash": ""
   },
   "src/components/common/ErrorBoundary.jsx": {

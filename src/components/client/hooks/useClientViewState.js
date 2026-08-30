@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useApp } from '../../../context/AppContext';
 import { useEmergencyFlow } from '../../../context/EmergencyFlowContext';
