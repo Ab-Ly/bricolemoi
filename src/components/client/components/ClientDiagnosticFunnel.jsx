@@ -22,7 +22,8 @@ import {
   Door,
   HouseLine,
   Television,
-  Car
+  Car,
+  Sparkle
 } from '@phosphor-icons/react';
 import { CustomDropdown } from '../../CustomDropdown';
 import { InteractiveMap } from '../../InteractiveMap';

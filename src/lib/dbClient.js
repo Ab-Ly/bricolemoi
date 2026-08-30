@@ -62,7 +62,8 @@ function createDbAdapter(pbInstance) {
           return queryBuilder;
         },
         order(column, { ascending = true } = {}) {
-          sortField = `${ascending ? '+' : '-'}${column === 'created_at' ? 'created' : column}`;
+          const colName = column === 'created_at' ? 'created_at_original' : column;
+          sortField = `${ascending ? '+' : '-'}${colName}`;
           return queryBuilder;
         },
         limit(num) {
