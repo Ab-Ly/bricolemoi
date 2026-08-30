@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createClient } from '@supabase/supabase-js';
+import PocketBase from 'pocketbase';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -24,21 +24,14 @@ if (fs.existsSync(envPath)) {
   });
 }
 
-const SUPABASE_URL = envVars.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = envVars.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error('\x1b[31m❌ Erreur : Variables Supabase manquantes dans .env\x1b[0m');
-  process.exit(1);
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const POCKETBASE_URL = envVars.VITE_POCKETBASE_URL || 'https://pocketbase.51.255.46.206.sslip.io';
+const pb = new PocketBase(POCKETBASE_URL);
 
 console.log('\x1b[36m%s\x1b[0m', '═════════════════════════════════════════════════════════════════════════════');
-console.log('\x1b[1m\x1b[32m%s\x1b[0m', ' 🛡️  BRICOLEMOI — AUDIT DE SANTÉ & CONTRÔLE COMPTABLE GLOBAL');
+console.log('\x1b[1m\x1b[32m%s\x1b[0m', ' 🛡️  BRICOLEMOI — AUDIT DE SANTÉ & CONTRÔLE COMPTABLE GLOBAL (POCKETBASE VPS)');
 console.log('\x1b[36m%s\x1b[0m', '    [ Analyse Intégrité Base de Données • Trésorerie • GPS • Piliers ]');
 console.log('\x1b[36m%s\x1b[0m', '═════════════════════════════════════════════════════════════════════════════');
-console.log(`📡 Base Supabase : \x1b[33m${SUPABASE_URL}\x1b[0m`);
+console.log(`📡 Base PocketBase VPS : \x1b[33m${POCKETBASE_URL}\x1b[0m`);
 console.log(`⏱️  Horodatage : \x1b[90m${new Date().toLocaleString('fr-FR')}\x1b[0m`);
 console.log('\x1b[36m%s\x1b[0m', '─────────────────────────────────────────────────────────────────────────────\n');
 
@@ -48,22 +41,24 @@ async function runGlobalAudit() {
   let warnings = 0;
 
   // 1. Récupération des données maîtresses
-  const [
-    { data: profiles, error: pErr },
-    { data: maalemDetails, error: mErr },
-    { data: interventions, error: iErr },
-    { data: transactions, error: tErr },
-    { data: reviews, error: rErr }
-  ] = await Promise.all([
-    supabase.from('profiles').select('*'),
-    supabase.from('maalem_details').select('*'),
-    supabase.from('interventions').select('*'),
-    supabase.from('transactions').select('*'),
-    supabase.from('reviews').select('*')
-  ]);
+  let profiles = [], maalemDetails = [], interventions = [], transactions = [], reviews = [];
 
-  if (pErr || mErr || iErr || tErr || rErr) {
-    console.error('\x1b[31m❌ Erreur lors de la récupération des tables Supabase.\x1b[0m');
+  try {
+    [
+      profiles,
+      maalemDetails,
+      interventions,
+      transactions,
+      reviews
+    ] = await Promise.all([
+      pb.collection('profiles').getFullList(),
+      pb.collection('maalem_details').getFullList(),
+      pb.collection('interventions').getFullList(),
+      pb.collection('transactions').getFullList(),
+      pb.collection('reviews').getFullList()
+    ]);
+  } catch (err) {
+    console.error('\x1b[31m❌ Erreur lors de la récupération des collections PocketBase :\x1b[0m', err.message);
     return;
   }
 

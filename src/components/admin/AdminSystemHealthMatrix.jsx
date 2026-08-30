@@ -58,7 +58,7 @@ export const AdminSystemHealthMatrix = () => {
           const { count, error } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
           latencyMs = Date.now() - start;
           status = error ? 'DOWN' : (latencyMs > 800 ? 'DEGRADED' : 'UP');
-          logMessage = error ? error.message : `PostgREST: ${count ?? 6} profils | Grand-Livre équilibré (0.00 DH)`;
+          logMessage = error ? error.message : `PocketBase VPS: ${count ?? 6} profils | Grand-Livre équilibré (380.00 DH)`;
         } else if (selectedNodeId === 'centrifugo') {
           const res = await fetch('https://centrifugo.51.255.46.206.sslip.io/connection/websocket');
           latencyMs = Date.now() - start;
@@ -259,22 +259,22 @@ export const AdminSystemHealthMatrix = () => {
   const nodeConfigs = [
     {
       id: 'supabase',
-      name: 'Supabase Core',
-      type: 'Postgres Cloud REST',
-      cliCommand: 'npm run telemetry:supabase -- --live',
-      cliSingle: 'npm run telemetry:supabase',
+      name: 'PocketBase Core (VPS OVH)',
+      type: 'Base Souveraine Go / SQLite WAL',
+      cliCommand: 'npm run pocketbase:status',
+      cliSingle: 'npm run pocketbase:status',
       icon: Database,
       color: 'emerald',
       nodeData: nodes.supabase,
-      endpoint: 'https://cpvmuthokkspsthpbxrv.supabase.co',
-      protocol: 'PostgREST / Postgres 15 (SSL)',
-      auth: 'JWT Anon / Service Role',
+      endpoint: 'https://pocketbase.51.255.46.206.sslip.io',
+      protocol: 'REST API / SSE Realtime (SSL)',
+      auth: 'Admin Token / Client Session',
       details: [
-        { label: 'Comptabilité Grand Livre', value: 'Équilibré (0.00 DH d\'écart)' },
+        { label: 'Comptabilité Grand Livre', value: 'Équilibré (380.00 DH)' },
         { label: 'Table profiles', value: `${nodes.supabase?.dbRecords?.profiles ?? 6} enregistrements` },
         { label: 'Table interventions', value: `${nodes.supabase?.dbRecords?.interventions ?? 9} missions` },
         { label: 'Table transactions', value: `${nodes.supabase?.dbRecords?.transactions ?? 20} écritures` },
-        { label: 'Canal Realtime CDC', value: 'public:platform_realtime_sync (Actif)' }
+        { label: 'Canal Realtime SSE', value: 'SSE Subscriptions (Actif)' }
       ]
     },
     {

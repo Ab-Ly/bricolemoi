@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1788106408.990982,
-    "seen": 1788106585.737439,
-    "ast_hash": "31accaa1d22b9c31de656869d95822a6",
+    "mtime": 1788121568.6819708,
+    "seen": 1788121773.810665,
+    "ast_hash": "a82c1176298fdc27cb4a3e2c4928c5ce",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -456,9 +456,9 @@
     "semantic_hash": ""
   },
   "src/lib/supabaseClient.js": {
-    "mtime": 1788025521.4718273,
-    "seen": 1788026192.631327,
-    "ast_hash": "531b826dd4eaa5d718575e0221d94cab",
+    "mtime": 1788121610.2567406,
+    "seen": 1788121773.81872,
+    "ast_hash": "b3bc66f74f93d2e4052bffc4baf2723f",
     "semantic_hash": ""
   },
   "src/main.jsx": {
@@ -1056,9 +1056,9 @@
     "semantic_hash": ""
   },
   "scripts/audit.js": {
-    "mtime": 1788028919.1169052,
-    "seen": 1788029289.893895,
-    "ast_hash": "9173abc71bf61582b37cc6915459d831",
+    "mtime": 1788121656.9456246,
+    "seen": 1788121773.811799,
+    "ast_hash": "5ae2bd69351e32ae969999c740ddaa9d",
     "semantic_hash": ""
   },
   "scripts/reconcile.js": {
@@ -1212,21 +1212,135 @@
     "semantic_hash": ""
   },
   "scripts/telemetryDaemon.js": {
-    "mtime": 1788106385.5886316,
-    "seen": 1788106585.739327,
-    "ast_hash": "25535dcc981f2f511dc2155bf2e005d4",
+    "mtime": 1788121676.3033395,
+    "seen": 1788121773.812417,
+    "ast_hash": "fe70ee94717bccccf16bc564efcfb5bc",
     "semantic_hash": ""
   },
   "src/components/admin/AdminSystemHealthMatrix.jsx": {
-    "mtime": 1788108392.980808,
-    "seen": 1788108503.674986,
-    "ast_hash": "656084f7225b9e1c57a95a3c6b16b0b0",
+    "mtime": 1788121585.4086726,
+    "seen": 1788121773.814262,
+    "ast_hash": "dc4e0df0e2ef8e432a3e5428c744c5a0",
     "semantic_hash": ""
   },
   "src/hooks/useSystemTelemetry.js": {
     "mtime": 1788108369.6103258,
     "seen": 1788108503.680207,
     "ast_hash": "b9090a7fa1ed8ea737920a53c33b4950",
+    "semantic_hash": ""
+  },
+  "scripts/check-pb-cmd.js": {
+    "mtime": 1788121392.8873093,
+    "seen": 1788121773.8118021,
+    "ast_hash": "82164c74ab6a28e4e18b9bf77eb7107b",
+    "semantic_hash": ""
+  },
+  "scripts/check-pb-entry.js": {
+    "mtime": 1788121405.2788863,
+    "seen": 1788121773.8118038,
+    "ast_hash": "00be2296059161f35bf2d025d8cc7a62",
+    "semantic_hash": ""
+  },
+  "scripts/check-pb-help.js": {
+    "mtime": 1788121377.1219714,
+    "seen": 1788121773.811805,
+    "ast_hash": "2a134859e33602e659d8027dbb17ef2a",
+    "semantic_hash": ""
+  },
+  "scripts/check-pb-logs.js": {
+    "mtime": 1788121360.2548726,
+    "seen": 1788121773.811807,
+    "ast_hash": "8982cb89f389746c395aa9e8658c37e0",
+    "semantic_hash": ""
+  },
+  "scripts/check-pb-superuser.js": {
+    "mtime": 1788121336.4665167,
+    "seen": 1788121773.811809,
+    "ast_hash": "475cd62a2fd2bc72fe1a5a2d29e2211a",
+    "semantic_hash": ""
+  },
+  "scripts/deploy-pocketbase.js": {
+    "mtime": 1788121176.9501667,
+    "seen": 1788121773.8119738,
+    "ast_hash": "7dab60eed914070d375a8a84a55ddc49",
+    "semantic_hash": ""
+  },
+  "scripts/inspect-labels.js": {
+    "mtime": 1788121166.2101984,
+    "seen": 1788121773.811976,
+    "ast_hash": "c37fe3ac48c7c279967ed74693cc5516",
+    "semantic_hash": ""
+  },
+  "scripts/inspect-supabase-records.js": {
+    "mtime": 1788121301.700543,
+    "seen": 1788121773.811978,
+    "ast_hash": "62427941b087977b544a371df303922a",
+    "semantic_hash": ""
+  },
+  "scripts/migrate-supabase-to-pocketbase.js": {
+    "mtime": 1788121477.42449,
+    "seen": 1788121773.812188,
+    "ast_hash": "937abeb9e36195182001d6ff23191ac8",
+    "semantic_hash": ""
+  },
+  "scripts/pocketbase-status.js": {
+    "mtime": 1788121552.4007697,
+    "seen": 1788121773.81219,
+    "ast_hash": "097e4e309e8fca6025dfcfe91d02add4",
+    "semantic_hash": ""
+  },
+  "scripts/relaunch-pocketbase.js": {
+    "mtime": 1788121416.752639,
+    "seen": 1788121773.812245,
+    "ast_hash": "65a771d573a9da331a136c3269c99f61",
+    "semantic_hash": ""
+  },
+  "scripts/setup-pocketbase-admin.js": {
+    "mtime": 1788121196.899722,
+    "seen": 1788121773.812317,
+    "ast_hash": "d21f9b6e1dbc2849207ce2a41c77daa0",
+    "semantic_hash": ""
+  },
+  "scripts/test-15-char.js": {
+    "mtime": 1788121449.4420497,
+    "seen": 1788121773.8124192,
+    "ast_hash": "22df878c6c7bc520a30175a55df9b922",
+    "semantic_hash": ""
+  },
+  "scripts/test-adapter.js": {
+    "mtime": 1788121530.8307974,
+    "seen": 1788121773.812421,
+    "ast_hash": "eba54327444d0255b183eb5ba098cc04",
+    "semantic_hash": ""
+  },
+  "scripts/test-id-format.js": {
+    "mtime": 1788121439.7971842,
+    "seen": 1788121773.8124218,
+    "ast_hash": "78fd78d952d718226bcff79e10e9e2c4",
+    "semantic_hash": ""
+  },
+  "scripts/test-pb.js": {
+    "mtime": 1788121346.9176824,
+    "seen": 1788121773.812423,
+    "ast_hash": "22e080978dc7f7dd3e2a453c53b97544",
+    "semantic_hash": ""
+  },
+  "scripts/vps-diag.js": {
+    "mtime": 1788121149.1036232,
+    "seen": 1788121773.8125231,
+    "ast_hash": "a3bab211a67969f35679c799912f3010",
+    "semantic_hash": ""
+  },
+  "src/lib/pocketbaseClient.js": {
+    "mtime": 1788121490.2893322,
+    "seen": 1788121773.818368,
+    "ast_hash": "fd58b086586dc054609c40dbd38ebdac",
+    "semantic_hash": ""
+  },
+  "src/lib/pocketbaseService.js": {
+    "mtime": 1788121512.3949363,
+    "seen": 1788121773.81837,
+    "ast_hash": "113221d3edc0dd3d7f1aa36648db8d75",
     "semantic_hash": ""
   }
 }

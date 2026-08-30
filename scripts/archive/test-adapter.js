@@ -1,17 +1,20 @@
-/**
- * Client de Base de Données BricoleMoi (Moteur PocketBase Dédié VPS OVH)
- * Assure la compatibilité totale et transparente avec l'API existante,
- * tout en exploitant la rapidité, la fiabilité et le Realtime SSE de PocketBase.
- */
-import { pb, toPbId, isPocketBaseConfigured } from './pocketbaseClient';
+import PocketBase from 'pocketbase';
 
-export { pb, toPbId, isPocketBaseConfigured };
-export const isSupabaseConfigured = isPocketBaseConfigured;
+const pb = new PocketBase('https://pocketbase.51.255.46.206.sslip.io');
+pb.autoCancellation(false);
 
-function createPocketBaseAdapter(pbInstance) {
+function toPbId(uuid) {
+  if (!uuid) return '';
+  const clean = String(uuid).toLowerCase().replace(/[^a-z0-9]/g, '');
+  return clean.slice(0, 15).padEnd(15, '0');
+}
+
+// Adaptateur PocketBase imitant l'API Supabase Client
+export function createPocketBaseSupabaseAdapter(pbInstance) {
   return {
     from(tableName) {
       const collection = pbInstance.collection(tableName);
+      let selectQuery = '*';
       let countExact = false;
       let filterConditions = [];
       let limitVal = null;
@@ -21,16 +24,13 @@ function createPocketBaseAdapter(pbInstance) {
 
       const queryBuilder = {
         select(fields = '*', options = {}) {
+          selectQuery = fields;
           if (options?.count === 'exact') countExact = true;
           return queryBuilder;
         },
         eq(column, value) {
           if (column === 'id') {
             filterConditions.push(`(id = "${toPbId(value)}" || uuid = "${value}")`);
-          } else if (typeof value === 'boolean') {
-            filterConditions.push(`${column} = ${value}`);
-          } else if (typeof value === 'number') {
-            filterConditions.push(`${column} = ${value}`);
           } else {
             filterConditions.push(`${column} = "${value}"`);
           }
@@ -78,7 +78,7 @@ function createPocketBaseAdapter(pbInstance) {
             if (sortField) options.sort = sortField;
 
             const records = await collection.getFullList(options);
-            const normalized = records.map((r) => ({
+            const normalized = records.map(r => ({
               ...r,
               id: r.uuid || r.id,
               created_at: r.created_at_original || r.created,
@@ -91,7 +91,7 @@ function createPocketBaseAdapter(pbInstance) {
             if (isSingle || isMaybeSingle) {
               const item = resultData[0] || null;
               if (isSingle && !item) {
-                return onFulfilled({ data: null, error: { message: 'Enregistrement introuvable' }, count: 0 });
+                return onFulfilled({ data: null, error: { message: 'Row not found' }, count: 0 });
               }
               return onFulfilled({ data: item, error: null, count: item ? 1 : 0 });
             }
@@ -102,7 +102,7 @@ function createPocketBaseAdapter(pbInstance) {
               error: null
             });
           } catch (err) {
-            console.warn(`[PocketBase Adapter] Requête sur ${tableName}:`, err.message);
+            console.warn(`[PocketBase Adapter] Erreur sur ${tableName}:`, err.message);
             return onFulfilled({ data: isSingle || isMaybeSingle ? null : [], error: err, count: 0 });
           }
         },
@@ -111,7 +111,7 @@ function createPocketBaseAdapter(pbInstance) {
           const rowArray = Array.isArray(rows) ? rows : [rows];
           const results = [];
           for (const row of rowArray) {
-            const uuid = row.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}`);
+            const uuid = row.id || crypto.randomUUID();
             const pbId = toPbId(uuid);
             const payload = {
               ...row,
@@ -127,7 +127,7 @@ function createPocketBaseAdapter(pbInstance) {
                 const res = await collection.update(pbId, payload);
                 results.push({ ...res, id: res.uuid || res.id });
               } catch (updateErr) {
-                console.warn(`[PocketBase Adapter] Insertion ${tableName}:`, updateErr.message);
+                console.warn(`[PocketBase Insert Error] on ${tableName}:`, updateErr.message);
               }
             }
           }
@@ -138,7 +138,7 @@ function createPocketBaseAdapter(pbInstance) {
           };
         },
 
-        update(fields) {
+        async update(fields) {
           return {
             eq: async (column, value) => {
               try {
@@ -169,7 +169,7 @@ function createPocketBaseAdapter(pbInstance) {
           };
         },
 
-        upsert(rows) {
+        async upsert(rows) {
           return queryBuilder.insert(rows);
         },
 
@@ -198,21 +198,16 @@ function createPocketBaseAdapter(pbInstance) {
         on(event, filter, callback) {
           return {
             subscribe(onSubscribed) {
-              try {
-                const unsub = pbInstance.collection('interventions').subscribe('*', (e) => {
-                  const record = e.record ? { ...e.record, id: e.record.uuid || e.record.id } : {};
-                  callback({
-                    eventType: e.action === 'create' ? 'INSERT' : (e.action === 'update' ? 'UPDATE' : 'DELETE'),
-                    new: record,
-                    old: record
-                  });
+              const unsub = pbInstance.collection('interventions').subscribe('*', (e) => {
+                const record = e.record ? { ...e.record, id: e.record.uuid || e.record.id } : {};
+                callback({
+                  eventType: e.action === 'create' ? 'INSERT' : (e.action === 'update' ? 'UPDATE' : 'DELETE'),
+                  new: record,
+                  old: record
                 });
-                if (onSubscribed) onSubscribed('SUBSCRIBED');
-                return { unsubscribe: () => unsub() };
-              } catch (err) {
-                if (onSubscribed) onSubscribed('SUBSCRIBED');
-                return { unsubscribe: () => {} };
-              }
+              });
+              if (onSubscribed) onSubscribed('SUBSCRIBED');
+              return { unsubscribe: () => unsub() };
             }
           };
         }
@@ -222,6 +217,7 @@ function createPocketBaseAdapter(pbInstance) {
     removeChannel() {},
 
     rpc(functionName, args) {
+      // Émulateur RPC PocketBase (déblocage de lead, calcul solde)
       return Promise.resolve({ data: { success: true }, error: null });
     },
 
@@ -248,4 +244,14 @@ function createPocketBaseAdapter(pbInstance) {
   };
 }
 
-export const supabase = createPocketBaseAdapter(pb);
+// Test du pont
+async function testAdapter() {
+  const fakeSupa = createPocketBaseSupabaseAdapter(pb);
+  const { data: profiles, count } = await fakeSupa.from('profiles').select('*', { count: 'exact', head: true });
+  console.log('Adapter test profiles count:', count, 'data length:', profiles.length);
+
+  const { data: singleProfile } = await fakeSupa.from('profiles').select('*').eq('role', 'MAALEM').maybeSingle();
+  console.log('Adapter single profile found:', singleProfile?.full_name, 'Phone:', singleProfile?.phone);
+}
+
+testAdapter();

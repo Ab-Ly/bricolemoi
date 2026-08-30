@@ -1,5 +1,4 @@
-#!/usr/bin/env node
-import { createClient } from '@supabase/supabase-js';
+import PocketBase from 'pocketbase';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -23,8 +22,8 @@ if (fs.existsSync(envPath)) {
   });
 }
 
-const SUPABASE_URL = envVars.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://cpvmuthokkspsthpbxrv.supabase.co';
-const SUPABASE_ANON_KEY = envVars.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+const POCKETBASE_URL = envVars.VITE_POCKETBASE_URL || 'https://pocketbase.51.255.46.206.sslip.io';
+const pb = new PocketBase(POCKETBASE_URL);
 const EVOLUTION_API_URL = envVars.EVOLUTION_API_URL || envVars.VITE_EVOLUTION_API_URL || 'http://51.255.46.206:8085';
 const EVOLUTION_API_KEY = envVars.EVOLUTION_API_KEY || envVars.VITE_EVOLUTION_API_KEY || 'bricolemoi_secret_token_2026';
 const EVOLUTION_INSTANCE = envVars.EVOLUTION_INSTANCE || envVars.VITE_EVOLUTION_INSTANCE || 'bricolemoi-otp';
@@ -32,8 +31,6 @@ const N8N_WEBHOOK_URL = envVars.VITE_N8N_WEBHOOK_URL || 'http://n8n-nfyfefwxs67b
 const CENTRIFUGO_HTTP_URL = envVars.CENTRIFUGO_HTTP_URL || 'https://centrifugo.51.255.46.206.sslip.io';
 const CENTRIFUGO_API_KEY = envVars.CENTRIFUGO_API_KEY || envVars.VITE_CENTRIFUGO_TOKEN || '';
 const R2_PUBLIC_DOMAIN = envVars.VITE_R2_PUBLIC_DOMAIN || 'https://pub-e32b5a8e3eb24da59b44606366d761d7.r2.dev';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Helper : Fetch avec timeout strict (Circuit-Breaker)
 async function fetchWithTimeout(url, options = {}, timeoutMs = 2500) {
@@ -56,36 +53,35 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 2500) {
   }
 }
 
-// 1. Sonde Supabase
+// 1. Sonde Base de Données (PocketBase VPS)
 async function probeSupabase() {
   const start = Date.now();
   try {
     const [
-      { count: pCount, error: pErr },
-      { count: iCount, error: iErr },
-      { count: tCount, error: tErr },
-      { data: mDetails, error: mErr }
+      profiles,
+      interventions,
+      transactions,
+      maalemDetails
     ] = await Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('interventions').select('*', { count: 'exact', head: true }),
-      supabase.from('transactions').select('*', { count: 'exact', head: true }),
-      supabase.from('maalem_details').select('id, credit_balance')
+      pb.collection('profiles').getFullList(),
+      pb.collection('interventions').getFullList(),
+      pb.collection('transactions').getFullList(),
+      pb.collection('maalem_details').getFullList()
     ]);
 
     const latencyMs = Date.now() - start;
-    const hasError = Boolean(pErr || iErr || tErr || mErr);
 
     return {
-      status: hasError ? 'DEGRADED' : (latencyMs > 800 ? 'DEGRADED' : 'UP'),
+      status: latencyMs > 800 ? 'DEGRADED' : 'UP',
       latencyMs,
       dbRecords: {
-        profiles: pCount || 0,
-        interventions: iCount || 0,
-        transactions: tCount || 0,
-        maalems: mDetails?.length || 0
+        profiles: profiles.length,
+        interventions: interventions.length,
+        transactions: transactions.length,
+        maalems: maalemDetails.length
       },
       ledgerBalanced: true,
-      error: hasError ? (pErr?.message || iErr?.message || tErr?.message) : null
+      error: null
     };
   } catch (err) {
     return {
