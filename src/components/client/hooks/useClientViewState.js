@@ -5,7 +5,7 @@ import { useEmergencyFlow } from '../../../context/EmergencyFlowContext';
 import { MOROCCAN_CITIES, COUNTRY_DIAL_CODES } from '../../../constants/geo';
 import { reverseGeocodeMorocco } from '../../../lib/geoService';
 import { uploadMediaToR2 } from '../../../lib/r2StorageService';
-import { supabase, isSupabaseConfigured } from '../../../lib/supabaseClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
 import { toast } from 'sonner';
 
 export const getServiceDisplay = (type) => {

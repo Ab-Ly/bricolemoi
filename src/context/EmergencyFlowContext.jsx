@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { useApp } from './AppContext';
-import { ABLY_CHANNELS } from '../lib/ablyClient';
-import { subscribeToRealtimeChannel, publishRealtimeEvent } from '../lib/ablyRealtimeService';
+import { REALTIME_CHANNELS, ABLY_CHANNELS } from '../lib/realtimeClient';
+import { subscribeToRealtimeChannel, publishRealtimeEvent } from '../lib/realtimeBroadcastService';
 import { startEmergencySiren, stopEmergencySiren, playNotificationSound, triggerVibration } from '../lib/audioNotifier';
 import { notify } from '../lib/notify';
 import { showLocalPushNotification } from '../lib/pushNotificationService';

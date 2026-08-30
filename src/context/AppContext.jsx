@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { notify } from '../lib/notify';
 import { useAuth } from './AuthContext';
 import { calculateDistanceInKm } from './app/helpers/appSyncHelpers';
-import { useAblySupabaseSync } from './app/hooks/useAblySupabaseSync';
+import { usePlatformDataSync } from './app/hooks/usePlatformDataSync';
 import { useInterventionsService } from './app/hooks/useInterventionsService';
 import { useWalletTransactionsService } from './app/hooks/useWalletTransactionsService';
 import { useReviewsLoyaltyService } from './app/hooks/useReviewsLoyaltyService';
@@ -47,8 +47,8 @@ export const AppProvider = ({ children }) => {
     else notify.success('Succès', msg);
   };
 
-  // 1. Synchronisation Temps Réel Ably & Supabase
-  const ablySync = useAblySupabaseSync({
+  // 1. Synchronisation Temps Réel Plateforme (Centrifugo VPS + PocketBase)
+  const platformSync = usePlatformDataSync({
     user,
     setUser,
     interventions,
@@ -168,13 +168,17 @@ export const AppProvider = ({ children }) => {
         calculateDistanceInKm,
         loyaltyRewardsHistory,
         setLoyaltyRewardsHistory,
-        refreshData: ablySync.fetchRealSupabaseData,
-        toggleMaalemOnlineStatus: ablySync.toggleMaalemOnlineStatus,
-        isAblyConnected: ablySync.isAblyConnected,
-        ablyConnectionState: ablySync.ablyConnectionState,
-        ablyOnlineMaalemsCount: ablySync.ablyOnlineMaalemsCount,
-        ablyOnlineMaalems: ablySync.ablyOnlineMaalems,
-        isAblyConfigured: ablySync.isAblyConfigured,
+        refreshData: platformSync.fetchRealSupabaseData,
+        toggleMaalemOnlineStatus: platformSync.toggleMaalemOnlineStatus,
+        isRealtimeConnected: platformSync.isAblyConnected,
+        realtimeConnectionState: platformSync.ablyConnectionState,
+        onlineMaalemsCount: platformSync.ablyOnlineMaalemsCount,
+        onlineMaalems: platformSync.ablyOnlineMaalems,
+        isAblyConnected: platformSync.isAblyConnected,
+        ablyConnectionState: platformSync.ablyConnectionState,
+        ablyOnlineMaalemsCount: platformSync.ablyOnlineMaalemsCount,
+        ablyOnlineMaalems: platformSync.ablyOnlineMaalems,
+        isAblyConfigured: platformSync.isAblyConfigured,
         ...interventionsService,
         ...walletService,
         ...reviewsLoyaltyService,

@@ -20,7 +20,7 @@ import {
   Users,
   Smartphone
 } from 'lucide-react';
-import { subscribeToRealtimeChannel, publishRealtimeEvent } from '../../lib/ablyRealtimeService';
+import { subscribeToRealtimeChannel, publishRealtimeEvent } from '../../lib/realtimeBroadcastService';
 
 export const AdminRealtimeConsole = () => {
   const [events, setEvents] = useState([]);

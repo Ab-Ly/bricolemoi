@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from './supabaseClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured } from './dbClient';
 
 const PRELUDE_API_KEY = import.meta.env.VITE_PRELUDE_API_KEY || 'sk_72Xju0Hj6c3evZiDyrQJ0alDnxPiLDaZ';
 const INFOBIP_API_KEY = import.meta.env.VITE_INFOBIP_API_KEY || '';

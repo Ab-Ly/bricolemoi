@@ -11,7 +11,7 @@ import { AdminAuthModal } from './components/AdminAuthModal';
 import { UserProfileModal } from './components/UserProfileModal';
 import { EmergencySOSModal } from './components/EmergencySOSModal';
 import { useApp } from './context/AppContext';
-import { useAblyNotifications } from './hooks/useAblyNotifications';
+import { useRealtimeNotifications } from './hooks/useRealtimeNotifications';
 import { getAppSubdomain, switchSubdomainInDev, APP_SUBDOMAINS } from './lib/subdomain';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { initRemoteTelemetry, sendTerminalLog } from './lib/remoteLogger';
@@ -59,7 +59,7 @@ const AppLoadingFallback = () => (
 const MainApp = () => {
   const { user, switchRole, setAuthModalOpen, profileModalOpen, setProfileModalOpen } = useAuth();
   const { acceptLead } = useApp();
-  const { activeSosAlert, dismissSosAlert } = useAblyNotifications({ user });
+  const { activeSosAlert, dismissSosAlert } = useRealtimeNotifications({ user });
   const { incomingAlert, acceptSOS, dismissAlert } = useEmergencyFlow();
   
   // Reactive Subdomain & Navigation State

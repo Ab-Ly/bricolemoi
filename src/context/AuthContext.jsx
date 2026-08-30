@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { translations } from '../lib/i18n';
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../lib/dbClient';
 import { 
   auth, 
   RecaptchaVerifier, 

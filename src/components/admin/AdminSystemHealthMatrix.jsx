@@ -31,7 +31,7 @@ import {
   Pause
 } from 'lucide-react';
 import { useSystemTelemetry } from '../../hooks/useSystemTelemetry';
-import { supabase } from '../../lib/supabaseClient';
+import { db as supabase } from '../../lib/dbClient';
 
 export const AdminSystemHealthMatrix = () => {
   const { telemetry, isLoading, lastUpdated, refreshTelemetry } = useSystemTelemetry();

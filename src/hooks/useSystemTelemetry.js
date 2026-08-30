@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
-import { subscribeToRealtimeChannel } from '../lib/ablyRealtimeService';
+import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../lib/dbClient';
+import { subscribeToRealtimeChannel } from '../lib/realtimeBroadcastService';
 import { isCentrifugoConfigured } from '../lib/centrifugoClient';
 
 const EVOLUTION_API_URL = import.meta.env.VITE_EVOLUTION_API_URL || 'http://51.255.46.206:8085';

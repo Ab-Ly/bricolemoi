@@ -1,5 +1,5 @@
 import { getAppSubdomain } from '../../../lib/subdomain';
-import { supabase, isSupabaseConfigured } from '../../../lib/supabaseClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
 
 export const isUuid = (str) =>
   typeof str === 'string' &&

@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../../../lib/supabaseClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
 import { generateReceiptPDF } from '../../../lib/pdfReceiptGenerator';
 
 export const useAdminService = ({

@@ -1,7 +1,7 @@
 /**
  * Service de gestion des Push Notifications Web & Arrière-plan pour BricoleMoi (Artisans & Clients)
  */
-import { supabase } from './supabaseClient';
+import { db as supabase } from './dbClient';
 import { playNotificationSound, triggerVibration } from './audioNotifier';
 
 // Clé publique VAPID standard pour BricoleMoi

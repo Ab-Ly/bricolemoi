@@ -1,7 +1,7 @@
-import { supabase, isSupabaseConfigured } from '../../../lib/supabaseClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
 import { notify } from '../../../lib/notify';
-import { publishRealtimeEvent } from '../../../lib/ablyRealtimeService';
-import { ABLY_CHANNELS } from '../../../lib/ablyClient';
+import { publishRealtimeEvent } from '../../../lib/realtimeBroadcastService';
+import { REALTIME_CHANNELS, ABLY_CHANNELS } from '../../../lib/realtimeClient';
 import {
   toSafeUUID,
   broadcastSync,

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../lib/dbClient';
 import { switchSubdomainInDev } from '../lib/subdomain';
 import { 
   User as UserIcon, 

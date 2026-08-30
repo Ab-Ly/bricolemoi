@@ -6,7 +6,7 @@ import { MOROCCAN_CITIES } from '../../../constants/geo';
 import { calculateMaalemBalance, isBonusTx, isLeadTx, isRealRechargeTx } from '../../../utils/balanceUtils';
 import { calculateMaalemRating } from '../../../utils/ratingUtils';
 import { uploadMediaToR2 } from '../../../lib/r2StorageService';
-import { supabase, isSupabaseConfigured } from '../../../lib/supabaseClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
 
 export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
   const { t, user, setUser } = useAuth();
