@@ -120,35 +120,60 @@ function createDbAdapter(pbInstance) {
           }
         },
 
-        async insert(rows) {
+        insert(rows) {
           const rowArray = Array.isArray(rows) ? rows : [rows];
-          const results = [];
-          for (const row of rowArray) {
-            const uuid = row.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}`);
-            const pbId = toPbId(uuid);
-            const payload = {
-              ...row,
-              id: pbId,
-              uuid: uuid,
-              created_at_original: row.created_at || new Date().toISOString()
-            };
-            try {
-              const res = await collection.create(payload);
-              results.push({ ...res, id: res.uuid || res.id });
-            } catch (e) {
+          let isSingle = false;
+
+          const executeInsert = async () => {
+            const results = [];
+            for (const row of rowArray) {
+              const uuid = row.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}`);
+              const pbId = toPbId(uuid);
+              const payload = {
+                ...row,
+                id: pbId,
+                uuid: uuid,
+                created_at_original: row.created_at || new Date().toISOString()
+              };
               try {
-                const res = await collection.update(pbId, payload);
+                const res = await collection.create(payload);
                 results.push({ ...res, id: res.uuid || res.id });
-              } catch (updateErr) {
-                console.warn(`[DbClient] Insertion ${tableName}:`, updateErr.message);
+              } catch (e) {
+                try {
+                  const res = await collection.update(pbId, payload);
+                  results.push({ ...res, id: res.uuid || res.id });
+                } catch (updateErr) {
+                  console.warn(`[DbClient] Insertion ${tableName}:`, updateErr.message);
+                }
               }
             }
-          }
-          return {
-            data: results,
-            error: null,
-            select: () => Promise.resolve({ data: results, error: null })
+            return results;
           };
+
+          const insertBuilder = {
+            select(fields = '*') {
+              return insertBuilder;
+            },
+            single() {
+              isSingle = true;
+              return insertBuilder;
+            },
+            maybeSingle() {
+              isSingle = true;
+              return insertBuilder;
+            },
+            async then(onFulfilled, onRejected) {
+              try {
+                const results = await executeInsert();
+                const data = isSingle ? (results[0] || null) : results;
+                return onFulfilled({ data, error: null });
+              } catch (err) {
+                return onFulfilled({ data: null, error: err });
+              }
+            }
+          };
+
+          return insertBuilder;
         },
 
         update(fields) {

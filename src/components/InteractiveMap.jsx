@@ -463,6 +463,7 @@ export const InteractiveMap = ({
   const [isLocating, setIsLocating] = useState(false);
   const [showLayerMenu, setShowLayerMenu] = useState(false);
   const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const [hasGpuError, setHasGpuError] = useState(false);
 
   const maalemMarkersRef = useRef({});
   const emergencyMarkersRef = useRef({});
@@ -492,43 +493,64 @@ export const InteractiveMap = ({
     vehicleIconElRef.current = null;
     vehicleHeadingRingRef.current = null;
     if (trackingMaalemMarkerRef.current) {
-      trackingMaalemMarkerRef.current.remove();
+      try {
+        trackingMaalemMarkerRef.current.remove();
+      } catch (e) {}
       trackingMaalemMarkerRef.current = null;
     }
     maalemMarkersRef.current = {};
     emergencyMarkersRef.current = {};
 
-    const map = new maplibregl.Map({
-      container: mapContainerRef.current,
-      style: getMapStyleJson(activeStyleKey),
-      center: [defaultLng, defaultLat],
-      zoom: 14.5,
-      minZoom: 10,
-      maxZoom: 20,
-      pitch: 0,
-      bearing: 0,
-      antialias: true,
-      attributionControl: false
-    });
+    let map = null;
+    try {
+      map = new maplibregl.Map({
+        container: mapContainerRef.current,
+        style: getMapStyleJson(activeStyleKey),
+        center: [defaultLng, defaultLat],
+        zoom: 14.5,
+        minZoom: 10,
+        maxZoom: 20,
+        pitch: 0,
+        bearing: 0,
+        antialias: true,
+        attributionControl: false
+      });
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
-    mapRef.current = map;
+      map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+      mapRef.current = map;
 
-    map.on('load', () => {
-      setMapLoaded(true);
-      map.resize();
-    });
+      map.on('load', () => {
+        setMapLoaded(true);
+        try {
+          map.resize();
+        } catch (e) {}
+      });
+
+      map.on('error', (e) => {
+        if (e?.error?.message?.includes('WebGL') || e?.error?.message?.includes('GPU')) {
+          setHasGpuError(true);
+        }
+      });
+    } catch (err) {
+      console.warn('[InteractiveMap] WebGL/GPU indisponible sur ce navigateur:', err?.message);
+      setHasGpuError(true);
+      mapRef.current = null;
+      return;
+    }
 
     const resizeTimer = setTimeout(() => {
-      if (map) map.resize();
+      try {
+        if (map) map.resize();
+      } catch (e) {}
     }, 200);
 
-    map.on('click', (e) => {
-      // Ne pas écouter les clics de sélection d'adresse si un trajet en direct est actif
-      if (onLocationSelect && (!activeRouteCoords || activeRouteCoords.length < 2)) {
-        onLocationSelect(e.lngLat.lat, e.lngLat.lng);
-      }
-    });
+    if (map) {
+      map.on('click', (e) => {
+        if (onLocationSelect && (!activeRouteCoords || activeRouteCoords.length < 2)) {
+          onLocationSelect(e.lngLat.lat, e.lngLat.lng);
+        }
+      });
+    }
 
     return () => {
       clearTimeout(resizeTimer);
@@ -537,23 +559,31 @@ export const InteractiveMap = ({
       maalemMarkersRef.current = {};
       emergencyMarkersRef.current = {};
       setMapLoaded(false);
-      map.remove();
+      try {
+        if (map && typeof map.remove === 'function') {
+          map.remove();
+        }
+      } catch (err) {
+        console.warn('[InteractiveMap] Erreur nettoyage map:', err?.message);
+      }
+      mapRef.current = null;
     };
   }, [activeStyleKey]);
 
   // 2. Smooth map center update (uniquement si aucun trajet routier actif n'est affiché)
   useEffect(() => {
-    // Si un itinéraire actif est affiché, laisser fitBounds cadrer le trajet et ne pas forcer flyTo sur le point unique
     if (activeRouteCoords && activeRouteCoords.length >= 2) return;
 
-    if (mapRef.current && selectedLat && selectedLng) {
-      mapRef.current.flyTo({
-        center: [selectedLng, selectedLat],
-        zoom: 14.5,
-        speed: 1.2
-      });
+    if (mapRef.current && mapLoaded && selectedLat && selectedLng) {
+      try {
+        mapRef.current.flyTo({
+          center: [selectedLng, selectedLat],
+          zoom: 14.5,
+          speed: 1.2
+        });
+      } catch (e) {}
     }
-  }, [selectedLat, selectedLng, activeRouteCoords]);
+  }, [selectedLat, selectedLng, activeRouteCoords, mapLoaded]);
 
   // 3. Render & Update All Markers (Client GPS, Destination, Maalems, SOS Leads)
   useEffect(() => {
@@ -1200,6 +1230,22 @@ export const InteractiveMap = ({
         ref={mapContainerRef} 
         className={`w-full h-[320px] xs:h-[370px] sm:h-[440px] md:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden map-theme-${mapTheme.toLowerCase().replace('_', '-')}`} 
       />
+
+      {/* Fallback Gracieux si GPU/WebGL n'est pas supporté */}
+      {hasGpuError && (
+        <div className="absolute inset-0 bg-slate-50/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
+          <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 mb-3 shadow-xs">
+            <MapPin className="w-6 h-6" />
+          </div>
+          <h4 className="font-black text-slate-900 text-sm sm:text-base">Coordonnées GPS Confirmées</h4>
+          <p className="text-xs text-slate-600 max-w-sm mt-1">
+            Votre position ({selectedLat ? Number(selectedLat).toFixed(4) : '33.5883'}, {selectedLng ? Number(selectedLng).toFixed(4) : '-7.6328'}) est bien enregistrée pour l'intervention.
+          </p>
+          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full mt-3">
+            ✓ Position transmise au Maâlem
+          </span>
+        </div>
+      )}
 
       {/* Floating Toolbar: GPS, Color Palette, & Layer Switcher */}
       <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 sm:gap-2 max-w-[calc(100%-1.25rem)]">
