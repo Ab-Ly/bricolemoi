@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-08-30T16:09:42.488Z",
-  "overallStatus": "DEGRADED",
-  "latencyAvgMs": 370,
+  "timestamp": "2026-08-30T16:42:16.076Z",
+  "overallStatus": "HEALTHY",
+  "latencyAvgMs": 235,
   "nodes": {
     "supabase": {
       "status": "UP",
-      "latencyMs": 432,
+      "latencyMs": 405,
       "dbRecords": {
         "profiles": 6,
         "interventions": 9,
@@ -17,37 +17,37 @@
     },
     "centrifugo": {
       "status": "UP",
-      "latencyMs": 286,
-      "wsLatencyMs": 286,
+      "latencyMs": 254,
+      "wsLatencyMs": 254,
       "activeClients": 1,
       "activeChannels": 4,
       "error": null
     },
     "evolutionApi": {
-      "status": "DEGRADED",
-      "instanceStatus": "close",
-      "latencyMs": 231,
+      "status": "UP",
+      "instanceStatus": "open",
+      "latencyMs": 150,
       "error": null
     },
     "n8nRadar": {
       "status": "UP",
-      "latencyMs": 236,
+      "latencyMs": 135,
       "error": null
     },
     "r2Storage": {
-      "status": "DEGRADED",
-      "latencyMs": 663,
+      "status": "UP",
+      "latencyMs": 230,
       "error": null
     }
   },
   "links": {
     "front_to_supabase": {
       "status": "UP",
-      "latencyMs": 432
+      "latencyMs": 405
     },
     "front_to_centrifugo": {
       "status": "UP",
-      "latencyMs": 286,
+      "latencyMs": 254,
       "fallbackActive": false
     },
     "supabase_to_centrifugo": {
@@ -59,11 +59,5 @@
       "queuePending": 0
     }
   },
-  "alerts": [
-    {
-      "level": "WARN",
-      "message": "Evolution WhatsApp instance \"bricolemoi-otp\" est en état \"close\".",
-      "timestamp": "2026-08-30T16:09:42.488Z"
-    }
-  ]
+  "alerts": []
 }
