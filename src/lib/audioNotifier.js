@@ -76,12 +76,15 @@ export const playNotificationSound = (type = 'emergency') => {
  */
 export const triggerVibration = (pattern = [300, 200, 300, 200, 500]) => {
   try {
-    if (typeof window !== 'undefined' && 'navigator' in window && typeof navigator.vibrate === 'function') {
+    if (
+      typeof window !== 'undefined' &&
+      'navigator' in window &&
+      typeof navigator.vibrate === 'function' &&
+      (!navigator.userActivation || navigator.userActivation.hasBeenActive)
+    ) {
       navigator.vibrate(pattern);
     }
-  } catch (e) {
-    console.warn('[Vibrate] Non supporté ou bloqué:', e);
-  }
+  } catch (e) {}
 };
 
 /**
