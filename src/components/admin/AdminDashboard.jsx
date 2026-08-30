@@ -249,14 +249,14 @@ export const AdminDashboard = () => {
               <span>{isRefreshing ? '...' : 'Actualiser'}</span>
             </button>
 
-            {/* Bouton Accès Dédié Cockpit IT (Option B) */}
+            {/* Bouton Accès Dédié Cockpit IT (Modern Clean & Trust) */}
             <button
               type="button"
               onClick={() => switchSubdomainInDev('IT')}
-              className="flex-1 md:flex-none px-2.5 py-2 sm:px-3.5 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+              className="flex-1 md:flex-none px-2.5 py-2 sm:px-3.5 sm:py-2.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
               title="Ouvrir la Console Live et l'Observabilité IT"
             >
-              <Terminal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" />
+              <Terminal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 shrink-0" />
               <span>Espace IT</span>
             </button>
           </div>
