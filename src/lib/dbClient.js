@@ -207,29 +207,29 @@ function createDbAdapter(pbInstance) {
     },
 
     channel(channelName) {
-      return {
+      const channelObj = {
         on(event, filter, callback) {
-          return {
-            subscribe(onSubscribed) {
-              try {
-                const unsub = pbInstance.collection('interventions').subscribe('*', (e) => {
-                  const record = e.record ? { ...e.record, id: e.record.uuid || e.record.id } : {};
-                  callback({
-                    eventType: e.action === 'create' ? 'INSERT' : (e.action === 'update' ? 'UPDATE' : 'DELETE'),
-                    new: record,
-                    old: record
-                  });
+          const tableName = filter?.table || 'interventions';
+          try {
+            pbInstance.collection(tableName).subscribe('*', (e) => {
+              const record = e.record ? { ...e.record, id: e.record.uuid || e.record.id } : {};
+              if (typeof callback === 'function') {
+                callback({
+                  eventType: e.action === 'create' ? 'INSERT' : (e.action === 'update' ? 'UPDATE' : 'DELETE'),
+                  new: record,
+                  old: record
                 });
-                if (onSubscribed) onSubscribed('SUBSCRIBED');
-                return { unsubscribe: () => unsub() };
-              } catch (err) {
-                if (onSubscribed) onSubscribed('SUBSCRIBED');
-                return { unsubscribe: () => {} };
               }
-            }
-          };
+            }).catch(() => {});
+          } catch (err) {}
+          return channelObj;
+        },
+        subscribe(onSubscribed) {
+          if (typeof onSubscribed === 'function') onSubscribed('SUBSCRIBED');
+          return { unsubscribe: () => {} };
         }
       };
+      return channelObj;
     },
 
     removeChannel() {},
