@@ -41,6 +41,7 @@ const lazyWithRetry = (componentImport) =>
 const ClientApp = lazyWithRetry(() => import('./layouts/ClientApp'));
 const MaalemApp = lazyWithRetry(() => import('./layouts/MaalemApp'));
 const AdminApp = lazyWithRetry(() => import('./layouts/AdminApp'));
+const ITApp = lazyWithRetry(() => import('./layouts/ITApp').then((m) => ({ default: m.ITApp })));
 
 // Élégant composant de chargement pour les transitions SPA instantanées
 const AppLoadingFallback = () => (
@@ -294,6 +295,25 @@ const MainApp = () => {
             }} 
             onDismiss={dismissSosAlert} 
           />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  if (activeSubdomain === APP_SUBDOMAINS.IT) {
+    return (
+      <ErrorBoundary name="ITAppRoot">
+        <Suspense fallback={<AppLoadingFallback />}>
+          <Toaster 
+            position="top-right" 
+            theme="dark" 
+            offset="16px" 
+            gap={10} 
+            visibleToasts={4} 
+            expand={false} 
+            closeButton
+          />
+          <ITApp />
         </Suspense>
       </ErrorBoundary>
     );

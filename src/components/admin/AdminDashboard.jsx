@@ -24,17 +24,17 @@ import {
   TrendingUp,
   Wallet,
   DollarSign,
-  PiggyBank
+  PiggyBank,
+  Terminal
 } from 'lucide-react';
 import { isRealRechargeTx, isLeadTx, isBonusTx, isRefundTx } from '../../utils/balanceUtils';
+import { switchSubdomainInDev } from '../../lib/subdomain';
 import { AdminClientsView } from './AdminClientsView';
 import { AdminLiveMissions } from './AdminLiveMissions';
 import { AdminMaalemsView } from './AdminMaalemsView';
 import { AdminDisputesView } from './AdminDisputesView';
 import { AdminRechargesView } from './AdminRechargesView';
 import { AdminLoyaltyRewardsView } from './AdminLoyaltyRewardsView';
-import { AdminRealtimeConsole } from './AdminRealtimeConsole';
-import { AdminSystemHealthMatrix } from './AdminSystemHealthMatrix';
 import { auditPlatformState, healPlatformState } from '../../services/platformAuditReferee';
 
 export const AdminDashboard = () => {
@@ -246,7 +246,18 @@ export const AdminDashboard = () => {
               className="flex-1 md:flex-none px-2.5 py-2 sm:px-4 sm:py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 shrink-0 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>{isRefreshing ? 'Actualisation...' : 'Actualiser'}</span>
+              <span>{isRefreshing ? '...' : 'Actualiser'}</span>
+            </button>
+
+            {/* Bouton Accès Dédié Cockpit IT (Option B) */}
+            <button
+              type="button"
+              onClick={() => switchSubdomainInDev('IT')}
+              className="flex-1 md:flex-none px-2.5 py-2 sm:px-3.5 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-slate-700 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-mono font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+              title="Ouvrir la Console Live et l'Observabilité IT"
+            >
+              <Terminal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" />
+              <span>Espace IT</span>
             </button>
           </div>
         </div>
@@ -477,9 +488,9 @@ export const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* 2. Barre de Navigation par Onglets (Segmented Control SaaS Pro : 7 Cols Desktop / Scroll Horizontal Mobile) */}
+      {/* 2. Barre de Navigation par Onglets Métier (Segmented Control SaaS Pro : 6 Cols Desktop / Scroll Horizontal Mobile) */}
       <div className="bg-slate-100/95 border border-slate-200 p-1.5 rounded-2xl shadow-xs overflow-x-auto no-scrollbar">
-        <div className="flex lg:grid lg:grid-cols-7 gap-1.5 min-w-max lg:min-w-0">
+        <div className="flex lg:grid lg:grid-cols-6 gap-1.5 min-w-max lg:min-w-0">
           {/* Tab 1: Clients */}
           <button
             type="button"
@@ -601,38 +612,11 @@ export const AdminDashboard = () => {
               {loyaltyRewardsHistory.length}
             </span>
           </button>
-
-          {/* Tab 7: Console Temps Réel Live (Ably-Style Stream) */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('REALTIME')}
-            className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap ${
-              activeTab === 'REALTIME'
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm font-black'
-                : 'text-blue-700 hover:text-blue-900 hover:bg-blue-50 font-bold border border-blue-200/60 bg-white'
-            }`}
-          >
-            <Radio className={`w-4 h-4 shrink-0 animate-pulse ${activeTab === 'REALTIME' ? 'text-white' : 'text-blue-600'}`} />
-            <span>Console Live</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          </button>
         </div>
       </div>
 
-      {/* 3. Contenu de l'Onglet Actif */}
+      {/* 3. Contenu de l'Onglet Actif (100% Métier) */}
       <AnimatePresence mode="wait">
-        {activeTab === 'REALTIME' && (
-          <motion.div
-            key="realtime"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
-          >
-            <AdminSystemHealthMatrix />
-            <AdminRealtimeConsole />
-          </motion.div>
-        )}
         {activeTab === 'CLIENTS' && (
           <motion.div
             key="clients"

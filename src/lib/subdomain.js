@@ -9,6 +9,7 @@ export const APP_SUBDOMAINS = {
   CLIENT: 'CLIENT',
   MAALEM: 'MAALEM',
   ADMIN: 'ADMIN',
+  IT: 'IT',
   LANDING: 'LANDING'
 };
 
@@ -47,21 +48,23 @@ export const getAppSubdomain = () => {
     return APP_SUBDOMAINS.CLIENT;
   }
 
-  // 2. Détection par Clean Paths (/client, /maalem, /admin)
+  // 2. Détection par Clean Paths (/client, /maalem, /admin, /it)
   if (pathname.startsWith('/client')) return APP_SUBDOMAINS.CLIENT;
   if (pathname.startsWith('/maalem') || pathname.startsWith('/pro') || pathname.startsWith('/artisan')) return APP_SUBDOMAINS.MAALEM;
   if (pathname.startsWith('/admin')) return APP_SUBDOMAINS.ADMIN;
+  if (pathname.startsWith('/it') || pathname.startsWith('/devops') || pathname.startsWith('/tech')) return APP_SUBDOMAINS.IT;
 
-  // 3. Détection par Sous-Domaine Réel (ex: client.bricolemoi.ma, maalem.bricolemoi.ma, admin.bricolemoi.ma)
+  // 3. Détection par Sous-Domaine Réel (ex: client.bricolemoi.ma, maalem.bricolemoi.ma, admin.bricolemoi.ma, it.bricolemoi.ma)
   const hostParts = hostname.split('.');
   if (hostParts.length > 1) {
     const sub = hostParts[0].toUpperCase();
     if (sub === 'CLIENT') return APP_SUBDOMAINS.CLIENT;
     if (sub === 'MAALEM' || sub === 'PRO') return APP_SUBDOMAINS.MAALEM;
     if (sub === 'ADMIN') return APP_SUBDOMAINS.ADMIN;
+    if (sub === 'IT' || sub === 'DEVOPS') return APP_SUBDOMAINS.IT;
   }
 
-  // 4. Fallback Paramètres Query (Compatibilité ascendante ?app=client | ?subdomain=maalem)
+  // 4. Fallback Paramètres Query (Compatibilité ascendante ?app=client | ?subdomain=maalem | ?app=it)
   const appParam = (searchParams.get('app') || searchParams.get('subdomain') || '').toUpperCase();
   if (appParam && APP_SUBDOMAINS[appParam]) {
     return APP_SUBDOMAINS[appParam];
@@ -85,6 +88,7 @@ export const switchSubdomainInDev = (targetApp, params = {}) => {
   if (validApp === APP_SUBDOMAINS.CLIENT) newPath = '/client';
   else if (validApp === APP_SUBDOMAINS.MAALEM) newPath = '/maalem';
   else if (validApp === APP_SUBDOMAINS.ADMIN) newPath = '/admin';
+  else if (validApp === APP_SUBDOMAINS.IT) newPath = '/it';
 
   // Conserver le contexte de navigation sans polluer la barre d'adresse
   if (params && typeof params === 'object' && Object.keys(params).length > 0) {
