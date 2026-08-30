@@ -271,8 +271,66 @@ export async function collectSystemTelemetry() {
 
 // Exécution autonome
 async function run() {
-  const isOnce = process.argv.includes('--once');
+  const args = process.argv.slice(2);
+  const nodeArg = args.find((a) => a.startsWith('--node='))?.split('=')[1]?.toLowerCase();
+  const isLive = args.includes('--live');
+  const isOnce = args.includes('--once') || (!isLive && Boolean(nodeArg));
 
+  const nodeMap = {
+    supabase: { name: 'Supabase Core', probe: probeSupabase },
+    centrifugo: { name: 'Centrifugo v5 Engine', probe: probeCentrifugo },
+    evolution: { name: 'Evolution API WhatsApp', probe: probeEvolutionApi },
+    evolutionapi: { name: 'Evolution API WhatsApp', probe: probeEvolutionApi },
+    n8n: { name: 'n8n Dispatch Radar', probe: probeN8nRadar },
+    n8nradar: { name: 'n8n Dispatch Radar', probe: probeN8nRadar },
+    r2: { name: 'Cloudflare R2 Storage', probe: probeR2Storage },
+    r2storage: { name: 'Cloudflare R2 Storage', probe: probeR2Storage }
+  };
+
+  // Mode 1 : Sonde ciblée sur un nœud spécifique
+  if (nodeArg && nodeMap[nodeArg]) {
+    const target = nodeMap[nodeArg];
+    console.log('═════════════════════════════════════════════════════════════════════════════');
+    console.log(` 📡 BRICOLEMOI — SONDE CLI LIVE : [ ${target.name.toUpperCase()} ]`);
+    console.log('═════════════════════════════════════════════════════════════════════════════');
+
+    const executeSingleProbe = async () => {
+      const start = Date.now();
+      const res = await target.probe();
+      const timeStr = new Date().toLocaleTimeString('fr-FR');
+      const icon = res.status === 'UP' ? '🟢' : (res.status === 'DEGRADED' ? '🟡' : '🔴');
+      
+      console.log(`[${timeStr}] ${icon} ${target.name} — Statut: ${res.status} (Latence: ${res.latencyMs}ms)`);
+      if (nodeArg === 'supabase' && res.dbRecords) {
+        console.log(`  • Profils: ${res.dbRecords.profiles} | Missions: ${res.dbRecords.interventions} | Transactions: ${res.dbRecords.transactions} | Maâlems: ${res.dbRecords.maalems}`);
+        console.log(`  • Grand-Livre: ${res.ledgerBalanced ? 'Équilibré (0.00 DH)' : 'DÉSÉQUILIBRE DÉTECTÉ'}`);
+      } else if ((nodeArg === 'evolution' || nodeArg === 'evolutionapi')) {
+        console.log(`  • Instance WhatsApp: "${EVOLUTION_INSTANCE}" (État: ${res.instanceStatus})`);
+      } else if (nodeArg === 'centrifugo') {
+        console.log(`  • Handshake WS: ${res.status !== 'DOWN' ? 'Actif & Prêt' : 'Échec'}`);
+      } else if ((nodeArg === 'n8n' || nodeArg === 'n8nradar')) {
+        console.log(`  • Webhook Radar 8km: ${res.status !== 'DOWN' ? 'Opérationnel' : 'Injoignable'}`);
+      } else if ((nodeArg === 'r2' || nodeArg === 'r2storage')) {
+        console.log(`  • CDN Médias Cloudflare: ${res.status !== 'DOWN' ? 'Accessible (0€ Egress)' : 'Injoignable'}`);
+      }
+      if (res.error) console.log(`  ⚠️ Erreur: ${res.error}`);
+      return res;
+    };
+
+    if (!isLive) {
+      const singleRes = await executeSingleProbe();
+      console.log('\nPayload JSON du nœud :');
+      console.log(JSON.stringify(singleRes, null, 2));
+      process.exit(0);
+    } else {
+      await executeSingleProbe();
+      console.log('\n⚡ Flux Live CLI actif. Rafraîchissement toutes les 3 secondes... (Ctrl+C pour quitter)\n');
+      setInterval(executeSingleProbe, 3000);
+      return;
+    }
+  }
+
+  // Mode 2 : Démon Global (5 nœuds)
   console.log('═════════════════════════════════════════════════════════════════════════════');
   console.log(' 📡 BRICOLEMOI — DÉMON D\'OBSERVABILITÉ & TÉLÉMÉTRIE DISTRIBUÉE');
   console.log('═════════════════════════════════════════════════════════════════════════════');

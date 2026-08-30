@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1788029966.360875,
-    "seen": 1788030082.031808,
-    "ast_hash": "2eefc7ae2e77093cb226fe63260b093d",
+    "mtime": 1788106408.990982,
+    "seen": 1788106585.737439,
+    "ast_hash": "31accaa1d22b9c31de656869d95822a6",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -1212,15 +1212,15 @@
     "semantic_hash": ""
   },
   "scripts/telemetryDaemon.js": {
-    "mtime": 1788029841.0829947,
-    "seen": 1788030082.033686,
-    "ast_hash": "a5d0945f6eceb2008d96198b22bafa02",
+    "mtime": 1788106385.5886316,
+    "seen": 1788106585.739327,
+    "ast_hash": "25535dcc981f2f511dc2155bf2e005d4",
     "semantic_hash": ""
   },
   "src/components/admin/AdminSystemHealthMatrix.jsx": {
-    "mtime": 1788030348.8399422,
-    "seen": 1788030477.164866,
-    "ast_hash": "71e30407b9448f479badc45a5111d045",
+    "mtime": 1788106478.8619525,
+    "seen": 1788106585.7416708,
+    "ast_hash": "06aadd80b92883940d8aff6de2231e94",
     "semantic_hash": ""
   },
   "src/hooks/useSystemTelemetry.js": {

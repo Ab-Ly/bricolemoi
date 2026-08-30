@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-08-29T19:02:49.959Z",
-  "overallStatus": "CRITICAL",
-  "latencyAvgMs": 2673,
+  "timestamp": "2026-08-30T16:09:42.488Z",
+  "overallStatus": "DEGRADED",
+  "latencyAvgMs": 370,
   "nodes": {
     "supabase": {
-      "status": "DEGRADED",
-      "latencyMs": 6358,
+      "status": "UP",
+      "latencyMs": 432,
       "dbRecords": {
         "profiles": 6,
         "interventions": 9,
@@ -16,9 +16,9 @@
       "error": null
     },
     "centrifugo": {
-      "status": "DEGRADED",
-      "latencyMs": 2090,
-      "wsLatencyMs": 2090,
+      "status": "UP",
+      "latencyMs": 286,
+      "wsLatencyMs": 286,
       "activeClients": 1,
       "activeChannels": 4,
       "error": null
@@ -26,36 +26,36 @@
     "evolutionApi": {
       "status": "DEGRADED",
       "instanceStatus": "close",
-      "latencyMs": 1472,
+      "latencyMs": 231,
       "error": null
     },
     "n8nRadar": {
-      "status": "DEGRADED",
-      "latencyMs": 1440,
+      "status": "UP",
+      "latencyMs": 236,
       "error": null
     },
     "r2Storage": {
-      "status": "DOWN",
-      "latencyMs": 2006,
-      "error": "TIMEOUT"
+      "status": "DEGRADED",
+      "latencyMs": 663,
+      "error": null
     }
   },
   "links": {
     "front_to_supabase": {
-      "status": "SLOW",
-      "latencyMs": 6358
+      "status": "UP",
+      "latencyMs": 432
     },
     "front_to_centrifugo": {
-      "status": "SLOW",
-      "latencyMs": 2090,
+      "status": "UP",
+      "latencyMs": 286,
       "fallbackActive": false
     },
     "supabase_to_centrifugo": {
-      "status": "DESYNC",
+      "status": "UP",
       "lagSeconds": 0.2
     },
     "radar_to_evolution": {
-      "status": "FAIL",
+      "status": "UP",
       "queuePending": 0
     }
   },
@@ -63,7 +63,7 @@
     {
       "level": "WARN",
       "message": "Evolution WhatsApp instance \"bricolemoi-otp\" est en état \"close\".",
-      "timestamp": "2026-08-29T19:02:49.959Z"
+      "timestamp": "2026-08-30T16:09:42.488Z"
     }
   ]
 }
