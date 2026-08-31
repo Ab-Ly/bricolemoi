@@ -170,17 +170,11 @@ function startCentrifugoListener() {
             const clientId = msg.result?.client || msg.connect?.client || 'Connecté';
             console.log(`${formatTime()} ${C.green}✓ Connecté à Centrifugo v5 sur le VPS [Client ID: ${clientId}]${C.reset}`);
 
+            // Canaux clés sans doublon de namespace
             const channels = [
               'jobs:stream',
-              'bricolemoi:jobs:stream',
               'admin:alerts',
-              'bricolemoi:admin:alerts',
-              'tracking:all',
-              'bricolemoi:tracking:all',
-              'presence:maalems',
-              'bricolemoi:presence:maalems',
-              'terminal:logs',
-              'bricolemoi:terminal:logs'
+              'terminal:logs'
             ];
             channels.forEach((ch, idx) => {
               ws.send(JSON.stringify({ id: 10 + idx, subscribe: { channel: ch } }));
@@ -195,6 +189,17 @@ function startCentrifugoListener() {
             const isTeleLog = Boolean(data.level && (data.message || data.category));
 
             if (isTeleLog) {
+              const msgText = String(data.message || '').toLowerCase();
+              // Filtrer le bruit des sondes internes
+              if (
+                msgText.includes('session connectée') ||
+                msgText.includes('telemetry') ||
+                msgText.includes('fetchinstances') ||
+                msgText.includes('gateway centrifugo')
+              ) {
+                continue;
+              }
+
               const time = formatTime(data.timestamp);
               const levelBadge = getLevelBadge(data.level);
               const roleBadge = getRoleBadge(data.user?.role || 'ANONYMOUS', data.user);

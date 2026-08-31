@@ -9,6 +9,24 @@ let isTelemetryInitialized = false;
 let lastLogPayloadKey = '';
 let lastLogTimestamp = 0;
 
+const recentLogs = new Map();
+const THROTTLE_MS = 10000;
+
+const isBenignNoise = (text = '') => {
+  const s = String(text).toLowerCase();
+  return (
+    s.includes('telemetry') ||
+    s.includes('fetchinstances') ||
+    s.includes('dispatch-sos') ||
+    s.includes('send-push') ||
+    s.includes('cartocdn') ||
+    s.includes('openstreetmap') ||
+    s.includes('arcgisonline') ||
+    s.includes('favicon') ||
+    s.includes('websocket')
+  );
+};
+
 // File d'attente hors-ligne pour ne jamais perdre un log en cas de micro-coupure
 const offlineLogsQueue = [];
 const MAX_OFFLINE_QUEUE_SIZE = 60;
@@ -79,14 +97,21 @@ const flushOfflineLogs = async () => {
 export const sendTerminalLog = async (level = 'INFO', category = 'APP', message = '', metadata = {}) => {
   if (typeof window === 'undefined') return;
 
-  // Anti-spam / déduplication
+  if (isBenignNoise(message) || isBenignNoise(category)) return;
+
+  // Anti-spam / déduplication (fenêtre glissante de 10 secondes)
   const now = Date.now();
   const payloadKey = `${level}:${category}:${message}`;
-  if (payloadKey === lastLogPayloadKey && now - lastLogTimestamp < 1500) {
+  const lastEmitted = recentLogs.get(payloadKey) || 0;
+  if (now - lastEmitted < THROTTLE_MS) {
     return;
   }
-  lastLogPayloadKey = payloadKey;
-  lastLogTimestamp = now;
+  recentLogs.set(payloadKey, now);
+  if (recentLogs.size > 250) {
+    for (const [k, v] of recentLogs.entries()) {
+      if (now - v > THROTTLE_MS) recentLogs.delete(k);
+    }
+  }
 
   let userSession = null;
   try {
@@ -149,6 +174,7 @@ export const initRemoteTelemetry = () => {
   // 2. Capture des erreurs runtime JS non interceptées
   window.addEventListener('error', (event) => {
     try {
+      if (isBenignNoise(event.message)) return;
       sendTerminalLog('ERROR', 'RUNTIME', event.message || 'Erreur JavaScript non gérée', {
         filename: event.filename,
         lineno: event.lineno,
@@ -162,13 +188,15 @@ export const initRemoteTelemetry = () => {
   window.addEventListener('unhandledrejection', (event) => {
     try {
       const reason = event.reason;
-      sendTerminalLog('ERROR', 'PROMISE', reason?.message || String(reason) || 'Unhandled Promise Rejection', {
+      const reasonMsg = reason?.message || String(reason) || 'Unhandled Promise Rejection';
+      if (isBenignNoise(reasonMsg)) return;
+      sendTerminalLog('ERROR', 'PROMISE', reasonMsg, {
         stack: reason?.stack ? reason.stack.split('\n').slice(0, 3).join(' -> ') : null
       });
     } catch (e) {}
   });
 
-  // 4. Interception globale de console.error & console.warn
+  // 4. Interception sélective de console.error & console.warn
   try {
     const rawConsoleError = console.error;
     console.error = function (...args) {
@@ -176,8 +204,7 @@ export const initRemoteTelemetry = () => {
       try {
         const firstArg = args[0];
         const msg = typeof firstArg === 'string' ? firstArg : (firstArg?.message || JSON.stringify(firstArg) || 'Console error');
-        // Éviter les boucles infinies de logs internes
-        if (!msg.includes('[Telemetry]') && !msg.includes('WebSocket')) {
+        if (!isBenignNoise(msg)) {
           sendTerminalLog('ERROR', 'CONSOLE', msg, {
             details: args.slice(1).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' | ')
           });
@@ -191,7 +218,7 @@ export const initRemoteTelemetry = () => {
       try {
         const firstArg = args[0];
         const msg = typeof firstArg === 'string' ? firstArg : (firstArg?.message || JSON.stringify(firstArg) || 'Console warn');
-        if (!msg.includes('[Telemetry]') && !msg.includes('WebSocket')) {
+        if (!isBenignNoise(msg)) {
           sendTerminalLog('WARN', 'CONSOLE', msg, {
             details: args.slice(1).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' | ')
           });
@@ -208,8 +235,7 @@ export const initRemoteTelemetry = () => {
         const res = await rawFetch.apply(this, args);
         if (!res.ok && res.status >= 400) {
           const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'API';
-          // Ne pas logger les canaux internes de télémétrie
-          if (!url.includes('ably.net') && !url.includes('terminal:logs')) {
+          if (!isBenignNoise(url) && !url.includes('ably.net') && !url.includes('centrifugo') && !url.includes('terminal:logs')) {
             sendTerminalLog('WARN', 'NETWORK', `Échec requête HTTP ${res.status} (${res.statusText || 'Error'})`, {
               url: url.split('?')[0],
               status: res.status
@@ -221,26 +247,11 @@ export const initRemoteTelemetry = () => {
         const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'API';
         const errMsg = String(networkErr?.message || '');
         const isAborted = errMsg.includes('abort') || networkErr?.name === 'AbortError';
-        const isMapTile = url.includes('.png') || url.includes('tile.openstreetmap') || url.includes('cartocdn') || url.includes('arcgisonline');
 
-        // Ne pas polluer les logs avec les annulations normales de zoom/déplacement de carte
-        if (!isAborted && !isMapTile && !url.includes('ably.net') && !url.includes('centrifugo')) {
-          const isTransientOffline = 
-            !navigator.onLine || 
-            errMsg.includes('Failed to fetch') || 
-            errMsg.includes('NetworkError') || 
-            errMsg.includes('Load failed');
-
-          if (isTransientOffline) {
-            sendTerminalLog('WARN', 'NETWORK', `Micro-coupure réseau mobile sur : ${url.split('?')[0]} (rétablissement automatique)`, {
-              error: errMsg || 'NetworkOffline',
-              online: navigator.onLine
-            });
-          } else {
-            sendTerminalLog('ERROR', 'NETWORK', `Échec requête réseau sur : ${url.split('?')[0]}`, {
-              error: errMsg || 'NetworkError'
-            });
-          }
+        if (!isAborted && !isBenignNoise(url) && !url.includes('ably.net') && !url.includes('centrifugo')) {
+          sendTerminalLog('WARN', 'NETWORK', `Requête réseau non aboutie sur : ${url.split('?')[0]}`, {
+            error: errMsg || 'NetworkError'
+          });
         }
         throw networkErr;
       }

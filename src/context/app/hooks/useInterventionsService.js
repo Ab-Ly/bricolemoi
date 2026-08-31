@@ -1,4 +1,5 @@
 import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
+import { toPbId } from '../../../lib/pocketbaseClient';
 import { notify } from '../../../lib/notify';
 import { publishRealtimeEvent } from '../../../lib/realtimeBroadcastService';
 import { REALTIME_CHANNELS, ABLY_CHANNELS } from '../../../lib/realtimeClient';
@@ -6,6 +7,7 @@ import { getCoordinatesFromDistrict } from '../../../lib/geoService';
 import {
   generateUuid,
   isUuid,
+  isMatchingInterventionId,
   toSafeUUID,
   broadcastSync
 } from '../helpers/appSyncHelpers';
@@ -46,14 +48,14 @@ export const useInterventionsService = ({
     const finalPhoto = description_photo || null;
 
     const generatedId = generateUuid();
-    let validClientId = user?.id && isUuid(user.id) ? user.id : null;
-    if (!validClientId) {
-      validClientId = '209a9beb-b4d4-41eb-8a15-f10000000000';
-    }
+    const generatedPbId = toPbId(generatedId);
+    const validClientId = user?.id ? String(user.id).trim() : '209a9beb-b4d4-41eb-8a15-f10000000000';
 
     const dbPayload = {
       id: generatedId,
       client_id: validClientId,
+      client_name: user?.full_name || 'Client BricoleMoi',
+      client_phone: user?.phone || '',
       service_type: (service_type || 'PLUMBING').toUpperCase(),
       subcategory: subcategory,
       district: district || 'Casablanca - Maarif',
@@ -72,7 +74,7 @@ export const useInterventionsService = ({
     const newIntervention = {
       ...dbPayload,
       subcategory,
-      client_name: user?.full_name || 'Client Maroc',
+      client_name: user?.full_name || 'Client BricoleMoi',
       client_phone: user?.phone || '',
       lat: finalLat,
       lng: finalLng,
@@ -89,7 +91,7 @@ export const useInterventionsService = ({
       );
       const updated = [
         newIntervention,
-        ...filtered.filter((i) => String(i.id).trim() !== String(newIntervention.id).trim())
+        ...filtered.filter((i) => !isMatchingInterventionId(i.id, newIntervention.id))
       ];
       try {
         localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated));
@@ -101,10 +103,10 @@ export const useInterventionsService = ({
       const myCreated = JSON.parse(
         localStorage.getItem('bricolemoi_my_created_leads') || '[]'
       );
-      if (!myCreated.includes(String(generatedId).trim())) {
-        myCreated.push(String(generatedId).trim());
-        localStorage.setItem('bricolemoi_my_created_leads', JSON.stringify(myCreated));
-      }
+      [String(generatedId).trim(), String(generatedPbId).trim()].forEach((idToAdd) => {
+        if (!myCreated.includes(idToAdd)) myCreated.push(idToAdd);
+      });
+      localStorage.setItem('bricolemoi_my_created_leads', JSON.stringify(myCreated));
     } catch (e) {}
 
     const payload = {
@@ -450,8 +452,9 @@ export const useInterventionsService = ({
       return false;
     }
 
-    const targetIntv = interventions.find(
-      (i) => String(i.id).trim() === String(interventionId).trim()
+    const targetIntv = interventions.find((i) =>
+      isMatchingInterventionId(i.id, interventionId) ||
+      (i.uuid && isMatchingInterventionId(i.uuid, interventionId))
     );
 
     // Verrou Anti-Collision : Vérifier si la mission a déjà été prise par un autre Maâlem
@@ -573,7 +576,7 @@ export const useInterventionsService = ({
 
     setInterventions((prev) => {
       const updated = prev.map((item) =>
-        String(item.id).trim() === cleanIntId ? { ...item, ...acceptedItem } : item
+        isMatchingInterventionId(item.id, cleanIntId) ? { ...item, ...acceptedItem } : item
       );
       try {
         localStorage.setItem('bricolemoi_interventions_cache', JSON.stringify(updated));
@@ -581,46 +584,42 @@ export const useInterventionsService = ({
       return updated;
     });
 
-    publishRealtimeEvent('job_accepted', {
-      intervention_id: interventionId,
+    const eventPayload = {
+      intervention_id: cleanIntId,
+      uuid: targetIntv?.uuid || (isUuid(cleanIntId) ? cleanIntId : null),
+      client_id: targetIntv?.client_id || null,
+      client_phone: targetIntv?.client_phone || null,
+      client_name: targetIntv?.client_name || null,
       maalem_id: cleanMaalemId,
       maalem_name: actualMaalemName,
       maalem_phone: actualMaalemPhone,
+      service_type: targetIntv?.service_type || serviceType,
+      district: targetIntv?.district || cityName,
       accepted_at: nowIso,
-      progress_step: 'ON_THE_WAY'
-    }, ABLY_CHANNELS.JOBS_STREAM);
+      progress_step: 'ON_THE_WAY',
+      intervention: {
+        ...(targetIntv || {}),
+        ...acceptedItem
+      }
+    };
+
+    publishRealtimeEvent('job_accepted', eventPayload, ABLY_CHANNELS.JOBS_STREAM);
 
     publishRealtimeEvent(
       'sos:claimed',
-      { 
-        intervention_id: interventionId, 
-        maalem_id: cleanMaalemId,
-        maalem_name: actualMaalemName,
-        maalem_phone: actualMaalemPhone
-      },
+      eventPayload,
       ABLY_CHANNELS.getSosChannel(cityName, serviceType)
     );
     publishRealtimeEvent(
       'sos:claimed',
-      { 
-        intervention_id: interventionId, 
-        maalem_id: cleanMaalemId,
-        maalem_name: actualMaalemName,
-        maalem_phone: actualMaalemPhone
-      },
+      eventPayload,
       ABLY_CHANNELS.getSosCityChannel(cityName)
     );
 
     if (targetIntv?.client_id) {
       publishRealtimeEvent(
         'job:accepted',
-        {
-          intervention_id: interventionId,
-          maalem_id: cleanMaalemId,
-          maalem_name: actualMaalemName,
-          maalem_phone: actualMaalemPhone,
-          accepted_at: nowIso
-        },
+        eventPayload,
         ABLY_CHANNELS.getUserChannel(targetIntv.client_id)
       );
     }
@@ -651,42 +650,23 @@ export const useInterventionsService = ({
 
     if (isSupabaseConfigured) {
       try {
-        const isUserUuid = user?.id && isUuid(user.id);
-        const validIntvUuid = isUuid(interventionId) ? interventionId : null;
+        const updatePayload = {
+          status: 'ACCEPTED',
+          maalem_id: actualMaalemId,
+          maalem_name: actualMaalemName,
+          maalem_phone: actualMaalemPhone,
+          accepted_at: nowIso,
+          progress_step: 'ON_THE_WAY',
+          escrow_status: 'DEBITED'
+        };
 
-        if (validIntvUuid && isUserUuid) {
-          const { data: rpcRes, error: rpcErr } = await supabase.rpc(
-            'unlock_lead_secure',
-            {
-              p_maalem_id: user.id,
-              p_intervention_id: validIntvUuid,
-              p_cost: leadCost
-            }
-          );
-
-          if (rpcErr) {
-            await supabase
-              .from('interventions')
-              .update({ status: 'ACCEPTED', maalem_id: user.id })
-              .eq('id', interventionId);
-          } else if (rpcRes && rpcRes.success === false) {
-            notify.error(
-              'Déblocage Impossible 🚫',
-              rpcRes.message || 'Impossible de débloquer cette mission.',
-              { id: `rpc-unlock-fail-${interventionId}` }
-            );
-            return false;
-          }
-        } else {
-          const updatePayload = { status: 'ACCEPTED' };
-          if (isUserUuid) updatePayload.maalem_id = user.id;
-          await supabase
-            .from('interventions')
-            .update(updatePayload)
-            .eq('id', interventionId);
-        }
+        // Mise à jour garantie dans la collection PocketBase
+        await supabase
+          .from('interventions')
+          .update(updatePayload)
+          .eq('id', interventionId);
       } catch (dbErr) {
-        console.warn('[Supabase] acceptLead exception:', dbErr.message);
+        console.warn('[DB] acceptLead exception:', dbErr.message);
       }
     }
 

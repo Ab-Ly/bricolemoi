@@ -6,6 +6,7 @@ import { MOROCCAN_CITIES, COUNTRY_DIAL_CODES } from '../../../constants/geo';
 import { reverseGeocodeMorocco } from '../../../lib/geoService';
 import { uploadMediaToR2 } from '../../../lib/r2StorageService';
 import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
+import { isMatchingInterventionId } from '../../../context/app/helpers/appSyncHelpers';
 import { toast } from 'sonner';
 
 export const getServiceDisplay = (type) => {
@@ -197,7 +198,9 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
         myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
       } catch (e) {}
 
-      const isOwnerByLocalCreated = myCreated.includes(String(item.id).trim());
+      const isOwnerByLocalCreated = myCreated.some(
+        (cId) => isMatchingInterventionId(cId, item.id) || (item.uuid && isMatchingInterventionId(cId, item.uuid))
+      );
       if (isOwnerByLocalCreated) return true;
 
       if (!user) return false;
@@ -648,7 +651,11 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
   // Synchroniser activeEmergency avec son état réel le plus récent dans myClientInterventions
   const liveActiveEmergency = activeEmergency?.id
-    ? myClientInterventions.find((i) => String(i.id).trim() === String(activeEmergency.id).trim()) || activeEmergency
+    ? myClientInterventions.find(
+        (i) =>
+          isMatchingInterventionId(i.id, activeEmergency.id) ||
+          (i.uuid && isMatchingInterventionId(i.uuid, activeEmergency.id))
+      ) || activeEmergency
     : activeEmergency;
 
   const isLiveEmergencyActive =

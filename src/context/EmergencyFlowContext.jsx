@@ -8,6 +8,7 @@ import { notify } from '../lib/notify';
 import { showLocalPushNotification } from '../lib/pushNotificationService';
 import { getAppSubdomain } from '../lib/subdomain';
 import { EMERGENCY_STATES } from '../constants/emergencyStates';
+import { isMatchingInterventionId } from './app/helpers/appSyncHelpers';
 
 // Types d'actions du Reducer
 const ACTIONS = {
@@ -181,8 +182,8 @@ export const EmergencyFlowProvider = ({ children }) => {
 
       const isMyIntv = (i) => {
         if (!i) return false;
-        if (flowState.activeEmergency?.id && String(i.id).trim() === String(flowState.activeEmergency.id).trim()) return true;
-        if (myCreated.includes(String(i.id).trim())) return true;
+        if (flowState.activeEmergency?.id && isMatchingInterventionId(i.id, flowState.activeEmergency.id)) return true;
+        if (myCreated.some((cId) => isMatchingInterventionId(cId, i.id))) return true;
         if (user?.id && String(i.client_id || '').trim() === String(user.id).trim()) return true;
         const userPhoneDigits = String(user?.phone || '').replace(/\D/g, '');
         const clientPhoneDigits = String(i.client_phone || '').replace(/\D/g, '');
@@ -303,16 +304,19 @@ export const EmergencyFlowProvider = ({ children }) => {
       } catch (e) {}
 
       const isTargetingMyEmergency =
-        (currentEmergencyId && intId === currentEmergencyId) ||
-        (intId && myCreated.includes(intId)) ||
-        (payload.client_id && user?.id && String(payload.client_id).trim() === String(user.id).trim());
+        (currentEmergencyId && isMatchingInterventionId(intId, currentEmergencyId)) ||
+        (payload.uuid && currentEmergencyId && isMatchingInterventionId(payload.uuid, currentEmergencyId)) ||
+        (intId && myCreated.some((cId) => isMatchingInterventionId(cId, intId))) ||
+        (payload.uuid && myCreated.some((cId) => isMatchingInterventionId(cId, payload.uuid))) ||
+        (payload.client_id && user?.id && String(payload.client_id).trim() === String(user.id).trim()) ||
+        (payload.client_phone && user?.phone && String(payload.client_phone).replace(/\D/g, '').slice(-8) === String(user.phone).replace(/\D/g, '').slice(-8));
 
       if (!isTargetingMyEmergency && event !== 'job:accepted' && event !== 'job_accepted' && event !== 'sos:claimed') {
         return;
       }
 
       if (event === 'job:accepted' || event === 'job_accepted' || event === 'sos:claimed') {
-        if (!isTargetingMyEmergency && currentEmergencyId && intId && intId !== currentEmergencyId) {
+        if (!isTargetingMyEmergency && currentEmergencyId && intId && !isMatchingInterventionId(intId, currentEmergencyId)) {
           return;
         }
 

@@ -5,6 +5,22 @@ export const isUuid = (str) =>
   typeof str === 'string' &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
+/**
+ * Compare deux identifiants d'interventions de manière tolérante
+ * Supporte indifféremment l'égalité exacte, l'UUID 36 chars et l'ID 15 chars PocketBase
+ */
+export const isMatchingInterventionId = (id1, id2) => {
+  if (!id1 || !id2) return false;
+  const s1 = String(id1).trim().toLowerCase();
+  const s2 = String(id2).trim().toLowerCase();
+  if (s1 === s2) return true;
+  const c1 = s1.replace(/[^a-z0-9]/g, '');
+  const c2 = s2.replace(/[^a-z0-9]/g, '');
+  if (c1 === c2) return true;
+  if (c1.length >= 15 && c2.length >= 15 && c1.slice(0, 15) === c2.slice(0, 15)) return true;
+  return false;
+};
+
 export const generateUuid = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -56,7 +72,7 @@ export const isCurrentUserClientOf = (intv, userRef) => {
   const intvId = String(intv.id || intv.intervention_id || '').trim();
   try {
     const myCreated = JSON.parse(localStorage.getItem('bricolemoi_my_created_leads') || '[]');
-    if (intvId && myCreated.includes(intvId)) return true;
+    if (intvId && myCreated.some((createdId) => isMatchingInterventionId(createdId, intvId))) return true;
   } catch (e) {}
 
   if (!curr) return false;
