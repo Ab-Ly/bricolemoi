@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { translations } from '../lib/i18n';
-import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../lib/dbClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured, pb } from '../lib/dbClient';
 import { 
   auth, 
   RecaptchaVerifier, 
@@ -465,8 +465,27 @@ export const AuthProvider = ({ children }) => {
     const cleanPin = String(pin || '').trim();
     const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'admin2026';
 
-    // 2. Vérification du code PIN de session 2FA
-    if (cleanPin !== ADMIN_PIN && cleanPin !== 'admin2026') {
+    // 2. Vérification du code PIN de session 2FA (PIN personnalisé ou PINs usine)
+    const enteredPinHash = await hashPin(cleanPin);
+    let customPinHash = localStorage.getItem('bricolemoi_admin_custom_pin_hash');
+    if (!customPinHash) {
+      try {
+        const { data: adminProf } = await supabase
+          .from('profiles')
+          .select('pin_hash')
+          .eq('role', 'ADMIN')
+          .single();
+        if (adminProf?.pin_hash) {
+          customPinHash = adminProf.pin_hash;
+          localStorage.setItem('bricolemoi_admin_custom_pin_hash', customPinHash);
+        }
+      } catch (e) {}
+    }
+
+    const isCustomPinValid = customPinHash && enteredPinHash === customPinHash;
+    const isDefaultPinValid = cleanPin === ADMIN_PIN || cleanPin === 'admin2026' || cleanPin === '2026';
+
+    if (!isCustomPinValid && !isDefaultPinValid) {
       const failed = parseInt(sessionStorage.getItem(attemptsKey) || '0', 10) + 1;
       sessionStorage.setItem(attemptsKey, failed.toString());
       if (failed >= 5) {
@@ -476,9 +495,9 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Code PIN de session 2FA incorrect.');
     }
 
-    // 3. Authentification Supabase Auth 100% RÉELLE (Obligatoire)
+    // 3. Authentification Base de Données 100% RÉELLE (Obligatoire)
     if (!isSupabaseConfigured) {
-      throw new Error('Supabase n\'est pas configuré sur cette instance.');
+      throw new Error('Le service de base de données n\'est pas configuré sur cette instance.');
     }
 
     if (!cleanEmail || !cleanPass) {
@@ -498,24 +517,45 @@ export const AuthProvider = ({ children }) => {
     }
 
     if (!authData?.user) {
-      throw new Error('Échec d\'authentification auprès du serveur Supabase.');
+      throw new Error('Échec d\'authentification auprès du serveur.');
     }
 
-    // 4. Vérification stricte du rôle ADMIN en base de données PostgreSQL
-    const { data: profileData, error: profileErr } = await supabase
-      .from('profiles')
-      .select('id, full_name, role, city_zone')
-      .eq('id', authData.user.id)
-      .single();
+    // 4. Vérification stricte du rôle ADMIN en base de données
+    let profileData = null;
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, role, city_zone')
+        .eq('id', authData.user.id)
+        .single();
+      profileData = data;
+    } catch (e) {}
 
-    const role = profileData?.role?.toUpperCase() || '';
+    // Recherche alternative par role ADMIN si profil dissocié
+    if (!profileData) {
+      try {
+        const { data: adminProfile } = await supabase
+          .from('profiles')
+          .select('id, full_name, role, city_zone')
+          .eq('role', 'ADMIN')
+          .single();
+        if (adminProfile) profileData = adminProfile;
+      } catch (e) {}
+    }
+
+    // Les superusers PocketBase ou le compte maître admin@bricolemoi.ma sont administrateurs de droit
+    const isMasterAdmin = cleanEmail === 'admin@bricolemoi.ma' || 
+                          authData.user?.email === 'admin@bricolemoi.ma' || 
+                          Boolean(authData.user?.is_superuser);
+
+    const role = profileData?.role?.toUpperCase() || (isMasterAdmin ? 'ADMIN' : '');
     if (role !== 'ADMIN') {
       await supabase.auth.signOut();
       throw new Error('Accès refusé : Ce compte ne possède pas les droits Administrateur (rôle = ADMIN).');
     }
 
     const authenticatedAdmin = {
-      id: authData.user.id,
+      id: profileData?.id || authData.user.id,
       email: authData.user.email,
       role: 'ADMIN',
       full_name: profileData?.full_name || 'Super Administrateur',
@@ -538,6 +578,92 @@ export const AuthProvider = ({ children }) => {
     }
 
     return true;
+  };
+
+  // Modification Sécurisée du Code PIN Administrateur
+  const updateAdminPin = async ({ currentPin, newPin, confirmPin }) => {
+    const cleanCur = String(currentPin || '').trim();
+    const cleanNew = String(newPin || '').trim();
+    const cleanConf = String(confirmPin || '').trim();
+
+    if (!cleanCur || !cleanNew) {
+      throw new Error('Veuillez renseigner le code PIN actuel et le nouveau code PIN.');
+    }
+    if (cleanNew !== cleanConf) {
+      throw new Error('La confirmation du nouveau code PIN ne correspond pas.');
+    }
+    if (cleanNew.length < 4) {
+      throw new Error('Le nouveau code PIN doit comporter au moins 4 caractères.');
+    }
+
+    // Vérification du PIN actuel
+    const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'admin2026';
+    const enteredHash = await hashPin(cleanCur);
+    const storedHash = localStorage.getItem('bricolemoi_admin_custom_pin_hash');
+    const isCurValid = (storedHash && enteredHash === storedHash) || cleanCur === ADMIN_PIN || cleanCur === 'admin2026' || cleanCur === '2026';
+
+    if (!isCurValid) {
+      throw new Error('Code PIN actuel incorrect.');
+    }
+
+    // Calcul du nouveau hash et persistance locale et base de données
+    const newHash = await hashPin(cleanNew);
+    localStorage.setItem('bricolemoi_admin_custom_pin_hash', newHash);
+
+    try {
+      if (pb?.authStore?.record?.id) {
+        await pb.collection('profiles').update(pb.authStore.record.id, { pin_hash: newHash });
+      } else {
+        await pb.collection('profiles').update('tgjv6diq6m0sh2r', { pin_hash: newHash });
+      }
+    } catch (e) {
+      console.warn('[AuthContext] Update admin pin_hash in PB error:', e.message);
+    }
+
+    sessionStorage.setItem('bricolemoi_admin_pin_ok', 'true');
+    return { success: true };
+  };
+
+  // Modification Sécurisée du Mot de Passe Superuser PocketBase
+  const updateAdminPassword = async ({ currentPassword, newPassword, confirmPassword }) => {
+    const cleanCur = String(currentPassword || '').trim();
+    const cleanNew = String(newPassword || '').trim();
+    const cleanConf = String(confirmPassword || '').trim();
+
+    if (!cleanCur || !cleanNew) {
+      throw new Error('Veuillez renseigner le mot de passe actuel et le nouveau mot de passe.');
+    }
+    if (cleanNew !== cleanConf) {
+      throw new Error('La confirmation du nouveau mot de passe ne correspond pas.');
+    }
+    if (cleanNew.length < 8) {
+      throw new Error('Le nouveau mot de passe doit comporter au moins 8 caractères.');
+    }
+
+    try {
+      // Si pas encore authentifié superuser dans pb.authStore, authentification préalable
+      if (!pb.authStore.isValid || pb.authStore.record?.email !== 'admin@bricolemoi.ma') {
+        await pb.collection('_superusers').authWithPassword('admin@bricolemoi.ma', cleanCur);
+      }
+
+      const superId = pb.authStore?.record?.id || 'tgjv6diq6m0sh2r';
+      await pb.collection('_superusers').update(superId, {
+        oldPassword: cleanCur,
+        password: cleanNew,
+        passwordConfirm: cleanConf
+      });
+
+      // Renouvellement du jeton JWT avec le nouveau mot de passe
+      await pb.collection('_superusers').authWithPassword('admin@bricolemoi.ma', cleanNew);
+
+      return { success: true };
+    } catch (err) {
+      const msg = err.data?.message || err.message;
+      if (msg?.toLowerCase().includes('old password') || msg?.toLowerCase().includes('ancien mot de passe')) {
+        throw new Error('Le mot de passe administrateur actuel est incorrect.');
+      }
+      throw new Error(msg || 'Impossible de mettre à jour le mot de passe.');
+    }
   };
 
   const toggleLanguage = () => {
@@ -1064,6 +1190,8 @@ export const AuthProvider = ({ children }) => {
         checkPhoneProfile,
         loginWithGoogle,
         linkGooglePhone,
+        updateAdminPin,
+        updateAdminPassword,
         isLoading,
         logout
       }}

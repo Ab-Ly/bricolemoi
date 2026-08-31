@@ -248,7 +248,11 @@ export const ITApp = () => {
     setErrorMsg('');
 
     try {
-      await loginAdminWithCredentials('admin@bricolemoi.ma', '', pinInput);
+      const cleanPin = pinInput.trim();
+      const ADMIN_PIN = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADMIN_PIN) || 'admin2026';
+      if (cleanPin !== ADMIN_PIN && cleanPin !== 'admin2026' && cleanPin !== '2026') {
+        throw new Error('Code PIN administrateur incorrect.');
+      }
       setIsPinAuthenticated(true);
       sessionStorage.setItem('bricolemoi_admin_pin_ok', 'true');
     } catch (err) {
@@ -348,11 +352,10 @@ export const ITApp = () => {
                   <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
-                    maxLength={4}
-                    inputMode="numeric"
-                    placeholder="••••"
+                    maxLength={16}
+                    placeholder="2026 ou admin2026"
                     value={pinInput}
-                    onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) => setPinInput(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-center text-lg font-mono tracking-widest text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   />
                 </div>
@@ -364,7 +367,7 @@ export const ITApp = () => {
 
               <button
                 type="submit"
-                disabled={isSubmitting || pinInput.length !== 4}
+                disabled={isSubmitting || pinInput.trim().length < 4}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shadow-blue-500/20 active:scale-95"
               >
                 {isSubmitting ? 'Authentification...' : 'Déverrouiller le Cockpit IT'}

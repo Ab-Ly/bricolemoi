@@ -273,7 +273,17 @@ function createDbAdapter(pbInstance) {
       async signInWithPassword({ email, password }) {
         try {
           const authData = await pbInstance.collection('_superusers').authWithPassword(email, password);
-          return { data: { user: { id: authData.record.id, email: authData.record.email } }, error: null };
+          return {
+            data: {
+              user: {
+                id: authData.record.id,
+                email: authData.record.email,
+                role: 'ADMIN',
+                is_superuser: true
+              }
+            },
+            error: null
+          };
         } catch (err) {
           return { data: null, error: err };
         }

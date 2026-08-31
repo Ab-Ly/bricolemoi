@@ -25,7 +25,8 @@ import {
   Wallet,
   DollarSign,
   PiggyBank,
-  Terminal
+  Terminal,
+  KeyRound
 } from 'lucide-react';
 import { isRealRechargeTx, isLeadTx, isBonusTx, isRefundTx } from '../../utils/balanceUtils';
 import { switchSubdomainInDev } from '../../lib/subdomain';
@@ -35,6 +36,7 @@ import { AdminMaalemsView } from './AdminMaalemsView';
 import { AdminDisputesView } from './AdminDisputesView';
 import { AdminRechargesView } from './AdminRechargesView';
 import { AdminLoyaltyRewardsView } from './AdminLoyaltyRewardsView';
+import { AdminSecurityModal } from './AdminSecurityModal';
 import { auditPlatformState, healPlatformState } from '../../services/platformAuditReferee';
 
 export const AdminDashboard = () => {
@@ -62,6 +64,7 @@ export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('MISSIONS'); // 'CLIENTS' | 'MISSIONS' | 'MAALEMS' | 'DISPUTES' | 'RECHARGES' | 'REWARDS'
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showSecurityModal, setShowSecurityModal] = useState(false);
 
   // 🛡️ Audit en Temps Réel de l'Arbitre Déterministe
   const auditReport = useMemo(() => {
@@ -247,6 +250,17 @@ export const AdminDashboard = () => {
             >
               <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 shrink-0 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>{isRefreshing ? '...' : 'Actualiser'}</span>
+            </button>
+
+            {/* Bouton Sécurité & Identifiants Admin */}
+            <button
+              type="button"
+              onClick={() => setShowSecurityModal(true)}
+              className="flex-1 md:flex-none px-2.5 py-2 sm:px-3.5 sm:py-2.5 bg-white hover:bg-purple-50 text-slate-700 hover:text-purple-700 border border-slate-200 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+              title="Modifier le mot de passe admin et le code PIN de session 2FA"
+            >
+              <KeyRound className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 shrink-0" />
+              <span>Sécurité Accès</span>
             </button>
 
             {/* Bouton Accès Dédié Cockpit IT (Modern Clean & Trust) */}
@@ -837,6 +851,7 @@ export const AdminDashboard = () => {
           </div>
         )}
       </AnimatePresence>
+      <AdminSecurityModal isOpen={showSecurityModal} onClose={() => setShowSecurityModal(false)} />
     </div>
   );
 };
