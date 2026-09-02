@@ -97,12 +97,17 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
 
       const coords = getUserCoordinates();
 
+      const effectiveCity = currUser.city_zone || currUser.district || 'Casablanca';
+      const effectivePhone = currUser.phone || currUser.maalem_details?.phone || '';
+
       const presenceData = {
         id: currUser.id,
         user_id: currUser.id,
         full_name: currUser.full_name,
+        phone: effectivePhone,
+        district: effectiveCity,
+        city_zone: effectiveCity,
         specialty: currUser.maalem_details?.specialty || currUser.specialty || 'PLUMBING',
-        city_zone: currUser.city_zone || currUser.district || 'Casablanca',
         lat: coords.lat,
         lng: coords.lng,
         is_online: currOnline,

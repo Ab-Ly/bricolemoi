@@ -100,9 +100,15 @@ export const usePlatformDataSync = ({
         const existing = maalemMap.get(cleanId);
         const resolvedLivePos = latestPresenceCoordsRef.current.get(cleanId);
 
+        const memberPhone = member.phone || '';
+        const memberZone = member.city_zone || member.district || '';
+
         if (existing) {
           maalemMap.set(cleanId, {
             ...existing,
+            phone: memberPhone || existing.phone || '',
+            district: memberZone || existing.district || 'Casablanca',
+            city_zone: memberZone || existing.city_zone || 'Casablanca',
             is_online: true,
             is_available: true,
             lat: resolvedLivePos ? resolvedLivePos.lat : (member.lat !== undefined ? member.lat : existing.lat),
@@ -121,7 +127,7 @@ export const usePlatformDataSync = ({
           maalemMap.set(cleanId, {
             id: cleanId,
             full_name: member.full_name || 'Artisan Maalem',
-            phone: member.phone || '',
+            phone: memberPhone,
             specialty: member.specialty || 'PLUMBING',
             rating_avg: member.rating_avg ?? 5.0,
             is_verified: member.is_verified ?? true,
@@ -133,7 +139,8 @@ export const usePlatformDataSync = ({
             lat: member.lat || 33.5883,
             lng: member.lng || -7.6328,
             credit_balance: member.credit_balance ?? 0,
-            district: member.district || 'Casablanca',
+            district: memberZone || 'Casablanca',
+            city_zone: memberZone || 'Casablanca',
             last_seen_at: member.last_seen_at || Date.now()
           });
         }
