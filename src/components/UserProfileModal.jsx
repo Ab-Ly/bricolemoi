@@ -398,19 +398,19 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
           initial={{ scale: 0.94, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 10 }}
-          className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-4 sm:p-6 max-h-modal overflow-y-auto modal-scroll shadow-2xl relative text-slate-900 space-y-4 sm:space-y-5"
+          className="bg-white border border-slate-200/90 rounded-3xl max-w-lg sm:max-w-xl md:max-w-2xl w-full p-4 sm:p-6 max-h-[92vh] overflow-y-auto modal-scroll shadow-2xl relative text-slate-900 space-y-4 sm:space-y-5"
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer touch-target-44 active:scale-95 z-20"
+            className="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-700 w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer touch-target-44 active:scale-95 z-20"
             title="Fermer"
           >
             <X className="w-4 h-4" />
           </button>
 
           {/* Header Avatar & Role Badge */}
-          <div className="flex items-center gap-3.5 pt-1">
+          <div className="flex items-center gap-3.5 pt-1 pr-8">
             <div className="relative flex-shrink-0">
               {user.avatar_url ? (
                 <img 
@@ -479,15 +479,15 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             </motion.div>
           )}
 
-          {/* Tab Switcher */}
-          <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 gap-1 overflow-x-auto no-scrollbar scroll-smooth">
+          {/* Tab Switcher — Fluid Pill Navigation */}
+          <div className="flex bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80 gap-1.5 overflow-x-auto modal-scroll scrollbar-thin">
             <button
               type="button"
               onClick={() => setActiveTab('info')}
-              className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer text-center whitespace-nowrap ${
+              className={`shrink-0 py-2 px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer text-center whitespace-nowrap active:scale-95 ${
                 activeTab === 'info'
-                  ? isMaalem ? 'bg-amber-600 text-white shadow-xs' : 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? isMaalem ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-black' : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs font-black'
+                  : 'bg-white/60 hover:bg-white text-slate-700 hover:text-slate-900'
               }`}
             >
               Coordonnées
@@ -498,10 +498,10 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 <button
                   type="button"
                   onClick={() => setActiveTab('missions')}
-                  className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                  className={`shrink-0 py-2 px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 ${
                     activeTab === 'missions'
-                      ? 'bg-amber-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-black'
+                      : 'bg-white/60 hover:bg-white text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   <Wrench className="w-3.5 h-3.5" />
@@ -511,10 +511,10 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 <button
                   type="button"
                   onClick={() => setActiveTab('reviews')}
-                  className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                  className={`shrink-0 py-2 px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 ${
                     activeTab === 'reviews'
-                      ? 'bg-amber-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-black'
+                      : 'bg-white/60 hover:bg-white text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -524,10 +524,10 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
                 <button
                   type="button"
                   onClick={() => setActiveTab('transactions')}
-                  className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                  className={`shrink-0 py-2 px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 ${
                     activeTab === 'transactions'
-                      ? 'bg-amber-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-black'
+                      : 'bg-white/60 hover:bg-white text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   <Receipt className="w-3.5 h-3.5" />
@@ -540,10 +540,10 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
               <button
                 type="button"
                 onClick={() => setActiveTab('requests')}
-                className={`flex-1 min-w-[85px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+                className={`shrink-0 py-2 px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 ${
                   activeTab === 'requests'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs font-black'
+                    : 'bg-white/60 hover:bg-white text-slate-700 hover:text-slate-900'
                 }`}
               >
                 <HistoryIcon className="w-3.5 h-3.5" />
@@ -554,10 +554,10 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             <button
               type="button"
               onClick={() => setActiveTab('edit')}
-              className={`flex-1 min-w-[80px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+              className={`shrink-0 py-2 px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 ${
                 activeTab === 'edit'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-slate-900 text-white shadow-xs font-black'
+                  : 'bg-white/60 hover:bg-white text-slate-700 hover:text-slate-900'
               }`}
             >
               <Edit3 className="w-3 h-3" />
@@ -567,10 +567,10 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, onOpenEditProfi
             <button
               type="button"
               onClick={() => setActiveTab('pin')}
-              className={`flex-1 min-w-[80px] py-2 px-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${
+              className={`shrink-0 py-2 px-3.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 ${
                 activeTab === 'pin'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-slate-900 text-white shadow-xs font-black'
+                  : 'bg-white/60 hover:bg-white text-slate-700 hover:text-slate-900'
               }`}
             >
               <Lock className="w-3 h-3 text-amber-500" />
