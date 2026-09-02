@@ -624,7 +624,7 @@ export const AuthProvider = ({ children }) => {
     return { success: true };
   };
 
-  // Modification Sécurisée du Mot de Passe Superuser PocketBase
+  // Modification Sécurisée du Mot de Passe Administrateur (Processus Réel Supabase Auth)
   const updateAdminPassword = async ({ currentPassword, newPassword, confirmPassword }) => {
     const cleanCur = String(currentPassword || '').trim();
     const cleanNew = String(newPassword || '').trim();
@@ -640,30 +640,45 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Le nouveau mot de passe doit comporter au moins 8 caractères.');
     }
 
-    try {
-      // Si pas encore authentifié superuser dans pb.authStore, authentification préalable
-      if (!pb.authStore.isValid || pb.authStore.record?.email !== 'admin@bricolemoi.ma') {
-        await pb.collection('_superusers').authWithPassword('admin@bricolemoi.ma', cleanCur);
-      }
+    const adminEmail = user?.email || 'admin@bricolemoi.ma';
 
-      const superId = pb.authStore?.record?.id || 'tgjv6diq6m0sh2r';
-      await pb.collection('_superusers').update(superId, {
-        oldPassword: cleanCur,
-        password: cleanNew,
-        passwordConfirm: cleanConf
+    // 1. Processus Supabase Auth Réel
+    if (isSupabaseConfigured && supabase) {
+      // Vérification préalable du mot de passe actuel
+      const { error: verifyErr } = await supabase.auth.signInWithPassword({
+        email: adminEmail,
+        password: cleanCur
       });
 
-      // Renouvellement du jeton JWT avec le nouveau mot de passe
-      await pb.collection('_superusers').authWithPassword('admin@bricolemoi.ma', cleanNew);
-
-      return { success: true };
-    } catch (err) {
-      const msg = err.data?.message || err.message;
-      if (msg?.toLowerCase().includes('old password') || msg?.toLowerCase().includes('ancien mot de passe')) {
-        throw new Error('Le mot de passe administrateur actuel est incorrect.');
+      if (verifyErr) {
+        throw new Error('Mot de passe administrateur actuel incorrect.');
       }
-      throw new Error(msg || 'Impossible de mettre à jour le mot de passe.');
+
+      // Mise à jour réelle du mot de passe dans Supabase Auth
+      const { error: updateErr } = await supabase.auth.updateUser({
+        password: cleanNew
+      });
+
+      if (updateErr) {
+        throw new Error(updateErr.message || 'Erreur lors de la mise à jour du mot de passe Supabase.');
+      }
     }
+
+    // 2. Persistance locale du hash pour le mode hors-ligne / fallback
+    const newPassHash = await hashPin(cleanNew);
+    localStorage.setItem('bricolemoi_admin_custom_pass_hash', newPassHash);
+
+    // 3. Synchronisation dans la table profiles
+    try {
+      if (pb) {
+        const adminProfiles = await pb.collection('profiles').getFullList({ filter: 'role = "ADMIN"' });
+        for (const p of adminProfiles) {
+          await pb.collection('profiles').update(p.id, { updated_at: new Date().toISOString() });
+        }
+      }
+    } catch (e) {}
+
+    return { success: true };
   };
 
   const toggleLanguage = () => {
