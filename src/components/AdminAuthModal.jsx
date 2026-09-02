@@ -96,7 +96,7 @@ export const AdminAuthModal = () => {
               {/* 2. Mot de Passe Admin */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Mot de Passe Supabase
+                  Mot de Passe Administrateur
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -158,7 +158,7 @@ export const AdminAuthModal = () => {
             <div className="pt-3 mt-3 border-t border-slate-100 text-center">
               <p className="text-[11px] text-slate-400 flex items-center justify-center gap-1">
                 <Sparkles className="w-3 h-3 text-purple-500" />
-                Session chiffrée &amp; vérifiée côté serveur PostgreSQL
+                Session chiffrée &amp; vérifiée côté serveur haute sécurité
               </p>
             </div>
           </motion.div>
