@@ -232,18 +232,22 @@ export const MaalemLeadsFeed = ({
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-slate-500">
-                      Coût :{' '}
-                      <span className="text-slate-900 font-mono font-black">15.00 DH</span>
-                    </span>
+                  <div className="pt-3 border-t border-slate-100 flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-mono">
+                        Déblocage :
+                      </span>
+                      <span className="text-slate-900 font-mono font-black text-sm px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200">
+                        15.00 DH
+                      </span>
+                    </div>
 
                     <motion.button
-                      whileTap={{ scale: 0.92 }}
+                      whileTap={{ scale: 0.94 }}
                       onClick={() => handleUnlockLead(item.id)}
-                      className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 active:scale-90 cursor-pointer"
+                      className="w-full xs:w-auto px-4 py-3 min-h-[44px] bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                     >
-                      <CheckCircle2 className="w-4 h-4" />
+                      <CheckCircle2 className="w-4 h-4 text-amber-100" />
                       <span>Débloquer le Lead (-15 DH) 🔓</span>
                     </motion.button>
                   </div>

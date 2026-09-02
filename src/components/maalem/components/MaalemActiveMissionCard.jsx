@@ -33,7 +33,7 @@ export const MaalemActiveMissionCard = ({
 
   return (
     <div id="active-unlocked-missions-section" className="space-y-4 scroll-mt-6">
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border-2 border-emerald-500/80 shadow-sm space-y-2">
+      <div className="p-4 sm:p-5 rounded-3xl bg-emerald-50/70 border border-emerald-200/90 shadow-2xs space-y-2">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center shadow-xs flex-shrink-0 animate-pulse">
@@ -45,7 +45,7 @@ export const MaalemActiveMissionCard = ({
             </h3>
           </div>
 
-          <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black tracking-wide uppercase border border-emerald-300 shrink-0 shadow-xs">
+          <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black tracking-wide uppercase border border-emerald-300 shrink-0 shadow-2xs">
             ⚡ Action Immédiate
           </span>
         </div>
@@ -91,7 +91,7 @@ export const MaalemActiveMissionCard = ({
             <div
               key={lead.id}
               id={`active-lead-${lead.id}`}
-              className="bg-white border-2 border-emerald-500/90 rounded-3xl p-5 shadow-md space-y-4 text-slate-900 transition-all hover:shadow-lg"
+              className="bg-white border border-emerald-300 rounded-3xl p-4 sm:p-5 shadow-sm ring-1 ring-emerald-400/20 space-y-4 text-slate-900 transition-all hover:shadow-md"
             >
               {/* Header: Badge & Métier */}
               <div className="flex flex-wrap items-center justify-between gap-2">
