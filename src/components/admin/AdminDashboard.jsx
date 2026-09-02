@@ -7,30 +7,18 @@ import {
   Activity, 
   Wrench, 
   ShieldAlert, 
-  Coins, 
   RefreshCw, 
   ShieldCheck, 
-  Sparkles, 
-  Clock, 
-  CheckCircle2, 
-  AlertTriangle,
-  Receipt,
-  FileSpreadsheet,
-  Gift,
-  SearchCheck,
-  Zap,
-  X,
-  Radio,
-  TrendingUp,
-  Wallet,
-  DollarSign,
-  PiggyBank,
-  Terminal,
-  KeyRound
+  SearchCheck, 
+  Terminal, 
+  KeyRound, 
+  Receipt, 
+  Gift 
 } from 'lucide-react';
-import { isRealRechargeTx, isLeadTx, isBonusTx, isRefundTx, calculateMaalemBalance } from '../../utils/balanceUtils';
-import { deduplicateMaalems } from '../../services/dataReconciliationService';
 import { switchSubdomainInDev } from '../../lib/subdomain';
+import { auditPlatformState, healPlatformState } from '../../services/platformAuditReferee';
+
+// Sous-composants & Vues
 import { AdminClientsView } from './AdminClientsView';
 import { AdminLiveMissions } from './AdminLiveMissions';
 import { AdminMaalemsView } from './AdminMaalemsView';
@@ -38,7 +26,9 @@ import { AdminDisputesView } from './AdminDisputesView';
 import { AdminRechargesView } from './AdminRechargesView';
 import { AdminLoyaltyRewardsView } from './AdminLoyaltyRewardsView';
 import { AdminSecurityModal } from './AdminSecurityModal';
-import { auditPlatformState, healPlatformState } from '../../services/platformAuditReferee';
+import { AdminAuditModal } from './components/AdminAuditModal';
+import { AdminKpiBanners } from './components/AdminKpiBanners';
+import { useAdminKpis } from './hooks/useAdminKpis';
 
 export const AdminDashboard = () => {
   const { user } = useAuth();
@@ -58,14 +48,33 @@ export const AdminDashboard = () => {
     cancelIntervention,
     approveRecharge,
     rejectRecharge,
-    generateReceiptPDF,
-    ablyOnlineMaalemsCount
+    generateReceiptPDF
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState('MISSIONS'); // 'CLIENTS' | 'MISSIONS' | 'MAALEMS' | 'DISPUTES' | 'RECHARGES' | 'REWARDS'
+  const [activeTab, setActiveTab] = useState('MISSIONS'); // 'CLIENTS' | 'MISSIONS' | 'MAALEMS' | 'DISPUTES' | 'RECHARGES' | 'LOYALTY'
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
+
+  // Hook modulaire de KPIs
+  const {
+    pendingSOSCount,
+    inProgressSOSCount,
+    activeSOSCount,
+    completedSOSCount,
+    uniqueMaalems,
+    onlineMaalemsCount,
+    activeClientsCount,
+    pendingDisputesCount,
+    pendingRechargesCount,
+    financialMetrics
+  } = useAdminKpis({
+    interventions,
+    transactions,
+    maalems,
+    clients,
+    adminAlerts
+  });
 
   // 🛡️ Audit en Temps Réel de l'Arbitre Déterministe
   const auditReport = useMemo(() => {
@@ -85,126 +94,6 @@ export const AdminDashboard = () => {
     }
     setTimeout(() => setIsRefreshing(false), 600);
   };
-
-  const handleHealPlatform = () => {
-    const healed = healPlatformState({ interventions, maalems, transactions, reviews });
-    if (healed) {
-      if (refreshData) refreshData();
-      setShowAuditModal(false);
-    }
-  };
-
-  // Calcul des métriques globales en direct et détaillées
-  const pendingSOSCount = interventions.filter((i) => i.status === 'PENDING').length;
-  const inProgressSOSCount = interventions.filter(
-    (i) =>
-      i.status !== 'COMPLETED' &&
-      i.status !== 'CANCELLED' &&
-      i.status !== 'UNFEASIBLE' &&
-      i.status !== 'UNREACHABLE_REFUNDED' &&
-      (i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.progress_step === 'ON_THE_WAY' || i.progress_step === 'ARRIVED')
-  ).length;
-  const activeSOSCount = pendingSOSCount + inProgressSOSCount;
-  const completedSOSCount = interventions.filter((i) => i.status === 'COMPLETED').length;
-
-  // Artisans uniques dédupliqués de manière stricte (zéro doublon de numéro ni d'alias)
-  const uniqueMaalems = useMemo(() => deduplicateMaalems(maalems), [maalems]);
-  const onlineMaalemsCount = uniqueMaalems.filter((m) => m.is_online).length;
-  const activeClientsCount = (clients || []).filter((c) => !c.is_suspended).length;
-  const resolvedDisputesMap = React.useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('bricolemoi_resolved_disputes') || '{}');
-    } catch (e) {
-      return {};
-    }
-  }, []);
-
-  const pendingDisputesCount = React.useMemo(() => {
-    const map = new Map();
-
-    (adminAlerts || []).forEach((a) => {
-      if (a && (a.intervention_id || a.id)) {
-        map.set(String(a.intervention_id || a.id), a.status);
-      }
-    });
-
-    (interventions || []).forEach((intv) => {
-      if (!intv) return;
-      const intId = String(intv.id);
-      if (map.has(intId)) {
-        if (intv.unfeasible_notes?.startsWith('REJECTED')) {
-          map.set(intId, 'REJECTED');
-        }
-        return;
-      }
-
-      const hasLowRating = intv.rating && Number(intv.rating) <= 2;
-      const hasUnreachable = Boolean(intv.unreachable_reason);
-      const hasUnfeasible = Boolean(intv.unfeasible_reason);
-
-      if (hasLowRating || hasUnreachable || hasUnfeasible) {
-        let status = 'PENDING';
-        if (intv.status === 'UNREACHABLE_REFUNDED' || resolvedDisputesMap[intId] === 'REFUNDED_RESOLVED') {
-          status = 'REFUNDED_RESOLVED';
-        } else if (
-          intv.unfeasible_notes?.startsWith('REJECTED') ||
-          resolvedDisputesMap[intId] === 'REJECTED' ||
-          intv.dispute_status === 'REJECTED'
-        ) {
-          status = 'REJECTED';
-        }
-        map.set(intId, status);
-      }
-    });
-
-  }, [adminAlerts, interventions, resolvedDisputesMap]);
-  const pendingRechargesCount = transactions.filter((t) => t.status === 'PENDING').length;
-
-  // --- 💼 Bilan Financier & Trésorerie Haute Précision ---
-  const financialMetrics = useMemo(() => {
-    // 1. CA Brut Encaissé (Recharges Bancaires réelles payées par les artisans, hors remboursements et hors bonus)
-    const grossRevenueEncaissed = (transactions || [])
-      .filter((t) => (t.status === 'VALIDATED' || t.status === 'APPROVED' || t.status === 'COMPLETED') && isRealRechargeTx(t))
-      .reduce((sum, t) => sum + (parseFloat(t.amount_dh) || 0), 0);
-
-    // 2. Déblocages et Missions Réalisées (15 DH par mission débloquée)
-    const unlockedMissions = (interventions || []).filter(
-      (i) => i.status === 'ACCEPTED' || i.status === 'IN_PROGRESS' || i.status === 'COMPLETED'
-    );
-    const unlockedMissionsCount = unlockedMissions.length;
-    const netEarnedCommissions = unlockedMissionsCount * 15;
-
-    // 3. Soldes Détenus par les Maâlems (Calcul dynamique et infaillible du solde réel disponible)
-    const totalMaalemCredits = uniqueMaalems.reduce((sum, m) => {
-      const bal = calculateMaalemBalance(m, transactions, uniqueMaalems).liveAvailableBalance;
-      return sum + (parseFloat(bal) || 0);
-    }, 0);
-    const unspentRealCash = Math.max(0, grossRevenueEncaissed - netEarnedCommissions);
-    const unspentBonusCredits = Math.max(0, totalMaalemCredits - unspentRealCash);
-
-    // 4. Volume d'Affaires Global Chantiers Accord Direct (Montant total des travaux réalisés)
-    const completedMissions = (interventions || []).filter((i) => i.status === 'COMPLETED');
-    const directChantiersVolume = completedMissions.reduce(
-      (sum, i) => sum + (parseFloat(i.final_agreed_price) || parseFloat(i.price) || 0), 0
-    );
-
-    // 5. Total des Remboursements Litiges (Avoirs SAV)
-    const totalRefundsDh = (transactions || [])
-      .filter((t) => isRefundTx(t) && (t.status === 'VALIDATED' || t.status === 'APPROVED'))
-      .reduce((sum, t) => sum + (parseFloat(t.amount_dh) || 0), 0);
-
-    return {
-      grossRevenueEncaissed,
-      netEarnedCommissions,
-      totalMaalemCredits,
-      unspentRealCash,
-      unspentBonusCredits,
-      directChantiersVolume,
-      completedMissionsCount: completedMissions.length,
-      totalRefundsDh,
-      unlockedMissionsCount
-    };
-  }, [transactions, interventions, maalems]);
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto pb-32 md:pb-16 font-sans px-2.5 sm:px-4">
@@ -229,7 +118,7 @@ export const AdminDashboard = () => {
           </div>
 
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap md:flex-nowrap items-center gap-2 sm:gap-2.5 w-full md:w-auto">
-            {/* Bouton Arbitre d'Audit Invariant */}
+            {/* Bouton Arbitre d'Audit */}
             <button
               type="button"
               onClick={() => setShowAuditModal(true)}
@@ -269,7 +158,7 @@ export const AdminDashboard = () => {
               <span>Sécurité Accès</span>
             </button>
 
-            {/* Bouton Accès Dédié Cockpit IT (Modern Clean & Trust) */}
+            {/* Bouton Accès Dédié Cockpit IT */}
             <button
               type="button"
               onClick={() => switchSubdomainInDev('IT')}
@@ -282,236 +171,26 @@ export const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* 💼 1. Bilan Financier & Trésorerie Haute Visibilité (Tout en Haut) */}
-        <div className="mt-3.5 sm:mt-6 p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-slate-50 via-blue-50/30 to-slate-50 border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-slate-200/80 mb-2.5 sm:mb-3.5 flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-xs">
-                <Coins className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </div>
-              <div>
-                <span className="text-xs sm:text-sm font-black text-slate-900 tracking-tight block">
-                  Bilan Financier &amp; Trésorerie
-                </span>
-                <span className="text-[9px] sm:text-[10px] text-slate-500 font-medium hidden sm:block">
-                  Suivi en direct des encaissements, commissions nettes et séquestre
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setActiveTab('RECHARGES')}
-              className="text-[10px] sm:text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-white hover:bg-blue-50 px-2.5 py-1 rounded-lg sm:rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer flex items-center gap-1 ml-auto"
-            >
-              <span>Recharges</span>
-              <TrendingUp className="w-3 h-3" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5">
-            {/* 1. CA Brut Encaissé */}
-            <div className="p-2.5 sm:p-3.5 rounded-xl bg-white border border-slate-200/90 shadow-xs space-y-0.5 sm:space-y-1">
-              <span className="text-[9px] sm:text-[11px] font-mono uppercase tracking-wider text-slate-500 font-bold block truncate">
-                CA Brut Encaissé
-              </span>
-              <p className="text-base sm:text-2xl font-black font-mono text-slate-900">
-                {financialMetrics.grossRevenueEncaissed.toLocaleString('fr-FR')} <span className="text-[10px] sm:text-xs font-normal text-slate-500 font-sans">DH</span>
-              </p>
-              <span className="text-[8px] sm:text-[10px] text-slate-400 font-mono block truncate">
-                Recharges réelles payées
-              </span>
-            </div>
-
-            {/* 2. CA Net Réalisé */}
-            <div className="p-2.5 sm:p-3.5 rounded-xl bg-white border border-emerald-200/90 shadow-xs space-y-0.5 sm:space-y-1 ring-1 ring-emerald-500/10">
-              <span className="text-[9px] sm:text-[11px] font-mono uppercase tracking-wider text-emerald-700 font-bold block truncate">
-                CA Net Réalisé
-              </span>
-              <p className="text-base sm:text-2xl font-black font-mono text-emerald-700">
-                {financialMetrics.netEarnedCommissions.toLocaleString('fr-FR')} <span className="text-[10px] sm:text-xs font-normal text-emerald-600 font-sans">DH</span>
-              </p>
-              <span className="text-[8px] sm:text-[10px] text-emerald-600 font-mono block truncate">
-                {financialMetrics.unlockedMissionsCount} lead{financialMetrics.unlockedMissionsCount > 1 ? 's' : ''} (15 DH/u)
-              </span>
-            </div>
-
-            {/* 3. Solde Non Consommé Maâlems */}
-            <div className="p-2.5 sm:p-3.5 rounded-xl bg-white border border-amber-200/90 shadow-xs space-y-0.5 sm:space-y-1 ring-1 ring-amber-500/10">
-              <span className="text-[9px] sm:text-[11px] font-mono uppercase tracking-wider text-amber-800 font-bold block truncate">
-                Crédits Non Consommés
-              </span>
-              <p className="text-base sm:text-2xl font-black font-mono text-amber-800">
-                {financialMetrics.totalMaalemCredits.toLocaleString('fr-FR')} <span className="text-[10px] sm:text-xs font-normal text-amber-700 font-sans">DH</span>
-              </p>
-              <span className="text-[8px] sm:text-[10px] text-amber-700 font-mono block truncate">
-                {financialMetrics.unspentRealCash} DH + {financialMetrics.unspentBonusCredits} DH bonus
-              </span>
-            </div>
-
-            {/* 4. Volume Global Chantiers */}
-            <div className="p-2.5 sm:p-3.5 rounded-xl bg-white border border-blue-200/90 shadow-xs space-y-0.5 sm:space-y-1 ring-1 ring-blue-500/10">
-              <span className="text-[9px] sm:text-[11px] font-mono uppercase tracking-wider text-blue-700 font-bold block truncate">
-                Volume Chantiers
-              </span>
-              <p className="text-base sm:text-2xl font-black font-mono text-blue-700">
-                {financialMetrics.directChantiersVolume.toLocaleString('fr-FR')} <span className="text-[10px] sm:text-xs font-normal text-blue-600 font-sans">DH</span>
-              </p>
-              <span className="text-[8px] sm:text-[10px] text-blue-500 font-mono block truncate">
-                {financialMetrics.completedMissionsCount > 0
-                  ? `${financialMetrics.completedMissionsCount} chantiers directs`
-                  : 'Accords directs'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. 4 Compteurs KPI Essentiels & Interactifs (2x2 Mobile, 4 Cols Desktop) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5 mt-3.5 sm:mt-5 pt-3.5 sm:pt-5 border-t border-slate-100">
-          {/* Card 1 : Total Clients */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setActiveTab('CLIENTS')}
-            className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-1.5 sm:space-y-3 shadow-xs ${
-              activeTab === 'CLIENTS'
-                ? 'bg-blue-50/70 border-blue-400 shadow-sm ring-1 ring-blue-400/50'
-                : 'bg-white border-slate-200 hover:border-blue-300'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shadow-xs shrink-0">
-                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
-              </div>
-              <span className="text-[8px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                {activeClientsCount} actifs
-              </span>
-            </div>
-
-            <div>
-              <span className="text-[9px] sm:text-[11px] font-mono text-slate-500 uppercase tracking-wider block font-bold truncate">
-                Clients Enregistrés
-              </span>
-              <p className="text-lg sm:text-3xl font-black text-slate-900 font-mono mt-0.5">{clients.length}</p>
-            </div>
-
-            <div className="text-[8px] sm:text-[10px] text-slate-500 pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
-              <span className="truncate">Missions :</span>
-              <strong className="text-blue-700 font-black">{interventions.length}</strong>
-            </div>
-          </motion.div>
-
-          {/* Card 2 : Tour de Contrôle SOS */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setActiveTab('MISSIONS')}
-            className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-1.5 sm:space-y-3 shadow-xs ${
-              activeTab === 'MISSIONS'
-                ? 'bg-amber-50/70 border-amber-400 shadow-sm ring-1 ring-amber-400/50'
-                : 'bg-white border-slate-200 hover:border-amber-300'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shadow-xs shrink-0">
-                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" />
-              </div>
-              <span className="text-[8px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
-                <span>Live</span>
-              </span>
-            </div>
-
-            <div>
-              <span className="text-[9px] sm:text-[11px] font-mono text-amber-800 font-bold uppercase tracking-wider block truncate">
-                Urgences SOS Actives
-              </span>
-              <p className="text-lg sm:text-3xl font-black text-slate-900 font-mono mt-0.5">{activeSOSCount}</p>
-            </div>
-
-            <div className="text-[8px] sm:text-[10px] text-slate-500 pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
-              <span className="truncate">{pendingSOSCount} en attente</span>
-              <span>•</span>
-              <strong className="text-amber-800 font-bold">{inProgressSOSCount} en cours</strong>
-            </div>
-          </motion.div>
-
-          {/* Card 3 : Total Maâlems */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setActiveTab('MAALEMS')}
-            className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-1.5 sm:space-y-3 shadow-xs ${
-              activeTab === 'MAALEMS'
-                ? 'bg-emerald-50/70 border-emerald-400 shadow-sm ring-1 ring-emerald-400/50'
-                : 'bg-white border-slate-200 hover:border-emerald-300'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center shadow-xs shrink-0">
-                <Wrench className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-800" />
-              </div>
-              <span className="text-[8px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                <span>En Ligne</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              </span>
-            </div>
-
-            <div>
-              <span className="text-[9px] sm:text-[11px] font-mono text-emerald-800 uppercase tracking-wider block font-bold truncate">
-                Maâlems en Ligne
-              </span>
-              <p className="text-lg sm:text-3xl font-black text-slate-900 font-mono mt-0.5">{onlineMaalemsCount}</p>
-            </div>
-
-            <div className="text-[8px] sm:text-[10px] text-slate-500 pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
-              <span className="truncate">Réseau :</span>
-              <strong className="text-slate-900 font-bold">{uniqueMaalems.length} pro{uniqueMaalems.length > 1 ? 's' : ''}</strong>
-            </div>
-          </motion.div>
-
-          {/* Card 4 : Litiges à Arbitrer */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setActiveTab('DISPUTES')}
-            className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-1.5 sm:space-y-3 shadow-xs ${
-              activeTab === 'DISPUTES'
-                ? 'bg-rose-50/70 border-rose-400 shadow-sm ring-1 ring-rose-400/50'
-                : 'bg-white border-slate-200 hover:border-rose-300'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shadow-xs shrink-0">
-                <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-600" />
-              </div>
-              <span className={`text-[8px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full border ${
-                pendingDisputesCount > 0
-                  ? 'bg-rose-50 border-rose-200 text-rose-700 animate-pulse'
-                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
-              }`}>
-                {pendingDisputesCount > 0 ? 'Action' : '🟢 À jour'}
-              </span>
-            </div>
-
-            <div>
-              <span className="text-[9px] sm:text-[11px] font-mono text-rose-700 uppercase tracking-wider block font-bold truncate">
-                Litiges en Attente
-              </span>
-              <p className="text-lg sm:text-3xl font-black text-slate-900 font-mono mt-0.5">{pendingDisputesCount}</p>
-            </div>
-
-            <div className="text-[8px] sm:text-[10px] text-slate-500 pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
-              <span className="truncate">Recharges :</span>
-              <strong className="text-purple-700 font-bold">{pendingRechargesCount}</strong>
-            </div>
-          </motion.div>
-        </div>
+        {/* Bannières KPI Financières & Activité */}
+        <AdminKpiBanners
+          financialMetrics={financialMetrics}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          clientsCount={clients.length}
+          activeClientsCount={activeClientsCount}
+          interventionsCount={interventions.length}
+          activeSOSCount={activeSOSCount}
+          pendingSOSCount={pendingSOSCount}
+          inProgressSOSCount={inProgressSOSCount}
+          maalemsCount={uniqueMaalems.length}
+          onlineMaalemsCount={onlineMaalemsCount}
+          pendingDisputesCount={pendingDisputesCount}
+        />
       </div>
 
-      {/* 2. Barre de Navigation par Onglets Métier (Segmented Control SaaS Pro : 6 Cols Desktop / Scroll Horizontal Mobile) */}
+      {/* 2. Barre de Navigation par Onglets Métier */}
       <div className="bg-slate-100/95 border border-slate-200 p-1.5 rounded-2xl shadow-xs overflow-x-auto no-scrollbar">
         <div className="flex lg:grid lg:grid-cols-6 gap-1.5 min-w-max lg:min-w-0">
-          {/* Tab 1: Clients */}
           <button
             type="button"
             onClick={() => setActiveTab('CLIENTS')}
@@ -530,7 +209,6 @@ export const AdminDashboard = () => {
             </span>
           </button>
 
-          {/* Tab 2: Tour de Contrôle Live */}
           <button
             type="button"
             onClick={() => setActiveTab('MISSIONS')}
@@ -549,7 +227,6 @@ export const AdminDashboard = () => {
             </span>
           </button>
 
-          {/* Tab 3: Maâlems */}
           <button
             type="button"
             onClick={() => setActiveTab('MAALEMS')}
@@ -568,7 +245,6 @@ export const AdminDashboard = () => {
             </span>
           </button>
 
-          {/* Tab 4: Litiges & Remplacement */}
           <button
             type="button"
             onClick={() => setActiveTab('DISPUTES')}
@@ -579,19 +255,14 @@ export const AdminDashboard = () => {
             }`}
           >
             <ShieldAlert className={`w-4 h-4 shrink-0 ${activeTab === 'DISPUTES' ? 'text-rose-600' : 'text-slate-500'}`} />
-            <span>Litiges &amp; SAV</span>
-            {pendingDisputesCount > 0 ? (
-              <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-mono font-black animate-pulse">
-                {pendingDisputesCount}
-              </span>
-            ) : (
-              <span className="px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600 text-[10px] font-mono font-bold">
-                0
-              </span>
-            )}
+            <span>Litiges &amp; Arbitrage</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
+              pendingDisputesCount > 0 ? 'bg-rose-100 text-rose-900 animate-pulse' : 'bg-slate-200/80 text-slate-600'
+            }`}>
+              {pendingDisputesCount}
+            </span>
           </button>
 
-          {/* Tab 5: Recharges */}
           <button
             type="button"
             onClick={() => setActiveTab('RECHARGES')}
@@ -603,39 +274,29 @@ export const AdminDashboard = () => {
           >
             <Receipt className={`w-4 h-4 shrink-0 ${activeTab === 'RECHARGES' ? 'text-purple-600' : 'text-slate-500'}`} />
             <span>Recharges</span>
-            {pendingRechargesCount > 0 ? (
-              <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-mono font-black animate-pulse">
-                {pendingRechargesCount}
-              </span>
-            ) : (
-              <span className="px-1.5 py-0.2 rounded-full bg-slate-200/80 text-slate-600 text-[10px] font-mono font-bold">
-                0
-              </span>
-            )}
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
+              pendingRechargesCount > 0 ? 'bg-purple-100 text-purple-900 animate-pulse' : 'bg-slate-200/80 text-slate-600'
+            }`}>
+              {pendingRechargesCount}
+            </span>
           </button>
 
-          {/* Tab 6: Gratuités & Fidélité 4/4 */}
           <button
             type="button"
             onClick={() => setActiveTab('LOYALTY')}
             className={`py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'LOYALTY'
-                ? 'bg-white text-indigo-700 shadow-sm font-black border border-slate-200/90'
+                ? 'bg-white text-amber-700 shadow-sm font-black border border-slate-200/90'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
             }`}
           >
-            <Gift className={`w-4 h-4 shrink-0 ${activeTab === 'LOYALTY' ? 'text-indigo-600' : 'text-slate-500'}`} />
-            <span>Fidélité 4/4</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
-              activeTab === 'LOYALTY' ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-200/80 text-slate-600'
-            }`}>
-              {loyaltyRewardsHistory.length}
-            </span>
+            <Gift className={`w-4 h-4 shrink-0 ${activeTab === 'LOYALTY' ? 'text-amber-600' : 'text-slate-500'}`} />
+            <span>Fidélité &amp; Badges</span>
           </button>
         </div>
       </div>
 
-      {/* 3. Contenu de l'Onglet Actif (100% Métier) */}
+      {/* 3. Vues Métier Conditionnelles */}
       <AnimatePresence mode="wait">
         {activeTab === 'CLIENTS' && (
           <motion.div
@@ -732,133 +393,18 @@ export const AdminDashboard = () => {
         )}
       </AnimatePresence>
 
-      {/* 🛡️ Modale Interactive d'Arbitrage et Santé Système */}
-      <AnimatePresence>
-        {showAuditModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-7 max-w-2xl w-full shadow-2xl space-y-5 max-h-modal overflow-y-auto modal-scroll pb-safe text-slate-900"
-            >
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3 sm:pb-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
-                    auditReport.healthStatus === 'OPTIMAL' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                  }`}>
-                    <ShieldCheck className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-black text-slate-900">
-                      Arbitre d'Audit &amp; Invariants Plateforme
-                    </h3>
-                    <p className="text-xs text-slate-500 font-mono">
-                      Supervision automatique continue des 3 piliers (Client - Maâlem - Admin)
-                    </p>
-                  </div>
-                </div>
+      {/* Modale interactive d'audit */}
+      <AdminAuditModal
+        isOpen={showAuditModal}
+        onClose={() => setShowAuditModal(false)}
+        auditReport={auditReport}
+      />
 
-                <button
-                  type="button"
-                  onClick={() => setShowAuditModal(false)}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer touch-target-44 active:scale-95"
-                  title="Fermer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Score & Métriques */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                  <span className="text-[10px] font-mono uppercase text-slate-500 font-bold">Score Intégrité</span>
-                  <p className={`text-2xl font-black font-mono ${
-                    auditReport.score >= 90 ? 'text-emerald-600' : 'text-amber-600'
-                  }`}>
-                    {auditReport.score}%
-                  </p>
-                </div>
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                  <span className="text-[10px] font-mono uppercase text-slate-500 font-bold">Missions Audités</span>
-                  <p className="text-2xl font-black font-mono text-slate-900">{auditReport.totalAudited.interventions}</p>
-                </div>
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                  <span className="text-[10px] font-mono uppercase text-slate-500 font-bold">Écritures Grand Livre</span>
-                  <p className="text-2xl font-black font-mono text-slate-900">{auditReport.totalAudited.transactions}</p>
-                </div>
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                  <span className="text-[10px] font-mono uppercase text-slate-500 font-bold">Anomalies</span>
-                  <p className={`text-2xl font-black font-mono ${
-                    auditReport.issues.length === 0 ? 'text-emerald-600' : 'text-amber-600'
-                  }`}>
-                    {auditReport.issues.length}
-                  </p>
-                </div>
-              </div>
-
-              {/* Liste des Invariants Vérifiés */}
-              <div className="space-y-2.5">
-                <h4 className="text-xs font-black uppercase text-slate-500 font-mono tracking-wider">
-                  Contrôles Invariants Temps Réel :
-                </h4>
-
-                <div className="space-y-2 text-xs">
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <span className="font-bold text-slate-700">1. Grand Livre Financier (Soldes Maâlems = Recharges - Débits)</span>
-                    <span className="text-emerald-600 font-bold">✓ Conforme</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <span className="font-bold text-slate-700">2. Identité &amp; Contacts (Vrai Nom &amp; Téléphone sur Déblocage)</span>
-                    <span className="text-emerald-600 font-bold">✓ Conforme</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <span className="font-bold text-slate-700">3. Géolocalisation &amp; GPS (Zéro Déroutement Forcé)</span>
-                    <span className="text-emerald-600 font-bold">✓ Conforme</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <span className="font-bold text-slate-700">4. Ségrégation des Badges d'Avis (Notes 1-3★ vs 4-5★)</span>
-                    <span className="text-emerald-600 font-bold">✓ Conforme</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <span className="font-bold text-slate-700">5. Schéma UUID &amp; Clés Étrangères PostgreSQL Supabase</span>
-                    <span className="text-emerald-600 font-bold">✓ Conforme</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Détails des Anomalies Éventuelles */}
-              {auditReport.issues.length > 0 && (
-                <div className="space-y-2 p-4 bg-amber-50/80 border border-amber-200 rounded-2xl text-xs">
-                  <h4 className="font-black text-amber-900 flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    <span>Journal des alertes de l'arbitre :</span>
-                  </h4>
-                  <ul className="space-y-1.5 list-disc pl-4 text-amber-800">
-                    {auditReport.issues.map((iss, idx) => (
-                      <li key={idx}>
-                        <strong>{iss.title}</strong>: {iss.message}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Bouton de Fermeture */}
-              <div className="flex justify-end pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setShowAuditModal(false)}
-                  className="w-full sm:w-auto px-6 py-3 min-h-[44px] bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer touch-target-44 active:scale-95"
-                >
-                  Fermer l'Arbitre
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-      <AdminSecurityModal isOpen={showSecurityModal} onClose={() => setShowSecurityModal(false)} />
+      {/* Modale de sécurité admin */}
+      <AdminSecurityModal
+        isOpen={showSecurityModal}
+        onClose={() => setShowSecurityModal(false)}
+      />
     </div>
   );
 };
