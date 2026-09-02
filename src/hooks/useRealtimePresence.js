@@ -6,6 +6,7 @@ import { db } from '../lib/dbClient';
 /**
  * Hook React pour la gestion de Présence & Tracking GPS Temps Réel
  * 100% propulsé par Centrifugo v5 (Open Source sur VPS) et Heartbeat Dynamique.
+ * Intègre un anti-écho strict et un throttling pour éliminer tout risque de boucle infinie.
  *
  * @param {object} options
  * @param {object} options.user - Profil utilisateur actuel
@@ -21,6 +22,7 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
   const geoWatchIdRef = useRef(null);
   const heartbeatTimerRef = useRef(null);
   const lastLocationUpdateRef = useRef({ lat: null, lng: null, timestamp: 0 });
+  const lastBroadcastTimeRef = useRef(0);
   const isOnlineRef = useRef(isOnline);
   const userRef = useRef(user);
 
@@ -88,12 +90,19 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
     return { lat, lng };
   }, []);
 
-  // Émettre son propre heartbeat / mise à jour de présence
+  // Émettre son propre heartbeat / mise à jour de présence avec throttling strict (15s minimum)
   const broadcastSelfPresence = useCallback(
-    async (customData = {}) => {
+    async (customData = {}, force = false) => {
       const currUser = userRef.current;
       const currOnline = isOnlineRef.current;
       if (!currUser || currUser.role !== 'MAALEM') return;
+
+      const now = Date.now();
+      // Throttling strict : max 1 émission toutes les 15s sauf si forcé
+      if (!force && now - lastBroadcastTimeRef.current < 15000) {
+        return;
+      }
+      lastBroadcastTimeRef.current = now;
 
       const coords = getUserCoordinates();
 
@@ -115,7 +124,7 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
         credit_balance: currUser.maalem_details?.credit_balance ?? currUser.credits ?? 0,
         rating_avg: currUser.maalem_details?.rating_avg || 0,
         total_reviews: currUser.maalem_details?.total_reviews || 0,
-        last_seen_at: Date.now(),
+        last_seen_at: now,
         ...customData
       };
 
@@ -125,7 +134,7 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
           await centrifugo.publish(REALTIME_CHANNELS.PRESENCE_MAALEMS, {
             type: currOnline ? 'PRESENCE_HEARTBEAT' : 'PRESENCE_LEAVE',
             maalem: presenceData,
-            timestamp: Date.now()
+            timestamp: now
           });
         } catch (e) {}
       }
@@ -136,7 +145,7 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
         bc.postMessage({
           type: currOnline ? 'PRESENCE_HEARTBEAT' : 'PRESENCE_LEAVE',
           maalem: presenceData,
-          timestamp: Date.now()
+          timestamp: now
         });
         bc.close();
       } catch (e) {}
@@ -168,6 +177,19 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
       const m = message.maalem;
       const maalemId = m.id || m.user_id;
       if (!maalemId) return;
+
+      // 🛡️ PROTECTION ANTI-ÉCHO ABSOLUE :
+      // Si le heartbeat reçu est notre propre message diffusé par Centrifugo,
+      // l'ignorer pour ne JAMAIS déclencher de cycle infini de réconciliation !
+      const myId = userRef.current?.id;
+      const myPhone = userRef.current?.phone;
+      if (
+        myId &&
+        (String(maalemId).trim() === String(myId).trim() ||
+          (myPhone && m.phone && String(m.phone).replace(/\D/g, '').slice(-9) === String(myPhone).replace(/\D/g, '').slice(-9)))
+      ) {
+        return;
+      }
 
       setOnlineMaalemsMap((prev) => {
         const updated = { ...prev };
@@ -231,11 +253,18 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
     };
   }, [onPresenceChange]);
 
-  // Boucle de Heartbeat pour le Maâlem connecté
+  // Boucle de Heartbeat pour le Maâlem connecté (cadencé à 30 secondes sans boucle infinie)
   useEffect(() => {
-    if (!user || user.role !== 'MAALEM') return;
+    if (!user?.id || user?.role !== 'MAALEM' || !isOnline) {
+      if (heartbeatTimerRef.current) {
+        clearInterval(heartbeatTimerRef.current);
+        heartbeatTimerRef.current = null;
+      }
+      return;
+    }
 
-    broadcastSelfPresence();
+    // Premier heartbeat (forcé au montage/passage en ligne)
+    broadcastSelfPresence({}, true);
 
     heartbeatTimerRef.current = setInterval(() => {
       broadcastSelfPresence();
@@ -247,11 +276,11 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
         heartbeatTimerRef.current = null;
       }
     };
-  }, [user, isOnline, broadcastSelfPresence]);
+  }, [user?.id, user?.role, isOnline, broadcastSelfPresence]);
 
-  // Watcher GPS continu pour le Maâlem en service
+  // Watcher GPS continu pour le Maâlem en service (avec throttling de 30s)
   useEffect(() => {
-    if (!user || user.role !== 'MAALEM' || !isOnline) {
+    if (!user?.id || user?.role !== 'MAALEM' || !isOnline) {
       if (geoWatchIdRef.current !== null && typeof navigator !== 'undefined' && navigator.geolocation) {
         navigator.geolocation.clearWatch(geoWatchIdRef.current);
         geoWatchIdRef.current = null;
@@ -259,14 +288,21 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
       return;
     }
 
+    let lastGpsBroadcast = 0;
+
     if (typeof window !== 'undefined' && navigator.geolocation) {
       const handlePositionSuccess = (pos) => {
         const { latitude, longitude } = pos.coords;
         if (latitude > 20 && latitude < 38 && longitude < 0) {
+          const now = Date.now();
+          // Limiter les diffusions GPS à 30 secondes minimum
+          if (now - lastGpsBroadcast < 30000) return;
+          lastGpsBroadcast = now;
+
           lastLocationUpdateRef.current = {
             lat: latitude,
             lng: longitude,
-            timestamp: Date.now()
+            timestamp: now
           };
 
           try {
@@ -275,7 +311,7 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
               JSON.stringify({
                 lat: latitude,
                 lng: longitude,
-                updated_at: Date.now()
+                updated_at: now
               })
             );
           } catch (e) {}
@@ -304,7 +340,7 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
         {
           enableHighAccuracy: true,
           timeout: 12000,
-          maximumAge: 5000
+          maximumAge: 10000
         }
       );
 
@@ -315,7 +351,7 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
         }
       };
     }
-  }, [user, isOnline, broadcastSelfPresence]);
+  }, [user?.id, user?.role, isOnline, broadcastSelfPresence]);
 
   return {
     onlineMaalemsMap,

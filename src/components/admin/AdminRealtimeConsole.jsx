@@ -63,7 +63,10 @@ export const AdminRealtimeConsole = () => {
         if (isPausedRef.current) return;
 
         const rawData = data.payload !== undefined ? data.payload : data;
-        const eventName = data.event || data.name || (rawData.level ? rawData.category : 'EVENT');
+        const isPresence = channelName.includes('presence');
+        const eventName = isPresence 
+          ? (rawData.type || 'PRESENCE_HEARTBEAT')
+          : (data.event || data.name || (rawData.level ? rawData.category : 'EVENT'));
         const now = new Date();
         const timeStr = now.toLocaleTimeString('fr-FR', { 
           hour12: false, 
@@ -72,15 +75,32 @@ export const AdminRealtimeConsole = () => {
           second: '2-digit' 
         }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
 
+        let displayMessage = rawData.message;
+        if (!displayMessage) {
+          if (isPresence) {
+            const mName = rawData.maalem?.full_name || 'Artisan';
+            const mZone = rawData.maalem?.district || rawData.maalem?.city_zone || 'En service';
+            displayMessage = rawData.type === 'PRESENCE_LEAVE'
+              ? `🔴 Déconnexion Maâlem : ${mName} (${mZone})`
+              : `🟢 Heartbeat Maâlem : ${mName} (${mZone})`;
+          } else if (typeof rawData === 'string') {
+            displayMessage = rawData;
+          } else {
+            displayMessage = `Événement ${eventName}`;
+          }
+        }
+
         const newEvt = {
           id: 'evt-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
           channel: channelName,
           event: eventName,
           level: rawData.level || (String(eventName).toLowerCase().includes('sos') ? 'SOS' : 'INFO'),
-          category: rawData.category || (String(eventName).toLowerCase().includes('track') ? 'GPS' : 'REALTIME'),
-          message: rawData.message || (typeof rawData === 'string' ? rawData : `Événement ${eventName}`),
+          category: isPresence ? 'MAALEM' : (rawData.category || (String(eventName).toLowerCase().includes('track') ? 'GPS' : 'REALTIME')),
+          message: displayMessage,
           payload: rawData.data || rawData,
-          user: rawData.user || { role: 'SYSTEM', name: 'Passerelle VPS' },
+          user: isPresence && rawData.maalem
+            ? { role: 'MAALEM', name: rawData.maalem.full_name || 'Maâlem' }
+            : (rawData.user || { role: 'SYSTEM', name: 'Passerelle VPS' }),
           device: rawData.device || { summary: '🌐 Web • Centrifugo v5' },
           timestamp: timeStr,
           rawTimestamp: Date.now()
