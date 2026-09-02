@@ -1,8 +1,9 @@
-import { pb, toPbId, isPocketBaseConfigured } from './pocketbaseClient';
+import { pb, toPbId, generatePbId, isPocketBaseConfigured } from './pocketbaseClient';
 
 /**
  * Service de persistance et de synchronisation temps réel basé sur PocketBase
  * Architecture : Client - Maâlem - Admin (Zéro Donnée Forcée)
+ * Standardisation totale sur l'identifiant natif PocketBase (15 caractères alphanumériques)
  */
 
 export const dbService = {
@@ -12,7 +13,7 @@ export const dbService = {
       const records = await pb.collection('profiles').getFullList({ sort: '-created' });
       return records.map((r) => ({
         ...r,
-        id: r.uuid || r.id
+        id: r.id
       }));
     } catch (err) {
       console.warn('[PocketBase] Erreur getProfiles:', err);
@@ -24,7 +25,7 @@ export const dbService = {
     if (!phone) return null;
     try {
       const record = await pb.collection('profiles').getFirstListItem(`phone = "${phone}"`);
-      return { ...record, id: record.uuid || record.id };
+      return { ...record, id: record.id };
     } catch (err) {
       return null;
     }
@@ -32,14 +33,14 @@ export const dbService = {
 
   async getProfileById(idOrUuid) {
     if (!idOrUuid) return null;
+    const pbId = toPbId(idOrUuid);
     try {
-      const pbId = toPbId(idOrUuid);
       try {
         const r = await pb.collection('profiles').getOne(pbId);
-        return { ...r, id: r.uuid || r.id };
+        return { ...r, id: r.id };
       } catch (e) {
-        const r = await pb.collection('profiles').getFirstListItem(`uuid = "${idOrUuid}"`);
-        return { ...r, id: r.uuid || r.id };
+        const r = await pb.collection('profiles').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
+        return { ...r, id: r.id };
       }
     } catch (err) {
       return null;
@@ -48,11 +49,9 @@ export const dbService = {
 
   async upsertProfile(profile) {
     if (!profile) return null;
-    const uuid = profile.id || profile.uuid;
-    const pbId = toPbId(uuid);
+    const pbId = profile.id ? toPbId(profile.id) : generatePbId();
 
     const payload = {
-      uuid: uuid,
       phone: profile.phone,
       role: profile.role ? String(profile.role).toUpperCase() : undefined,
       full_name: profile.full_name || profile.name,
@@ -71,10 +70,10 @@ export const dbService = {
     try {
       try {
         const updated = await pb.collection('profiles').update(pbId, payload);
-        return { ...updated, id: updated.uuid || updated.id };
+        return { ...updated, id: updated.id };
       } catch (notFound) {
         const created = await pb.collection('profiles').create({ id: pbId, ...payload });
-        return { ...created, id: created.uuid || created.id };
+        return { ...created, id: created.id };
       }
     } catch (err) {
       console.error('[PocketBase] Échec upsertProfile:', err);
@@ -87,8 +86,15 @@ export const dbService = {
     const pbId = toPbId(idOrUuid);
     try {
       const updated = await pb.collection('profiles').update(pbId, fields);
-      return { ...updated, id: updated.uuid || updated.id };
+      return { ...updated, id: updated.id };
     } catch (err) {
+      try {
+        const item = await pb.collection('profiles').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
+        if (item) {
+          const updated = await pb.collection('profiles').update(item.id, fields);
+          return { ...updated, id: updated.id };
+        }
+      } catch (fallbackErr) {}
       console.error('[PocketBase] Échec updateProfile:', err);
       return null;
     }
@@ -100,7 +106,7 @@ export const dbService = {
       const records = await pb.collection('maalem_details').getFullList();
       return records.map((r) => ({
         ...r,
-        id: r.uuid || r.id
+        id: r.id
       }));
     } catch (err) {
       console.warn('[PocketBase] Erreur getMaalemDetailsList:', err);
@@ -114,10 +120,10 @@ export const dbService = {
     try {
       try {
         const r = await pb.collection('maalem_details').getOne(pbId);
-        return { ...r, id: r.uuid || r.id };
+        return { ...r, id: r.id };
       } catch (e) {
-        const r = await pb.collection('maalem_details').getFirstListItem(`uuid = "${idOrUuid}"`);
-        return { ...r, id: r.uuid || r.id };
+        const r = await pb.collection('maalem_details').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
+        return { ...r, id: r.id };
       }
     } catch (err) {
       return null;
@@ -126,11 +132,9 @@ export const dbService = {
 
   async upsertMaalemDetails(details) {
     if (!details) return null;
-    const uuid = details.id || details.uuid;
-    const pbId = toPbId(uuid);
+    const pbId = details.id ? toPbId(details.id) : generatePbId();
 
     const payload = {
-      uuid: uuid,
       specialty: details.specialty,
       specialties: details.specialties || [],
       cin_number: details.cin_number,
@@ -160,10 +164,10 @@ export const dbService = {
     try {
       try {
         const updated = await pb.collection('maalem_details').update(pbId, payload);
-        return { ...updated, id: updated.uuid || updated.id };
+        return { ...updated, id: updated.id };
       } catch (notFound) {
         const created = await pb.collection('maalem_details').create({ id: pbId, ...payload });
-        return { ...created, id: created.uuid || created.id };
+        return { ...created, id: created.id };
       }
     } catch (err) {
       console.error('[PocketBase] Échec upsertMaalemDetails:', err);
@@ -176,8 +180,15 @@ export const dbService = {
     const pbId = toPbId(idOrUuid);
     try {
       const updated = await pb.collection('maalem_details').update(pbId, fields);
-      return { ...updated, id: updated.uuid || updated.id };
+      return { ...updated, id: updated.id };
     } catch (err) {
+      try {
+        const item = await pb.collection('maalem_details').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
+        if (item) {
+          const updated = await pb.collection('maalem_details').update(item.id, fields);
+          return { ...updated, id: updated.id };
+        }
+      } catch (fallbackErr) {}
       console.error('[PocketBase] Échec updateMaalemDetails:', err);
       return null;
     }
@@ -189,7 +200,7 @@ export const dbService = {
       const records = await pb.collection('interventions').getFullList({ sort: '-created' });
       return records.map((r) => ({
         ...r,
-        id: r.uuid || r.id
+        id: r.id
       }));
     } catch (err) {
       console.warn('[PocketBase] Erreur getInterventions:', err);
@@ -199,14 +210,12 @@ export const dbService = {
 
   async createIntervention(intervention) {
     if (!intervention) return null;
-    const uuid = intervention.id || crypto.randomUUID();
-    const pbId = toPbId(uuid);
+    const pbId = intervention.id ? toPbId(intervention.id) : generatePbId();
 
     const payload = {
       id: pbId,
-      uuid: uuid,
-      client_id: intervention.client_id,
-      maalem_id: intervention.maalem_id,
+      client_id: intervention.client_id ? toPbId(intervention.client_id) : undefined,
+      maalem_id: intervention.maalem_id ? toPbId(intervention.maalem_id) : undefined,
       service_type: intervention.service_type,
       subcategory: intervention.subcategory,
       district: intervention.district,
@@ -240,7 +249,7 @@ export const dbService = {
 
     try {
       const created = await pb.collection('interventions').create(payload);
-      return { ...created, id: created.uuid || created.id };
+      return { ...created, id: created.id };
     } catch (err) {
       console.error('[PocketBase] Échec createIntervention:', err);
       return null;
@@ -254,12 +263,12 @@ export const dbService = {
       let targetId = pbId;
       try {
         const updated = await pb.collection('interventions').update(targetId, fields);
-        return { ...updated, id: updated.uuid || updated.id };
+        return { ...updated, id: updated.id };
       } catch (errFind) {
-        const item = await pb.collection('interventions').getFirstListItem(`uuid = "${idOrUuid}"`);
+        const item = await pb.collection('interventions').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
         if (item) {
           const updated = await pb.collection('interventions').update(item.id, fields);
-          return { ...updated, id: updated.uuid || updated.id };
+          return { ...updated, id: updated.id };
         }
         throw errFind;
       }
@@ -275,7 +284,7 @@ export const dbService = {
       const records = await pb.collection('transactions').getFullList({ sort: '-created' });
       return records.map((r) => ({
         ...r,
-        id: r.uuid || r.id
+        id: r.id
       }));
     } catch (err) {
       console.warn('[PocketBase] Erreur getTransactions:', err);
@@ -285,13 +294,11 @@ export const dbService = {
 
   async createTransaction(tx) {
     if (!tx) return null;
-    const uuid = tx.id || crypto.randomUUID();
-    const pbId = toPbId(uuid);
+    const pbId = tx.id ? toPbId(tx.id) : generatePbId();
 
     const payload = {
       id: pbId,
-      uuid: uuid,
-      maalem_id: tx.maalem_id,
+      maalem_id: tx.maalem_id ? toPbId(tx.maalem_id) : undefined,
       amount_dh: Number(tx.amount_dh || 0),
       type: tx.type || 'LEAD_DEDUCTION',
       payment_method: tx.payment_method || 'SYSTEM',
@@ -307,7 +314,7 @@ export const dbService = {
 
     try {
       const created = await pb.collection('transactions').create(payload);
-      return { ...created, id: created.uuid || created.id };
+      return { ...created, id: created.id };
     } catch (err) {
       console.error('[PocketBase] Échec createTransaction:', err);
       return null;
@@ -319,13 +326,13 @@ export const dbService = {
     const pbId = toPbId(idOrUuid);
     try {
       const updated = await pb.collection('transactions').update(pbId, fields);
-      return { ...updated, id: updated.uuid || updated.id };
+      return { ...updated, id: updated.id };
     } catch (err) {
       try {
-        const item = await pb.collection('transactions').getFirstListItem(`uuid = "${idOrUuid}" || reference_ref = "${idOrUuid}"`);
+        const item = await pb.collection('transactions').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}" || reference_ref = "${idOrUuid}"`);
         if (item) {
           const updated = await pb.collection('transactions').update(item.id, fields);
-          return { ...updated, id: updated.uuid || updated.id };
+          return { ...updated, id: updated.id };
         }
       } catch (e) {}
       console.error('[PocketBase] Échec updateTransaction:', err);
@@ -339,7 +346,7 @@ export const dbService = {
       const records = await pb.collection('reviews').getFullList({ sort: '-created' });
       return records.map((r) => ({
         ...r,
-        id: r.uuid || r.id
+        id: r.id
       }));
     } catch (err) {
       console.warn('[PocketBase] Erreur getReviews:', err);
@@ -349,15 +356,13 @@ export const dbService = {
 
   async createReview(review) {
     if (!review) return null;
-    const uuid = review.id || crypto.randomUUID();
-    const pbId = toPbId(uuid);
+    const pbId = review.id ? toPbId(review.id) : generatePbId();
 
     const payload = {
       id: pbId,
-      uuid: uuid,
-      intervention_id: review.intervention_id,
-      maalem_id: review.maalem_id,
-      client_id: review.client_id,
+      intervention_id: review.intervention_id ? toPbId(review.intervention_id) : undefined,
+      maalem_id: review.maalem_id ? toPbId(review.maalem_id) : undefined,
+      client_id: review.client_id ? toPbId(review.client_id) : undefined,
       rating: Number(review.rating || 5),
       comment: review.comment || '',
       badges: review.badges || [],
@@ -369,7 +374,7 @@ export const dbService = {
 
     try {
       const created = await pb.collection('reviews').create(payload);
-      return { ...created, id: created.uuid || created.id };
+      return { ...created, id: created.id };
     } catch (err) {
       console.error('[PocketBase] Échec createReview:', err);
       return null;
@@ -380,7 +385,7 @@ export const dbService = {
   subscribeInterventions(onEvent) {
     try {
       return pb.collection('interventions').subscribe('*', (e) => {
-        const record = e.record ? { ...e.record, id: e.record.uuid || e.record.id } : null;
+        const record = e.record ? { ...e.record, id: e.record.id } : null;
         onEvent({ action: e.action, record });
       });
     } catch (err) {

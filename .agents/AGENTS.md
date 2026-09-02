@@ -25,3 +25,8 @@ Toute modification, ajout de fonctionnalité ou correction doit OBLIGATOIREMENT 
 3. **Côté ADMIN** : Supervision des missions en direct, fiches Maâlems avec KPI et historique réel de chantiers, centre d'arbitrage/litiges avec recoupement complet Client + Maâlem (noms, téléphones, badges cohérents).
 4. **Zéro Donnée Forcée** : Aucun tarif imposé (Accord Direct), aucune fausse photo stock d'Unsplash, aucun repli GPS arbitraire, aucune note parfaite de 5.0 imposée si 0 avis.
 
+## 5. Règle Stricte Identifiants & Base de Données (PocketBase VPS)
+- **Standard d'Identifiant Unique** : Tout identifiant d'entité (`profiles`, `interventions`, `maalem_details`, `transactions`, `reviews`, etc.) est **EXCLUSIVEMENT un string de 15 caractères alphanumériques minuscules** (`[a-z0-9]{15}`), natif PocketBase.
+- **Interdiction Formelle du Champ `uuid`** : Ne JAMAIS réintroduire de champ ou propriété `uuid` ni d'acrobatie `r.uuid || r.id`. L'identifiant s'appelle TOUJOURS et UNIQUEMENT `id`.
+- **Génération Côté Client** : Toujours utiliser `generatePbId()` (15 caractères). Ne JAMAIS générer d'UUID 36 caractères (`crypto.randomUUID()`) ou d'IDs arbitraires (`1`, `"m1"`).
+- **Synchronisation du Schéma & Typage** : Toute modification ou ajout de collection PocketBase sur le VPS doit être suivie de l'exécution de `npm run typegen` (`scripts/generate-types.js`) pour régénérer `src/types/pocketbase-types.ts`.

@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "status": "node scripts/pocketbase-status.js",
+    "typegen": "node scripts/generate-types.js",
     "pocketbase:status": "node scripts/pocketbase-status.js",
     "supabase:status": "node scripts/supabase-status.js",
     "listen": "node scripts/listen.js",

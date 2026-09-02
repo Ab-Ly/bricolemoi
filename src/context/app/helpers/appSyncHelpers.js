@@ -1,35 +1,25 @@
 import { getAppSubdomain } from '../../../lib/subdomain';
-import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured, toPbId, generatePbId } from '../../../lib/dbClient';
+
+export { generatePbId, toPbId };
 
 export const isUuid = (str) =>
   typeof str === 'string' &&
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+  (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str) || /^[a-z0-9]{15}$/i.test(str));
 
 /**
- * Compare deux identifiants d'interventions de manière tolérante
- * Supporte indifféremment l'égalité exacte, l'UUID 36 chars et l'ID 15 chars PocketBase
+ * Compare deux identifiants d'interventions de manière tolérante et déterministe
  */
 export const isMatchingInterventionId = (id1, id2) => {
   if (!id1 || !id2) return false;
   const s1 = String(id1).trim().toLowerCase();
   const s2 = String(id2).trim().toLowerCase();
   if (s1 === s2) return true;
-  const c1 = s1.replace(/[^a-z0-9]/g, '');
-  const c2 = s2.replace(/[^a-z0-9]/g, '');
-  if (c1 === c2) return true;
-  if (c1.length >= 15 && c2.length >= 15 && c1.slice(0, 15) === c2.slice(0, 15)) return true;
-  return false;
+  return toPbId(s1) === toPbId(s2);
 };
 
 export const generateUuid = () => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  return generatePbId();
 };
 
 // Haversine formula — distance en km

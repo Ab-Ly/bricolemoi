@@ -2,9 +2,9 @@
  * Client de Base de Données BricoleMoi (Moteur Dédié VPS OVH PocketBase)
  * Fournit une interface unifiée de requêtage, typage et abonnements temps réel.
  */
-import { pb, toPbId, isPocketBaseConfigured } from './pocketbaseClient';
+import { pb, toPbId, generatePbId, isPocketBaseConfigured } from './pocketbaseClient';
 
-export { pb, toPbId, isPocketBaseConfigured };
+export { pb, toPbId, generatePbId, isPocketBaseConfigured };
 export const isDbConfigured = isPocketBaseConfigured;
 export const isSupabaseConfigured = isPocketBaseConfigured;
 
@@ -26,7 +26,8 @@ function createDbAdapter(pbInstance) {
         },
         eq(column, value) {
           if (column === 'id') {
-            filterConditions.push(`(id = "${toPbId(value)}" || uuid = "${value}")`);
+            const cleanId = toPbId(value);
+            filterConditions.push(`id = "${cleanId}"`);
           } else if (typeof value === 'boolean') {
             filterConditions.push(`${column} = ${value}`);
           } else if (typeof value === 'number') {
@@ -38,7 +39,8 @@ function createDbAdapter(pbInstance) {
         },
         neq(column, value) {
           if (column === 'id') {
-            filterConditions.push(`id != "${toPbId(value)}" && uuid != "${value}"`);
+            const cleanId = toPbId(value);
+            filterConditions.push(`id != "${cleanId}"`);
           } else {
             filterConditions.push(`${column} != "${value}"`);
           }
@@ -53,7 +55,7 @@ function createDbAdapter(pbInstance) {
           if (Array.isArray(values) && values.length > 0) {
             const orParts = values.map(val => {
               if (column === 'id') {
-                return `(id = "${toPbId(val)}" || uuid = "${val}")`;
+                return `id = "${toPbId(val)}"`;
               }
               return `${column} = "${val}"`;
             });
@@ -93,7 +95,7 @@ function createDbAdapter(pbInstance) {
             const records = await collection.getFullList(options);
             const normalized = records.map((r) => ({
               ...r,
-              id: r.uuid || r.id,
+              id: r.id,
               created_at: r.created_at_original || r.created,
               updated_at: r.updated_at_original || r.updated
             }));
@@ -127,21 +129,22 @@ function createDbAdapter(pbInstance) {
           const executeInsert = async () => {
             const results = [];
             for (const row of rowArray) {
-              const uuid = row.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}`);
-              const pbId = toPbId(uuid);
+              const pbId = row.id ? toPbId(row.id) : generatePbId();
               const payload = {
                 ...row,
                 id: pbId,
-                uuid: uuid,
                 created_at_original: row.created_at || new Date().toISOString()
               };
+              if ('uuid' in payload && payload.uuid !== pbId) {
+                delete payload.uuid;
+              }
               try {
                 const res = await collection.create(payload);
-                results.push({ ...res, id: res.uuid || res.id });
+                results.push({ ...res, id: res.id });
               } catch (e) {
                 try {
                   const res = await collection.update(pbId, payload);
-                  results.push({ ...res, id: res.uuid || res.id });
+                  results.push({ ...res, id: res.id });
                 } catch (updateErr) {
                   console.warn(`[DbClient] Insertion ${tableName}:`, updateErr.message);
                 }
@@ -180,15 +183,15 @@ function createDbAdapter(pbInstance) {
           return {
             eq: async (column, value) => {
               try {
-                const pbId = toPbId(value);
+                const cleanId = toPbId(value);
                 let res;
                 try {
-                  res = await collection.update(pbId, fields);
+                  res = await collection.update(cleanId, fields);
                 } catch (e) {
-                  const item = await collection.getFirstListItem(`uuid = "${value}"`);
+                  const item = await collection.getFirstListItem(`id = "${cleanId}" || uuid = "${value}"`);
                   res = await collection.update(item.id, fields);
                 }
-                const out = res ? [{ ...res, id: res.uuid || res.id }] : [];
+                const out = res ? [{ ...res, id: res.id }] : [];
                 return { data: out, error: null, select: () => Promise.resolve({ data: out, error: null }) };
               } catch (err) {
                 return { data: null, error: err };
@@ -237,7 +240,7 @@ function createDbAdapter(pbInstance) {
           const tableName = filter?.table || 'interventions';
           try {
             pbInstance.collection(tableName).subscribe('*', (e) => {
-              const record = e.record ? { ...e.record, id: e.record.uuid || e.record.id } : {};
+              const record = e.record ? { ...e.record, id: e.record.id } : {};
               if (typeof callback === 'function') {
                 callback({
                   eventType: e.action === 'create' ? 'INSERT' : (e.action === 'update' ? 'UPDATE' : 'DELETE'),
