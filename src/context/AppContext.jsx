@@ -10,6 +10,29 @@ import { useAdminService } from './app/hooks/useAdminService';
 
 import { loadCacheWithFallback } from '../services/dataReconciliationService';
 
+export const CACHE_VERSION = 'bricolemoi_v4_clean';
+
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
+    const currentVersion = localStorage.getItem('bricolemoi_cache_version');
+    if (currentVersion !== CACHE_VERSION) {
+      const keysToClear = [
+        'bricolemoi_interventions_cache',
+        'bricolemoi_transactions_cache',
+        'bricolemoi_maalems_cache',
+        'bricolemoi_clients_cache',
+        'bricolemoi_reviews_cache',
+        'bricolemoi_active_mutations',
+        'bricolemoi_my_created_leads',
+        'bricolemoi_my_unlocked_leads',
+        'bricolemoi_online_maalems_map'
+      ];
+      keysToClear.forEach((k) => localStorage.removeItem(k));
+      localStorage.setItem('bricolemoi_cache_version', CACHE_VERSION);
+    }
+  } catch (e) {}
+}
+
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {

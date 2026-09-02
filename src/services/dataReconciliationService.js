@@ -103,8 +103,8 @@ const STATUS_WEIGHT = {
  * - Privilégie la version locale si protégée par la période de grâce
  */
 export const mergeInterventions = (localList = [], remoteList = []) => {
-  if (!Array.isArray(localList) || localList.length === 0) return remoteList || [];
-  if (!Array.isArray(remoteList) || remoteList.length === 0) return localList;
+  if (!Array.isArray(remoteList)) return localList || [];
+  if (!Array.isArray(localList) || localList.length === 0) return remoteList;
 
   const mergedMap = new Map();
 
@@ -133,8 +133,10 @@ export const mergeInterventions = (localList = [], remoteList = []) => {
     }
 
     if (!matchedRemoteKey) {
-      // Élément local non encore répliqué sur le serveur : le conserver absolument !
-      mergedMap.set(lId, { ...localItem });
+      // Conserver l'élément local uniquement s'il est sous période de grâce (création locale récente)
+      if (isEntityInGracePeriod('INTERVENTION', lId)) {
+        mergedMap.set(lId, { ...localItem });
+      }
     } else {
       const remoteItem = mergedMap.get(matchedRemoteKey);
       const isProtected = isEntityInGracePeriod('INTERVENTION', lId) || isEntityInGracePeriod('INTERVENTION', matchedRemoteKey);
@@ -159,7 +161,6 @@ export const mergeInterventions = (localList = [], remoteList = []) => {
         mergedMap.set(matchedRemoteKey, {
           ...localItem,
           ...remoteItem,
-          // Conserver les métadonnées de contact locales si le serveur les a omises
           client_phone: remoteItem.client_phone || localItem.client_phone,
           maalem_phone: remoteItem.maalem_phone || localItem.maalem_phone
         });
@@ -168,7 +169,6 @@ export const mergeInterventions = (localList = [], remoteList = []) => {
   });
 
   const result = Array.from(mergedMap.values());
-  // Trier par date de création descendante
   result.sort((a, b) => {
     const timeA = new Date(a.created_at || 0).getTime();
     const timeB = new Date(b.created_at || 0).getTime();
@@ -181,12 +181,12 @@ export const mergeInterventions = (localList = [], remoteList = []) => {
 /**
  * Réconciliation non-destructive des transactions financières
  * - Déduplique par ID et par reference_ref
- * - Conserve les transactions créées localement (débits de leads, bonus, recharges)
+ * - Conserve les transactions créées localement sous période de grâce
  * - Maintient l'intégrité du grand livre (ledger)
  */
 export const mergeTransactions = (localList = [], remoteList = []) => {
-  if (!Array.isArray(localList) || localList.length === 0) return remoteList || [];
-  if (!Array.isArray(remoteList) || remoteList.length === 0) return localList;
+  if (!Array.isArray(remoteList)) return localList || [];
+  if (!Array.isArray(localList) || localList.length === 0) return remoteList;
 
   const txMap = new Map();
 
@@ -206,20 +206,20 @@ export const mergeTransactions = (localList = [], remoteList = []) => {
     }
   });
 
-  // 2. Fusionner avec les transactions locales (les locales sous période de grâce ou non-distantes sont conservées)
+  // 2. Fusionner avec les transactions locales (les locales sous période de grâce sont conservées)
   localList.forEach((t) => {
     if (!t) return;
     const key = getTxKey(t);
     if (!key) return;
 
     if (!txMap.has(key)) {
-      // Transaction créée localement non encore reçue du serveur
-      txMap.set(key, { ...t });
+      if (isEntityInGracePeriod('TRANSACTION', t.id) || isEntityInGracePeriod('TRANSACTION', t.reference_ref)) {
+        txMap.set(key, { ...t });
+      }
     } else {
       const existing = txMap.get(key);
       const isProtected = isEntityInGracePeriod('TRANSACTION', t.id) || isEntityInGracePeriod('TRANSACTION', t.reference_ref);
 
-      // Si locale validée et distante en attente, conserver VALIDATED
       const preferredStatus = (t.status === 'VALIDATED' || isProtected) ? 'VALIDATED' : (existing.status || t.status);
 
       txMap.set(key, {
@@ -248,8 +248,8 @@ export const mergeTransactions = (localList = [], remoteList = []) => {
  * Protège le solde et la disponibilité de l'artisan connecté contre les lectures DB obsolètes
  */
 export const mergeMaalems = (localList = [], remoteList = [], currentUser = null) => {
-  if (!Array.isArray(localList) || localList.length === 0) return remoteList || [];
-  if (!Array.isArray(remoteList) || remoteList.length === 0) return localList;
+  if (!Array.isArray(remoteList)) return localList || [];
+  if (!Array.isArray(localList) || localList.length === 0) return remoteList;
 
   const currentUserId = currentUser?.id ? String(currentUser.id).trim() : null;
   const isSelfProtected = currentUserId && (
