@@ -24,6 +24,7 @@ class CentrifugoClient {
     this.reconnectTimeout = null;
     this.pingInterval = null;
     this.clientId = null;
+    this.lastChannelPublish = new Map();
   }
 
   connect() {
@@ -168,6 +169,16 @@ class CentrifugoClient {
   }
 
   async publish(channel, data) {
+    // 🛡️ Protection Anti-Flood Globale sur les canaux à haute fréquence (presence)
+    if (channel && channel.includes('presence')) {
+      const now = Date.now();
+      const last = this.lastChannelPublish.get(channel) || 0;
+      if (now - last < 15000 && data?.type !== 'PRESENCE_LEAVE') {
+        return true; // Throttle silencieux : protège le serveur et le réseau contre tout flood
+      }
+      this.lastChannelPublish.set(channel, now);
+    }
+
     if (!this.isConnected) {
       this.connect();
       for (let i = 0; i < 25; i++) {

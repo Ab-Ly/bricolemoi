@@ -3,6 +3,8 @@ import { centrifugo, isCentrifugoConfigured } from '../lib/centrifugoClient';
 import { REALTIME_CHANNELS } from '../lib/realtimeClient';
 import { db } from '../lib/dbClient';
 
+let moduleLastBroadcastTimestamp = 0;
+
 /**
  * Hook React pour la gestion de Présence & Tracking GPS Temps Réel
  * 100% propulsé par Centrifugo v5 (Open Source sur VPS) et Heartbeat Dynamique.
@@ -22,7 +24,6 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
   const geoWatchIdRef = useRef(null);
   const heartbeatTimerRef = useRef(null);
   const lastLocationUpdateRef = useRef({ lat: null, lng: null, timestamp: 0 });
-  const lastBroadcastTimeRef = useRef(0);
   const isOnlineRef = useRef(isOnline);
   const userRef = useRef(user);
 
@@ -92,17 +93,17 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
 
   // Émettre son propre heartbeat / mise à jour de présence avec throttling strict (15s minimum)
   const broadcastSelfPresence = useCallback(
-    async (customData = {}, force = false) => {
+    async (customData = {}) => {
       const currUser = userRef.current;
       const currOnline = isOnlineRef.current;
       if (!currUser || currUser.role !== 'MAALEM') return;
 
       const now = Date.now();
-      // Throttling strict : max 1 émission toutes les 15s sauf si forcé
-      if (!force && now - lastBroadcastTimeRef.current < 15000) {
+      // Throttling strict : max 1 émission toutes les 15s sauf déconnexion (PRESENCE_LEAVE)
+      if (now - moduleLastBroadcastTimestamp < 15000 && customData?.type !== 'PRESENCE_LEAVE') {
         return;
       }
-      lastBroadcastTimeRef.current = now;
+      moduleLastBroadcastTimestamp = now;
 
       const coords = getUserCoordinates();
 
@@ -263,8 +264,8 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
       return;
     }
 
-    // Premier heartbeat (forcé au montage/passage en ligne)
-    broadcastSelfPresence({}, true);
+    // Premier heartbeat au montage ou passage en ligne
+    broadcastSelfPresence();
 
     heartbeatTimerRef.current = setInterval(() => {
       broadcastSelfPresence();
@@ -276,7 +277,7 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
         heartbeatTimerRef.current = null;
       }
     };
-  }, [user?.id, user?.role, isOnline, broadcastSelfPresence]);
+  }, [user?.id, user?.role, isOnline]);
 
   // Watcher GPS continu pour le Maâlem en service (avec throttling de 30s)
   useEffect(() => {
