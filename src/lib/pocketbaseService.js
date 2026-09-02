@@ -31,17 +31,12 @@ export const dbService = {
     }
   },
 
-  async getProfileById(idOrUuid) {
-    if (!idOrUuid) return null;
-    const pbId = toPbId(idOrUuid);
+  async getProfileById(id) {
+    if (!id) return null;
+    const pbId = toPbId(id);
     try {
-      try {
-        const r = await pb.collection('profiles').getOne(pbId);
-        return { ...r, id: r.id };
-      } catch (e) {
-        const r = await pb.collection('profiles').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
-        return { ...r, id: r.id };
-      }
+      const r = await pb.collection('profiles').getOne(pbId);
+      return { ...r, id: r.id };
     } catch (err) {
       return null;
     }
@@ -81,20 +76,13 @@ export const dbService = {
     }
   },
 
-  async updateProfile(idOrUuid, fields) {
-    if (!idOrUuid) return null;
-    const pbId = toPbId(idOrUuid);
+  async updateProfile(id, fields) {
+    if (!id) return null;
+    const pbId = toPbId(id);
     try {
       const updated = await pb.collection('profiles').update(pbId, fields);
       return { ...updated, id: updated.id };
     } catch (err) {
-      try {
-        const item = await pb.collection('profiles').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
-        if (item) {
-          const updated = await pb.collection('profiles').update(item.id, fields);
-          return { ...updated, id: updated.id };
-        }
-      } catch (fallbackErr) {}
       console.error('[PocketBase] Échec updateProfile:', err);
       return null;
     }
@@ -114,17 +102,12 @@ export const dbService = {
     }
   },
 
-  async getMaalemDetailsById(idOrUuid) {
-    if (!idOrUuid) return null;
-    const pbId = toPbId(idOrUuid);
+  async getMaalemDetailsById(id) {
+    if (!id) return null;
+    const pbId = toPbId(id);
     try {
-      try {
-        const r = await pb.collection('maalem_details').getOne(pbId);
-        return { ...r, id: r.id };
-      } catch (e) {
-        const r = await pb.collection('maalem_details').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
-        return { ...r, id: r.id };
-      }
+      const r = await pb.collection('maalem_details').getOne(pbId);
+      return { ...r, id: r.id };
     } catch (err) {
       return null;
     }
@@ -175,20 +158,13 @@ export const dbService = {
     }
   },
 
-  async updateMaalemDetails(idOrUuid, fields) {
-    if (!idOrUuid) return null;
-    const pbId = toPbId(idOrUuid);
+  async updateMaalemDetails(id, fields) {
+    if (!id) return null;
+    const pbId = toPbId(id);
     try {
       const updated = await pb.collection('maalem_details').update(pbId, fields);
       return { ...updated, id: updated.id };
     } catch (err) {
-      try {
-        const item = await pb.collection('maalem_details').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
-        if (item) {
-          const updated = await pb.collection('maalem_details').update(item.id, fields);
-          return { ...updated, id: updated.id };
-        }
-      } catch (fallbackErr) {}
       console.error('[PocketBase] Échec updateMaalemDetails:', err);
       return null;
     }
@@ -256,22 +232,12 @@ export const dbService = {
     }
   },
 
-  async updateIntervention(idOrUuid, fields) {
-    if (!idOrUuid) return null;
-    const pbId = toPbId(idOrUuid);
+  async updateIntervention(id, fields) {
+    if (!id) return null;
+    const pbId = toPbId(id);
     try {
-      let targetId = pbId;
-      try {
-        const updated = await pb.collection('interventions').update(targetId, fields);
-        return { ...updated, id: updated.id };
-      } catch (errFind) {
-        const item = await pb.collection('interventions').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}"`);
-        if (item) {
-          const updated = await pb.collection('interventions').update(item.id, fields);
-          return { ...updated, id: updated.id };
-        }
-        throw errFind;
-      }
+      const updated = await pb.collection('interventions').update(pbId, fields);
+      return { ...updated, id: updated.id };
     } catch (err) {
       console.error('[PocketBase] Échec updateIntervention:', err);
       return null;
@@ -321,15 +287,15 @@ export const dbService = {
     }
   },
 
-  async updateTransaction(idOrUuid, fields) {
-    if (!idOrUuid) return null;
-    const pbId = toPbId(idOrUuid);
+  async updateTransaction(id, fields) {
+    if (!id) return null;
+    const pbId = toPbId(id);
     try {
       const updated = await pb.collection('transactions').update(pbId, fields);
       return { ...updated, id: updated.id };
     } catch (err) {
       try {
-        const item = await pb.collection('transactions').getFirstListItem(`id = "${pbId}" || uuid = "${idOrUuid}" || reference_ref = "${idOrUuid}"`);
+        const item = await pb.collection('transactions').getFirstListItem(`reference_ref = "${id}"`);
         if (item) {
           const updated = await pb.collection('transactions').update(item.id, fields);
           return { ...updated, id: updated.id };

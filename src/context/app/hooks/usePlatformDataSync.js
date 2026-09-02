@@ -717,7 +717,7 @@ export const usePlatformDataSync = ({
 
           setInterventions((prev) => {
             const next = prev.map((item) =>
-              isMatchingInterventionId(item.id, intId) || (acceptedIntv.uuid && isMatchingInterventionId(item.id, acceptedIntv.uuid))
+              isMatchingInterventionId(item.id, intId)
                 ? {
                     ...item,
                     status: 'ACCEPTED',
@@ -940,7 +940,7 @@ export const usePlatformDataSync = ({
 
               setInterventions((prev) => {
                 const next = prev.map((item) =>
-                  isMatchingInterventionId(item.id, intId) || (payload.uuid && isMatchingInterventionId(item.id, payload.uuid))
+                  isMatchingInterventionId(item.id, intId)
                     ? {
                         ...item,
                         status: 'ACCEPTED',
@@ -962,7 +962,7 @@ export const usePlatformDataSync = ({
             if (intId) {
               setInterventions((prev) => {
                 const next = prev.map((item) =>
-                  isMatchingInterventionId(item.id, intId) || (payload.uuid && isMatchingInterventionId(item.id, payload.uuid))
+                  isMatchingInterventionId(item.id, intId)
                     ? { ...item, progress_step: payload.progress_step || payload.step || item.progress_step }
                     : item
                 );
@@ -976,7 +976,7 @@ export const usePlatformDataSync = ({
             if (intId) {
               setInterventions((prev) => {
                 const next = prev.map((item) =>
-                  isMatchingInterventionId(item.id, intId) || (payload.uuid && isMatchingInterventionId(item.id, payload.uuid))
+                  isMatchingInterventionId(item.id, intId)
                     ? {
                         ...item,
                         status: 'CANCELLED',
@@ -995,7 +995,7 @@ export const usePlatformDataSync = ({
             if (intId) {
               setInterventions((prev) => {
                 const next = prev.map((item) =>
-                  isMatchingInterventionId(item.id, intId) || (payload.uuid && isMatchingInterventionId(item.id, payload.uuid))
+                  isMatchingInterventionId(item.id, intId)
                     ? {
                         ...item,
                         status: 'UNFEASIBLE',
@@ -1067,7 +1067,7 @@ export const usePlatformDataSync = ({
                 const item = payload.new;
                 setInterventions((prev) => {
                   const existing = prev.find(
-                    (i) => isMatchingInterventionId(i.id, item.id) || (item.uuid && isMatchingInterventionId(i.id, item.uuid))
+                    (i) => isMatchingInterventionId(i.id, item.id)
                   );
                   const enriched = {
                     ...(existing || {}),
@@ -1079,7 +1079,7 @@ export const usePlatformDataSync = ({
                   };
                   const next = existing
                     ? prev.map((i) =>
-                        isMatchingInterventionId(i.id, item.id) || (item.uuid && isMatchingInterventionId(i.id, item.uuid)) ? enriched : i
+                        isMatchingInterventionId(i.id, item.id) ? enriched : i
                       )
                     : [enriched, ...prev];
                   try {

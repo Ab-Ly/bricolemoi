@@ -199,7 +199,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
       } catch (e) {}
 
       const isOwnerByLocalCreated = myCreated.some(
-        (cId) => isMatchingInterventionId(cId, item.id) || (item.uuid && isMatchingInterventionId(cId, item.uuid))
+        (cId) => isMatchingInterventionId(cId, item.id)
       );
       if (isOwnerByLocalCreated) return true;
 
@@ -655,9 +655,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
   // Synchroniser activeEmergency avec son état réel le plus récent dans myClientInterventions
   const liveActiveEmergency = activeEmergency?.id
     ? myClientInterventions.find(
-        (i) =>
-          isMatchingInterventionId(i.id, activeEmergency.id) ||
-          (i.uuid && isMatchingInterventionId(i.uuid, activeEmergency.id))
+        (i) => isMatchingInterventionId(i.id, activeEmergency.id)
       ) || activeEmergency
     : activeEmergency;
 

@@ -8,7 +8,6 @@ import {
   Activity, 
   Lock, 
   KeyRound, 
-  ShieldCheck, 
   ArrowLeft, 
   Radio, 
   CheckCircle2,

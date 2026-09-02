@@ -21,12 +21,12 @@ export const ClientActiveOngoingCard = ({
   serviceType,
   setShowNewSOSForm
 }) => {
-  if (!activeOngoingSOS) return null;
-
   const [routeInfo, setRouteInfo] = useState(null);
+  const lastRouteSigRef = useRef('');
+  const stableMaalemCoordsRef = useRef({ lat: null, lng: null });
 
-  const rawMaalemId = String(activeOngoingSOS.maalem_id || matchedMaalem?.id || '').trim();
-  const rawMaalemPhone = String(activeOngoingSOS.maalem_phone || matchedMaalem?.phone || '').replace(/\D/g, '');
+  const rawMaalemId = String(activeOngoingSOS?.maalem_id || matchedMaalem?.id || '').trim();
+  const rawMaalemPhone = String(activeOngoingSOS?.maalem_phone || matchedMaalem?.phone || '').replace(/\D/g, '');
 
   const resolvedMaalem = (maalems || []).find((m) => {
     const mId = String(m.id || '').trim();
@@ -62,20 +62,17 @@ export const ClientActiveOngoingCard = ({
       ? Number(activeOngoingSOS.maalem_rating).toFixed(1)
       : (resolvedMaalem?.rating_avg ? Number(resolvedMaalem.rating_avg).toFixed(1) : '5.0'));
 
-  const lastRouteSigRef = useRef('');
-  const stableMaalemCoordsRef = useRef({ lat: null, lng: null });
-
   // Coordonnées client ultra-stables (priorité absolue à l'intervention enregistrée)
-  const clientLat = (activeOngoingSOS.lat && !isNaN(Number(activeOngoingSOS.lat)))
+  const clientLat = (activeOngoingSOS?.lat && !isNaN(Number(activeOngoingSOS.lat)))
     ? Number(activeOngoingSOS.lat)
     : Number(selectedLat);
-  const clientLng = (activeOngoingSOS.lng && !isNaN(Number(activeOngoingSOS.lng)))
+  const clientLng = (activeOngoingSOS?.lng && !isNaN(Number(activeOngoingSOS.lng)))
     ? Number(activeOngoingSOS.lng)
     : Number(selectedLng);
 
   // Coordonnées Maâlem ultra-stables (anti-oscillation et anti-écrasement par fallback)
-  const rawLat = parseFloat(resolvedMaalem?.lat || activeOngoingSOS.maalem_lat);
-  const rawLng = parseFloat(resolvedMaalem?.lng || activeOngoingSOS.maalem_lng);
+  const rawLat = parseFloat(resolvedMaalem?.lat || activeOngoingSOS?.maalem_lat);
+  const rawLng = parseFloat(resolvedMaalem?.lng || activeOngoingSOS?.maalem_lng);
 
   const isValidRaw = !isNaN(rawLat) && !isNaN(rawLng) && rawLat > 20 && rawLat < 38 && rawLng < 0;
   const isGenericCenter =
@@ -119,6 +116,8 @@ export const ClientActiveOngoingCard = ({
       isCancelled = true;
     };
   }, [clientLat, clientLng, maalemLat, maalemLng]);
+
+  if (!activeOngoingSOS) return null;
 
   return (
     <motion.div

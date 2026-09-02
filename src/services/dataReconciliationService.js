@@ -111,7 +111,7 @@ export const mergeInterventions = (localList = [], remoteList = []) => {
   // 1. Indexer les éléments distants
   remoteList.forEach((remoteItem) => {
     if (!remoteItem) return;
-    const rId = String(remoteItem.id || remoteItem.uuid || '').trim();
+    const rId = String(remoteItem.id || '').trim();
     if (rId) {
       mergedMap.set(rId, { ...remoteItem });
     }
@@ -120,13 +120,13 @@ export const mergeInterventions = (localList = [], remoteList = []) => {
   // 2. Fusionner avec les éléments locaux
   localList.forEach((localItem) => {
     if (!localItem) return;
-    const lId = String(localItem.id || localItem.uuid || '').trim();
+    const lId = String(localItem.id || '').trim();
     if (!lId) return;
 
     // Trouver si une correspondance existe déjà dans mergedMap
     let matchedRemoteKey = null;
-    for (const [rKey, rVal] of mergedMap.entries()) {
-      if (isMatchingInterventionId(lId, rKey) || isMatchingInterventionId(localItem.uuid, rVal.uuid)) {
+    for (const [rKey] of mergedMap.entries()) {
+      if (isMatchingInterventionId(lId, rKey)) {
         matchedRemoteKey = rKey;
         break;
       }
@@ -260,19 +260,14 @@ export const deduplicateMaalems = (maalemsList = []) => {
   maalemsList.forEach((m) => {
     if (!m) return;
     const mId = String(m.id || '').trim();
-    const mUuid = String(m.uuid || '').trim();
     const mPhone9 = getPhone9(m.phone);
 
-    // Trouver un artisan existant qui correspond par ID, UUID ou téléphone (9 chiffres)
+    // Trouver un artisan existant qui correspond par ID ou téléphone (9 chiffres)
     const existingIndex = fusedList.findIndex((ex) => {
       const exId = String(ex.id || '').trim();
-      const exUuid = String(ex.uuid || '').trim();
       const exPhone9 = getPhone9(ex.phone);
 
-      const matchId = (mId && exId && mId === exId) || 
-                      (mUuid && exUuid && mUuid === exUuid) || 
-                      (mId && exUuid && mId === exUuid) || 
-                      (mUuid && exId && mUuid === exId);
+      const matchId = mId && exId && mId === exId;
       const matchPhone = mPhone9.length >= 8 && exPhone9.length >= 8 && mPhone9 === exPhone9;
 
       return matchId || matchPhone;
@@ -297,7 +292,6 @@ export const deduplicateMaalems = (maalemsList = []) => {
         ...ex,
         ...m,
         id: ex.id || m.id,
-        uuid: ex.uuid || m.uuid || ex.id || m.id,
         full_name: ex.full_name || m.full_name || 'Artisan Maâlem',
         phone: ex.phone || m.phone || '',
         is_online: isOnline,

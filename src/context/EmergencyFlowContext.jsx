@@ -305,9 +305,7 @@ export const EmergencyFlowProvider = ({ children }) => {
 
       const isTargetingMyEmergency =
         (currentEmergencyId && isMatchingInterventionId(intId, currentEmergencyId)) ||
-        (payload.uuid && currentEmergencyId && isMatchingInterventionId(payload.uuid, currentEmergencyId)) ||
         (intId && myCreated.some((cId) => isMatchingInterventionId(cId, intId))) ||
-        (payload.uuid && myCreated.some((cId) => isMatchingInterventionId(cId, payload.uuid))) ||
         (payload.client_id && user?.id && String(payload.client_id).trim() === String(user.id).trim()) ||
         (payload.client_phone && user?.phone && String(payload.client_phone).replace(/\D/g, '').slice(-8) === String(user.phone).replace(/\D/g, '').slice(-8));
 

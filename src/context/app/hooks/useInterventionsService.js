@@ -1,14 +1,11 @@
 import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
-import { toPbId } from '../../../lib/pocketbaseClient';
+import { toPbId, generatePbId } from '../../../lib/pocketbaseClient';
 import { notify } from '../../../lib/notify';
 import { publishRealtimeEvent } from '../../../lib/realtimeBroadcastService';
 import { REALTIME_CHANNELS, ABLY_CHANNELS } from '../../../lib/realtimeClient';
 import { getCoordinatesFromDistrict } from '../../../lib/geoService';
 import {
-  generateUuid,
-  isUuid,
   isMatchingInterventionId,
-  toSafeUUID,
   broadcastSync
 } from '../helpers/appSyncHelpers';
 import { recordLocalMutation } from '../../../services/dataReconciliationService';
@@ -48,9 +45,8 @@ export const useInterventionsService = ({
 
     const finalPhoto = description_photo || null;
 
-    const generatedId = generateUuid();
-    const generatedPbId = toPbId(generatedId);
-    const validClientId = user?.id ? String(user.id).trim() : '209a9beb-b4d4-41eb-8a15-f10000000000';
+    const generatedId = generatePbId();
+    const validClientId = user?.id ? String(user.id).trim() : generatePbId();
 
     const dbPayload = {
       id: generatedId,
@@ -104,9 +100,9 @@ export const useInterventionsService = ({
       const myCreated = JSON.parse(
         localStorage.getItem('bricolemoi_my_created_leads') || '[]'
       );
-      [String(generatedId).trim(), String(generatedPbId).trim()].forEach((idToAdd) => {
-        if (!myCreated.includes(idToAdd)) myCreated.push(idToAdd);
-      });
+      if (!myCreated.includes(generatedId)) {
+        myCreated.push(generatedId);
+      }
       localStorage.setItem('bricolemoi_my_created_leads', JSON.stringify(myCreated));
     } catch (e) {}
 
@@ -455,8 +451,7 @@ export const useInterventionsService = ({
     }
 
     const targetIntv = interventions.find((i) =>
-      isMatchingInterventionId(i.id, interventionId) ||
-      (i.uuid && isMatchingInterventionId(i.uuid, interventionId))
+      isMatchingInterventionId(i.id, interventionId)
     );
 
     // Verrou Anti-Collision : Vérifier si la mission a déjà été prise par un autre Maâlem
@@ -593,7 +588,6 @@ export const useInterventionsService = ({
 
     const eventPayload = {
       intervention_id: cleanIntId,
-      uuid: targetIntv?.uuid || (isUuid(cleanIntId) ? cleanIntId : null),
       client_id: targetIntv?.client_id || null,
       client_phone: targetIntv?.client_phone || null,
       client_name: targetIntv?.client_name || null,

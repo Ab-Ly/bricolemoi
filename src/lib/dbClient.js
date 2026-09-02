@@ -184,13 +184,7 @@ function createDbAdapter(pbInstance) {
             eq: async (column, value) => {
               try {
                 const cleanId = toPbId(value);
-                let res;
-                try {
-                  res = await collection.update(cleanId, fields);
-                } catch (e) {
-                  const item = await collection.getFirstListItem(`id = "${cleanId}" || uuid = "${value}"`);
-                  res = await collection.update(item.id, fields);
-                }
+                const res = await collection.update(cleanId, fields);
                 const out = res ? [{ ...res, id: res.id }] : [];
                 return { data: out, error: null, select: () => Promise.resolve({ data: out, error: null }) };
               } catch (err) {

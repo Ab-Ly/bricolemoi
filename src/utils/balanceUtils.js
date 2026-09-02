@@ -149,8 +149,8 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
 
   for (const t of validatedLeadTxs) {
     const ref = String(t.reference_ref || '').trim();
-    const uuidMatch = ref.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
-    const intvKey = uuidMatch ? uuidMatch[0].toLowerCase() : (t.id || ref);
+    const idMatch = ref.match(/[a-z0-9]{15}/i);
+    const intvKey = idMatch ? idMatch[0].toLowerCase() : (t.id || ref);
     if (!seenInterventionKeys.has(intvKey)) {
       seenInterventionKeys.add(intvKey);
       totalValidatedLeadsSpent += Math.abs(parseFloat(t.amount_dh) || 0);
@@ -164,8 +164,8 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
 
   for (const t of validatedRefundTxs) {
     const ref = String(t.reference_ref || '').trim();
-    const uuidMatch = ref.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
-    const intvKey = uuidMatch ? uuidMatch[0].toLowerCase() : (t.id || ref);
+    const idMatch = ref.match(/[a-z0-9]{15}/i);
+    const intvKey = idMatch ? idMatch[0].toLowerCase() : (t.id || ref);
     if (!seenRefundKeys.has(intvKey)) {
       seenRefundKeys.add(intvKey);
       totalValidatedRefunds += Math.abs(parseFloat(t.amount_dh) || 15.0);
