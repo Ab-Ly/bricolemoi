@@ -13,6 +13,7 @@ import {
   mergeInterventions,
   mergeTransactions,
   mergeMaalems,
+  deduplicateMaalems,
   isEntityInGracePeriod,
   saveCache
 } from '../../../services/dataReconciliationService';
@@ -158,7 +159,7 @@ export const usePlatformDataSync = ({
         });
       }
 
-      return Array.from(maalemMap.values());
+      return deduplicateMaalems(Array.from(maalemMap.values()));
     });
   }, [setMaalems]);
 

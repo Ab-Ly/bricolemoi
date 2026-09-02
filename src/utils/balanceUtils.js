@@ -125,16 +125,21 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
     if (!t) return false;
     const tId = String(t.maalem_id || '').trim();
     const tPhoneDigits = String(t.maalem_phone || '').replace(/\D/g, '');
-    const tPhone9 = tPhoneDigits.slice(-9) || maalemPhoneMap.get(tId) || '';
+    const tIdDigits = tId.replace(/\D/g, '');
+    const tPhone9 = tPhoneDigits.slice(-9) || (tIdDigits.length >= 8 ? tIdDigits.slice(-9) : '') || maalemPhoneMap.get(tId) || '';
 
     const matchId = (mId && tId === mId) || (currentLiveMaalem?.id && String(currentLiveMaalem.id).trim() === tId);
     const matchPhone = mPhone9.length >= 8 && tPhone9.length >= 8 && mPhone9 === tPhone9;
+    const matchPhoneInTId = mPhone9.length >= 8 && tId.includes(mPhone9);
+    const matchPhoneInMId = tPhone9.length >= 8 && mId.includes(tPhone9);
+    const matchName = t.maalem_name && maalemOrUser?.full_name && 
+      String(t.maalem_name).trim().toLowerCase() === String(maalemOrUser.full_name).trim().toLowerCase();
     const matchFallback = isFallbackMaalem && (tId === 'maalem-1' || tId === '22222222-2222-2222-2222-222222222222');
     const matchFuzzyId = mId && tId && cleanId(mId).length >= 10 && cleanId(tId).length >= 10 && (
       cleanId(mId).includes(cleanId(tId)) || cleanId(tId).includes(cleanId(mId))
     );
 
-    return matchId || matchPhone || matchFallback || matchFuzzyId;
+    return matchId || matchPhone || matchPhoneInTId || matchPhoneInMId || matchName || matchFallback || matchFuzzyId;
   });
 
   // Dédupliquer les transactions de déduction de lead pour la même intervention

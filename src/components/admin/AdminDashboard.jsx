@@ -28,7 +28,8 @@ import {
   Terminal,
   KeyRound
 } from 'lucide-react';
-import { isRealRechargeTx, isLeadTx, isBonusTx, isRefundTx } from '../../utils/balanceUtils';
+import { isRealRechargeTx, isLeadTx, isBonusTx, isRefundTx, calculateMaalemBalance } from '../../utils/balanceUtils';
+import { deduplicateMaalems } from '../../services/dataReconciliationService';
 import { switchSubdomainInDev } from '../../lib/subdomain';
 import { AdminClientsView } from './AdminClientsView';
 import { AdminLiveMissions } from './AdminLiveMissions';
@@ -106,7 +107,9 @@ export const AdminDashboard = () => {
   const activeSOSCount = pendingSOSCount + inProgressSOSCount;
   const completedSOSCount = interventions.filter((i) => i.status === 'COMPLETED').length;
 
-  const onlineMaalemsCount = maalems.filter((m) => m.is_online).length;
+  // Artisans uniques dédupliqués de manière stricte (zéro doublon de numéro ni d'alias)
+  const uniqueMaalems = useMemo(() => deduplicateMaalems(maalems), [maalems]);
+  const onlineMaalemsCount = uniqueMaalems.filter((m) => m.is_online).length;
   const activeClientsCount = (clients || []).filter((c) => !c.is_suspended).length;
   const resolvedDisputesMap = React.useMemo(() => {
     try {
@@ -171,8 +174,11 @@ export const AdminDashboard = () => {
     const unlockedMissionsCount = unlockedMissions.length;
     const netEarnedCommissions = unlockedMissionsCount * 15;
 
-    // 3. Soldes Détenus par les Maâlems (Total, Avances Réelles en Séquestre et Bonus)
-    const totalMaalemCredits = (maalems || []).reduce((sum, m) => sum + (parseFloat(m.credit_balance) || 0), 0);
+    // 3. Soldes Détenus par les Maâlems (Calcul dynamique et infaillible du solde réel disponible)
+    const totalMaalemCredits = uniqueMaalems.reduce((sum, m) => {
+      const bal = calculateMaalemBalance(m, transactions, uniqueMaalems).liveAvailableBalance;
+      return sum + (parseFloat(bal) || 0);
+    }, 0);
     const unspentRealCash = Math.max(0, grossRevenueEncaissed - netEarnedCommissions);
     const unspentBonusCredits = Math.max(0, totalMaalemCredits - unspentRealCash);
 
@@ -459,7 +465,7 @@ export const AdminDashboard = () => {
 
             <div className="text-[8px] sm:text-[10px] text-slate-500 pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
               <span className="truncate">Réseau :</span>
-              <strong className="text-slate-900 font-bold">{maalems.length} pros</strong>
+              <strong className="text-slate-900 font-bold">{uniqueMaalems.length} pro{uniqueMaalems.length > 1 ? 's' : ''}</strong>
             </div>
           </motion.div>
 
@@ -558,7 +564,7 @@ export const AdminDashboard = () => {
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
               activeTab === 'MAALEMS' ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-200/80 text-slate-600'
             }`}>
-              {maalems.length}
+              {uniqueMaalems.length}
             </span>
           </button>
 
@@ -670,7 +676,7 @@ export const AdminDashboard = () => {
             exit={{ opacity: 0, y: -10 }}
           >
             <AdminMaalemsView
-              maalems={maalems}
+              maalems={uniqueMaalems}
               interventions={interventions}
               transactions={transactions}
               reviews={reviews}
