@@ -173,9 +173,13 @@ export const MaalemTransactionsModal = ({
                   const isPending = statusUpper === 'PENDING';
 
                   const cleanTitle = isBonus
-                    ? Number(tx.amount_dh) >= 100
-                      ? 'Bonus Récompense Plateforme'
-                      : 'Bonus de Bienvenue Artisan'
+                    ? (String(tx.reference_ref || '').includes('PACK') || String(tx.payment_method || '').includes('PACK') || String(tx.admin_notes || '').includes('Pack')
+                      ? `Prime Pack Recharge (+${tx.amount_dh} DH Offerts 🎁)`
+                      : String(tx.reference_ref || '').includes('WELCOME') || String(tx.payment_method || '').includes('WELCOME') || String(tx.admin_notes || '').includes('Bienvenue') || String(tx.admin_notes || '').includes('inscription')
+                      ? 'Bonus de Bienvenue (1 Lead Offert 🎁)'
+                      : Number(tx.amount_dh) >= 100
+                      ? 'Bonus Récompense Plateforme 🎁'
+                      : 'Bonus & Cadeau Plateforme 🎁')
                     : isLead
                     ? 'Déblocage Lead Client SOS'
                     : `Recharge Solde (${tx.payment_method || 'Virement'})`;

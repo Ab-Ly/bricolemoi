@@ -167,11 +167,47 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
     }
   }
 
-  const totalBonusSum = myTransactions
+  // Déterminer si une transaction explicite de bienvenue (15 DH) existe déjà dans l'historique
+  const hasExplicitWelcomeTx = myTransactions.some((t) => {
+    const ref = String(t.reference_ref || '').toUpperCase();
+    const method = String(t.payment_method || '').toUpperCase();
+    const notes = String(t.admin_notes || '').toUpperCase();
+    return (
+      ref.includes('WELCOME') ||
+      ref.includes('BIENVENUE') ||
+      method.includes('WELCOME') ||
+      method.includes('BIENVENUE') ||
+      (notes.includes('BIENVENUE') && Number(t.amount_dh) === 15)
+    );
+  });
+
+  // Si aucune transaction de bienvenue n'est enregistrée dans le grand livre,
+  // synthétiser la transaction de 15 DH offerte à l'inscription afin qu'elle apparaisse
+  // fidèlement dans l'historique et qu'elle ne disparaisse JAMAIS lors d'une recharge.
+  let enrichedTransactions = [...myTransactions];
+  if (!hasExplicitWelcomeTx) {
+    const welcomeTx = {
+      id: `tx-welcome-bonus-${mId || 'default'}`,
+      maalem_id: mId,
+      maalem_name: maalemOrUser?.full_name || 'Artisan Maâlem',
+      maalem_phone: maalemOrUser?.phone || '',
+      amount_dh: 15.00,
+      type: 'BONUS',
+      payment_method: 'WELCOME_BONUS_15DH',
+      reference_ref: 'BONUS-BIENVENUE-15DH',
+      status: 'VALIDATED',
+      admin_notes: "1 Lead SOS Offert à l'inscription (15 DH) 🎁",
+      created_at: maalemOrUser?.created_at || '2026-08-01T00:00:00.000Z'
+    };
+    enrichedTransactions.push(welcomeTx);
+    enrichedTransactions.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  }
+
+  const totalBonusSum = enrichedTransactions
     .filter((t) => (t.status === 'VALIDATED' || !t.status) && isBonusTx(t))
     .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
 
-  const totalRechargedSum = myTransactions
+  const totalRechargedSum = enrichedTransactions
     .filter((t) => t.status === 'VALIDATED' && isRealRechargeTx(t))
     .reduce((acc, t) => acc + (parseFloat(t.amount_dh) || 0), 0);
 
@@ -185,12 +221,7 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
           : 0))
   );
 
-  // Si aucune recharge enregistrée, le solde initial du profil compte comme crédit de base
-  const startingCredit = (totalRechargedSum === 0 && totalBonusSum === 0 && !isNaN(fallbackCredits) && fallbackCredits > 0)
-    ? fallbackCredits
-    : 0;
-
-  const totalCreditsInjected = totalRechargedSum + totalBonusSum + totalValidatedRefunds + startingCredit;
+  const totalCreditsInjected = totalRechargedSum + totalBonusSum + totalValidatedRefunds;
   let liveTotalBalance = 0;
 
   if (totalCreditsInjected > 0 || totalValidatedLeadsSpent > 0) {
@@ -198,7 +229,7 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
   } else if (!isNaN(fallbackCredits) && fallbackCredits > 0) {
     liveTotalBalance = fallbackCredits;
   } else {
-    liveTotalBalance = 0;
+    liveTotalBalance = 15.00; // Garantie du 1er lead offert
   }
 
   return {
@@ -209,6 +240,6 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
     liveTotalBalance,
     liveAvailableBalance: liveTotalBalance,
     availableBalance: liveTotalBalance,
-    myTransactions
+    myTransactions: enrichedTransactions
   };
 };
