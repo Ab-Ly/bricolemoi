@@ -8,6 +8,7 @@ import {
   isCurrentUserMaalemOfTransaction
 } from '../helpers/appSyncHelpers';
 import { getRechargePackBonus } from '../../../utils/balanceUtils';
+import { recordLocalMutation } from '../../../services/dataReconciliationService';
 
 export const useWalletTransactionsService = ({
   user,
@@ -112,6 +113,8 @@ export const useWalletTransactionsService = ({
     );
 
     if (isSupabaseConfigured && cleanMaalemId) {
+      recordLocalMutation('BALANCE', cleanMaalemId);
+      recordLocalMutation('MAALEM', cleanMaalemId);
       try {
         await supabase.from('transactions').insert([
           {
@@ -157,36 +160,43 @@ export const useWalletTransactionsService = ({
       return;
     }
 
+    const maalemPhone = user?.phone || user?.maalem_details?.phone || '';
     const newTx = {
       id: 'tx-' + Date.now(),
       maalem_id: maalemId,
       maalem_name: maalemName,
+      maalem_phone: maalemPhone,
       amount_dh: rechargeAmount,
       type: 'RECHARGE',
       payment_method,
       reference_ref: reference_ref || 'REF-PACK-' + Date.now(),
       receipt_photo_url: receipt_photo_url || null,
       status,
+      admin_notes: bonusAmount > 0 ? `Pack ${rechargeAmount} DH (+${bonusAmount} DH Bonus Offert 🎁)` : '',
       created_at: new Date().toISOString()
     };
 
-    const nextTxs = [newTx];
-    if (instant && bonusAmount > 0) {
-      nextTxs.unshift({
-        id: 'tx-bonus-pack-' + Date.now(),
-        maalem_id: maalemId,
-        maalem_name: maalemName,
-        amount_dh: bonusAmount,
-        type: 'BONUS',
-        payment_method: 'PACK_BONUS_CREDIT',
-        reference_ref: `BONUS-PACK-${rechargeAmount}DH-${Date.now()}`,
-        status: 'VALIDATED',
-        admin_notes: `Bonus incitatif +${bonusAmount} DH offert avec le Pack ${rechargeAmount} DH 🎁`,
-        created_at: new Date().toISOString()
-      });
-    }
+    const bonusTx = (instant && bonusAmount > 0) ? {
+      id: 'tx-bonus-pack-' + Date.now(),
+      maalem_id: maalemId,
+      maalem_name: maalemName,
+      maalem_phone: maalemPhone,
+      amount_dh: bonusAmount,
+      type: 'BONUS',
+      payment_method: 'PACK_BONUS_CREDIT',
+      reference_ref: `BONUS-PACK-${rechargeAmount}DH-${Date.now()}`,
+      status: 'VALIDATED',
+      admin_notes: `Bonus incitatif +${bonusAmount} DH offert avec le Pack ${rechargeAmount} DH 🎁`,
+      created_at: new Date().toISOString()
+    } : null;
 
+    const nextTxs = bonusTx ? [bonusTx, newTx] : [newTx];
     setTransactions((prev) => [...nextTxs, ...prev]);
+
+    recordLocalMutation('BALANCE', maalemId);
+    recordLocalMutation('MAALEM', maalemId);
+    recordLocalMutation('TRANSACTION', newTx.id);
+    if (bonusTx) recordLocalMutation('TRANSACTION', bonusTx.id);
 
     if (instant) {
       const currentBalance =
@@ -203,6 +213,7 @@ export const useWalletTransactionsService = ({
       setUser(updatedUser);
       try {
         sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+        localStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
       } catch (e) {}
 
       setMaalems((prev) =>
@@ -231,12 +242,15 @@ export const useWalletTransactionsService = ({
 
     if (isSupabaseConfigured) {
       try {
-        const cleanMaalemId = toSafeUUID(maalemId);
-        const { data: insertedTx } = await supabase
+        const cleanMaalemId = maalemId;
+        await supabase
           .from('transactions')
           .insert([
             {
+              id: newTx.id,
               maalem_id: cleanMaalemId,
+              maalem_name: maalemName,
+              maalem_phone: maalemPhone,
               amount_dh: rechargeAmount,
               type: 'RECHARGE',
               payment_method,
@@ -244,27 +258,22 @@ export const useWalletTransactionsService = ({
               receipt_photo_url: receipt_photo_url || null,
               status
             }
-          ])
-          .select()
-          .maybeSingle();
-
-        if (insertedTx) {
-          setTransactions((prev) =>
-            prev.map((t) => (t.id === newTx.id ? { ...t, id: insertedTx.id } : t))
-          );
-        }
+          ]);
 
         if (instant) {
-          if (bonusAmount > 0) {
+          if (bonusTx) {
             await supabase.from('transactions').insert([
               {
+                id: bonusTx.id,
                 maalem_id: cleanMaalemId,
+                maalem_name: maalemName,
+                maalem_phone: maalemPhone,
                 amount_dh: bonusAmount,
                 type: 'BONUS',
                 payment_method: 'PACK_BONUS_CREDIT',
-                reference_ref: `BONUS-PACK-${rechargeAmount}DH-${Date.now()}`,
+                reference_ref: bonusTx.reference_ref,
                 status: 'VALIDATED',
-                admin_notes: `Bonus incitatif +${bonusAmount} DH offert avec le Pack ${rechargeAmount} DH 🎁`
+                admin_notes: bonusTx.admin_notes
               }
             ]);
           }
@@ -283,14 +292,13 @@ export const useWalletTransactionsService = ({
             })
             .eq('id', cleanMaalemId);
         }
-
         await supabase.from('admin_notifications').insert([
           {
             type: 'RECHARGE',
             title: `💳 Demande de Recharge (${rechargeAmount} DH${bonusAmount > 0 ? ` +${bonusAmount} DH Offerts` : ''})`,
             message: `L'artisan ${maalemName} a demandé une recharge de ${rechargeAmount} DH via ${payment_method} (Réf: ${newTx.reference_ref}).`,
             data: {
-              maalem_id: maalemId,
+              maalem_id: cleanMaalemId,
               amount_dh: rechargeAmount,
               bonus_dh: bonusAmount,
               total_credited: totalCredited,
@@ -299,10 +307,16 @@ export const useWalletTransactionsService = ({
             }
           }
         ]);
-      } catch (err) {
-        console.warn('[Supabase] Recharge insert warning:', err.message);
+      } catch (e) {
+        console.warn('[Supabase] submitRechargeRequest insert warning:', e?.message);
       }
     }
+
+    try {
+      const savedTxs = JSON.parse(localStorage.getItem('bricolemoi_transactions_cache') || '[]');
+      const newItems = bonusTx ? [bonusTx, newTx] : [newTx];
+      localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify([...newItems, ...savedTxs]));
+    } catch (e) {}
 
     showToast(
       instant
@@ -363,6 +377,10 @@ export const useWalletTransactionsService = ({
     });
 
     if (targetMaalemId) {
+      recordLocalMutation('BALANCE', targetMaalemId);
+      recordLocalMutation('MAALEM', targetMaalemId);
+      recordLocalMutation('TRANSACTION', targetId);
+      if (bonusTx) recordLocalMutation('TRANSACTION', bonusTx.id);
       setMaalems((prev) =>
         prev.map((m) => {
           if (String(m.id).trim() === String(targetMaalemId).trim()) {
@@ -448,7 +466,7 @@ export const useWalletTransactionsService = ({
             .eq('id', targetMaalemId)
             .maybeSingle();
 
-          const newBal = (parseFloat(mData?.credit_balance) || 0) + amountDh;
+          const newBal = (parseFloat(mData?.credit_balance) || 0) + totalCredited;
           await supabase
             .from('maalem_details')
             .update({ credit_balance: newBal })
@@ -457,7 +475,35 @@ export const useWalletTransactionsService = ({
             .from('profiles')
             .update({ credits: newBal })
             .eq('id', targetMaalemId);
+
+          if (bonusTx) {
+            await supabase.from('transactions').insert([
+              {
+                id: bonusTx.id,
+                maalem_id: targetMaalemId,
+                maalem_name: bonusTx.maalem_name,
+                maalem_phone: bonusTx.maalem_phone,
+                amount_dh: bonusTx.amount_dh,
+                type: 'BONUS',
+                payment_method: bonusTx.payment_method,
+                reference_ref: bonusTx.reference_ref,
+                status: 'VALIDATED',
+                admin_notes: bonusTx.admin_notes
+              }
+            ]);
+          }
         }
+
+        try {
+          const savedTxs = JSON.parse(localStorage.getItem('bricolemoi_transactions_cache') || '[]');
+          const updatedCache = savedTxs.map((t) =>
+            String(t.id).trim() === String(targetId).trim() ? { ...t, status: 'VALIDATED', reconciled_at: new Date().toISOString() } : t
+          );
+          if (bonusTx && !updatedCache.some((t) => t.id === bonusTx.id)) {
+            updatedCache.unshift(bonusTx);
+          }
+          localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify(updatedCache));
+        } catch (e) {}
       } catch (err) {
         console.warn('[Supabase] approveRecharge sync warning:', err.message);
       }

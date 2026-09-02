@@ -23,7 +23,7 @@ export const MaalemUnfeasibleModal = ({
             initial={{ scale: 0.92, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.92, opacity: 0 }}
-            className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900"
+            className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl space-y-4 text-slate-900 max-h-modal overflow-y-auto modal-scroll pb-safe"
           >
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2 text-amber-700">
@@ -35,7 +35,8 @@ export const MaalemUnfeasibleModal = ({
               <button
                 type="button"
                 onClick={() => setUnreachableModalLead(null)}
-                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer touch-target-44 active:scale-95"
+                title="Fermer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -83,11 +84,11 @@ export const MaalemUnfeasibleModal = ({
               </select>
             </div>
 
-            <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
+            <div className="flex flex-col sm:flex-row items-center gap-2 pt-2 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => setUnreachableModalLead(null)}
-                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                className="w-full sm:w-1/3 py-3 min-h-[44px] bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer touch-target-44 active:scale-95"
               >
                 Retour
               </button>
@@ -102,7 +103,7 @@ export const MaalemUnfeasibleModal = ({
                   }
                   setUnreachableModalLead(null);
                 }}
-                className="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all cursor-pointer"
+                className="w-full sm:w-2/3 py-3 min-h-[44px] bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-md shadow-amber-500/20 transition-all cursor-pointer touch-target-44 active:scale-95"
               >
                 🛡️ Confirmer &amp; Restituer 15 DH
               </button>

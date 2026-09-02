@@ -29,7 +29,7 @@ export const ClientPhoneRequirementModal = ({
             initial={{ scale: 0.93, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.93, opacity: 0, y: 10 }}
-            className="bg-white border border-red-200 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative text-slate-900 space-y-4"
+            className="bg-white border border-red-200 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative text-slate-900 space-y-4 max-h-modal overflow-y-auto modal-scroll pb-safe"
           >
             <button
               type="button"

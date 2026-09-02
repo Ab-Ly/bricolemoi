@@ -119,15 +119,22 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
 
   const maalemPhoneMap = new Map((maalems || []).map(m => [String(m.id).trim(), String(m.phone || '').replace(/\D/g, '').slice(-9)]));
 
+  const cleanId = (id) => String(id || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+
   const myTransactions = (transactions || []).filter((t) => {
     if (!t) return false;
     const tId = String(t.maalem_id || '').trim();
     const tPhoneDigits = String(t.maalem_phone || '').replace(/\D/g, '');
     const tPhone9 = tPhoneDigits.slice(-9) || maalemPhoneMap.get(tId) || '';
-    const matchId = mId && tId === mId;
+
+    const matchId = (mId && tId === mId) || (currentLiveMaalem?.id && String(currentLiveMaalem.id).trim() === tId);
     const matchPhone = mPhone9.length >= 8 && tPhone9.length >= 8 && mPhone9 === tPhone9;
     const matchFallback = isFallbackMaalem && (tId === 'maalem-1' || tId === '22222222-2222-2222-2222-222222222222');
-    return matchId || matchPhone || matchFallback;
+    const matchFuzzyId = mId && tId && cleanId(mId).length >= 10 && cleanId(tId).length >= 10 && (
+      cleanId(mId).includes(cleanId(tId)) || cleanId(tId).includes(cleanId(mId))
+    );
+
+    return matchId || matchPhone || matchFallback || matchFuzzyId;
   });
 
   // Dédupliquer les transactions de déduction de lead pour la même intervention
@@ -178,7 +185,12 @@ export const calculateMaalemBalance = (maalemOrUser, transactions = [], maalems 
           : 0))
   );
 
-  const totalCreditsInjected = totalRechargedSum + totalBonusSum + totalValidatedRefunds;
+  // Si aucune recharge enregistrée, le solde initial du profil compte comme crédit de base
+  const startingCredit = (totalRechargedSum === 0 && totalBonusSum === 0 && !isNaN(fallbackCredits) && fallbackCredits > 0)
+    ? fallbackCredits
+    : 0;
+
+  const totalCreditsInjected = totalRechargedSum + totalBonusSum + totalValidatedRefunds + startingCredit;
   let liveTotalBalance = 0;
 
   if (totalCreditsInjected > 0 || totalValidatedLeadsSpent > 0) {

@@ -321,14 +321,22 @@
   height: 100dvh;
 }
 
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 1rem);
+}
+
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 0.75rem);
+}
+
 .max-h-modal {
-  max-height: min(92dvh, 760px);
+  max-height: min(92dvh, 780px);
 }
 
 /* Touch friendly scrolling and prevent rubber-banding issues on modals */
 .modal-scroll {
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
 }
 
 /* Hide scrollbar for clean horizontal swipe tabs */

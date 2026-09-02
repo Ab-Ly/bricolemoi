@@ -87,29 +87,30 @@ export const AdminSecurityModal = ({ isOpen, onClose }) => {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="w-full max-w-md bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-7 shadow-2xl relative overflow-hidden"
+          className="w-full max-w-md bg-white border border-slate-200/90 rounded-3xl p-4 sm:p-7 shadow-2xl relative max-h-modal overflow-y-auto modal-scroll pb-safe"
         >
           {/* Bouton de Fermeture */}
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 cursor-pointer transition-colors"
+            className="absolute top-3.5 right-3.5 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer touch-target-44 active:scale-95 z-20"
+            title="Fermer"
           >
             <X className="w-4 h-4" />
           </button>
 
           {/* En-tête */}
-          <div className="flex items-center gap-3.5 mb-5">
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 shadow-xs">
+          <div className="flex items-center gap-3.5 mb-5 pr-10">
+            <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 shadow-xs shrink-0">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
                   Sécurité Haute
                 </span>
               </div>
-              <h2 className="text-lg font-black text-slate-900 tracking-tight">
+              <h2 className="text-lg font-black text-slate-900 tracking-tight truncate">
                 Identifiants &amp; Clés Admin
               </h2>
             </div>
@@ -120,7 +121,7 @@ export const AdminSecurityModal = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={() => { setActiveTab('PIN'); setPinError(''); }}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2.5 min-h-[44px] rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-target-44 ${
                 activeTab === 'PIN'
                   ? 'bg-white text-purple-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -132,7 +133,7 @@ export const AdminSecurityModal = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={() => { setActiveTab('PASSWORD'); setPassError(''); }}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2.5 min-h-[44px] rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-target-44 ${
                 activeTab === 'PASSWORD'
                   ? 'bg-white text-purple-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'

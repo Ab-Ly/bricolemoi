@@ -22,7 +22,7 @@ export const ClientRadarSearchingCard = ({
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-white border-2 border-blue-500/80 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden text-slate-900"
+      className="bg-white border-2 border-blue-500/80 rounded-3xl p-4 sm:p-8 shadow-xl space-y-6 relative overflow-hidden text-slate-900"
     >
       <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 animate-pulse" />
 
@@ -82,7 +82,7 @@ export const ClientRadarSearchingCard = ({
               }
             }
           }}
-          className="px-4 py-2.5 bg-white hover:bg-red-50 text-red-600 border border-slate-200 hover:border-red-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 self-stretch sm:self-auto shrink-0"
+          className="px-4 py-2.5 min-h-[44px] bg-white hover:bg-red-50 text-red-600 border border-slate-200 hover:border-red-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 self-stretch sm:self-auto shrink-0 touch-target-44"
         >
           <X className="w-3.5 h-3.5" />
           <span>Annuler la recherche</span>

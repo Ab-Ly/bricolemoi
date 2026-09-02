@@ -230,11 +230,11 @@ export const ClientActiveOngoingCard = ({
         </div>
 
         {/* Boutons d'Appel / WhatsApp */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
           {maalemCleanPhone.length >= 8 && (
             <a
               href={`tel:${maalemDisplayPhone}`}
-              className="py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 font-bold text-xs shadow-xs flex items-center gap-2 active:scale-95 transition-all"
+              className="flex-1 sm:flex-initial py-2.5 px-4 min-h-[44px] justify-center rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 font-bold text-xs shadow-xs flex items-center gap-2 active:scale-95 transition-all touch-target-44"
             >
               <PhoneCall className="w-4 h-4 text-blue-600" />
               <span>Appeler</span>
@@ -247,7 +247,7 @@ export const ClientActiveOngoingCard = ({
               )}`}
               target="_blank"
               rel="noreferrer"
-              className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center gap-2 active:scale-95 transition-all"
+              className="flex-1 sm:flex-initial py-2.5 px-4 min-h-[44px] justify-center rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center gap-2 active:scale-95 transition-all touch-target-44"
             >
               <MessageSquare className="w-4 h-4" />
               <span>WhatsApp</span>

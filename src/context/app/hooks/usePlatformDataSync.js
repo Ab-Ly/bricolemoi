@@ -10,6 +10,13 @@ import {
   normalizeReviewRecord
 } from '../../../utils/dataNormalizer';
 import {
+  mergeInterventions,
+  mergeTransactions,
+  mergeMaalems,
+  isEntityInGracePeriod,
+  saveCache
+} from '../../../services/dataReconciliationService';
+import {
   updateOnlineMaalemInStorage,
   getOnlineMaalemsFromStorage,
   safeSupabaseBroadcast,
@@ -381,7 +388,12 @@ export const usePlatformDataSync = ({
         ? Number(details.credit_balance)
         : (m.credits !== undefined && m.credits !== null ? Number(m.credits) : 15.0);
 
-      if (isThisSelf && user && (user.credits === undefined || Number(user.credits) !== directDbCredit)) {
+      const isBalanceProtected = isThisSelf && user && (
+        isEntityInGracePeriod('BALANCE', user.id) ||
+        isEntityInGracePeriod('MAALEM', user.id)
+      );
+
+      if (isThisSelf && user && !isBalanceProtected && (user.credits === undefined || Number(user.credits) !== directDbCredit)) {
         const updatedSelf = {
           ...user,
           credits: directDbCredit,
@@ -393,6 +405,7 @@ export const usePlatformDataSync = ({
         setUser(updatedSelf);
         try {
           sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedSelf));
+          localStorage.setItem('bricolemoi_session', JSON.stringify(updatedSelf));
         } catch (e) {}
       }
 
@@ -552,21 +565,39 @@ export const usePlatformDataSync = ({
           return normalizeIntervention(intv, normContext);
         }).filter(Boolean);
 
-        setInterventions(enrichedInterventions);
+        setInterventions((prev) => {
+          const merged = mergeInterventions(prev, enrichedInterventions);
+          saveCache('bricolemoi_interventions_cache', merged);
+          return merged;
+        });
       }
     } catch (e) {}
 
     const finalClients = Array.from(clientMap.values());
     const finalMaalems = Array.from(maalemMap.values()).map(normalizeMaalemProfile).filter(Boolean);
 
-    setClients(finalClients);
-    setMaalems(finalMaalems);
+    setClients((prev) => {
+      const clientMapMerged = new Map((prev || []).map((c) => [String(c.id).trim(), c]));
+      finalClients.forEach((c) => {
+        const existing = clientMapMerged.get(String(c.id).trim());
+        clientMapMerged.set(String(c.id).trim(), { ...existing, ...c });
+      });
+      const merged = Array.from(clientMapMerged.values());
+      saveCache('bricolemoi_clients_cache', merged);
+      return merged;
+    });
+
+    setMaalems((prev) => {
+      const merged = mergeMaalems(prev, finalMaalems, userRef.current);
+      saveCache('bricolemoi_maalems_cache', merged);
+      return merged;
+    });
 
     try {
       const { data: realTransactions } = await supabase
         .from('transactions')
         .select(
-          'id, maalem_id, amount_dh, type, payment_method, reference_ref, status, created_at, admin_notes'
+          'id, maalem_id, maalem_name, maalem_phone, amount_dh, type, payment_method, reference_ref, status, created_at, admin_notes'
         )
         .order('created_at', { ascending: false })
         .limit(50);
@@ -577,21 +608,31 @@ export const usePlatformDataSync = ({
             profilesMap.get(String(tx.maalem_id).trim()) ||
             maalemMap.get(String(tx.maalem_id).trim());
 
+          const isUser =
+            user &&
+            (String(user.id).trim() === String(tx.maalem_id).trim() ||
+              (tx.maalem_phone && user.phone && String(tx.maalem_phone).replace(/\D/g, '').slice(-9) === String(user.phone).replace(/\D/g, '').slice(-9)));
+
           return {
             ...tx,
             status: tx.status,
             admin_notes: tx.admin_notes,
             maalem_name:
-              p?.full_name ||
               tx.maalem_name ||
-              (user?.id === tx.maalem_id ? user?.full_name : 'Artisan Maalem'),
+              p?.full_name ||
+              (isUser ? user?.full_name : 'Artisan Maalem'),
             maalem_phone:
-              p?.phone ||
               tx.maalem_phone ||
-              (user?.id === tx.maalem_id ? user?.phone : '')
+              p?.phone ||
+              (isUser ? user?.phone : '')
           };
         });
-        setTransactions(enrichedTx);
+
+        setTransactions((prev) => {
+          const merged = mergeTransactions(prev, enrichedTx);
+          saveCache('bricolemoi_transactions_cache', merged);
+          return merged;
+        });
       }
     } catch (e) {}
   };

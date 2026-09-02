@@ -11,6 +11,7 @@ import {
   toSafeUUID,
   broadcastSync
 } from '../helpers/appSyncHelpers';
+import { recordLocalMutation } from '../../../services/dataReconciliationService';
 
 export const useInterventionsService = ({
   user,
@@ -157,6 +158,7 @@ export const useInterventionsService = ({
           console.warn('[Supabase] Intervention insert warning:', error.message);
         } else if (data?.[0]) {
           insertedRecord = { ...newIntervention, ...data[0] };
+          recordLocalMutation('INTERVENTION', insertedRecord.id);
           setInterventions((prev) => [
             insertedRecord,
             ...prev.filter((i) => i.id !== insertedRecord.id)
@@ -529,6 +531,11 @@ export const useInterventionsService = ({
     const leadCost = 15.0;
     const ref = `LEAD_UNLOCK_${cleanIntId}_${Date.now()}`;
 
+    // Verrouillage optimiste avec période de grâce pour empêcher tout écrasement par le polling
+    recordLocalMutation('INTERVENTION', cleanIntId);
+    recordLocalMutation('BALANCE', actualMaalemId);
+    recordLocalMutation('MAALEM', actualMaalemId);
+
     const newDebitTx = {
       id: `tx-lead-${cleanIntId}-${Date.now()}`,
       maalem_id: actualMaalemId,
@@ -660,15 +667,63 @@ export const useInterventionsService = ({
           escrow_status: 'DEBITED'
         };
 
-        // Mise à jour garantie dans la collection PocketBase
+        // 1. Mise à jour de l'intervention en base
         await supabase
           .from('interventions')
           .update(updatePayload)
           .eq('id', interventionId);
+
+        // 2. Enregistrement officiel de la transaction de débit (-15 DH) au grand livre
+        await supabase.from('transactions').insert([
+          {
+            id: newDebitTx.id,
+            maalem_id: actualMaalemId,
+            maalem_name: actualMaalemName,
+            maalem_phone: actualMaalemPhone,
+            amount_dh: -leadCost,
+            type: 'LEAD_DEDUCTION',
+            payment_method: 'SYSTEM_DEBIT',
+            reference_ref: ref,
+            status: 'VALIDATED',
+            admin_notes: `Déblocage Immédiat Contact SOS #${cleanIntId}`
+          }
+        ]);
+
+        // 3. Mise à jour persistante du solde de l'artisan
+        await supabase
+          .from('maalem_details')
+          .update({ credit_balance: newCalculatedBal })
+          .eq('id', actualMaalemId);
+
+        await supabase
+          .from('profiles')
+          .update({ credits: newCalculatedBal })
+          .eq('id', actualMaalemId);
       } catch (dbErr) {
         console.warn('[DB] acceptLead exception:', dbErr.message);
       }
     }
+
+    // Sauvegarde immédiate dans le cache des transactions pour éviter toute désynchronisation
+    try {
+      const savedTxs = JSON.parse(localStorage.getItem('bricolemoi_transactions_cache') || '[]');
+      const filteredTxs = savedTxs.filter((t) => t.id !== newDebitTx.id);
+      localStorage.setItem('bricolemoi_transactions_cache', JSON.stringify([newDebitTx, ...filteredTxs]));
+    } catch (e) {}
+
+    // Sauvegarde immédiate de la session utilisateur avec le solde débité
+    try {
+      const updatedUser = {
+        ...user,
+        credits: newCalculatedBal,
+        maalem_details: {
+          ...(user?.maalem_details || {}),
+          credit_balance: newCalculatedBal
+        }
+      };
+      sessionStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+      localStorage.setItem('bricolemoi_session', JSON.stringify(updatedUser));
+    } catch (e) {}
 
     showToast(
       '🟢 Contact débloqué avec succès ! Coordonnées complètes et itinéraire GPS disponibles.',
@@ -679,6 +734,7 @@ export const useInterventionsService = ({
 
   const updateInterventionProgress = async (interventionId, progressStep) => {
     const sId = String(interventionId || '').trim();
+    recordLocalMutation('INTERVENTION', sId);
     setInterventions((prev) => {
       const updated = prev.map((item) =>
         String(item.id).trim() === sId
@@ -761,6 +817,7 @@ export const useInterventionsService = ({
   };
 
   const requestWorkCompletion = async (interventionId, finalAgreedPrice) => {
+    recordLocalMutation('INTERVENTION', interventionId);
     const parsedPrice = finalAgreedPrice ? parseFloat(finalAgreedPrice) : undefined;
     const targetIntv = interventions.find(
       (i) => String(i.id).trim() === String(interventionId).trim()

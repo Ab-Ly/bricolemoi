@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { WhatsappLogo } from '@phosphor-icons/react';
 import { EnhancedCategoryIcon, getSpecialtyLabel, getSpecialtyMeta } from '../EnhancedCategoryIcon';
-import { calculateMaalemBalance, isRealRechargeTx, isLeadTx, isBonusTx, isRefundTx } from '../../utils/balanceUtils';
+import { calculateMaalemBalance, isRealRechargeTx, isLeadTx, isBonusTx, isRefundTx, getRechargePackBonus } from '../../utils/balanceUtils';
 import { paginateArray } from '../../utils/paginationUtils';
 import { PaginationControls } from '../common/PaginationControls';
 
@@ -457,10 +457,13 @@ export const AdminRechargesView = ({
                         <button
                           type="button"
                           onClick={() => onApprove && onApprove(tx.id)}
-                          className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
-                          title="Valider la recharge et créditer le compte"
+                          className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                          title="Valider la recharge et créditer le compte (avec bonus éventuel)"
                         >
-                          Valider (+{parseFloat(tx.amount_dh || 0)} DH)
+                          <span>
+                            Valider (+{parseFloat(tx.amount_dh || 0).toFixed(0)} DH
+                            {getRechargePackBonus(tx.amount_dh) > 0 ? ` +${getRechargePackBonus(tx.amount_dh)} DH Offerts 🎁` : ''})
+                          </span>
                         </button>
 
                         <button

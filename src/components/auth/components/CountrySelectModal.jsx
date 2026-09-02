@@ -40,7 +40,8 @@ export const CountrySelectModal = ({
                   setIsCountryOpen(false);
                   setCountrySearch('');
                 }}
-                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all cursor-pointer active:scale-95"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all cursor-pointer touch-target-44 active:scale-95"
+                title="Fermer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -54,7 +55,7 @@ export const CountrySelectModal = ({
                 value={countrySearch}
                 onChange={(e) => setCountrySearch(e.target.value)}
                 placeholder="Rechercher pays ou indicatif (+33, +34...)"
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-bold focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
+                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm sm:text-xs font-bold focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
                 autoFocus
               />
             </div>
@@ -72,7 +73,7 @@ export const CountrySelectModal = ({
                       setIsCountryOpen(false);
                       setCountrySearch('');
                     }}
-                    className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer border ${
+                    className={`w-full min-h-[48px] flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer touch-target-44 border ${
                       isSelected
                         ? 'bg-blue-50/90 border-blue-600 text-blue-950 font-bold shadow-xs'
                         : 'bg-white hover:bg-slate-50 border-slate-100 hover:border-slate-200 text-slate-800'

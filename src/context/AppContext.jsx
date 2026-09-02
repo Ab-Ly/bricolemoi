@@ -8,6 +8,8 @@ import { useWalletTransactionsService } from './app/hooks/useWalletTransactionsS
 import { useReviewsLoyaltyService } from './app/hooks/useReviewsLoyaltyService';
 import { useAdminService } from './app/hooks/useAdminService';
 
+import { loadCacheWithFallback } from '../services/dataReconciliationService';
+
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
@@ -17,12 +19,22 @@ export const AppProvider = ({ children }) => {
     userRef.current = user;
   }, [user]);
 
-  // États globaux (Cloud-First 100% synchronisés avec Supabase)
-  const [interventions, setInterventions] = useState([]);
-  const [maalems, setMaalems] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [reviews, setReviews] = useState([]);
+  // États globaux (Architecture Cache-First & Réconciliation Non-Destructive)
+  const [interventions, setInterventions] = useState(() =>
+    loadCacheWithFallback('bricolemoi_interventions_cache', [])
+  );
+  const [maalems, setMaalems] = useState(() =>
+    loadCacheWithFallback('bricolemoi_maalems_cache', [])
+  );
+  const [clients, setClients] = useState(() =>
+    loadCacheWithFallback('bricolemoi_clients_cache', [])
+  );
+  const [transactions, setTransactions] = useState(() =>
+    loadCacheWithFallback('bricolemoi_transactions_cache', [])
+  );
+  const [reviews, setReviews] = useState(() =>
+    loadCacheWithFallback('bricolemoi_reviews_cache', [])
+  );
 
   const [adminNotifications, setAdminNotifications] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
