@@ -91,6 +91,8 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
     return { lat, lng };
   }, []);
 
+  const lastDbStatusRef = useRef({ isOnline: null });
+
   // Émettre son propre heartbeat / mise à jour de présence avec throttling strict (15s minimum)
   const broadcastSelfPresence = useCallback(
     async (customData = {}) => {
@@ -151,8 +153,9 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
         bc.close();
       } catch (e) {}
 
-      // 3. Mise à jour de maalem_details dans la base de données
-      if (currUser.id) {
+      // 3. Mise à jour de maalem_details dans la base de données (uniquement lors d'un changement de statut en ligne/hors ligne)
+      if (currUser.id && (lastDbStatusRef.current.isOnline !== currOnline || customData?.forceDb)) {
+        lastDbStatusRef.current.isOnline = currOnline;
         try {
           db
             .from('maalem_details')

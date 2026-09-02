@@ -37,6 +37,9 @@ ws.on('message', (raw) => {
         eventCount++;
         const now = new Date().toISOString().slice(11, 23);
         const data = pub.data || {};
+        if (eventCount <= 3) {
+          console.log(`\n🔍 [INSPECTION ÉVÉNEMENT #${eventCount}]:\n`, JSON.stringify(pub, null, 2));
+        }
         eventsReceived.push({
           time: now,
           type: data.type,

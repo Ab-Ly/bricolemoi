@@ -163,6 +163,10 @@ export const initRemoteTelemetry = () => {
   if (isTelemetryInitialized || typeof window === 'undefined') return;
   isTelemetryInitialized = true;
 
+  window.addEventListener('beforeunload', () => {
+    window.__isUnloading = true;
+  });
+
   // 1. Annonce de connexion Centrifugo VPS
   if (isCentrifugoConfigured) {
     setTimeout(() => {
@@ -246,7 +250,11 @@ export const initRemoteTelemetry = () => {
       } catch (networkErr) {
         const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'API';
         const errMsg = String(networkErr?.message || '');
-        const isAborted = errMsg.includes('abort') || networkErr?.name === 'AbortError';
+        const isAborted =
+          errMsg.includes('abort') ||
+          networkErr?.name === 'AbortError' ||
+          (errMsg.includes('Failed to fetch') && typeof document !== 'undefined' && document.visibilityState === 'hidden') ||
+          (typeof window !== 'undefined' && window.__isUnloading);
 
         if (!isAborted && !isBenignNoise(url) && !url.includes('ably.net') && !url.includes('centrifugo')) {
           sendTerminalLog('WARN', 'NETWORK', `Requête réseau non aboutie sur : ${url.split('?')[0]}`, {
