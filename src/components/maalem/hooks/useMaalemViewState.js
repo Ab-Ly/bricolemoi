@@ -7,6 +7,7 @@ import { calculateMaalemBalance, isBonusTx, isLeadTx, isRealRechargeTx } from '.
 import { calculateMaalemRating } from '../../../utils/ratingUtils';
 import { uploadMediaToR2 } from '../../../lib/r2StorageService';
 import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
+import { playSosRadarAlert } from '../../../services/soundAlertService';
 
 export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
   const { t, user, setUser } = useAuth();
@@ -313,6 +314,15 @@ export const useMaalemViewState = ({ onOpenCINVerification } = {}) => {
       return { ...item, lat, lng, calculatedDistance: distance };
     })
     .sort((a, b) => (a.calculatedDistance || 0) - (b.calculatedDistance || 0));
+
+  // Alerte Sonore & Vibreur Radar lorsque de nouveaux chantiers SOS apparaissent
+  const prevLeadsCountRef = useRef(availableLeads.length);
+  useEffect(() => {
+    if (availableLeads.length > prevLeadsCountRef.current) {
+      playSosRadarAlert();
+    }
+    prevLeadsCountRef.current = availableLeads.length;
+  }, [availableLeads.length]);
 
   // 2. Chantiers Actifs Débloqués (Missions assignées à cet artisan)
   const uPhone9 = String(user?.phone || '').replace(/\D/g, '').slice(-9);
