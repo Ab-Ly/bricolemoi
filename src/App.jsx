@@ -16,26 +16,7 @@ import { getAppSubdomain, switchSubdomainInDev, APP_SUBDOMAINS } from './lib/sub
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { initRemoteTelemetry, sendTerminalLog } from './lib/remoteLogger';
 
-// Resilient Lazy Loading Helper that auto-reloads on deployment chunk update
-const lazyWithRetry = (componentImport) =>
-  lazy(async () => {
-    const pageHasBeenForceRefreshed = JSON.parse(
-      window.sessionStorage.getItem('bricolemoi_chunk_reload') || 'false'
-    );
-
-    try {
-      const component = await componentImport();
-      window.sessionStorage.setItem('bricolemoi_chunk_reload', 'false');
-      return component;
-    } catch (error) {
-      if (!pageHasBeenForceRefreshed) {
-        window.sessionStorage.setItem('bricolemoi_chunk_reload', 'true');
-        window.location.reload();
-        return { default: () => null };
-      }
-      throw error;
-    }
-  });
+import { lazyWithRetry } from './utils/lazyWithRetry';
 
 // Code Splitting & Lazy-loaded Sub-Apps
 const ClientApp = lazyWithRetry(() => import('./layouts/ClientApp'));

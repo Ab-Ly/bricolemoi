@@ -1,11 +1,12 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navbar } from '../components/Navbar';
 import { BottomNav } from '../components/BottomNav';
 import { Lock, KeyRound, AlertCircle, ShieldCheck, Mail, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { switchSubdomainInDev } from '../lib/subdomain';
+import { lazyWithRetry } from '../utils/lazyWithRetry';
 
-const AdminView = lazy(() =>
+const AdminView = lazyWithRetry(() =>
   import('../components/AdminView').then((m) => ({ default: m.AdminView }))
 );
 
