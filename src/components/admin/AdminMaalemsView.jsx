@@ -32,6 +32,7 @@ import { calculateMaalemBalance } from '../../utils/balanceUtils';
 import { calculateMaalemRating } from '../../utils/ratingUtils';
 import { paginateArray } from '../../utils/paginationUtils';
 import { PaginationControls } from '../common/PaginationControls';
+import { deduplicateMaalems } from '../../services/dataReconciliationService';
 
 export const AdminMaalemsView = ({ 
   maalems = [], 
@@ -62,9 +63,10 @@ export const AdminMaalemsView = ({
     return calculateMaalemRating(m, reviews, interventions);
   };
 
-  // Filtrage des artisans
+  // Filtrage des artisans sans AUCUN doublon
   const filteredMaalems = useMemo(() => {
-    return maalems.filter((m) => {
+    const uniqueMaalems = deduplicateMaalems(maalems);
+    return uniqueMaalems.filter((m) => {
       const q = searchTerm.toLowerCase();
       const nameMatch = (m.full_name || '').toLowerCase().includes(q);
       const phoneMatch = (m.phone || '').replace(/\D/g, '').includes(searchTerm.replace(/\D/g, ''));

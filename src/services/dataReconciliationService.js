@@ -244,12 +244,84 @@ export const mergeTransactions = (localList = [], remoteList = []) => {
 };
 
 /**
+ * Déduplication déterministe des artisans Maâlems
+ * Fused les alias (PocketBase ID, UUID, ID temporaire) et garantit qu'un numéro de téléphone n'apparaît qu'une seule fois.
+ */
+export const deduplicateMaalems = (maalemsList = []) => {
+  if (!Array.isArray(maalemsList) || maalemsList.length <= 1) return maalemsList || [];
+
+  const getPhone9 = (phone) => {
+    if (!phone) return '';
+    return String(phone).replace(/\D/g, '').slice(-9);
+  };
+
+  const fusedList = [];
+
+  maalemsList.forEach((m) => {
+    if (!m) return;
+    const mId = String(m.id || '').trim();
+    const mUuid = String(m.uuid || '').trim();
+    const mPhone9 = getPhone9(m.phone);
+
+    // Trouver un artisan existant qui correspond par ID, UUID ou téléphone (9 chiffres)
+    const existingIndex = fusedList.findIndex((ex) => {
+      const exId = String(ex.id || '').trim();
+      const exUuid = String(ex.uuid || '').trim();
+      const exPhone9 = getPhone9(ex.phone);
+
+      const matchId = (mId && exId && mId === exId) || 
+                      (mUuid && exUuid && mUuid === exUuid) || 
+                      (mId && exUuid && mId === exUuid) || 
+                      (mUuid && exId && mUuid === exId);
+      const matchPhone = mPhone9.length >= 8 && exPhone9.length >= 8 && mPhone9 === exPhone9;
+
+      return matchId || matchPhone;
+    });
+
+    if (existingIndex === -1) {
+      fusedList.push({ ...m });
+    } else {
+      const ex = fusedList[existingIndex];
+      const isOnline = Boolean(ex.is_online || m.is_online);
+      const isAvailable = Boolean(ex.is_available || m.is_available);
+
+      const hasRealGpsM = !isNaN(m.lat) && m.lat !== 33.5883 && m.lat !== 34.0331 && m.lat > 20;
+      const hasRealGpsEx = !isNaN(ex.lat) && ex.lat !== 33.5883 && ex.lat !== 34.0331 && ex.lat > 20;
+
+      const lat = hasRealGpsM ? m.lat : (hasRealGpsEx ? ex.lat : (m.lat || ex.lat));
+      const lng = hasRealGpsM ? m.lng : (hasRealGpsEx ? ex.lng : (m.lng || ex.lng));
+
+      const district = (m.district && m.district !== 'Casablanca' ? m.district : ex.district) || m.city_zone || ex.city_zone || 'Casablanca';
+
+      fusedList[existingIndex] = {
+        ...ex,
+        ...m,
+        id: ex.id || m.id,
+        uuid: ex.uuid || m.uuid || ex.id || m.id,
+        full_name: ex.full_name || m.full_name || 'Artisan Maâlem',
+        phone: ex.phone || m.phone || '',
+        is_online: isOnline,
+        is_available: isAvailable,
+        lat,
+        lng,
+        district,
+        city_zone: district,
+        credit_balance: Math.max(Number(ex.credit_balance || 0), Number(m.credit_balance || 0))
+      };
+    }
+  });
+
+  return fusedList;
+};
+
+/**
  * Réconciliation des profils Maâlems
  * Protège le solde et la disponibilité de l'artisan connecté contre les lectures DB obsolètes
+ * et élimine les cartes dupliquées.
  */
 export const mergeMaalems = (localList = [], remoteList = [], currentUser = null) => {
-  if (!Array.isArray(remoteList)) return localList || [];
-  if (!Array.isArray(localList) || localList.length === 0) return remoteList;
+  if (!Array.isArray(remoteList)) return deduplicateMaalems(localList || []);
+  if (!Array.isArray(localList) || localList.length === 0) return deduplicateMaalems(remoteList);
 
   const currentUserId = currentUser?.id ? String(currentUser.id).trim() : null;
   const isSelfProtected = currentUserId && (
@@ -259,7 +331,7 @@ export const mergeMaalems = (localList = [], remoteList = [], currentUser = null
 
   const mLocalMap = new Map(localList.map((m) => [String(m.id).trim(), m]));
 
-  return remoteList.map((rMaalem) => {
+  const merged = remoteList.map((rMaalem) => {
     if (!rMaalem) return rMaalem;
     const mId = String(rMaalem.id).trim();
     const lMaalem = mLocalMap.get(mId);
@@ -292,6 +364,8 @@ export const mergeMaalems = (localList = [], remoteList = [], currentUser = null
         : rMaalem.lng
     };
   });
+
+  return deduplicateMaalems(merged);
 };
 
 /**
