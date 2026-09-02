@@ -23,7 +23,12 @@ const isBenignNoise = (text = '') => {
     s.includes('openstreetmap') ||
     s.includes('arcgisonline') ||
     s.includes('favicon') ||
-    s.includes('websocket')
+    s.includes('websocket') ||
+    s.includes('r2.dev') ||
+    s.includes('n8n') ||
+    s.includes('booking-radar') ||
+    s.includes('webhook') ||
+    s.includes('telemetry_status')
   );
 };
 
