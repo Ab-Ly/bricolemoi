@@ -306,6 +306,28 @@ function createDbAdapter(pbInstance) {
       async signOut() {
         pbInstance.authStore.clear();
         return { error: null };
+      },
+      async updateUser({ password, data: userData }) {
+        try {
+          const superId = pbInstance.authStore?.record?.id || 'tgjv6diq6m0sh2r';
+          const updatePayload = {};
+          if (password) {
+            updatePayload.password = password;
+            updatePayload.passwordConfirm = password;
+          }
+          if (userData && typeof userData === 'object') {
+            Object.assign(updatePayload, userData);
+          }
+
+          const record = await pbInstance.collection('_superusers').update(superId, updatePayload);
+          if (password) {
+            const email = record.email || 'admin@bricolemoi.ma';
+            await pbInstance.collection('_superusers').authWithPassword(email, password);
+          }
+          return { data: { user: record }, error: null };
+        } catch (err) {
+          return { data: null, error: err };
+        }
       }
     }
   };

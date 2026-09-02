@@ -212,7 +212,7 @@ export const useAdminAuthLogic = ({ user, setUser, setCurrentRole, setAdminAuthM
 
     const adminEmail = user?.email || 'admin@bricolemoi.ma';
 
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && supabase?.auth) {
       const { error: verifyErr } = await supabase.auth.signInWithPassword({
         email: adminEmail,
         password: cleanCur
@@ -222,26 +222,19 @@ export const useAdminAuthLogic = ({ user, setUser, setCurrentRole, setAdminAuthM
         throw new Error('Mot de passe administrateur actuel incorrect.');
       }
 
-      const { error: updateErr } = await supabase.auth.updateUser({
-        password: cleanNew
-      });
+      if (typeof supabase.auth.updateUser === 'function') {
+        const { error: updateErr } = await supabase.auth.updateUser({
+          password: cleanNew
+        });
 
-      if (updateErr) {
-        throw new Error(updateErr.message || 'Erreur lors de la mise à jour du mot de passe Supabase.');
+        if (updateErr) {
+          throw new Error(updateErr.message || 'Erreur lors de la mise à jour du mot de passe.');
+        }
       }
     }
 
     const newPassHash = await hashPin(cleanNew);
     localStorage.setItem('bricolemoi_admin_custom_pass_hash', newPassHash);
-
-    try {
-      if (pb) {
-        const adminProfiles = await pb.collection('profiles').getFullList({ filter: 'role = "ADMIN"' });
-        for (const p of adminProfiles) {
-          await pb.collection('profiles').update(p.id, { updated_at: new Date().toISOString() });
-        }
-      }
-    } catch (e) {}
 
     return { success: true };
   };
