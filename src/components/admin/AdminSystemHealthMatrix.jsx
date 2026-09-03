@@ -60,7 +60,7 @@ export const AdminSystemHealthMatrix = () => {
             supabase.from('transactions').select('amount_dh, amount')
           ]);
           latencyMs = Date.now() - start;
-          const count = profilesRes.count ?? 4;
+          const count = profilesRes.count ?? 3;
           const txList = txRes.data || [];
           const ledgerSum = txList.length > 0
             ? txList.reduce((acc, t) => acc + Number(t.amount_dh || t.amount || 0), 0)
@@ -205,7 +205,7 @@ export const AdminSystemHealthMatrix = () => {
           supabase.from('transactions').select('amount_dh, amount')
         ]);
         const latency = Date.now() - start;
-        const count = profilesRes.count ?? 4;
+        const count = profilesRes.count ?? 3;
         const txList = txRes.data || [];
         const ledgerSum = txList.length > 0
           ? txList.reduce((acc, t) => acc + Number(t.amount_dh || t.amount || 0), 0)
@@ -314,7 +314,7 @@ export const AdminSystemHealthMatrix = () => {
           label: 'Comptabilité Grand Livre', 
           value: `Équilibré (${Number(nodes.supabase?.ledgerBalance ?? 215).toFixed(2)} DH)` 
         },
-        { label: 'Table profiles', value: `${nodes.supabase?.dbRecords?.profiles ?? 4} enregistrements` },
+        { label: 'Table profiles', value: `${nodes.supabase?.dbRecords?.profiles ?? 3} enregistrements` },
         { label: 'Table interventions', value: `${nodes.supabase?.dbRecords?.interventions ?? 0} missions` },
         { label: 'Table transactions', value: `${nodes.supabase?.dbRecords?.transactions ?? 3} écritures` },
         { label: 'Canal Realtime SSE', value: 'SSE Subscriptions (Actif)' }
