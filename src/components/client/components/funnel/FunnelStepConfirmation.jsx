@@ -35,65 +35,46 @@ export const FunnelStepConfirmation = ({
       transition={{ duration: 0.25 }}
       className="space-y-6 font-sans"
     >
-      {/* 🎟️ Ticket SOS Récapitulatif */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 sm:p-6 rounded-3xl shadow-xl relative overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
+      {/* 🎟️ Ticket SOS Récapitulatif (« Modern Clean & Trust ») */}
+      <div className="bg-white border border-slate-200/90 p-5 sm:p-6 rounded-3xl shadow-sm relative overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-            <span className="font-mono text-xs font-bold uppercase tracking-wider text-emerald-400">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+            <span className="font-mono text-xs font-black uppercase tracking-wider text-emerald-700">
               {isRtl ? 'طلب جاهز للإرسال' : 'Ticket d’intervention prêt'}
             </span>
           </div>
-          <span className="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">
+          <span className="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full border border-slate-200/80">
             {selectedCity}
           </span>
         </div>
 
         <div className="space-y-3">
           <div>
-            <span className="text-[11px] text-slate-400 block">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
               {isRtl ? 'العطب المؤهل :' : 'Problème qualifié :'}
             </span>
-            <h4 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
-              <span className="text-blue-400">⚡</span>
+            <h4 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 mt-0.5">
+              <span className="text-blue-600">⚡</span>
               <span>{selectedSubcategory || (isRtl ? selectedIssue?.titleAr : selectedIssue?.titleFr)}</span>
             </h4>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-700/60 text-xs">
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-xs">
             <div>
-              <span className="text-slate-400 block text-[11px]">
+              <span className="text-slate-500 block text-[11px] font-medium">
                 {isRtl ? 'الحي :' : 'Secteur :'}
               </span>
-              <span className="font-bold text-slate-200">{selectedDistrict}</span>
+              <span className="font-black text-slate-900">{selectedDistrict}</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">
+              <span className="text-slate-500 block text-[11px] font-medium">
                 {isRtl ? 'التوقيت :' : 'Délai :'}
               </span>
-              <span className="font-bold text-amber-400">
-                {isRtl ? '🚨 فوري (تحت 20-30 دقيقة)' : '🚨 Immédiat (20-30 min)'}
+              <span className="font-black text-blue-700 flex items-center gap-1">
+                <span>🚨 {isRtl ? 'فوري (20-30 دقيقة)' : 'Immédiat (20-30 min)'}</span>
               </span>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 🛡️ Transparence Tarifaire Marocaine */}
-      <div className="bg-blue-50/70 border border-blue-200 p-4 sm:p-5 rounded-2xl space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-100 border border-blue-200 text-blue-700 flex items-center justify-center flex-shrink-0">
-            <ShieldCheck weight="duotone" className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              {isRtl ? 'شفافية الأثمنة والاتفاق المسبق' : 'Transparence & Diagnostic sur Place'}
-            </h4>
-            <p className="text-[11px] text-slate-600">
-              {isRtl
-                ? 'الديبلاصمون والمُعاينة : 40 - 50 درهم • اتفاق مسبق على ثمن الخدمة قبل البدء'
-                : 'Déplacement & Constat : 40 - 50 DH • Aucun prix imposé, Accord Direct avec le Maâlem'}
-            </p>
           </div>
         </div>
       </div>
