@@ -466,6 +466,22 @@ export const EmergencyFlowProvider = ({ children }) => {
       const clientLng = Number(emergencyData.lng || emergencyData.client_lng || -7.6038);
       const targetCat = (emergencyData.service_type || emergencyData.category || 'PLUMBING').toUpperCase();
 
+      // Résolution fidèle de la ville et du quartier (zéro repli forcé sur Casablanca)
+      let resolvedCity = emergencyData.city || '';
+      let resolvedDistrict = emergencyData.district || '';
+
+      if (resolvedDistrict && resolvedDistrict.includes(' - ')) {
+        const parts = resolvedDistrict.split(' - ').map((s) => s.trim()).filter(Boolean);
+        if (parts.length >= 2) {
+          if (!resolvedCity) resolvedCity = parts[0];
+          resolvedDistrict = parts.slice(1).join(' - ');
+        }
+      }
+
+      if (!resolvedCity) {
+        resolvedCity = userRef.current?.city_zone || userRef.current?.city || '';
+      }
+
       let candidates = (maalems || []).map((m) => ({
         name: m.full_name || 'Artisan Maâlem',
         phone: m.phone || '',
@@ -482,8 +498,8 @@ export const EmergencyFlowProvider = ({ children }) => {
           clientName: userRef.current?.full_name || emergencyData.client_name || 'Client BricoleMoi',
           clientPhone: userRef.current?.phone || emergencyData.client_phone || '',
           category: targetCat,
-          district: emergencyData.district || 'Maârif',
-          city: emergencyData.city || 'Casablanca',
+          district: resolvedDistrict || emergencyData.district || 'Secteur renseigné',
+          city: resolvedCity,
           pricingModel: 'ACCORD_DIRECT',
           description: emergencyData.subcategory || emergencyData.description || 'Intervention Urgente SOS 🚨',
           clientLat,
@@ -497,15 +513,16 @@ export const EmergencyFlowProvider = ({ children }) => {
 
     // 2. Envoi de la notification Web Push d'urgence en arrière-plan vers tous les artisans
     try {
+      const pushDistrict = emergencyData.district || 'votre secteur';
       fetch('/api/send-push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: `🚨 URGENCE SOS : ${emergencyData.subcategory || emergencyData.service_type || 'Dépannage'}`,
-          body: `Nouvelle mission urgente à ${emergencyData.district || 'votre secteur'} !`,
-          city: emergencyData.city || 'Casablanca',
+          body: `Nouvelle mission urgente à ${pushDistrict} !`,
+          city: emergencyData.city || '',
           specialty: emergencyData.service_type || 'PLUMBING',
-          district: emergencyData.district || 'Centre',
+          district: pushDistrict,
           intervention_id: emergencyData.id || null
         })
       }).catch((err) => console.warn('[Push Dispatch Non-blocking Error]:', err));

@@ -519,7 +519,12 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
       });
 
       if (created) {
-        flowTriggerSOS(created);
+        flowTriggerSOS({
+          ...created,
+          city: selectedCity,
+          district: selectedDistrict,
+          full_district: fullDistrictLabel
+        });
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 

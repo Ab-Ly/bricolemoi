@@ -56,20 +56,44 @@ export default async function handler(req, res) {
       clientName = "Client BricoleMoi",
       clientPhone = "",
       category = "Dépannage",
-      district = "Centre",
-      city = "Casablanca",
+      district = "",
+      city = "",
       description = "Intervention d'urgence SOS",
       clientLat = 33.5883,
       clientLng = -7.6328,
       candidateMaalems = []
     } = req.body || {};
 
-    const locationLabel = [district, city].filter(Boolean).join(", ") || "Localisation transmise par GPS";
+    // Déterminer la ville et le quartier de manière propre sans forcer ni dupliquer Casablanca
+    let cleanDistrict = String(district || "").trim();
+    let cleanCity = String(city || "").trim();
+
+    if (cleanDistrict.includes(" - ")) {
+      const parts = cleanDistrict.split(" - ").map((s) => s.trim()).filter(Boolean);
+      if (parts.length >= 2) {
+        if (!cleanCity || cleanCity.toLowerCase() === "casablanca") {
+          cleanCity = parts[0];
+        }
+        cleanDistrict = parts.slice(1).join(" - ");
+      }
+    }
+
+    let locationLabel = "";
+    if (cleanDistrict && cleanCity) {
+      if (cleanDistrict.toLowerCase().includes(cleanCity.toLowerCase())) {
+        locationLabel = cleanDistrict;
+      } else {
+        locationLabel = `${cleanDistrict}, ${cleanCity}`;
+      }
+    } else {
+      locationLabel = cleanDistrict || cleanCity || "Localisation transmise par GPS";
+    }
+
     const formattedClientPhone = formatEvolutionNumber(clientPhone);
     console.log(`🚨 [SOS Dispatch API] Nouvelle urgence de ${clientName} (${formattedClientPhone || 'Sans tél'}) à ${locationLabel}`);
 
     // Anti-doublon : Éviter d'envoyer 2 alertes WhatsApp en rafale pour la même demande (< 15 secondes)
-    const dedupKey = `${formattedClientPhone || clientName}_${category}_${district}_${city}`;
+    const dedupKey = `${formattedClientPhone || clientName}_${category}_${cleanDistrict}_${cleanCity}`;
     const now = Date.now();
     if (recentDispatches.has(dedupKey) && now - recentDispatches.get(dedupKey) < 15000) {
       console.log(`⏱️ [SOS Dispatch API] Requête en doublon ignorée (< 15s) pour ${dedupKey}`);
