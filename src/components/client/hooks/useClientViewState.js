@@ -5,7 +5,7 @@ import { useEmergencyFlow } from '../../../context/EmergencyFlowContext';
 import { MOROCCAN_CITIES, COUNTRY_DIAL_CODES } from '../../../constants/geo';
 import { reverseGeocodeMorocco } from '../../../lib/geoService';
 import { uploadMediaToR2 } from '../../../lib/r2StorageService';
-import { db, isDbConfigured, supabase, isSupabaseConfigured } from '../../../lib/dbClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured, generatePbId } from '../../../lib/dbClient';
 import { isMatchingInterventionId } from '../../../context/app/helpers/appSyncHelpers';
 import { toast } from 'sonner';
 
@@ -556,9 +556,7 @@ export const useClientViewState = ({ initialCategory, initialCity, initialDistri
 
     let currentUser = user;
     if (!currentUser) {
-      const generatedId = (typeof crypto !== 'undefined' && crypto.randomUUID)
-        ? crypto.randomUUID()
-        : '209a9beb-b4d4-41eb-8a15-f10000000000';
+      const generatedId = generatePbId();
       currentUser = {
         id: generatedId,
         full_name: `Client ${formatted.slice(-4)}`,

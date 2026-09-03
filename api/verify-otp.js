@@ -22,6 +22,11 @@ function cleanPhoneNumber(rawPhone) {
   };
 }
 
+function toPbId(val) {
+  const clean = String(val || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
+  return clean.slice(0, 15).padEnd(15, "0");
+}
+
 function verifyOtpSignature(phone, code, sessionToken) {
   if (!sessionToken || typeof sessionToken !== "string") return false;
   const parts = sessionToken.split(".");
@@ -34,7 +39,15 @@ function verifyOtpSignature(phone, code, sessionToken) {
   const expectedData = `${phone}:${code}:${expiresAt}`;
   const expectedSig = crypto.createHmac("sha256", OTP_SIGNING_SECRET).update(expectedData).digest("hex");
 
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig));
+  const sigBuf = Buffer.from(signature, 'utf8');
+  const expectedBuf = Buffer.from(expectedSig, 'utf8');
+
+  // Protection contre TypeError de crypto.timingSafeEqual si les longueurs diffèrent
+  if (sigBuf.length !== expectedBuf.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(sigBuf, expectedBuf);
 }
 
 export default async function handler(req, res) {
@@ -72,7 +85,7 @@ export default async function handler(req, res) {
         message: "Code test validé avec succès.",
         verified: true,
         user: {
-          id: "usr_" + formatted.replace(/\D/g, ""),
+          id: toPbId("usr" + formatted.replace(/\D/g, "")),
           phone: formatted,
           role: role || "CLIENT",
           full_name: fullName || "Utilisateur Test",
@@ -93,7 +106,7 @@ export default async function handler(req, res) {
             verified: true,
             provider: "evolution_whatsapp",
             user: {
-              id: "usr_" + formatted.replace(/\D/g, ""),
+              id: toPbId("usr" + formatted.replace(/\D/g, "")),
               phone: formatted,
               role: role || "CLIENT",
               full_name: fullName || (role === "MAALEM" ? "Artisan Pro" : "Client Particulier"),
@@ -134,7 +147,7 @@ export default async function handler(req, res) {
             verified: true,
             provider: "prelude",
             user: {
-              id: "usr_" + formatted.replace(/\D/g, ""),
+              id: toPbId("usr" + formatted.replace(/\D/g, "")),
               phone: formatted,
               role: role || "CLIENT",
               full_name: fullName || (role === "MAALEM" ? "Artisan Pro" : "Client Particulier"),

@@ -3,8 +3,7 @@ const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || process.env.VITE_EVOL
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || process.env.VITE_EVOLUTION_API_KEY || "bricolemoi_secret_token_2026";
 const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE || process.env.VITE_EVOLUTION_INSTANCE || "bricolemoi-otp";
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || process.env.VITE_N8N_WEBHOOK_URL || "http://n8n-nfyfefwxs67boyv7oeeu02s4.51.255.46.206.sslip.io/webhook/bricolemoi-booking-radar";
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "https://cpvmuthokkspsthpbxrv.supabase.co";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwdm11dGhva2tzcHN0aHBieHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1Mzc4NzMsImV4cCI6MjEwMjExMzg3M30.RjBaKurGstN9b-mrtz9pMQRtMAnPJh13EVSdNw1Ue4c";
+const POCKETBASE_URL = (process.env.POCKETBASE_URL || process.env.VITE_POCKETBASE_URL || "https://pocketbase.51.255.46.206.sslip.io").replace(/\/$/, "");
 
 // Calcul de distance Haversine en kilomètres
 function getDistanceKm(lat1, lon1, lat2, lon2) {
@@ -89,32 +88,28 @@ export default async function handler(req, res) {
       }
     }
 
-    // 2. Résolution des Maâlems candidats : utiliser la liste reçue OU interroger Supabase directement
+    // 2. Résolution des Maâlems candidats : utiliser la liste reçue OU interroger PocketBase VPS directement
     let rawMaalems = candidateMaalems;
 
     if (!rawMaalems || rawMaalems.length === 0) {
       try {
-        console.log("🔍 [SOS Dispatch] Recherche directe des Maâlems dans Supabase...");
-        const profilesRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?role=eq.MAALEM&select=id,full_name,phone`, {
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        });
-        const profiles = await profilesRes.json();
+        console.log("🔍 [SOS Dispatch] Recherche directe des Maâlems dans PocketBase VPS...");
+        const [profilesRes, detailsRes] = await Promise.all([
+          fetch(`${POCKETBASE_URL}/api/collections/profiles/records?filter=(role='MAALEM')&fields=id,full_name,phone&perPage=50`),
+          fetch(`${POCKETBASE_URL}/api/collections/maalem_details/records?fields=id,specialty,lat,lng,is_available,is_online&perPage=50`)
+        ]);
 
-        const detailsRes = await fetch(`${SUPABASE_URL}/rest/v1/maalem_details?select=id,specialty,lat,lng,is_available,is_online`, {
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        });
-        const details = await detailsRes.json();
+        const profilesData = await profilesRes.json().catch(() => ({ items: [] }));
+        const detailsData = await detailsRes.json().catch(() => ({ items: [] }));
 
-        if (Array.isArray(profiles) && Array.isArray(details)) {
-          const detailsMap = new Map(details.map((d) => [d.id, d]));
+        const profiles = Array.isArray(profilesData?.items) ? profilesData.items : [];
+        const details = Array.isArray(detailsData?.items) ? detailsData.items : [];
+
+        if (profiles.length > 0) {
+          const detailsMap = new Map(details.map((d) => [String(d.id).trim(), d]));
           rawMaalems = profiles.map((p) => {
-            const d = detailsMap.get(p.id) || {};
+            const pId = String(p.id).trim();
+            const d = detailsMap.get(pId) || {};
             return {
               name: p.full_name || "Artisan Maâlem",
               phone: p.phone || "",
@@ -125,8 +120,8 @@ export default async function handler(req, res) {
             };
           }).filter((m) => Boolean(m.phone));
         }
-      } catch (sbErr) {
-        console.warn("[SOS Dispatch] Erreur fetch Supabase maalems:", sbErr.message);
+      } catch (pbErr) {
+        console.warn("[SOS Dispatch] Erreur fetch PocketBase maalems:", pbErr.message);
       }
     }
 

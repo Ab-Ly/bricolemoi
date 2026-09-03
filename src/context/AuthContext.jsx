@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { translations } from '../lib/i18n';
-import { db, isDbConfigured, supabase, isSupabaseConfigured, pb } from '../lib/dbClient';
+import { db, isDbConfigured, supabase, isSupabaseConfigured, pb, generatePbId, toPbId } from '../lib/dbClient';
 import { 
   auth, 
   RecaptchaVerifier, 
@@ -584,8 +584,7 @@ export const AuthProvider = ({ children }) => {
                   };
                 }
               } else {
-                const isUuid = (str) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-                const validProfileId = isUuid(firebaseUid) ? firebaseUid : (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : (normRole === 'MAALEM' ? '22222222-2222-2222-2222-222222222222' : '11111111-1111-1111-1111-111111111111'));
+                const validProfileId = firebaseUid ? toPbId(firebaseUid) : generatePbId();
                 authenticatedUser.id = validProfileId;
 
                 const profileData = {
@@ -616,12 +615,12 @@ export const AuthProvider = ({ children }) => {
                     id: validProfileId,
                     specialty: specialty || 'PLUMBING',
                     cin_number: 'CIN-PENDING',
-                    cin_photo_url: 'https://images.unsplash.com/photo-1544717305-2782549b5136',
-                    portfolio_urls: portfolioUrls.length > 0 ? portfolioUrls : ['https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500'],
+                    cin_photo_url: null,
+                    portfolio_urls: portfolioUrls.length > 0 ? portfolioUrls : [],
                     status: 'active',
                     credit_balance: 15.00,
                     is_verified: true,
-                    rating_avg: 5.00,
+                    rating_avg: 0,
                     consecutive_five_stars: 0,
                     hundred_dh_recharges_count: 0
                   };
@@ -633,7 +632,7 @@ export const AuthProvider = ({ children }) => {
                   // Enregistrement de la transaction officielle de bonus de bienvenue (+15 DH)
                   try {
                     const welcomeTx = {
-                      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ('tx-bonus-' + Date.now()),
+                      id: generatePbId(),
                       maalem_id: validProfileId,
                       maalem_name: fullName || 'Artisan Maâlem',
                       maalem_phone: finalPhone,
