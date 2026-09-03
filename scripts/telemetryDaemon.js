@@ -70,6 +70,7 @@ async function probeSupabase() {
     ]);
 
     const latencyMs = Date.now() - start;
+    const ledgerSum = transactions.reduce((acc, t) => acc + Number(t.amount_dh || t.amount || 0), 0);
 
     return {
       status: latencyMs > 800 ? 'DEGRADED' : 'UP',
@@ -80,6 +81,7 @@ async function probeSupabase() {
         transactions: transactions.length,
         maalems: maalemDetails.length
       },
+      ledgerBalance: ledgerSum,
       ledgerBalanced: true,
       error: null
     };

@@ -64,9 +64,37 @@ export const AdminClientsView = ({ clients = [], interventions = [], reviews = [
     return map;
   }, [interventions]);
 
+  // 1. Filtrer les faux clients (les profils ADMIN ne doivent pas être dans le répertoire clients)
+  // 2. Dédupliquer par numéro de téléphone normalisé (un client unique par numéro)
+  const cleanUniqueClients = useMemo(() => {
+    const seenPhones = new Set();
+    const unique = [];
+
+    (clients || []).forEach((c) => {
+      // Exclure les profils administrateurs
+      const role = String(c.role || '').toUpperCase();
+      const name = String(c.full_name || '').toLowerCase();
+      if (role === 'ADMIN' || name.includes('administrateur')) {
+        return;
+      }
+
+      // Normaliser le téléphone pour dédupliquer
+      const cleanPhone = String(c.phone || '').replace(/\D/g, '');
+      if (cleanPhone && cleanPhone.length >= 8) {
+        if (seenPhones.has(cleanPhone)) {
+          return; // Doublon détecté, ignorer
+        }
+        seenPhones.add(cleanPhone);
+      }
+      unique.push(c);
+    });
+
+    return unique;
+  }, [clients]);
+
   // Filtrage et Recherche multi-critères
   const filteredClients = useMemo(() => {
-    return clients.filter((client) => {
+    return cleanUniqueClients.filter((client) => {
       const nameMatch = (client.full_name || '').toLowerCase().includes(searchTerm.toLowerCase());
       const phoneMatch = (client.phone || '').replace(/\D/g, '').includes(searchTerm.replace(/\D/g, ''));
       const districtMatch = (client.city_zone || client.district || '').toLowerCase().includes(searchTerm.toLowerCase());
@@ -82,7 +110,7 @@ export const AdminClientsView = ({ clients = [], interventions = [], reviews = [
 
       return queryMatch && cityMatch && statusMatch;
     });
-  }, [clients, searchTerm, cityFilter, statusFilter]);
+  }, [cleanUniqueClients, searchTerm, cityFilter, statusFilter]);
 
   // Pagination
   const pagination = useMemo(() => {

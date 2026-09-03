@@ -441,7 +441,10 @@ export const usePlatformDataSync = ({
     });
 
     const clientProfiles = (rawProfiles || [])
-      .filter((p) => String(p.role || '').toLowerCase() !== 'maalem')
+      .filter((p) => {
+        const role = String(p.role || '').toUpperCase();
+        return role !== 'MAALEM' && role !== 'ADMIN';
+      })
       .map((c) => ({
         id: c.id,
         full_name: c.full_name || 'Client BricoleMoi',
@@ -450,7 +453,7 @@ export const usePlatformDataSync = ({
         district: c.city_zone || 'Casablanca',
         created_at: c.created_at || new Date().toISOString(),
         is_suspended: false,
-        role: c.role || 'client'
+        role: 'CLIENT'
       }));
 
     if (user && String(user.role || '').toUpperCase() === 'CLIENT') {
@@ -589,11 +592,23 @@ export const usePlatformDataSync = ({
     const finalMaalems = Array.from(maalemMap.values()).map(normalizeMaalemProfile).filter(Boolean);
 
     setClients((prev) => {
-      const clientMapMerged = new Map((prev || []).map((c) => [String(c.id).trim(), c]));
-      finalClients.forEach((c) => {
-        const existing = clientMapMerged.get(String(c.id).trim());
-        clientMapMerged.set(String(c.id).trim(), { ...existing, ...c });
+      const clientMapMerged = new Map();
+      const seenPhones = new Set();
+
+      // Fusionner et dédupliquer par téléphone en excluant les administrateurs
+      [...(prev || []), ...finalClients].forEach((c) => {
+        const role = String(c.role || '').toUpperCase();
+        const name = String(c.full_name || '').toLowerCase();
+        if (role === 'ADMIN' || name.includes('administrateur')) return;
+
+        const cleanPhone = String(c.phone || '').replace(/\D/g, '');
+        if (cleanPhone && cleanPhone.length >= 8) {
+          if (seenPhones.has(cleanPhone)) return;
+          seenPhones.add(cleanPhone);
+        }
+        clientMapMerged.set(String(c.id).trim(), c);
       });
+
       const merged = Array.from(clientMapMerged.values());
       saveCache('bricolemoi_clients_cache', merged);
       return merged;
