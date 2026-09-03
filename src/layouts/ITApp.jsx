@@ -906,19 +906,89 @@ export const ITApp = () => {
                     </div>
                   </div>
 
-                  <div className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
-                    <div className="p-3 bg-white border-b border-slate-200 flex items-center justify-between text-xs text-slate-600 font-mono">
-                      <span>Console de bord Beszel intégrée (http://51.255.46.206:8095)</span>
-                      <span className="text-emerald-700 font-bold flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                        Actif
+                  {/* Console de bord Beszel Hub : Accès Sécurisé Direct */}
+                  <div className="border border-slate-200 rounded-3xl p-5 sm:p-7 bg-gradient-to-b from-slate-50 to-white space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-xs font-mono font-black text-slate-900 uppercase tracking-wider">
+                            CONSOLE BESZEL HUB v0.8.0 • DOCKER CONTAINER
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-mono font-bold">
+                            PORT 8095 OPÉRATIONNEL
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          Surveillance temps réel de l'infrastructure matérielle : CPU multi-cœurs, mémoire RAM, I/O disque NVMe et conteneurs.
+                        </p>
+                      </div>
+
+                      <a
+                        href="http://51.255.46.206:8095"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        <span>Ouvrir le Hub Beszel en Plein Écran</span>
+                      </a>
+                    </div>
+
+                    {/* Identifiants d'accès rapide Beszel */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">URL Console</span>
+                          <code className="text-xs font-mono font-bold text-slate-800">51.255.46.206:8095</code>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard('http://51.255.46.206:8095', 'beszel-url')}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+                          title="Copier l'URL"
+                        >
+                          {copiedKey === 'beszel-url' ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
+
+                      <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">Identifiant</span>
+                          <code className="text-xs font-mono font-bold text-slate-800">admin@bricolemoi.ma</code>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard('admin@bricolemoi.ma', 'beszel-email')}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+                          title="Copier l'email"
+                        >
+                          {copiedKey === 'beszel-email' ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
+
+                      <div className="p-3 bg-white border border-slate-200 rounded-2xl flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">Mot de Passe</span>
+                          <code className="text-xs font-mono font-bold text-slate-800">Ali15091985@@</code>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard('Ali15091985@@', 'beszel-pwd')}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+                          title="Copier le mot de passe"
+                        >
+                          {copiedKey === 'beszel-pwd' ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/70 flex items-center gap-2.5 text-xs text-amber-900">
+                      <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span className="text-[11px] leading-relaxed">
+                        <strong>Sécurité navigateur :</strong> Beszel interdit l'intégration directe en iframe (<code className="font-mono bg-white px-1 py-0.5 rounded border border-amber-200">X-Frame-Options: SAMEORIGIN</code>). Cliquez sur le bouton vert ci-dessus pour ouvrir le tableau de bord complet dans un onglet dédié.
                       </span>
                     </div>
-                    <iframe
-                      src="http://51.255.46.206:8095"
-                      title="Beszel Monitoring Hub"
-                      className="w-full h-[460px] border-0 bg-white"
-                    />
                   </div>
                 </div>
               )}
