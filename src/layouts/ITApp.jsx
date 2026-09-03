@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { AdminSystemHealthMatrix } from '../components/admin/AdminSystemHealthMatrix';
 import { AdminRealtimeConsole } from '../components/admin/AdminRealtimeConsole';
@@ -29,7 +29,13 @@ import {
   Eye,
   EyeOff,
   Cloud,
-  ShieldAlert
+  ShieldAlert,
+  Menu,
+  X,
+  Search,
+  ChevronRight,
+  LogOut,
+  LayoutDashboard
 } from 'lucide-react';
 import { switchSubdomainInDev } from '../lib/subdomain';
 
@@ -211,12 +217,68 @@ const DEVOPS_KEYRING = [
   }
 ];
 
+const NAV_ITEMS = [
+  {
+    id: 'ALL',
+    label: 'Tableau de Bord 360°',
+    shortLabel: 'Vue 360°',
+    icon: LayoutDashboard,
+    badge: 'Global'
+  },
+  {
+    id: 'KEYRING',
+    label: 'Trousseau Identifiants',
+    shortLabel: 'Trousseau',
+    icon: Key,
+    badge: `${DEVOPS_KEYRING.length}`,
+    badgeColor: 'amber'
+  },
+  {
+    id: 'SERVICES',
+    label: 'Raccourcis Serveur',
+    shortLabel: 'Services VPS',
+    icon: Layers,
+    badge: `${DEVOPS_SERVICES.length}`,
+    badgeColor: 'blue'
+  },
+  {
+    id: 'MONITORING',
+    label: 'Monitoring Beszel',
+    shortLabel: 'Monitoring',
+    icon: Gauge,
+    badge: 'VPS Live',
+    badgeColor: 'emerald'
+  },
+  {
+    id: 'MATRIX',
+    label: 'Santé Infrastructure',
+    shortLabel: 'Matrice 5 Nœuds',
+    icon: Server,
+    badge: '5 Nœuds',
+    badgeColor: 'blue'
+  },
+  {
+    id: 'CONSOLE',
+    label: 'Console WebSocket',
+    shortLabel: 'Console Live',
+    icon: Radio,
+    badge: 'Centrifugo',
+    badgeColor: 'emerald'
+  }
+];
+
 export const ITApp = () => {
-  const { user, currentRole, loginAdminWithCredentials } = useAuth();
+  const { user, currentRole } = useAuth();
   const [pinInput, setPinInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Navigation active
   const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' | 'KEYRING' | 'SERVICES' | 'MONITORING' | 'MATRIX' | 'CONSOLE'
+  
+  // Contrôle du Menu Déroulant / Sidebar Mobile & Desktop
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [keyringSearch, setKeyringSearch] = useState('');
 
   // État local pour révéler les secrets du trousseau (masqué par défaut)
   const [visibleSecrets, setVisibleSecrets] = useState({});
@@ -262,6 +324,12 @@ export const ITApp = () => {
     }
   };
 
+  const handleLockCockpit = () => {
+    sessionStorage.removeItem('bricolemoi_admin_pin_ok');
+    setIsPinAuthenticated(false);
+    setPinInput('');
+  };
+
   const toggleSecretVisibility = (id) => {
     setVisibleSecrets(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -273,288 +341,362 @@ export const ITApp = () => {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
+  const selectTab = (tabId) => {
+    setActiveTab(tabId);
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const filteredKeyring = useMemo(() => {
+    if (!keyringSearch.trim()) return DEVOPS_KEYRING;
+    const q = keyringSearch.toLowerCase().trim();
+    return DEVOPS_KEYRING.filter(k => 
+      k.name.toLowerCase().includes(q) ||
+      k.category.toLowerCase().includes(q) ||
+      k.loginValue.toLowerCase().includes(q) ||
+      k.notes.toLowerCase().includes(q) ||
+      k.url.toLowerCase().includes(q)
+    );
+  }, [keyringSearch]);
+
+  const currentNav = NAV_ITEMS.find(n => n.id === activeTab) || NAV_ITEMS[0];
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
-      {/* 1. Header DevOps & IT — 100% Modern Clean & Trust */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 px-3 sm:px-6 py-3 shadow-xs">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+      {/* 1. Header DevOps & IT Sticky */}
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 px-3 sm:px-6 py-2.5 shadow-xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          {/* Gauche : Bouton Hamburger Mobile + Titre Cockpit */}
+          <div className="flex items-center gap-2.5">
+            {isPinAuthenticated && (
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(prev => !prev)}
+                className="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center justify-center cursor-pointer transition-all active:scale-95 touch-target-44"
+                title="Ouvrir le menu de navigation IT"
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            )}
+
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs shrink-0">
                 <Terminal className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-sm sm:text-base font-black tracking-tight text-slate-900 flex items-center gap-2 font-mono">
-                    BRICOLEMOI • COCKPIT IT & OBSERVABILITÉ
+                  <h1 className="text-xs sm:text-sm font-black tracking-tight text-slate-900 font-mono flex items-center gap-1.5">
+                    <span>COCKPIT IT</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="hidden sm:inline text-blue-700">OBSERVABILITÉ</span>
                   </h1>
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200">
                     DEVOPS
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 font-mono">
-                  VPS OVH Debian • PocketBase (8090) • Beszel (8095) • Coolify (8000)
+                <p className="text-[10px] sm:text-[11px] text-slate-500 font-mono truncate max-w-[200px] sm:max-w-none">
+                  VPS OVH Debian • 51.255.46.206
                 </p>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 sm:hidden">
-              <button
-                type="button"
-                onClick={() => switchSubdomainInDev('ADMIN')}
-                className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 cursor-pointer shadow-xs active:scale-95"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Admin</span>
-              </button>
-            </div>
           </div>
 
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-800 font-bold shadow-xs">
+          {/* Droite : Statut VPS & Actions Rapides */}
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-800 font-bold shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              <span>VPS : 51.255.46.206 (Opérationnel)</span>
+              <span>VPS : 51.255.46.206</span>
             </div>
 
             <button
               type="button"
               onClick={() => switchSubdomainInDev('ADMIN')}
-              className="hidden sm:flex px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold items-center gap-2 cursor-pointer transition-all active:scale-95 shadow-xs"
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-xs"
             >
-              <ArrowLeft className="w-4 h-4 text-slate-500" />
-              <span>Retour Vue Métier Admin</span>
+              <ArrowLeft className="w-3.5 h-3.5 text-slate-500" />
+              <span className="hidden sm:inline">Vue Métier Admin</span>
+              <span className="sm:hidden">Admin</span>
             </button>
+
+            {isPinAuthenticated && (
+              <button
+                type="button"
+                onClick={handleLockCockpit}
+                className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                title="Verrouiller le cockpit IT"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Verrouiller</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* 2. Main Content — Fond Clair & Cartes Blanches Lumineuses */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-20">
-        {!isPinAuthenticated ? (
-          <div className="max-w-md mx-auto my-12 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 text-center shadow-lg space-y-6">
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mx-auto shadow-xs">
-              <Lock className="w-7 h-7" />
-            </div>
+      {/* 2. Body avec Sidebar Latérale & Contenu */}
+      <div className="flex-1 flex max-w-7xl w-full mx-auto relative">
+        {/* SIDEBAR LATÉRALE DÉROULANTE (DESKTOP & MOBILE DRAWER) */}
+        {isPinAuthenticated && (
+          <>
+            {/* Backdrop sombre sur mobile */}
+            {isMobileMenuOpen && (
+              <div 
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+            )}
 
-            <div>
-              <h2 className="text-xl font-black text-slate-900 tracking-tight">Accès Ingénierie &amp; IT</h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Espace sécurisé : trousseau de mots de passe, monitoring Beszel et supervision technique.
-              </p>
-            </div>
-
-            <form onSubmit={handleLoginSubmit} className="space-y-4 text-left">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  Code PIN de Sécurité Administrateur
-                </label>
-                <div className="relative">
-                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="password"
-                    maxLength={16}
-                    placeholder="2026 ou admin2026"
-                    value={pinInput}
-                    onChange={(e) => setPinInput(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-center text-lg font-mono tracking-widest text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              {errorMsg && (
-                <p className="text-xs text-rose-600 font-bold text-center">{errorMsg}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting || pinInput.trim().length < 4}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shadow-blue-500/20 active:scale-95"
-              >
-                {isSubmitting ? 'Authentification...' : 'Déverrouiller le Cockpit IT'}
-              </button>
-            </form>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Contrôle de vue dédié (Sous-onglets IT — Clean Light) */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 overflow-x-auto no-scrollbar">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('ALL')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap ${
-                    activeTab === 'ALL'
-                      ? 'bg-white text-blue-700 shadow-xs border border-slate-200/80 font-black'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Vue Complète
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('KEYRING')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                    activeTab === 'KEYRING'
-                      ? 'bg-white text-amber-700 shadow-xs border border-slate-200/80 font-black'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <Key className="w-3.5 h-3.5 text-amber-600" />
-                  <span>🔑 Trousseau de Logins ({DEVOPS_KEYRING.length})</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('SERVICES')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap ${
-                    activeTab === 'SERVICES'
-                      ? 'bg-white text-blue-700 shadow-xs border border-slate-200/80 font-black'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Raccourcis Serveur ({DEVOPS_SERVICES.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('MONITORING')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap ${
-                    activeTab === 'MONITORING'
-                      ? 'bg-white text-emerald-700 shadow-xs border border-slate-200/80 font-black'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Monitoring Beszel (VPS)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('MATRIX')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap ${
-                    activeTab === 'MATRIX'
-                      ? 'bg-white text-blue-700 shadow-xs border border-slate-200/80 font-black'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Santé 5 Nœuds
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('CONSOLE')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap ${
-                    activeTab === 'CONSOLE'
-                      ? 'bg-white text-blue-700 shadow-xs border border-slate-200/80 font-black'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Console Live
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs shrink-0">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="font-bold text-slate-700">Trousseau Chiffré • Accès Protégé</span>
-              </div>
-            </div>
-
-            {/* 🔑 SECTION : TROUSSEAU DE LOGINS & MOTS DE PASSE (DEVOPS KEYRING) */}
-            {(activeTab === 'ALL' || activeTab === 'KEYRING') && (
-              <div className="space-y-3.5 bg-gradient-to-br from-amber-50/40 via-white to-slate-50 border border-amber-200/70 rounded-3xl p-4 sm:p-6 shadow-xs">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-100 pb-3">
+            {/* Menu Latéral Déroulant / Sidebar Drawer */}
+            <aside 
+              className={`
+                fixed lg:sticky top-0 lg:top-[57px] h-screen lg:h-[calc(100vh-57px)]
+                w-72 sm:w-80 lg:w-64 bg-white border-r border-slate-200/90 z-50 lg:z-10
+                flex flex-col justify-between p-4 shadow-xl lg:shadow-none
+                transition-transform duration-300 ease-in-out
+                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+              `}
+            >
+              <div className="space-y-4">
+                {/* En-tête tiroir mobile */}
+                <div className="flex items-center justify-between lg:hidden border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700">
-                      <Key className="w-4 h-4" />
+                    <Terminal className="w-4 h-4 text-blue-600" />
+                    <span className="font-mono font-black text-xs text-slate-900">MENU NAVIGATION IT</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-1 rounded-lg text-slate-400 hover:text-slate-700"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider px-2">
+                  SECTIONS &amp; OBSERVABILITÉ
+                </div>
+
+                {/* Liste des liens de navigation avec badges */}
+                <nav className="space-y-1">
+                  {NAV_ITEMS.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => selectTab(item.id)}
+                        className={`
+                          w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer text-left
+                          ${isActive 
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-black' 
+                            : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-900'}
+                        `}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                          <span className="truncate">{item.label}</span>
+                        </div>
+
+                        {item.badge && (
+                          <span 
+                            className={`
+                              px-2 py-0.5 rounded-full text-[10px] font-mono font-bold shrink-0
+                              ${isActive 
+                                ? 'bg-white/20 text-white' 
+                                : item.badgeColor === 'amber'
+                                ? 'bg-amber-50 text-amber-800 border border-amber-200/80'
+                                : item.badgeColor === 'emerald'
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/80'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200/80'}
+                            `}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              {/* Pied de sidebar : État Serveur & Raccourci SSH */}
+              <div className="pt-4 border-t border-slate-100 space-y-2 font-mono text-[11px]">
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 space-y-1">
+                  <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold">
+                    <span>HÔTE DEBIAN 12</span>
+                    <span className="text-emerald-700">● 100% UP</span>
+                  </div>
+                  <div className="font-bold text-slate-800 text-xs truncate">
+                    51.255.46.206
+                  </div>
+                </div>
+
+                <a
+                  href="https://pocketbase.51.255.46.206.sslip.io/_/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-between transition-all"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Database className="w-3.5 h-3.5 text-blue-600" />
+                    <span>PocketBase Admin</span>
+                  </span>
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                </a>
+              </div>
+            </aside>
+          </>
+        )}
+
+        {/* CONTENU PRINCIPAL */}
+        <main className="flex-1 min-w-0 px-3 sm:px-6 py-4 sm:py-6 pb-24 overflow-x-hidden">
+          {!isPinAuthenticated ? (
+            <div className="max-w-md mx-auto my-12 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 text-center shadow-lg space-y-6">
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mx-auto shadow-xs">
+                <Lock className="w-7 h-7" />
+              </div>
+
+              <div>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">Accès Ingénierie &amp; IT</h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Espace sécurisé : trousseau de mots de passe, monitoring Beszel et supervision technique.
+                </p>
+              </div>
+
+              <form onSubmit={handleLoginSubmit} className="space-y-4 text-left">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Code PIN de Sécurité Administrateur
+                  </label>
+                  <div className="relative">
+                    <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="password"
+                      maxLength={16}
+                      placeholder="2026 ou admin2026"
+                      value={pinInput}
+                      onChange={(e) => setPinInput(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-center text-lg font-mono tracking-widest text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {errorMsg && (
+                  <p className="text-xs text-rose-600 font-bold text-center">{errorMsg}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || pinInput.trim().length < 4}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shadow-blue-500/20 active:scale-95"
+                >
+                  {isSubmitting ? 'Authentification...' : 'Déverrouiller le Cockpit IT'}
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* En-tête de section actif avec fil d'ariane & switch mobile rapide */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
+                    {React.createElement(currentNav.icon, { className: 'w-4 h-4' })}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+                      <span>COCKPIT IT</span>
+                      <span>/</span>
+                      <span className="font-bold text-blue-700 uppercase">{currentNav.label}</span>
                     </div>
-                    <div>
-                      <h2 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2 font-mono">
-                        TROUSSEAU D'ACCÈS SÉCURISÉ &amp; IDENTIFIANTS
-                      </h2>
-                      <p className="text-xs text-slate-500">
-                        Tous vos identifiants, mots de passe et commandes SSH avec copie en 1 clic et liens directs.
-                      </p>
+                    <h2 className="text-sm sm:text-base font-black text-slate-900">
+                      {currentNav.label}
+                    </h2>
+                  </div>
+                </div>
+
+                {/* Bouton pour ouvrir le menu déroulant sur mobile */}
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="lg:hidden w-full sm:w-auto py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <Menu className="w-4 h-4 text-blue-600" />
+                  <span>Changer de section ({NAV_ITEMS.length} rubriques)</span>
+                </button>
+              </div>
+
+              {/* 🔑 SECTION : TROUSSEAU DE LOGINS & MOTS DE PASSE (DEVOPS KEYRING) */}
+              {(activeTab === 'ALL' || activeTab === 'KEYRING') && (
+                <div className="space-y-3.5 bg-gradient-to-br from-amber-50/40 via-white to-slate-50 border border-amber-200/70 rounded-3xl p-4 sm:p-6 shadow-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-100 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0">
+                        <Key className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2 font-mono">
+                          TROUSSEAU D'ACCÈS SÉCURISÉ &amp; IDENTIFIANTS ({filteredKeyring.length})
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Identifiants, mots de passe et commandes SSH avec copie en 1 clic.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Barre de recherche instantanée dans le trousseau */}
+                    <div className="relative w-full sm:w-64">
+                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="Rechercher login, service..."
+                        value={keyringSearch}
+                        onChange={(e) => setKeyringSearch(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-400 shadow-2xs font-medium"
+                      />
                     </div>
                   </div>
 
-                  <span className="text-[11px] font-mono font-bold text-amber-800 bg-amber-100/70 border border-amber-200 px-3 py-1 rounded-full self-start sm:self-auto">
-                    🔒 Masquage Actif (Eye Toggle)
-                  </span>
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    {filteredKeyring.map((item) => {
+                      const isSecretShown = Boolean(visibleSecrets[item.id]);
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                  {DEVOPS_KEYRING.map((item) => {
-                    const isSecretShown = Boolean(visibleSecrets[item.id]);
-
-                    return (
-                      <div
-                        key={item.id}
-                        className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-3"
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
-                              {item.category}
-                            </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                              {item.badge}
-                            </span>
-                          </div>
-
-                          <h3 className="text-sm font-bold text-slate-900">
-                            {item.name}
-                          </h3>
-
-                          {/* Ligne 1 : Login / Identifiant */}
-                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
-                            <div className="min-w-0 flex-1">
-                              <span className="text-[10px] font-mono text-slate-400 block">{item.loginLabel}</span>
-                              <span className="text-xs font-mono font-bold text-slate-800 truncate block">
-                                {item.loginValue}
+                      return (
+                        <div
+                          key={item.id}
+                          className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-3"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
+                                {item.category}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                {item.badge}
                               </span>
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(item.loginValue, `${item.id}-login`)}
-                              className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer"
-                              title="Copier l'identifiant"
-                            >
-                              {copiedKey === `${item.id}-login` ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span className="text-[10px] text-emerald-700 font-bold">Copié</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5 text-slate-500" />
-                                  <span className="text-[10px]">Copier</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
+                            <h4 className="text-sm font-bold text-slate-900">
+                              {item.name}
+                            </h4>
 
-                          {/* Ligne 2 : Mot de passe ou Clé secrète */}
-                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
-                            <div className="min-w-0 flex-1">
-                              <span className="text-[10px] font-mono text-slate-400 block">{item.secretLabel}</span>
-                              <span className="text-xs font-mono font-bold text-slate-800 truncate block">
-                                {isSecretShown ? item.secretValue : '••••••••••••••••'}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => toggleSecretVisibility(item.id)}
-                                className="p-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-lg shadow-xs transition-all cursor-pointer"
-                                title={isSecretShown ? 'Masquer' : 'Afficher le mot de passe'}
-                              >
-                                {isSecretShown ? <EyeOff className="w-3.5 h-3.5 text-amber-600" /> : <Eye className="w-3.5 h-3.5 text-slate-500" />}
-                              </button>
+                            {/* Ligne 1 : Login / Identifiant */}
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <span className="text-[10px] font-mono text-slate-400 block">{item.loginLabel}</span>
+                                <span className="text-xs font-mono font-bold text-slate-800 truncate block">
+                                  {item.loginValue}
+                                </span>
+                              </div>
 
                               <button
                                 type="button"
-                                onClick={() => copyToClipboard(item.secretValue, `${item.id}-secret`)}
+                                onClick={() => copyToClipboard(item.loginValue, `${item.id}-login`)}
                                 className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer"
-                                title="Copier le mot de passe"
+                                title="Copier l'identifiant"
                               >
-                                {copiedKey === `${item.id}-secret` ? (
+                                {copiedKey === `${item.id}-login` ? (
                                   <>
                                     <Check className="w-3.5 h-3.5 text-emerald-600" />
                                     <span className="text-[10px] text-emerald-700 font-bold">Copié</span>
@@ -567,32 +709,139 @@ export const ITApp = () => {
                                 )}
                               </button>
                             </div>
+
+                            {/* Ligne 2 : Mot de passe ou Clé secrète */}
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <span className="text-[10px] font-mono text-slate-400 block">{item.secretLabel}</span>
+                                <span className="text-xs font-mono font-bold text-slate-800 truncate block">
+                                  {isSecretShown ? item.secretValue : '••••••••••••••••'}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSecretVisibility(item.id)}
+                                  className="p-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-lg shadow-xs transition-all cursor-pointer"
+                                  title={isSecretShown ? 'Masquer' : 'Afficher le mot de passe'}
+                                >
+                                  {isSecretShown ? <EyeOff className="w-3.5 h-3.5 text-amber-600" /> : <Eye className="w-3.5 h-3.5 text-slate-500" />}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(item.secretValue, `${item.id}-secret`)}
+                                  className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer"
+                                  title="Copier le mot de passe"
+                                >
+                                  {copiedKey === `${item.id}-secret` ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                      <span className="text-[10px] text-emerald-700 font-bold">Copié</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="w-3.5 h-3.5 text-slate-500" />
+                                      <span className="text-[10px]">Copier</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Snippet SSH optionnel */}
+                            {item.cmdSnippet && (
+                              <div className="p-2 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between text-[11px] font-mono text-slate-700">
+                                <code className="truncate">{item.cmdSnippet}</code>
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(item.cmdSnippet, `${item.id}-cmd`)}
+                                  className="text-blue-600 hover:text-blue-700 font-bold ml-2 shrink-0 cursor-pointer"
+                                >
+                                  {copiedKey === `${item.id}-cmd` ? '✓' : 'Copier'}
+                                </button>
+                              </div>
+                            )}
                           </div>
 
-                          {/* Snippet SSH optionnel */}
-                          {item.cmdSnippet && (
-                            <div className="p-2 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between text-[11px] font-mono text-slate-700">
-                              <code className="truncate">{item.cmdSnippet}</code>
-                              <button
-                                type="button"
-                                onClick={() => copyToClipboard(item.cmdSnippet, `${item.id}-cmd`)}
-                                className="text-blue-600 hover:text-blue-700 font-bold ml-2 shrink-0 cursor-pointer"
+                          {/* Footer Carte : Lien Direct */}
+                          <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-[11px] text-slate-500 italic truncate max-w-[200px]">
+                              {item.notes}
+                            </span>
+
+                            {item.isUrl ? (
+                              <a
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-all cursor-pointer shadow-xs active:scale-95"
                               >
-                                {copiedKey === `${item.id}-cmd` ? '✓' : 'Copier'}
-                              </button>
-                            </div>
-                          )}
+                                <span>Ouvrir</span>
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </a>
+                            ) : (
+                              <span className="text-[11px] font-mono text-slate-400">Terminal SSH</span>
+                            )}
+                          </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
-                        {/* Footer Carte : Lien Direct */}
-                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-[11px] text-slate-500 italic truncate max-w-[220px]">
-                            {item.notes}
-                          </span>
+              {/* SECTION 1 : GRILLE DES RACCOURCIS DIRECTS CLOUD & VPS */}
+              {(activeTab === 'ALL' || activeTab === 'SERVICES') && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Layers className="w-4 h-4 text-purple-600" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
+                        Hub des Raccourcis Directs &amp; Services Déployés
+                      </h3>
+                    </div>
+                    <span className="text-[11px] text-slate-500 font-mono">Hôte : 51.255.46.206</span>
+                  </div>
 
-                          {item.isUrl ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {DEVOPS_SERVICES.map((srv) => {
+                      const Icon = srv.icon;
+                      return (
+                        <div
+                          key={srv.id}
+                          className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+                        >
+                          <div className="space-y-2.5">
+                            <div className="flex items-center justify-between">
+                              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shadow-xs">
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                Port {srv.port}
+                              </span>
+                            </div>
+
+                            <div>
+                              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
+                                {srv.category}
+                              </span>
+                              <h4 className="text-sm font-black text-slate-900 mt-0.5 tracking-tight">
+                                {srv.name}
+                              </h4>
+                              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                                {srv.desc}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                              {srv.badge}
+                            </span>
                             <a
-                              href={item.url}
+                              href={srv.url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-all cursor-pointer shadow-xs active:scale-95"
@@ -600,176 +849,109 @@ export const ITApp = () => {
                               <span>Ouvrir</span>
                               <ExternalLink className="w-3.5 h-3.5" />
                             </a>
-                          ) : (
-                            <span className="text-[11px] font-mono text-slate-400">Terminal SSH</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* SECTION 1 : GRILLE DES RACCOURCIS DIRECTS CLOUD & VPS */}
-            {(activeTab === 'ALL' || activeTab === 'SERVICES') && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-purple-600" />
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">
-                      Hub des Raccourcis Directs & Services Déployés
-                    </h2>
-                  </div>
-                  <span className="text-[11px] text-slate-500 font-mono">Hôte VPS OVH : 51.255.46.206</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {DEVOPS_SERVICES.map((srv) => {
-                    const Icon = srv.icon;
-                    return (
-                      <div
-                        key={srv.id}
-                        className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between"
-                      >
-                        <div className="space-y-2.5">
-                          <div className="flex items-center justify-between">
-                            <div className={`w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shadow-xs`}>
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                              Port {srv.port}
-                            </span>
-                          </div>
-
-                          <div>
-                            <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
-                              {srv.category}
-                            </span>
-                            <h3 className="text-sm font-black text-slate-900 mt-0.5 tracking-tight">
-                              {srv.name}
-                            </h3>
-                            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                              {srv.desc}
-                            </p>
                           </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
-                        <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                            {srv.badge}
-                          </span>
-                          <a
-                            href={srv.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-all cursor-pointer shadow-xs active:scale-95"
-                          >
-                            <span>Ouvrir</span>
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
-                        </div>
+              {/* SECTION 2 : MONITORING MATÉRIEL BESZEL */}
+              {(activeTab === 'ALL' || activeTab === 'MONITORING') && (
+                <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-700">
+                      <Gauge className="w-4 h-4 text-emerald-600" />
+                      <span className="font-mono">MONITORING DU VPS EN DIRECT (BESZEL HUB PORT 8095)</span>
+                    </div>
+
+                    <a
+                      href="http://51.255.46.206:8095"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-1.5 rounded-xl border border-emerald-200 transition-all shadow-xs"
+                    >
+                      <span>Plein Écran Beszel</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                      <div className="flex items-center gap-2 text-slate-500 text-xs font-bold mb-1">
+                        <Cpu className="w-4 h-4 text-blue-600" />
+                        <span>CPU &amp; Charge Système</span>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* SECTION 2 : MONITORING MATÉRIEL BESZEL */}
-            {(activeTab === 'ALL' || activeTab === 'MONITORING') && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-700">
-                    <Gauge className="w-4 h-4 text-emerald-600" />
-                    <span className="font-mono">MONITORING DU VPS EN DIRECT (BESZEL HUB PORT 8095)</span>
-                  </div>
-
-                  <a
-                    href="http://51.255.46.206:8095"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-1.5 rounded-xl border border-emerald-200 transition-all shadow-xs"
-                  >
-                    <span>Plein Écran Beszel</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-                    <div className="flex items-center gap-2 text-slate-500 text-xs font-bold mb-1">
-                      <Cpu className="w-4 h-4 text-blue-600" />
-                      <span>CPU &amp; Charge Système</span>
+                      <p className="text-lg font-black font-mono text-slate-900">4 vCores OVH</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Charge optimale (&lt; 20% en continu)</p>
                     </div>
-                    <p className="text-lg font-black font-mono text-slate-900">4 vCores OVH</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Charge optimale (&lt; 20% en continu)</p>
-                  </div>
 
-                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-                    <div className="flex items-center gap-2 text-slate-500 text-xs font-bold mb-1">
-                      <Activity className="w-4 h-4 text-emerald-600" />
-                      <span>Mémoire RAM Vive</span>
+                    <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                      <div className="flex items-center gap-2 text-slate-500 text-xs font-bold mb-1">
+                        <Activity className="w-4 h-4 text-emerald-600" />
+                        <span>Mémoire RAM Vive</span>
+                      </div>
+                      <p className="text-lg font-black font-mono text-slate-900">8.0 Go DDR4</p>
+                      <p className="text-[11px] text-emerald-700 font-bold mt-0.5">~3.2 Go alloués aux conteneurs</p>
                     </div>
-                    <p className="text-lg font-black font-mono text-slate-900">8.0 Go DDR4</p>
-                    <p className="text-[11px] text-emerald-700 font-bold mt-0.5">~3.2 Go alloués aux conteneurs</p>
-                  </div>
 
-                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-                    <div className="flex items-center gap-2 text-slate-500 text-xs font-bold mb-1">
-                      <HardDrive className="w-4 h-4 text-purple-600" />
-                      <span>Stockage SSD NVMe</span>
+                    <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                      <div className="flex items-center gap-2 text-slate-500 text-xs font-bold mb-1">
+                        <HardDrive className="w-4 h-4 text-purple-600" />
+                        <span>Stockage SSD NVMe</span>
+                      </div>
+                      <p className="text-lg font-black font-mono text-slate-900">80 Go NVMe</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Volumes Docker persistants</p>
                     </div>
-                    <p className="text-lg font-black font-mono text-slate-900">80 Go NVMe</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Volumes Docker persistants</p>
                   </div>
-                </div>
 
-                <div className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
-                  <div className="p-3 bg-white border-b border-slate-200 flex items-center justify-between text-xs text-slate-600 font-mono">
-                    <span>Console de bord Beszel intégrée (http://51.255.46.206:8095)</span>
-                    <span className="text-emerald-700 font-bold flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                      Actif
-                    </span>
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
+                    <div className="p-3 bg-white border-b border-slate-200 flex items-center justify-between text-xs text-slate-600 font-mono">
+                      <span>Console de bord Beszel intégrée (http://51.255.46.206:8095)</span>
+                      <span className="text-emerald-700 font-bold flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        Actif
+                      </span>
+                    </div>
+                    <iframe
+                      src="http://51.255.46.206:8095"
+                      title="Beszel Monitoring Hub"
+                      className="w-full h-[460px] border-0 bg-white"
+                    />
                   </div>
-                  <iframe
-                    src="http://51.255.46.206:8095"
-                    title="Beszel Monitoring Hub"
-                    className="w-full h-[460px] border-0 bg-white"
-                  />
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* SECTION 3 : MATRICE DE SANTÉ INFRASTRUCTURE (5 NŒUDS) */}
-            {(activeTab === 'ALL' || activeTab === 'MATRIX') && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm">
-                <div className="mb-3.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-blue-700">
-                    <Server className="w-4 h-4 text-blue-600" />
-                    <span>SUPERVISION DE L'INFRASTRUCTURE (5 NŒUDS CLOUD)</span>
+              {/* SECTION 3 : MATRICE DE SANTÉ INFRASTRUCTURE (5 NŒUDS) */}
+              {(activeTab === 'ALL' || activeTab === 'MATRIX') && (
+                <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm">
+                  <div className="mb-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-blue-700">
+                      <Server className="w-4 h-4 text-blue-600" />
+                      <span>SUPERVISION DE L'INFRASTRUCTURE (5 NŒUDS CLOUD)</span>
+                    </div>
                   </div>
+                  <AdminSystemHealthMatrix />
                 </div>
-                <AdminSystemHealthMatrix />
-              </div>
-            )}
+              )}
 
-            {/* SECTION 4 : CONSOLE WEBSOCKET EN DIRECT */}
-            {(activeTab === 'ALL' || activeTab === 'CONSOLE') && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm">
-                <div className="mb-3.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-700">
-                    <Radio className="w-4 h-4 text-emerald-600 animate-pulse" />
-                    <span>FLUX DE MESSAGERIE TEMPS RÉEL (CENTRIFUGO VPS STREAM)</span>
+              {/* SECTION 4 : CONSOLE WEBSOCKET EN DIRECT */}
+              {(activeTab === 'ALL' || activeTab === 'CONSOLE') && (
+                <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm">
+                  <div className="mb-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-700">
+                      <Radio className="w-4 h-4 text-emerald-600 animate-pulse" />
+                      <span>FLUX DE MESSAGERIE TEMPS RÉEL (CENTRIFUGO VPS STREAM)</span>
+                    </div>
                   </div>
+                  <AdminRealtimeConsole />
                 </div>
-                <AdminRealtimeConsole />
-              </div>
-            )}
-          </div>
-        )}
-      </main>
+              )}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 };
