@@ -1,12 +1,14 @@
 {
-  "name": "BricoleMoi - Dépannage Urgence Maroc",
+  "name": "BricoleMoi - Dépannage Express Maroc",
   "short_name": "BricoleMoi",
-  "description": "Plateforme d'urgence dépannage Plomberie et Mécanique Auto au Maroc",
+  "description": "N°1 du dépannage d'urgence au Maroc : Plomberie, Électricité, Serrurerie et Climatisation 24h/7j.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0F172A",
-  "theme_color": "#059669",
+  "background_color": "#F8FAFC",
+  "theme_color": "#2563EB",
   "orientation": "portrait-primary",
+  "lang": "fr-MA",
+  "categories": ["utilities", "lifestyle", "business"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -22,3 +24,4 @@
     }
   ]
 }
+
