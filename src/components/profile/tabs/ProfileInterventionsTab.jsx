@@ -6,6 +6,25 @@ import { formatDateTime } from '../../../utils/dateUtils';
 
 const PAGE_SIZE = 5;
 
+// Extraction propre des badges pour affichage visuel
+const parseCommentAndBadges = (rawComment, rawBadges) => {
+  let badges = Array.isArray(rawBadges) ? [...rawBadges] : [];
+  let commentText = typeof rawComment === 'string' ? rawComment.trim() : '';
+
+  const match = commentText.match(/\[Badges:\s*([^\]]+)\]/i);
+  if (match) {
+    const extracted = match[1]
+      .split(',')
+      .map((b) => b.trim())
+      .filter(Boolean);
+    badges = [...new Set([...badges, ...extracted])];
+    commentText = commentText.replace(/\[Badges:[^\]]+\]/gi, '').trim();
+    commentText = commentText.replace(/^["']|["']$/g, '').trim();
+  }
+
+  return { commentText, badges };
+};
+
 export const ProfileInterventionsTab = ({
   interventions = [],
   isMaalem = false,
@@ -201,6 +220,7 @@ export const ProfileInterventionsTab = ({
               ? (item.client_phone || clientPhoneMap.get(String(item.client_id || '').trim()) || '')
               : item.maalem_phone;
             const counterpartPhoneClean = (counterpartPhone || '').replace(/\D/g, '');
+            const { commentText, badges } = parseCommentAndBadges(item.comment, item.badges);
 
             return (
               <div key={item.id} className="p-3.5 bg-white border border-slate-200/90 rounded-2xl space-y-2 shadow-2xs">
@@ -219,24 +239,15 @@ export const ProfileInterventionsTab = ({
                   </span>
                 </div>
 
-                <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 flex items-center justify-between gap-2 text-[11px]">
-                  <div className="flex items-center gap-1.5 text-slate-700 truncate min-w-0">
-                    <span className="font-bold text-slate-900 truncate">
-                      {isMaalem ? `👤 ${item.client_name || 'Client'}` : `🛠️ ${item.maalem_name || 'Artisan Maâlem'}`}
-                    </span>
-                    <span className="text-slate-300">•</span>
-                    <span className="text-slate-500 truncate">📍 {item.district || 'Casablanca'}</span>
-                  </div>
-
+                <div className="flex items-center justify-between text-[11px] text-slate-600 gap-2">
+                  <span>📍 {item.district || 'Secteur non spécifié'}</span>
                   {counterpartPhone && (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <a href={`tel:${counterpartPhone}`} className="font-mono text-blue-700 font-bold hover:underline flex items-center gap-1">
-                        <Phone className="w-3 h-3 text-blue-600" />
-                        <span>{counterpartPhone}</span>
-                      </a>
-                      {counterpartPhoneClean.length >= 9 && (
+                    <div className="flex items-center gap-1.5 font-mono text-[10px] text-slate-700">
+                      <Phone className="w-3 h-3 text-slate-400" />
+                      <span>{counterpartPhone}</span>
+                      {counterpartPhoneClean && (
                         <a
-                          href={`https://wa.me/212${counterpartPhoneClean.replace(/^0/, '')}`}
+                          href={`https://wa.me/${counterpartPhoneClean.startsWith('212') ? counterpartPhoneClean : `212${counterpartPhoneClean.replace(/^0/, '')}`}`}
                           target="_blank"
                           rel="noreferrer"
                           className="text-emerald-700 hover:text-emerald-800 p-0.5"
@@ -264,10 +275,27 @@ export const ProfileInterventionsTab = ({
                   </div>
                 )}
 
-                {item.comment && (
-                  <p className="text-slate-700 italic bg-slate-50 p-2 rounded-xl border border-slate-100 font-medium text-[11px]">
-                    "{item.comment}"
-                  </p>
+                {/* Badges & Commentaire rendu propre */}
+                {(badges.length > 0 || commentText) && (
+                  <div className="mt-1.5 space-y-1.5">
+                    {badges.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {badges.map((badge, bIdx) => (
+                          <span
+                            key={bIdx}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-50 text-amber-900 border border-amber-200/80 text-[10px] font-bold shadow-2xs"
+                          >
+                            {badge}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {commentText && (
+                      <p className="text-slate-700 italic bg-slate-50 p-2 rounded-xl border border-slate-100 font-medium text-[11px]">
+                        "{commentText}"
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             );

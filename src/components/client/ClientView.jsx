@@ -8,8 +8,11 @@ import { ClientHistoryList } from './components/ClientHistoryList';
 import { ClientReviewCompletionModal } from './components/ClientReviewCompletionModal';
 import { ClientPhoneRequirementModal } from './components/ClientPhoneRequirementModal';
 
+import { useAuth } from '../../context/AuthContext';
+
 export const ClientView = ({ initialCategory, initialCity, initialDistrict }) => {
   const client = useClientViewState({ initialCategory, initialCity, initialDistrict });
+  const { openProfileTab } = useAuth();
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 font-sans pb-48 md:pb-24 px-3 sm:px-4">
@@ -27,8 +30,11 @@ export const ClientView = ({ initialCategory, initialCity, initialDistrict }) =>
       {/* 4. Liste des demandes actives en cours */}
       <ClientActiveRequestsList {...client} />
 
-      {/* 5. Historique des interventions terminées avec pagination */}
-      <ClientHistoryList {...client} />
+      {/* 5. Historique des interventions terminées (réduit aux plus récentes + bouton plein écran) */}
+      <ClientHistoryList
+        {...client}
+        onOpenFullHistory={() => openProfileTab && openProfileTab('missions')}
+      />
 
       {/* 6. Modales d'avis et de fin de chantier */}
       <ClientReviewCompletionModal {...client} />

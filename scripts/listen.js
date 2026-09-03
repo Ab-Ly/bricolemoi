@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createClient } from '@supabase/supabase-js';
+import PocketBase from 'pocketbase';
 import WebSocket from 'ws';
 import fs from 'fs';
 import path from 'path';
@@ -25,8 +25,7 @@ if (fs.existsSync(envPath)) {
   });
 }
 
-const SUPABASE_URL = envVars.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = envVars.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+const POCKETBASE_URL = envVars.VITE_POCKETBASE_URL || process.env.VITE_POCKETBASE_URL || 'https://pocketbase.51.255.46.206.sslip.io';
 const CENTRIFUGO_WS_URL = envVars.VITE_CENTRIFUGO_WS_URL || process.env.VITE_CENTRIFUGO_WS_URL || 'ws://51.255.46.206:8800/connection/websocket';
 
 const directWsUrl = CENTRIFUGO_WS_URL.startsWith('wss://')
@@ -54,13 +53,13 @@ const C = {
 
 console.clear();
 console.log(`${C.cyan}╔═════════════════════════════════════════════════════════════════════════════╗${C.reset}`);
-console.log(`${C.cyan}║${C.reset}  ${C.bold}${C.green}🛰️  BRICOLEMOI GLOBAL 360° TRI-PILLARS OBSERVER (CENTRIFUGO VPS)${C.reset}          ${C.cyan}║${C.reset}`);
+console.log(`${C.cyan}║${C.reset}  ${C.bold}${C.green}🛰️  BRICOLEMOI GLOBAL 360° TRI-PILLARS OBSERVER (POCKETBASE & CENTRIFUGO) ${C.reset}  ${C.cyan}║${C.reset}`);
 console.log(`${C.cyan}║${C.reset}  ${C.dim}Supervision temps réel : [ 👤 CLIENT  •  🛠️ MAÂLEM  •  🛡️ ADMIN ] 🇲🇦${C.reset}        ${C.cyan}║${C.reset}`);
 console.log(`${C.cyan}╚═════════════════════════════════════════════════════════════════════════════╝${C.reset}`);
-console.log(`📡 Supabase Base      : ${C.yellow}${SUPABASE_URL || 'Non configuré'}${C.reset}`);
+console.log(`📦 PocketBase VPS      : ${C.yellow}${POCKETBASE_URL}${C.reset}`);
 console.log(`⚡ Centrifugo VPS (WS) : ${C.green}${directWsUrl}${C.reset}`);
 console.log(`${C.cyan}─────────────────────────────────────────────────────────────────────────────${C.reset}`);
-console.log(`${C.dim}🎧 Écoute active multi-canaux (SOS, Leads, Présence, Admin & Base Postgres)...${C.reset}\n`);
+console.log(`${C.dim}🎧 Écoute active multi-canaux (SOS, Leads, Présence, Admin & PocketBase VPS)...${C.reset}\n`);
 
 const formatTime = (isoString) => {
   const now = isoString ? new Date(isoString) : new Date();
@@ -101,45 +100,22 @@ const getLevelBadge = (level) => {
   }
 };
 
-// 1. Écoute Supabase Realtime (Postgres Changes)
-if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// 1. Vérification Santé & Connectivité PocketBase VPS
+const pb = new PocketBase(POCKETBASE_URL);
+pb.autoCancellation(false);
 
-  supabase
-    .channel('global_cli_tri_pillars')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (p) => {
-      const type = p.eventType;
-      const d = p.new || p.old || {};
-      const role = String(d.role || 'CLIENT').toUpperCase();
-      const roleBadge = role === 'ADMIN' ? `${C.bgPurple} ADMIN ${C.reset}` : role === 'MAALEM' ? `${C.bgAmber} MAÂLEM ${C.reset}` : `${C.bgBlue} CLIENT ${C.reset}`;
-      console.log(
-        `${formatTime()} ${C.cyan}[SUPABASE:PROFILES]${C.reset} ${roleBadge} ${C.bold}${type}${C.reset} ID: ${C.yellow}${d.id?.slice(0, 8)}...${C.reset} | Nom: ${C.bold}${d.full_name || 'N/A'}${C.reset} | Tél: ${d.phone || 'N/A'}`
-      );
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'interventions' }, (p) => {
-      const type = p.eventType;
-      const d = p.new || p.old || {};
-      const statusBadge = d.status === 'COMPLETED' ? `${C.bgGreen} TERMINÉ ${C.reset}` : d.status === 'ACCEPTED' ? `${C.bgAmber} ACCEPTÉ ${C.reset}` : `${C.bgRed} PENDING ${C.reset}`;
-      console.log(
-        `${formatTime()} ${C.blue}[SUPABASE:INTERVENTIONS]${C.reset} ${statusBadge} ${C.bold}${type}${C.reset} #${d.id?.slice(0, 8)} | Service: ${C.bold}${d.service_type || 'N/A'}${C.reset} | Quartier: ${d.district || 'N/A'}`
-      );
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, (p) => {
-      const type = p.eventType;
-      const d = p.new || p.old || {};
-      const isPositive = Number(d.amount_dh) > 0;
-      const color = isPositive ? C.green : C.red;
-      const sign = isPositive ? '+' : '';
-      console.log(
-        `${formatTime()} ${C.yellow}[SUPABASE:TRANSACTIONS]${C.reset} ${C.bold}${type}${C.reset} Maâlem: ${C.yellow}${d.maalem_id?.slice(0, 8)}...${C.reset} | Montant: ${color}${sign}${d.amount_dh} DH${C.reset} | Type: ${d.type}`
-      );
-    })
-    .subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        console.log(`${formatTime()} ${C.green}✓ Connecté au flux Postgres Realtime Supabase${C.reset}`);
-      }
-    });
+async function checkPocketBaseHealth() {
+  try {
+    const health = await pb.health.check();
+    if (health?.code === 200) {
+      console.log(`${formatTime()} ${C.green}✓ Connecté à PocketBase VPS [${POCKETBASE_URL}] (Status: Healthy)${C.reset}`);
+    }
+  } catch (err) {
+    console.log(`${formatTime()} ${C.yellow}ℹ PocketBase VPS : ${err.message}${C.reset}`);
+  }
 }
+
+checkPocketBaseHealth();
 
 // 2. Écoute Centrifugo WebSocket VPS (Haute Performance & Formatage Pro)
 let ws = null;
@@ -170,10 +146,11 @@ function startCentrifugoListener() {
             const clientId = msg.result?.client || msg.connect?.client || 'Connecté';
             console.log(`${formatTime()} ${C.green}✓ Connecté à Centrifugo v5 sur le VPS [Client ID: ${clientId}]${C.reset}`);
 
-            // Canaux clés sans doublon de namespace
             const channels = [
               'jobs:stream',
               'admin:alerts',
+              'tracking:all',
+              'presence:maalems',
               'terminal:logs'
             ];
             channels.forEach((ch, idx) => {
@@ -190,7 +167,6 @@ function startCentrifugoListener() {
 
             if (isTeleLog) {
               const msgText = String(data.message || '').toLowerCase();
-              // Filtrer le bruit des sondes internes
               if (
                 msgText.includes('session connectée') ||
                 msgText.includes('telemetry') ||
@@ -219,11 +195,12 @@ function startCentrifugoListener() {
               console.log('');
             } else {
               const time = formatTime();
-              const eventName = data.event || data.name || 'UPDATE';
+              const eventName = data.event || data.name || data.type || 'UPDATE';
               const roleBadge = data.role ? getRoleBadge(data.role, data) : `${C.bgGray} ⚡ EVENT ${C.reset}`;
               console.log(`${time} ${roleBadge} ${C.green}[${ch}]${C.reset} » ${C.bold}${eventName}${C.reset}`);
-              if (data.payload && Object.keys(data.payload).length > 0) {
-                console.log(`   ↳ ${C.dim}Payload : ${JSON.stringify(data.payload)}${C.reset}`);
+              const payload = data.payload || data.maalem || data;
+              if (payload && typeof payload === 'object' && Object.keys(payload).length > 0) {
+                console.log(`   ↳ ${C.dim}${JSON.stringify(payload, null, 2).replace(/\n/g, '\n   ')}${C.reset}`);
               }
               console.log('');
             }

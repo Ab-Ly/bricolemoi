@@ -219,6 +219,19 @@ export const FunnelStepConfirmation = ({
           )}
         </button>
       </div>
+
+      {/* 🛡️ Bannière de Réassurance Client 100% Souveraine */}
+      <div className="p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-center space-y-1 shadow-2xs">
+        <div className="flex items-center justify-center gap-1.5 text-xs font-black text-emerald-950">
+          <ShieldCheck weight="fill" className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{isRtl ? 'خدمة مجانية 100% للزبون • بدون أي عمولة إضافية' : 'Service 100% Gratuit pour le Client • Zéro Commission'}</span>
+        </div>
+        <p className="text-[11px] text-emerald-800 font-medium leading-relaxed">
+          {isRtl 
+            ? 'اتفاق مباشر مع المعلم • لا يوجد أي دفع عبر الإنترنت • الدفع محلياً بعد إتمام العمل ورضاك التام' 
+            : 'Tarification Accord Direct • Aucun paiement en ligne • Paiement direct sur place après satisfaction'}
+        </p>
+      </div>
     </motion.div>
   );
 };

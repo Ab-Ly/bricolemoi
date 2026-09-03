@@ -51,37 +51,37 @@ export const FunnelStepLocationMedia = ({
         </p>
       </div>
 
-      {/* Bouton GPS Instantané Mobile */}
-      <div className="bg-blue-50/70 border border-blue-200 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* Hero Bouton GPS Instantané Mobile (Zéro Saisie) */}
+      <div className="bg-gradient-to-br from-blue-50 via-indigo-50/60 to-blue-50 border border-blue-200/90 p-4 sm:p-5 rounded-3xl shadow-xs space-y-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
-            <MapPin weight="fill" className="w-5 h-5" />
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+            <MapPin weight="fill" className="w-6 h-6" />
           </div>
-          <div>
-            <h4 className="text-xs font-black text-slate-900">
-              {isRtl ? 'الموقع الجغرافي الدقيق' : 'Position GPS en temps réel'}
+          <div className="min-w-0">
+            <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-snug">
+              {isRtl ? 'الموقع الجغرافي الدقيق' : 'Détection GPS automatique'}
             </h4>
-            <p className="text-[11px] text-slate-600 font-medium">
-              {selectedCity} • {selectedDistrict}
+            <p className="text-xs text-blue-700 font-bold truncate mt-0.5">
+              📍 {selectedCity} • {selectedDistrict}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
           <button
             type="button"
             onClick={handleUseCurrentGPS}
-            className="flex-1 sm:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs sm:text-sm rounded-2xl shadow-md shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer touch-target-44"
           >
-            <MapPin weight="bold" />
-            <span>{isRtl ? 'حدد موقعي تلقائياً' : 'Détecter ma position'}</span>
+            <MapPin weight="bold" className="w-4 h-4 shrink-0" />
+            <span>{isRtl ? 'حدد موقعي الحالي في الحين' : '📍 Détecter ma position GPS exacte'}</span>
           </button>
           <button
             type="button"
             onClick={() => setShowMapModal(!showMapModal)}
-            className="px-3 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-xs active:scale-95 transition-all cursor-pointer"
+            className="w-full py-3 px-4 bg-white border border-slate-200/90 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-2xl shadow-2xs active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-target-44"
           >
-            {showMapModal ? (isRtl ? 'إخفاء الخريطة' : 'Masquer carte') : (isRtl ? 'تعديل بالخريطة' : 'Ajuster sur carte')}
+            <span>🗺️ {showMapModal ? (isRtl ? 'إخفاء الخريطة' : 'Masquer la carte') : (isRtl ? 'تعديل بالخريطة التفاعلية' : 'Ajuster sur carte interactive')}</span>
           </button>
         </div>
       </div>
