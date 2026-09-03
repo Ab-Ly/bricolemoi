@@ -21,7 +21,8 @@ export const MaalemLeadsFeed = ({
   paginatedCompletedLeads,
   completedPage,
   setCompletedPage,
-  totalCompletedPages
+  totalCompletedPages,
+  onOpenHistory
 }) => {
   return (
     <div className="space-y-8">
@@ -258,36 +259,42 @@ export const MaalemLeadsFeed = ({
         )}
       </div>
 
-      {/* 2. Historique des Chantiers Clôturés & Avis */}
+      {/* 2. Historique des Derniers Chantiers Clôturés & Avis (Style Grandes Startups) */}
       {completedLeads.length > 0 && (
-        <div className="space-y-4 pt-4 border-t border-slate-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="space-y-3.5 pt-4 border-t border-slate-200">
+          <div className="flex items-center justify-between gap-2">
             <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 font-sans flex-wrap">
               <Star className="w-5 h-5 text-amber-500 fill-amber-500 shrink-0" />
-              <span>Chantiers Clôturés &amp; Avis Clients</span>
+              <span>Chantiers Récents &amp; Avis Clients</span>
               <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold font-mono border border-slate-200 whitespace-nowrap shrink-0">
                 {completedLeads.length} au total
               </span>
             </h3>
-            {totalCompletedPages > 1 && (
-              <p className="text-xs text-slate-500 font-medium whitespace-nowrap">
-                Page {completedPage} sur {totalCompletedPages}
-              </p>
-            )}
+
+            {/* Accès direct à l'historique complet */}
+            <button
+              type="button"
+              onClick={() => onOpenHistory?.('missions')}
+              className="text-xs font-black text-amber-700 hover:text-amber-800 hover:underline flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <span>Voir tout ({completedLeads.length})</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
+          {/* Affichage des 2 derniers chantiers récents */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {paginatedCompletedLeads.map((lead) => (
+            {completedLeads.slice(0, 2).map((lead) => (
               <div
                 key={lead.id}
-                className="p-4 bg-emerald-50/70 border border-emerald-200/90 rounded-2xl space-y-2 text-xs shadow-xs hover:shadow-sm transition-all"
+                className="p-4 bg-white hover:bg-slate-50 border border-slate-200/90 rounded-2xl space-y-2 text-xs shadow-2xs transition-all"
               >
                 <div className="flex items-center justify-between font-bold gap-2">
-                  <span className="text-emerald-950 font-black truncate">
+                  <span className="text-slate-900 font-black truncate">
                     {lead.client_name || 'Client BricoleMoi'} •{' '}
                     {lead.subcategory || 'Dépannage'}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full font-mono font-black text-amber-900 bg-amber-100/90 flex items-center gap-1 border border-amber-200 shadow-xs whitespace-nowrap shrink-0">
+                  <span className="px-2.5 py-0.5 rounded-full font-mono font-black text-amber-900 bg-amber-50 flex items-center gap-1 border border-amber-200 whitespace-nowrap shrink-0">
                     <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                     <span>
                       {lead.rating !== undefined && lead.rating !== null
@@ -304,18 +311,18 @@ export const MaalemLeadsFeed = ({
                 </p>
 
                 {/* Date et Heure précises de l'intervention */}
-                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium pt-1.5 border-t border-emerald-100/80">
+                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium pt-1.5 border-t border-slate-100">
                   <span className="flex items-center gap-1 font-mono text-slate-600">
                     <Calendar className="w-3 h-3 text-emerald-600" />
                     <span>{formatDateTime(lead.completed_at || lead.updated_at || lead.created_at, 'long')}</span>
                   </span>
-                  <span className="text-[9px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded border border-emerald-200">
+                  <span className="text-[9px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                     Mission Clôturée ✓
                   </span>
                 </div>
 
                 {lead.comment && (
-                  <p className="text-slate-700 italic bg-white p-2.5 rounded-xl border border-emerald-100 font-medium shadow-xs">
+                  <p className="text-slate-700 italic bg-slate-50 p-2.5 rounded-xl border border-slate-100 font-medium text-[11px]">
                     "{lead.comment}"
                   </p>
                 )}
@@ -323,55 +330,15 @@ export const MaalemLeadsFeed = ({
             ))}
           </div>
 
-          {/* Pagination Controls */}
-          {totalCompletedPages > 1 && (
-            <div className="flex items-center justify-between pt-3 border-t border-slate-200">
-              <button
-                type="button"
-                onClick={() => setCompletedPage((p) => Math.max(1, p - 1))}
-                disabled={completedPage === 1}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 border transition-all ${
-                  completedPage === 1
-                    ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-xs active:scale-95 cursor-pointer'
-                }`}
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Précédent</span>
-              </button>
-
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalCompletedPages }, (_, i) => i + 1).map((pageNum) => (
-                  <button
-                    key={pageNum}
-                    type="button"
-                    onClick={() => setCompletedPage(pageNum)}
-                    className={`w-8 h-8 rounded-xl text-xs font-black transition-all flex items-center justify-center cursor-pointer ${
-                      completedPage === pageNum
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs'
-                        : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setCompletedPage((p) => Math.min(totalCompletedPages, p + 1))}
-                disabled={completedPage === totalCompletedPages}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 border transition-all ${
-                  completedPage === totalCompletedPages
-                    ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-xs active:scale-95 cursor-pointer'
-                }`}
-              >
-                <span>Suivant</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+          {/* Bouton Grand Format pour accéder à tout l'historique complet */}
+          <button
+            type="button"
+            onClick={() => onOpenHistory?.('missions')}
+            className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 font-black text-xs flex items-center justify-center gap-2 shadow-2xs hover:shadow-xs active:scale-[0.99] transition-all cursor-pointer group"
+          >
+            <span>📜 Consulter l'historique complet ({completedLeads.length} chantiers clôturés)</span>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all" />
+          </button>
         </div>
       )}
     </div>

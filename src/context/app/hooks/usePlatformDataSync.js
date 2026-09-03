@@ -171,7 +171,11 @@ export const usePlatformDataSync = ({
   } = useRealtimePresence({
     user,
     isOnline: isMaalemOnline,
-    onPresenceChange: handleAblyPresenceUpdate
+    onPresenceChange: handleAblyPresenceUpdate,
+    transactions,
+    reviews,
+    interventions,
+    maalems
   });
 
   const toggleMaalemOnlineStatus = async (overrideStatus) => {

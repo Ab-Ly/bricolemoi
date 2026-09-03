@@ -105,6 +105,139 @@ const getLevelBadge = (level) => {
   }
 };
 
+const getSpecialtyLabel = (spec) => {
+  const map = {
+    PLUMBING: 'Plomberie & Sanitaire',
+    ELECTRICITY: 'Électricité Générale',
+    HVAC: 'Climatisation & Froid',
+    LOCKSMITH: 'Serrurerie & Métal',
+    PAINTING: 'Peinture & Finition',
+    CARPENTRY: 'Menuiserie & Bois',
+    MASONRY: 'Maçonnerie & Gros Œuvre',
+    APPLIANCE: 'Électroménager'
+  };
+  return map[spec] || spec || 'Bricolage Pro';
+};
+
+const formatCentrifugoEvent = (ch, data) => {
+  const time = formatTime(data?.timestamp || data?.created_at);
+  const cleanCh = String(ch || '').replace(/^bricolemoi:/, '');
+
+  // 1. Présence Maâlem (Heartbeat GPS / Statut En ligne)
+  if (cleanCh === 'presence:maalems' || data?.type === 'PRESENCE_HEARTBEAT' || data?.type === 'PRESENCE_UPDATE') {
+    const m = data?.maalem || data?.payload?.maalem || data || {};
+    const name = m.full_name || 'Artisan Maâlem';
+    const phone = m.phone ? ` (${m.phone})` : '';
+    const isOnline = m.is_online !== false;
+    const statusBadge = isOnline
+      ? `${C.bgGreen} 🟢 EN SERVICE ${C.reset}`
+      : `${C.bgGray} ⚪ HORS LIGNE ${C.reset}`;
+    const availBadge = m.is_available
+      ? `${C.green}✓ Disponible Radar${C.reset}`
+      : `${C.yellow}⏳ Occupé sur chantier${C.reset}`;
+
+    const spec = getSpecialtyLabel(m.specialty);
+    const zone = m.district || m.city_zone || 'Maroc';
+    const solde = m.credit_balance !== undefined ? `${C.bold}${m.credit_balance} DH${C.reset}` : null;
+    const reviewsCount = Number(m.total_reviews ?? 0);
+    const rating = reviewsCount > 0
+      ? `⭐ ${Number(m.rating_avg || 5).toFixed(1)}/5 (${reviewsCount} avis)`
+      : `✨ Nouveau profil (0 avis)`;
+    const gps = (m.lat && m.lng) ? `${C.cyan}🌐 GPS : ${Number(m.lat).toFixed(6)}, ${Number(m.lng).toFixed(6)}${C.reset}` : null;
+
+    console.log(`${time} ${statusBadge}  ${C.bold}${name}${C.reset}${C.dim}${phone}${C.reset}  ${availBadge}`);
+
+    const details = [
+      spec ? `🛠️  ${spec}` : null,
+      zone ? `📍 ${zone}` : null,
+      solde ? `💰 Solde : ${solde}` : null,
+      rating
+    ].filter(Boolean).join(` ${C.dim}•${C.reset} `);
+
+    if (details) console.log(`   ${details}`);
+    if (gps) console.log(`   ${gps}`);
+    console.log('');
+    return;
+  }
+
+  // 2. Flux des Chantiers & Urgences SOS (jobs:stream)
+  if (cleanCh === 'jobs:stream') {
+    const event = data.event || data.type || 'MISSION';
+    const p = data.payload || data.intervention || data || {};
+
+    if (event === 'new_job' || event === 'SOS_CREATED') {
+      const clientName = p.client_name || 'Client BricoleMoi';
+      const clientPhone = p.client_phone ? ` (${p.client_phone})` : '';
+      console.log(`${time} ${C.bgRed} 🚨 NOUVELLE DEMANDE SOS DÉTECTÉE ${C.reset}  ${C.bold}${clientName}${C.reset}${C.dim}${clientPhone}${C.reset}`);
+      console.log(`   🛠️  ${p.subcategory || p.service_type || 'Dépannage d\'urgence'}`);
+      console.log(`   📍 ${p.district || p.city_zone || 'Casablanca'} ${C.dim}• Tarification Accord Direct (Déblocage: 15 DH)${C.reset}`);
+      console.log('');
+      return;
+    }
+
+    if (event === 'job_accepted' || event === 'LEAD_UNLOCKED') {
+      const maalemName = p.maalem_name || 'Artisan Maâlem';
+      console.log(`${time} ${C.bgAmber} ⚡ LEAD DÉBLOQUÉ PAR UN MAÂLEM ${C.reset}  ${C.bold}${maalemName}${C.reset}`);
+      console.log(`   📋 Intervention ID : #${p.intervention_id || p.id || 'N/A'} ${C.dim}• Étape : ${p.progress_step || 'ON_THE_WAY'}${C.reset}`);
+      console.log('');
+      return;
+    }
+
+    if (event === 'job_progress_updated') {
+      console.log(`${time} ${C.bgBlue} 📍 AVANCEMENT MISSION ${C.reset}  ${C.bold}Étape : ${p.progress_step || 'EN COURS'}${C.reset}`);
+      console.log(`   📋 Intervention ID : #${p.intervention_id || p.id || 'N/A'}`);
+      console.log('');
+      return;
+    }
+
+    if (event === 'job_completed') {
+      console.log(`${time} ${C.bgGreen} ✅ CHANTIER CLÔTURÉ AVEC SUCCÈS ${C.reset}  ${C.bold}Fin de travaux${C.reset}`);
+      if (p.rating) console.log(`   ⭐ Note client reçue : ${p.rating}/5 ★`);
+      console.log('');
+      return;
+    }
+
+    // Événement job générique
+    console.log(`${time} ${C.bgBlue} ⚡ CHANTIER [${event}] ${C.reset}`);
+    console.log(`   ↳ ${C.dim}${JSON.stringify(p, null, 2).replace(/\n/g, '\n   ')}${C.reset}\n`);
+    return;
+  }
+
+  // 3. Suivi GPS Temps Réel (tracking:all)
+  if (cleanCh === 'tracking:all') {
+    const lat = data.lat || data.latitude;
+    const lng = data.lng || data.longitude;
+    const name = data.maalem_name || data.name || 'Artisan';
+    console.log(`${time} ${C.cyan}🚗 GUIDAGE GPS${C.reset}  ${C.bold}${name}${C.reset} ➔ Coordonnées : ${lat}, ${lng}\n`);
+    return;
+  }
+
+  // 4. Alertes Système & Administrateur (admin:alerts)
+  if (cleanCh === 'admin:alerts') {
+    console.log(`${time} ${C.bgPurple} 🛡️ ALERTE ADMIN ${C.reset}  ${C.bold}${data.message || data.title || 'Alerte Centrale'}${C.reset}`);
+    if (data.details || data.data) {
+      console.log(`   ↳ ${C.dim}${JSON.stringify(data.details || data.data, null, 2).replace(/\n/g, '\n   ')}${C.reset}`);
+    }
+    console.log('');
+    return;
+  }
+
+  // 5. Cas par défaut : Affichage structuré et lisible
+  const eventName = data?.event || data?.type || data?.name || 'UPDATE';
+  console.log(`${time} ${C.cyan}[${cleanCh}]${C.reset} ${C.bold}⚡ ${eventName}${C.reset}`);
+  const payload = data?.payload || data;
+  if (typeof payload === 'object' && payload !== null) {
+    const pretty = JSON.stringify(payload, null, 2)
+      .split('\n')
+      .map(line => `   ${C.dim}${line}${C.reset}`)
+      .join('\n');
+    console.log(pretty);
+  } else {
+    console.log(`   ${C.dim}${payload}${C.reset}`);
+  }
+  console.log('');
+};
+
 let ws = null;
 let pingTimer = null;
 
@@ -173,9 +306,7 @@ function startConnection() {
               }
               console.log('');
             } else {
-              const time = formatTime();
-              const eventName = data.event || data.name || 'UPDATE';
-              console.log(`${time} ${C.green}[${ch}]${C.reset} ${C.bold}⚡ ${eventName}${C.reset} :`, typeof data.payload === 'object' ? JSON.stringify(data.payload) : JSON.stringify(data));
+              formatCentrifugoEvent(ch, data);
             }
           }
         }

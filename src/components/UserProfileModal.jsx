@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Wrench, LogOut } from 'lucide-react';
+import { X, Wrench, LogOut, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
@@ -14,7 +14,6 @@ import { switchSubdomainInDev } from '../lib/subdomain';
 
 // Sous-composants modulaires du profil
 import { ProfileHeader } from './profile/ProfileHeader';
-import { ProfileTabsNav } from './profile/ProfileTabsNav';
 import { ProfileInfoTab } from './profile/tabs/ProfileInfoTab';
 import { ProfileEditTab } from './profile/tabs/ProfileEditTab';
 import { ProfilePinTab } from './profile/tabs/ProfilePinTab';
@@ -23,7 +22,37 @@ import { ProfileTransactionsTab } from './profile/tabs/ProfileTransactionsTab';
 import { ProfileReviewsTab } from './profile/tabs/ProfileReviewsTab';
 import { LogoutWarningModal } from './profile/LogoutWarningModal';
 
-export const UserProfileModal = ({ isOpen, onClose, onLoggedOut }) => {
+// Extraction fiable du pays et du numéro national (sans tronquer le premier chiffre 6 ou 7 marocain)
+const extractPhoneAndCountry = (rawPhone) => {
+  if (!rawPhone) return { country: COUNTRY_DIAL_CODES[0], nationalNumber: '' };
+  const clean = String(rawPhone).trim();
+
+  // Chercher par indicatif exact trié par longueur décroissante (+212, +33, etc.)
+  const matchedCountry = [...COUNTRY_DIAL_CODES]
+    .sort((a, b) => b.dial.length - a.dial.length)
+    .find((c) => clean.startsWith(c.dial));
+
+  if (matchedCountry) {
+    let num = clean.slice(matchedCountry.dial.length).replace(/\D/g, '');
+    if (num.startsWith('0')) num = num.slice(1);
+    return { country: matchedCountry, nationalNumber: num };
+  }
+
+  // Fallback si format 212xxxxxxxxx sans +
+  const digits = clean.replace(/\D/g, '');
+  if (digits.startsWith('212')) {
+    let num = digits.slice(3);
+    if (num.startsWith('0')) num = num.slice(1);
+    return { country: COUNTRY_DIAL_CODES[0], nationalNumber: num };
+  }
+
+  return {
+    country: COUNTRY_DIAL_CODES[0],
+    nationalNumber: digits.startsWith('0') ? digits.slice(1) : digits
+  };
+};
+
+export const UserProfileModal = ({ isOpen, onClose, onLoggedOut, initialTab = 'info' }) => {
   const { user, setUser, logout } = useAuth();
   const { interventions = [], transactions = [], maalems = [], clients = [], setMaalems, reviews = [], refreshData } = useApp();
 
@@ -31,12 +60,19 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut }) => {
   const ratingInfo = calculateMaalemRating(user, reviews, interventions);
 
   const isMissingPhone = !user?.phone || user.phone.length < 8;
-  const [activeTab, setActiveTab] = useState(isMissingPhone ? 'edit' : 'info');
+  const [activeTab, setActiveTab] = useState(isMissingPhone ? 'edit' : (initialTab || 'info'));
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(isMissingPhone ? 'edit' : (initialTab || 'info'));
+    }
+  }, [isOpen, initialTab, isMissingPhone]);
   
   // États formulaire édition
+  const initialPhoneData = extractPhoneAndCountry(user?.phone);
   const [fullName, setFullName] = useState(user?.full_name || '');
-  const [phone, setPhone] = useState(user?.phone ? user.phone.replace(/^\+\d{1,4}/, '') : '');
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRY_DIAL_CODES[0]);
+  const [phone, setPhone] = useState(initialPhoneData.nationalNumber);
+  const [selectedCountry, setSelectedCountry] = useState(initialPhoneData.country);
 
   // États code PIN 4 chiffres
   const [newPin, setNewPin] = useState('');
@@ -72,7 +108,9 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut }) => {
   useEffect(() => {
     if (user) {
       setFullName(user.full_name || '');
-      setPhone(user.phone ? user.phone.replace(/^\+\d{1,4}/, '') : '');
+      const p = extractPhoneAndCountry(user.phone);
+      setPhone(p.nationalNumber);
+      setSelectedCountry(p.country);
       if (user.city_zone) {
         const parts = user.city_zone.split(' - ');
         setSelectedCity(parts[0] || MOROCCAN_CITIES[0].name);
@@ -330,35 +368,47 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut }) => {
             <X className="w-4 h-4" />
           </button>
 
-          {/* En-tête Avatar & Rôle */}
-          <ProfileHeader
-            user={user}
-            isMaalem={isMaalem}
-            isAdmin={isAdmin}
-            specialty={specialty}
-            isMissingPhone={isMissingPhone}
-          />
+          {/* En-tête : soit le Profil complet (sur le Hub), soit l'en-tête de retour (sur les sous-pages) */}
+          {activeTab === 'info' ? (
+            <ProfileHeader
+              user={user}
+              isMaalem={isMaalem}
+              isAdmin={isAdmin}
+              specialty={specialty}
+              isMissingPhone={isMissingPhone}
+            />
+          ) : (
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200/80 pr-10">
+              <button
+                type="button"
+                onClick={() => setActiveTab('info')}
+                className="py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-xs flex items-center gap-2 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                title="Revenir au menu profil"
+              >
+                <ArrowLeft className="w-4 h-4 text-slate-600" />
+                <span>Retour au profil</span>
+              </button>
+              <h3 className="text-sm sm:text-base font-black text-slate-900 truncate">
+                {activeTab === 'missions' && '🛠️ Mes Chantiers Réalisés'}
+                {activeTab === 'reviews' && '⭐ Avis & Évaluations'}
+                {activeTab === 'transactions' && '💳 Mon Portefeuille'}
+                {activeTab === 'edit' && '✏️ Modifier mes Coordonnées'}
+                {activeTab === 'pin' && '🔒 Code PIN & Sécurité'}
+                {activeTab === 'requests' && '🚨 Mes Demandes SOS'}
+              </h3>
+            </div>
+          )}
 
-          {/* Navigation par Onglets Pilules */}
-          <ProfileTabsNav
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            isMaalem={isMaalem}
-            isMissingPhone={isMissingPhone}
-            maalemMissionsCount={myMaalemInterventions.length}
-            reviewsCount={ratingInfo.totalReviews}
-            transactionsCount={myMaalemTransactions.length}
-            clientRequestsCount={myClientInterventions.length}
-          />
-
-          {/* Contenu des Onglets */}
+          {/* Contenu principal : Hub d'accueil ou sous-vue détaillée */}
           {activeTab === 'info' && (
             <ProfileInfoTab
               user={user}
               isMaalem={isMaalem}
               balanceInfo={balanceInfo}
               ratingInfo={ratingInfo}
+              missionsCount={myMaalemInterventions.length}
               clientInterventionsCount={myClientInterventions.length}
+              onNavigate={setActiveTab}
             />
           )}
 
@@ -420,6 +470,20 @@ export const UserProfileModal = ({ isOpen, onClose, onLoggedOut }) => {
               transactions={myMaalemTransactions}
               liveAvailableBalance={balanceInfo.liveAvailableBalance}
             />
+          )}
+
+          {/* Bouton de retour en bas des sous-pages pour confort tactile */}
+          {activeTab !== 'info' && (
+            <div className="pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setActiveTab('info')}
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Retourner au menu du profil</span>
+              </button>
+            </div>
           )}
 
           {/* Sélecteur Rapide de Portail pour Artisans */}

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { centrifugo, isCentrifugoConfigured } from '../lib/centrifugoClient';
 import { REALTIME_CHANNELS } from '../lib/realtimeClient';
 import { db } from '../lib/dbClient';
+import { calculateMaalemBalance } from '../utils/balanceUtils';
+import { calculateMaalemRating } from '../utils/ratingUtils';
 
 let moduleLastBroadcastTimestamp = 0;
 
@@ -15,7 +17,15 @@ let moduleLastBroadcastTimestamp = 0;
  * @param {boolean} options.isOnline - Statut En Ligne souhaité pour le Maalem
  * @param {Function} [options.onPresenceChange] - Callback notifiant des changements de présence
  */
-export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) => {
+export const useRealtimePresence = ({
+  user,
+  isOnline,
+  onPresenceChange,
+  transactions = [],
+  reviews = [],
+  interventions = [],
+  maalems = []
+} = {}) => {
   const [onlineMaalemsMap, setOnlineMaalemsMap] = useState({});
   const [connectionState, setConnectionState] = useState('connected');
   const [isCentrifugoConnected, setIsCentrifugoConnected] = useState(isCentrifugoConfigured);
@@ -26,6 +36,18 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
   const lastLocationUpdateRef = useRef({ lat: null, lng: null, timestamp: 0 });
   const isOnlineRef = useRef(isOnline);
   const userRef = useRef(user);
+
+  const transactionsRef = useRef(transactions);
+  useEffect(() => { transactionsRef.current = transactions; }, [transactions]);
+
+  const reviewsRef = useRef(reviews);
+  useEffect(() => { reviewsRef.current = reviews; }, [reviews]);
+
+  const interventionsRef = useRef(interventions);
+  useEffect(() => { interventionsRef.current = interventions; }, [interventions]);
+
+  const maalemsRef = useRef(maalems);
+  useEffect(() => { maalemsRef.current = maalems; }, [maalems]);
 
   isOnlineRef.current = isOnline;
   userRef.current = user;
@@ -112,6 +134,14 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
       const effectiveCity = currUser.city_zone || currUser.district || 'Casablanca';
       const effectivePhone = currUser.phone || currUser.maalem_details?.phone || '';
 
+      // Calcul dynamique et temps réel du solde de leads et de la note / avis réels
+      const balanceData = calculateMaalemBalance(currUser, transactionsRef.current || [], maalemsRef.current || []);
+      const ratingData = calculateMaalemRating(currUser, reviewsRef.current || [], interventionsRef.current || []);
+
+      const effectiveBalance = balanceData?.liveAvailableBalance ?? (currUser.maalem_details?.credit_balance ?? currUser.credits ?? 0);
+      const effectiveRating = ratingData?.totalReviews > 0 ? ratingData.averageRating : (currUser.maalem_details?.rating_avg || 0);
+      const effectiveReviews = ratingData?.totalReviews ?? (currUser.maalem_details?.total_reviews || 0);
+
       const presenceData = {
         id: currUser.id,
         user_id: currUser.id,
@@ -124,9 +154,9 @@ export const useRealtimePresence = ({ user, isOnline, onPresenceChange } = {}) =
         lng: coords.lng,
         is_online: currOnline,
         is_available: currOnline,
-        credit_balance: currUser.maalem_details?.credit_balance ?? currUser.credits ?? 0,
-        rating_avg: currUser.maalem_details?.rating_avg || 0,
-        total_reviews: currUser.maalem_details?.total_reviews || 0,
+        credit_balance: effectiveBalance,
+        rating_avg: effectiveRating,
+        total_reviews: effectiveReviews,
         last_seen_at: now,
         ...customData
       };

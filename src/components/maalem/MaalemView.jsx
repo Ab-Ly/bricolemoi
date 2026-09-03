@@ -7,7 +7,6 @@ import {
   Star, 
   Power, 
   PlusCircle, 
-  ShieldCheck, 
   Clock, 
   Gift,
   Receipt,
@@ -36,7 +35,7 @@ import { InteractiveMap } from '../InteractiveMap';
  */
 export const MaalemView = ({ onOpenCINVerification }) => {
   const maalem = useMaalemViewState({ onOpenCINVerification });
-  const { setProfileModalOpen } = useAuth();
+  const { setProfileModalOpen, openProfileTab } = useAuth();
 
   const hasActiveMissions = maalem.activeUnlockedLeads.length > 0;
   const availableCount = maalem.availableLeads.length;
@@ -67,16 +66,6 @@ export const MaalemView = ({ onOpenCINVerification }) => {
                 <h2 className="text-sm sm:text-base font-black text-slate-900 tracking-tight truncate group-hover:text-amber-600 transition-colors">
                   {maalem.user?.full_name || maalem.currentLiveMaalem?.full_name || 'Artisan Maâlem'}
                 </h2>
-                {maalem.isCinVerified ? (
-                  <span className="px-2 py-0.2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold flex items-center gap-0.5 shrink-0">
-                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                    <span>CIN ✓</span>
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.2 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-bold shrink-0">
-                    CIN en attente
-                  </span>
-                )}
               </div>
 
               {/* Note Réelle ou Statut */}
@@ -96,18 +85,42 @@ export const MaalemView = ({ onOpenCINVerification }) => {
             </div>
           </button>
 
-          {/* Gros Interrupteur Tactile EN LIGNE / EN PAUSE */}
+          {/* Switch Tactile ON / OFF : En ligne / Hors ligne */}
           <button
             type="button"
+            role="switch"
+            aria-checked={maalem.isMaalemOnline}
             onClick={maalem.toggleMaalemOnlineStatus}
-            className={`py-2.5 px-3.5 sm:px-4 rounded-2xl font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 shrink-0 min-h-[44px] ${
+            className={`py-2 px-3 sm:px-3.5 rounded-2xl text-xs shadow-2xs active:scale-95 transition-all cursor-pointer flex items-center gap-2.5 shrink-0 border select-none min-h-[44px] ${
               maalem.isMaalemOnline
-                ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 ring-1 ring-emerald-400/20'
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                ? 'bg-emerald-50/80 hover:bg-emerald-100/90 text-emerald-900 border-emerald-300/80 ring-1 ring-emerald-400/20'
+                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
             }`}
+            title={maalem.isMaalemOnline ? 'Passer Hors ligne' : 'Passer En ligne'}
           >
-            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${maalem.isMaalemOnline ? 'bg-emerald-500 animate-ping' : 'bg-slate-400'}`} />
-            <span>{maalem.isMaalemOnline ? 'En Service 🟢' : 'En Pause ⚪'}</span>
+            <span className="font-black text-xs">
+              {maalem.isMaalemOnline ? 'En ligne' : 'Hors ligne'}
+            </span>
+            
+            {/* Track Switch */}
+            <div
+              className={`w-11 h-6 rounded-full transition-colors duration-200 ease-in-out p-0.5 flex items-center ${
+                maalem.isMaalemOnline ? 'bg-emerald-500' : 'bg-slate-300'
+              }`}
+            >
+              {/* Thumb Switch */}
+              <div
+                className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 ease-in-out flex items-center justify-center ${
+                  maalem.isMaalemOnline ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    maalem.isMaalemOnline ? 'bg-emerald-500' : 'bg-slate-400'
+                  }`}
+                />
+              </div>
+            </div>
           </button>
         </div>
 
@@ -154,6 +167,32 @@ export const MaalemView = ({ onOpenCINVerification }) => {
             </button>
           </div>
         </div>
+
+        {/* Alerte Solde Faible (< 15 DH) — Recharge Express */}
+        {maalem.liveAvailableBalance < 15 && (
+          <div className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 flex items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                ⚠️
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-black text-amber-950 truncate">
+                  Solde insuffisant pour la prochaine alerte
+                </p>
+                <p className="text-[11px] text-amber-800 font-medium truncate">
+                  Il vous reste {maalem.liveAvailableBalance.toFixed(2)} DH (minimum 15 DH requis par déblocage)
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => maalem.setRechargeModalOpen(true)}
+              className="py-1.5 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-xs rounded-xl shadow-xs active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+            >
+              Recharger
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -197,7 +236,7 @@ export const MaalemView = ({ onOpenCINVerification }) => {
       {/* ========================================================================= */}
       {/* 4. DEMANDES D'URGENCE SOS EN DIRECT (TOUJOURS VISIBLES SANS ONGLET)      */}
       {/* ========================================================================= */}
-      <MaalemLeadsFeed {...maalem} />
+      <MaalemLeadsFeed {...maalem} onOpenHistory={(tab) => openProfileTab(tab || 'missions')} />
 
       {/* ========================================================================= */}
       {/* 5. FIDÉLITÉ & RÉPUTATION (DÉROULEMENT NATUREL EN BAS DE PAGE)            */}

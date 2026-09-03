@@ -39,7 +39,7 @@ const AppLoadingFallback = () => (
 );
 
 const MainApp = () => {
-  const { user, switchRole, setAuthModalOpen, profileModalOpen, setProfileModalOpen } = useAuth();
+  const { user, switchRole, setAuthModalOpen, profileModalOpen, setProfileModalOpen, profileModalInitialTab } = useAuth();
   const { acceptLead } = useApp();
   const { activeSosAlert, dismissSosAlert } = useRealtimeNotifications({ user });
   const { incomingAlert, acceptSOS, dismissAlert } = useEmergencyFlow();
@@ -175,6 +175,7 @@ const MainApp = () => {
           <AdminAuthModal />
           <UserProfileModal 
             isOpen={profileModalOpen} 
+            initialTab={profileModalInitialTab}
             onClose={() => setProfileModalOpen(false)} 
             onLoggedOut={() => switchSubdomainInDev('LANDING')}
           />
@@ -220,6 +221,7 @@ const MainApp = () => {
           <AdminAuthModal />
           <UserProfileModal 
             isOpen={profileModalOpen} 
+            initialTab={profileModalInitialTab}
             onClose={() => setProfileModalOpen(false)} 
             onLoggedOut={() => switchSubdomainInDev('LANDING')}
           />
@@ -265,6 +267,7 @@ const MainApp = () => {
           <AdminAuthModal />
           <UserProfileModal 
             isOpen={profileModalOpen} 
+            initialTab={profileModalInitialTab}
             onClose={() => setProfileModalOpen(false)} 
             onLoggedOut={() => switchSubdomainInDev('LANDING')}
           />
@@ -345,6 +348,7 @@ const MainApp = () => {
       <AdminAuthModal />
       <UserProfileModal 
         isOpen={profileModalOpen} 
+        initialTab={profileModalInitialTab}
         onClose={() => setProfileModalOpen(false)} 
         onLoggedOut={() => switchSubdomainInDev('LANDING')}
       />

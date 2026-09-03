@@ -68,9 +68,17 @@ export const MaalemActiveMissionCard = ({
 
           const waLink = hasPhone
             ? `https://wa.me/${formattedWaDigits}?text=${encodeURIComponent(
-                `السلام عليكم ${lead.client_name || ''}، أنا المعلم الخاص بك من منصة BricoleMoi بخصوص طلبك (${
+                `Salam ${lead.client_name || ''}, ana l-Maâlem de BricoleMoi pour votre dépannage (${
                   lead.subcategory || 'Dépannage'
-                }). أنا في الطريق إليك.`
+                }). Je suis disponible et je prends la route vers votre adresse (${lead.district || 'votre secteur'}).`
+              )}`
+            : '#';
+
+          const reviewWaLink = hasPhone
+            ? `https://wa.me/${formattedWaDigits}?text=${encodeURIComponent(
+                `Salam ${lead.client_name || ''}, c'est votre artisan Maâlem BricoleMoi. Les travaux sont terminés avec succès ! Merci de valider et laisser votre note 5★ sur l'application BricoleMoi pour soutenir mon profil : ${
+                  typeof window !== 'undefined' ? window.location.origin : ''
+                }/?app=CLIENT`
               )}`
             : '#';
           const rawLat = parseFloat(lead.lat);
@@ -315,18 +323,34 @@ export const MaalemActiveMissionCard = ({
               {/* Action d'Accomplissement des Travaux & Saisie du Montant Réel */}
               <div className="pt-2 border-t border-slate-200 space-y-3">
                 {lead.status === 'PENDING_COMPLETION' ? (
-                  <div className="p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-xs font-bold text-purple-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
-                    <span className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-purple-600 animate-spin flex-shrink-0" />
-                      <span>Demande de notation transmise • En attente de la note du client sur son écran</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => requestOnSiteReview(lead.id)}
-                      className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-[11px] font-black cursor-pointer self-end sm:self-auto"
-                    >
-                      Renvoyer l'Alerte 📱
-                    </button>
+                  <div className="space-y-2.5">
+                    <div className="p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-xs font-bold text-purple-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
+                      <span className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-purple-600 animate-spin flex-shrink-0" />
+                        <span>Demande de notation transmise • En attente de la note du client sur son écran</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => requestOnSiteReview(lead.id)}
+                        className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-[11px] font-black cursor-pointer self-end sm:self-auto shrink-0 active:scale-95 transition-all"
+                      >
+                        Renvoyer l'Alerte 📱
+                      </button>
+                    </div>
+
+                    {/* Suggestion 4 : Réclamer mon avis client par WhatsApp direct */}
+                    {hasPhone && (
+                      <a
+                        href={reviewWaLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full py-2.5 px-3 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer touch-target-44"
+                        title="Envoyer le lien de notation WhatsApp au client"
+                      >
+                        <WhatsappLogo weight="fill" className="w-4 h-4 text-white shrink-0" />
+                        <span>⭐ Réclamer l'Avis 5★ par WhatsApp au Client</span>
+                      </a>
+                    )}
                   </div>
                 ) : lead.status === 'COMPLETED' ? (
                   <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs space-y-2 shadow-xs">

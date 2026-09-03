@@ -88,6 +88,12 @@ export const AuthProvider = ({ children }) => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [adminAuthModalOpen, setAdminAuthModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [profileModalInitialTab, setProfileModalInitialTab] = useState('info');
+
+  const openProfileTab = (tab = 'info') => {
+    setProfileModalInitialTab(tab);
+    setProfileModalOpen(true);
+  };
 
   // Persistance double (sessionStorage + localStorage) — sync à chaque changement du user
   useEffect(() => {
@@ -969,6 +975,8 @@ export const AuthProvider = ({ children }) => {
         setAdminAuthModalOpen,
         profileModalOpen,
         setProfileModalOpen,
+        profileModalInitialTab,
+        openProfileTab,
         verifyAdminPIN: loginAdminWithCredentials,
         loginAdminWithCredentials,
         sendPhoneOTP,
