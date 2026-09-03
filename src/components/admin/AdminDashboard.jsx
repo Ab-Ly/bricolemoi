@@ -19,7 +19,8 @@ import {
   ChevronRight,
   Radio,
   Sliders,
-  Sparkles
+  Sparkles,
+  LogOut
 } from 'lucide-react';
 import { switchSubdomainInDev } from '../../lib/subdomain';
 import { auditPlatformState, healPlatformState } from '../../services/platformAuditReferee';
@@ -37,7 +38,7 @@ import { AdminKpiBanners } from './components/AdminKpiBanners';
 import { useAdminKpis } from './hooks/useAdminKpis';
 
 export const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const {
     clients = [],
     maalems = [],
@@ -244,6 +245,24 @@ export const AdminDashboard = () => {
             >
               <Terminal className="w-4 h-4 text-blue-600 shrink-0" />
               <span>Espace IT</span>
+            </button>
+
+            {/* Bouton Quitter Session Admin */}
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.removeItem('bricolemoi_admin_pin_ok');
+                if (typeof logout === 'function') {
+                  logout(() => switchSubdomainInDev('LANDING'));
+                } else {
+                  switchSubdomainInDev('LANDING');
+                }
+              }}
+              className="min-h-[44px] px-3 py-2 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95 cursor-pointer touch-target-44"
+              title="Quitter la console d'administration"
+            >
+              <LogOut className="w-4 h-4 text-rose-500 shrink-0" />
+              <span>Quitter</span>
             </button>
           </div>
         </div>
