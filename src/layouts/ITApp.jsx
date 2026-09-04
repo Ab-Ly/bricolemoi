@@ -264,6 +264,14 @@ const NAV_ITEMS = [
     icon: Radio,
     badge: 'Centrifugo',
     badgeColor: 'emerald'
+  },
+  {
+    id: 'BACKUPS',
+    label: 'Sauvegardes & Résilience',
+    shortLabel: 'Backups VPS',
+    icon: HardDrive,
+    badge: 'Auto 03h30',
+    badgeColor: 'purple'
   }
 ];
 
@@ -274,7 +282,7 @@ export const ITApp = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Navigation active
-  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' | 'KEYRING' | 'SERVICES' | 'MONITORING' | 'MATRIX' | 'CONSOLE'
+  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' | 'KEYRING' | 'SERVICES' | 'MONITORING' | 'MATRIX' | 'CONSOLE' | 'BACKUPS'
   
   // Contrôle du Menu Déroulant / Sidebar Mobile & Desktop
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -1016,6 +1024,90 @@ export const ITApp = () => {
                     </div>
                   </div>
                   <AdminRealtimeConsole />
+                </div>
+              )}
+
+              {/* SECTION 5 : SÉCURITÉ OPÉRATIONNELLE & SAUVEGARDES */}
+              {(activeTab === 'ALL' || activeTab === 'BACKUPS') && (
+                <div className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm">
+                  <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-purple-700">
+                      <HardDrive className="w-4 h-4 text-purple-600" />
+                      <span>SÉCURITÉ OPÉRATIONNELLE & SAUVEGARDES VPS (POCKETBASE)</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 self-start sm:self-auto">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Cron Automatique Quotidien (03h30)
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Carte Sauvegardes SQLite */}
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                            <Database className="w-4 h-4 text-blue-600" />
+                            Snapshot SQLite Consistant
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold">
+                            7j Rétention
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed mb-3">
+                          Sauvegarde sans interruption via l'API officielle SQLite <code className="font-mono bg-white px-1 py-0.5 rounded border text-[11px]">.backup</code>. Intégrité vérifiée systématiquement avant compression gzip.
+                        </p>
+                        <div className="text-[11px] space-y-1 font-mono text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200">
+                          <div>• Répertoire : <span className="text-slate-800 font-bold">/var/backups/bricolemoi/</span></div>
+                          <div>• Format : <span className="text-slate-800 font-bold">tar.gz (data.db + types)</span></div>
+                          <div>• Rotation : <span className="text-emerald-700 font-bold">Purge auto &gt; 7 jours</span></div>
+                        </div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
+                        <span className="text-[11px] text-slate-500">Commande manuelle :</span>
+                        <button
+                          onClick={() => copyToClipboard('npm run vps:backup', 'cmd-backup')}
+                          className="px-2.5 py-1 text-[11px] font-mono bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-700 flex items-center gap-1.5 transition-colors"
+                        >
+                          {copiedKey === 'cmd-backup' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          npm run vps:backup
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Carte Surveillance & Auto-remédiation */}
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-emerald-600" />
+                            Sonde de Surveillance & Auto-Recovery
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold">
+                            Toutes les 3 min
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed mb-3">
+                          Contrôle permanent de la réactivité PocketBase, Centrifugo, disque et RAM. En cas de non-réponse, auto-restart Docker et alerte WhatsApp immédiate vers l'administrateur.
+                        </p>
+                        <div className="text-[11px] space-y-1 font-mono text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200">
+                          <div>• PocketBase : <span className="text-emerald-700 font-bold">/api/health (HTTP 200)</span></div>
+                          <div>• Centrifugo : <span className="text-emerald-700 font-bold">Port 8800 WebSocket</span></div>
+                          <div>• Alerte SMS/WhatsApp : <span className="text-slate-800 font-bold">Evolution API active</span></div>
+                        </div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
+                        <span className="text-[11px] text-slate-500">Statut en direct :</span>
+                        <button
+                          onClick={() => copyToClipboard('npm run vps:status', 'cmd-status')}
+                          className="px-2.5 py-1 text-[11px] font-mono bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-700 flex items-center gap-1.5 transition-colors"
+                        >
+                          {copiedKey === 'cmd-status' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          npm run vps:status
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
