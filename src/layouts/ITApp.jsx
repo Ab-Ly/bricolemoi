@@ -29,6 +29,7 @@ import {
   EyeOff,
   Cloud,
   ShieldAlert,
+  ShieldCheck,
   Menu,
   X,
   Search,
