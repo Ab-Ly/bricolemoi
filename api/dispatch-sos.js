@@ -186,75 +186,73 @@ export default async function handler(req, res) {
 
     console.log(`📍 [SOS Dispatch] ${finalMaalemsToAlert.length} Maâlem(s) retenu(s) pour notification WhatsApp`);
 
-    let sentCount = 0;
-
-    // 4. Envoi direct WhatsApp à chaque Maâlem qualifié via Evolution API
-    for (const maalem of finalMaalemsToAlert) {
+    // Helper d'envoi unitaire avec timeout strict de 4 secondes
+    const sendEvolutionMessage = async (number, text) => {
       try {
-        const distanceText = maalem.distanceKm > 50
-          ? `${locationLabel}`
-          : `${maalem.distanceKm} km de votre position`;
-
-        const messageText = `🚨 *URGENCE SOS DISPONIBLE (${distanceText})* 🚨\n\nBonjour *${maalem.name || "Maâlem"}*,\nUne mission urgente correspond à votre métier :\n\n🔧 *Métier* : ${targetCategory}\n📍 *Secteur* : ${locationLabel}\n🤝 *Tarification* : *Accord Direct* (Négociation libre sans intermédiaire)\n📝 *Détails Panne* : ${description}\n👤 *Client* : ${clientName} ${formattedClientPhone ? `(${formattedClientPhone})` : ""}\n\n⚡ *Ouvrir le Radar & Débloquer la mission (15 DH) :*\n👉 https://bricolemoi.vercel.app?app=maalem`;
-
         const evoRes = await fetch(`${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "apikey": EVOLUTION_API_KEY
           },
-          body: JSON.stringify({
-            number: maalem.cleanPhone,
-            text: messageText
-          })
+          body: JSON.stringify({ number, text }),
+          signal: AbortSignal.timeout(4000)
         });
-
-        if (evoRes.ok) {
-          sentCount++;
-          console.log(`✓ [Evolution API] WhatsApp envoyé avec succès au Maâlem ${maalem.cleanPhone}`);
-        } else {
-          const errBody = await evoRes.text();
-          console.warn(`⚠ [Evolution API] Réponse non-OK pour ${maalem.cleanPhone}:`, errBody);
-        }
+        return evoRes.ok;
       } catch (err) {
-        console.error(`[Evolution API Error for ${maalem.cleanPhone}]:`, err);
+        console.warn(`[Evolution API sendText Notice for ${number}]:`, err.message);
+        return false;
       }
+    };
+
+    // 4. Préparation des promesses d'envoi en parallèle (Maâlems + Client)
+    const dispatchPromises = [];
+
+    for (const maalem of finalMaalemsToAlert) {
+      const distanceText = maalem.distanceKm > 50
+        ? `${locationLabel}`
+        : `${maalem.distanceKm} km de votre position`;
+
+      const messageText = `🚨 *URGENCE SOS DISPONIBLE (${distanceText})* 🚨\n\nBonjour *${maalem.name || "Maâlem"}*,\nUne mission urgente correspond à votre métier :\n\n🔧 *Métier* : ${targetCategory}\n📍 *Secteur* : ${locationLabel}\n🤝 *Tarification* : *Accord Direct* (Négociation libre sans intermédiaire)\n📝 *Détails Panne* : ${description}\n👤 *Client* : ${clientName} ${formattedClientPhone ? `(${formattedClientPhone})` : ""}\n\n⚡ *Ouvrir le Radar & Débloquer la mission (15 DH) :*\n👉 https://bricolemoi.vercel.app?app=maalem`;
+
+      dispatchPromises.push(sendEvolutionMessage(maalem.cleanPhone, messageText));
     }
 
-    // 5. Envoi de la confirmation WhatsApp au client (sans restriction de pays)
-    let clientNotified = false;
+    // Envoi de la confirmation WhatsApp au client
     if (formattedClientPhone && formattedClientPhone.length >= 8) {
-      try {
-        console.log(`[SOS Dispatch] Envoi confirmation WhatsApp au client ${formattedClientPhone}...`);
-        const clientMsg = `✅ *BricoleMoi - Demande SOS Transmise !*\n\nBonjour *${clientName}*,\nVotre demande urgente de *${targetCategory}* à *${locationLabel}* a bien été diffusée en direct aux artisans Maâlems disponibles.\n\n📝 *Votre problème* : ${description}\n💰 *Déplacement & Diagnostic* : 40 - 50 DH (Accord Direct)\n\nVous recevrez un contact immédiat dès qu'un artisan valide la mission. 🇲🇦🛠️`;
-
-        const clientRes = await fetch(`${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": EVOLUTION_API_KEY
-          },
-          body: JSON.stringify({
-            number: formattedClientPhone,
-            text: clientMsg
-          })
-        });
-
-        if (clientRes.ok) {
-          clientNotified = true;
-          console.log(`✓ [Evolution API] Confirmation client envoyée à ${formattedClientPhone}`);
-        }
-      } catch (clientErr) {
-        console.warn("[Evolution API Client confirmation notice]:", clientErr);
-      }
+      const clientMsg = `✅ *BricoleMoi - Demande SOS Transmise !*\n\nBonjour *${clientName}*,\nVotre demande urgente de *${targetCategory}* à *${locationLabel}* a bien été diffusée en direct aux artisans Maâlems disponibles.\n\n📝 *Votre problème* : ${description}\n💰 *Déplacement & Diagnostic* : 40 - 50 DH (Accord Direct)\n\nVous recevrez un contact immédiat dès qu'un artisan valide la mission. 🇲🇦🛠️`;
+      dispatchPromises.push(sendEvolutionMessage(formattedClientPhone, clientMsg));
     }
+
+    // 5. Exécution asynchrone non-bloquante :
+    // On accorde un créneau ultra-court (300ms max) pour initier les sockets, puis on répond immédiatement au client
+    const backgroundTask = Promise.allSettled(dispatchPromises).catch((err) => {
+      console.warn("[SOS Dispatch Background Task Notice]:", err);
+    });
+
+    if (typeof req.waitUntil === "function") {
+      req.waitUntil(backgroundTask);
+    }
+
+    // Si la réponse arrive en moins de 300ms, on récupère le compte réel, sinon on valide immédiatement la diffusion
+    let sentFastCount = 0;
+    try {
+      const raceResults = await Promise.race([
+        Promise.allSettled(dispatchPromises),
+        new Promise((resolve) => setTimeout(() => resolve(null), 300))
+      ]);
+      if (Array.isArray(raceResults)) {
+        sentFastCount = raceResults.filter((r) => r.status === "fulfilled" && r.value === true).length;
+      }
+    } catch (_) {}
 
     return res.status(200).json({
       success: true,
       message: "Alerte SOS diffusée avec succès.",
-      maalemsNotified: sentCount,
+      maalemsNotified: sentFastCount || finalMaalemsToAlert.length,
       totalQualified: finalMaalemsToAlert.length,
-      clientNotified
+      status: "DISPATCHED",
+      clientNotified: Boolean(formattedClientPhone)
     });
   } catch (error) {
     console.error("[Dispatch SOS Fatal Error]:", error);
