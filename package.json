@@ -26,6 +26,7 @@
     "telemetry:r2": "node scripts/telemetryDaemon.js --node=r2",
     "reconcile": "node scripts/reconcile.js",
     "simulate": "node scripts/simulate.js",
+    "stress": "node scripts/stress-test.js",
     "deploy": "npx vercel",
     "deploy:prod": "npx vercel --prod",
     "deploy:logs": "npx vercel logs",
